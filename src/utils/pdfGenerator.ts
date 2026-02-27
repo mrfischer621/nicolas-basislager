@@ -138,16 +138,46 @@ export function sanitizeForQR(text: string): string {
 }
 
 /**
+ * Convert HTML rich text to plain text for PDF rendering.
+ * Preserves structure: list items become bullet points, paragraphs become lines.
+ *
+ * @param html - HTML string from Tiptap rich text editor
+ * @returns Plain text with basic formatting preserved
+ */
+function htmlToPlainText(html: string): string {
+  if (!html) return '';
+  // Skip conversion for plain text (no HTML tags)
+  if (!html.includes('<')) return html;
+
+  return html
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>/gi, '\n')
+    .replace(/<\/li>/gi, '\n')
+    .replace(/<li>/gi, '• ')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+/**
  * Sanitize text for general PDF rendering.
  * Less strict than QR sanitization, but still prevents rendering glitches.
+ * Automatically strips HTML if the input contains HTML tags.
  *
- * @param text - Raw text for PDF display
+ * @param text - Raw text or HTML for PDF display
  * @returns Sanitized text safe for PDF rendering
  */
 function sanitizeForPDF(text: string): string {
   if (!text) return '';
 
-  let sanitized = text;
+  // Strip HTML first (handles rich-text descriptions from Tiptap)
+  let sanitized = htmlToPlainText(text);
 
   // Remove control characters except newlines and tabs
   // (jsPDF can handle these for multiline text)

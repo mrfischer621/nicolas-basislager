@@ -35,7 +35,8 @@
       "Bash(wc:*)",
       "Bash(git -C /Users/nicolas/crm-projekt log --oneline)",
       "Bash(npm run lint:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(python3:*)"
     ]
   }
 }

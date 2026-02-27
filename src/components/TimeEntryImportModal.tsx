@@ -19,6 +19,19 @@ function formatMonthYear(date: Date): string {
   return `${months[date.getMonth()]} ${date.getFullYear()}`;
 }
 
+/** Format a date string "YYYY-MM-DD" → "DD.MM." without timezone shifting. */
+function formatDateShort(dateStr: string): string {
+  const [, month, day] = dateStr.split('-').map(Number);
+  return `${String(day).padStart(2, '0')}.${String(month).padStart(2, '0')}.`;
+}
+
+/** Format hours: whole numbers get ".0", fractional show only needed decimals. */
+function formatHours(h: number): string {
+  if (h === Math.floor(h)) return `${h}.0h`;
+  // Strip trailing zero from 2-decimal representation (e.g. 1.50 → "1.5h")
+  return `${h.toFixed(2).replace(/0+$/, '')}h`;
+}
+
 type TimeEntryWithProject = TimeEntry & {
   projects?: Project;
 };
@@ -112,14 +125,20 @@ export default function TimeEntryImportModal({
     const groups: Map<string, GroupedEntry> = new Map();
 
     entries.forEach(entry => {
+      // Skip entries with no billable time
+      if (entry.hours <= 0) return;
+
       const date = new Date(entry.date);
       const weekNumber = getISOWeekNumber(date);
       const monthYear = formatMonthYear(date);
       const projectName = entry.projects?.name || 'Unbekanntes Projekt';
       const projectId = entry.project_id;
 
-      // Group by: Week + Project + Rate
-      const key = `KW${weekNumber}_${monthYear}_${projectId}_${entry.rate}`;
+      // Group by: Week + Project (rate comes from project/company, not per-entry snapshot)
+      const key = `KW${weekNumber}_${monthYear}_${projectId}`;
+
+      // Rate hierarchy: project.hourly_rate → entry snapshot (snapshot already includes customer/company defaults)
+      const rate = entry.projects?.hourly_rate ?? entry.rate;
 
       if (!groups.has(key)) {
         groups.set(key, {
@@ -128,9 +147,9 @@ export default function TimeEntryImportModal({
           monthYear,
           projectName,
           projectId,
-          description: entry.description || projectName,
+          description: projectName,
           totalHours: 0,
-          rate: entry.rate,
+          rate,
           entries: [],
         });
       }
@@ -140,13 +159,13 @@ export default function TimeEntryImportModal({
       group.entries.push(entry);
     });
 
-    // Sort by date (week number + month)
+    // Sort groups chronologically by first entry date
     return Array.from(groups.values()).sort((a, b) => {
       const dateA = new Date(a.entries[0].date);
       const dateB = new Date(b.entries[0].date);
       return dateA.getTime() - dateB.getTime();
     });
-  }, [entries]);
+  }, [entries, selectedCompany]);
 
   const handleToggleGroup = (key: string) => {
     const newSelected = new Set(selectedGroups);
@@ -169,12 +188,32 @@ export default function TimeEntryImportModal({
   const handleImport = () => {
     const selectedItems = groupedEntries
       .filter(group => selectedGroups.has(group.key))
-      .map(group => ({
-        description: `KW ${group.weekNumber} (${group.monthYear}): ${group.projectName} - ${group.totalHours.toFixed(1)}h`,
-        quantity: group.totalHours,
-        unit_price: group.rate,
-        timeEntryIds: group.entries.map(e => e.id),
-      }));
+      .map(group => {
+        const heading = `<strong>KW ${group.weekNumber} (${group.monthYear})</strong>`;
+
+        // Entries are already sorted chronologically (query: order('date', ascending))
+        const listItems = group.entries
+          .filter(e => e.hours > 0)
+          .map(e => {
+            const date = formatDateShort(e.date);
+            const hours = formatHours(e.hours);
+            const desc = e.description?.trim();
+            return desc
+              ? `<li>${date} — ${desc} (${hours})</li>`
+              : `<li>${date} (${hours})</li>`;
+          });
+
+        const description = listItems.length > 0
+          ? `${heading}<ul>${listItems.join('')}</ul>`
+          : heading;
+
+        return {
+          description,
+          quantity: group.totalHours,
+          unit_price: group.rate,
+          timeEntryIds: group.entries.map(e => e.id),
+        };
+      });
 
     onImport(selectedItems);
     onClose();

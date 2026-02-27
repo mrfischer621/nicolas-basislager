@@ -1,4 +1,4 @@
-# Nicolas Fischer CRM
+# nicolas-basislager
 
 Multi-Tenant CRM für Schweizer Einzelfirmen mit integriertem Finanzmanagement, Zeiterfassung, Rechnungsstellung mit Swiss QR-Bill und Offerten-Modul.
 

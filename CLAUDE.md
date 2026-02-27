@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Nicolas Fischer CRM** - Multi-tenant CRM application for Swiss businesses with integrated financial management, time tracking, invoicing with Swiss QR-Bill generation, and year-end closing capabilities.
+**nicolas-basislager** - Multi-tenant CRM application for Swiss businesses with integrated financial management, time tracking, invoicing with Swiss QR-Bill generation, and year-end closing capabilities.
 
 ## Tech Stack
 

@@ -5,6 +5,12 @@ import type { Invoice, InvoiceItem, Customer, Project, Product } from '../lib/su
 import { useCompany } from '../context/CompanyContext';
 import { shouldWarnOnEdit, getEditWarningMessage } from '../utils/invoiceUtils';
 import TimeEntryImportModal from './TimeEntryImportModal';
+import RichTextEditor from './RichTextEditor';
+
+/** Returns true when an HTML string (or plain string) has no visible text content. */
+function isHtmlEmpty(html: string): boolean {
+  return !html || html.replace(/<[^>]*>/g, '').trim() === '';
+}
 
 type InvoiceFormData = {
   invoice: Omit<Invoice, 'id' | 'created_at' | 'subtotal' | 'vat_amount' | 'total' | 'total_discount_percent'>;
@@ -274,7 +280,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
 
     // Remove empty first item if present
     setItems(prev => {
-      const hasOnlyEmptyItem = prev.length === 1 && !prev[0].description && !prev[0].unit_price;
+      const hasOnlyEmptyItem = prev.length === 1 && isHtmlEmpty(prev[0].description) && !prev[0].unit_price;
       return hasOnlyEmptyItem ? newItems : [...prev, ...newItems];
     });
 
@@ -320,7 +326,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
           discount_value: parseFloat(discountValue) || 0,
         },
         items: items
-          .filter(item => item.description && item.unit_price)
+          .filter(item => !isHtmlEmpty(item.description) && item.unit_price)
           .map((item, index) => ({
             description: item.description,
             quantity: parseFloat(item.quantity) || 1,
@@ -550,12 +556,13 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
             </div>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             {items.map((item, index) => (
-              <div key={index} className="space-y-2">
-                <div className={`grid gap-2 items-end ${showDiscounts ? 'grid-cols-12' : 'grid-cols-12'}`}>
+              <div key={index} className="border border-gray-100 rounded-lg p-3 space-y-2 bg-gray-50/50">
+                {/* Row 1: Product, Qty, Price, VAT, Discount, Delete */}
+                <div className="grid grid-cols-12 gap-2 items-end">
                   {/* Product Selector */}
-                  <div className={showDiscounts ? 'col-span-2' : 'col-span-3'}>
+                  <div className="col-span-3">
                     {index === 0 && (
                       <label className="block text-xs font-medium text-gray-600 mb-1">
                         Produkt
@@ -564,7 +571,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
                     <select
                       value={item.product_id || ''}
                       onChange={(e) => handleProductSelect(index, e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm"
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm bg-white"
                     >
                       <option value="">Frei</option>
                       {products.map((product) => (
@@ -573,23 +580,6 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
                         </option>
                       ))}
                     </select>
-                  </div>
-
-                  {/* Description */}
-                  <div className={showDiscounts ? 'col-span-4' : 'col-span-4'}>
-                    {index === 0 && (
-                      <label className="block text-xs font-medium text-gray-600 mb-1">
-                        Beschreibung
-                      </label>
-                    )}
-                    <input
-                      type="text"
-                      value={item.description}
-                      onChange={(e) => handleItemChange(index, 'description', e.target.value)}
-                      placeholder="Beschreibung"
-                      required
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm"
-                    />
                   </div>
 
                   {/* Quantity */}
@@ -607,7 +597,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
                       step="0.01"
                       min="0"
                       required
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm"
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm bg-white"
                     />
                   </div>
 
@@ -615,24 +605,24 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
                   <div className="col-span-2">
                     {index === 0 && (
                       <label className="block text-xs font-medium text-gray-600 mb-1">
-                        Preis
+                        Preis (CHF)
                       </label>
                     )}
                     <input
                       type="number"
                       value={item.unit_price}
                       onChange={(e) => handleItemChange(index, 'unit_price', e.target.value)}
-                      placeholder="Preis"
+                      placeholder="0.00"
                       step="0.01"
                       min="0"
                       required
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm"
+                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm bg-white"
                     />
                   </div>
 
                   {/* VAT Rate (conditional - only if VAT enabled) */}
                   {selectedCompany?.vat_enabled && (
-                    <div className="col-span-1">
+                    <div className="col-span-2">
                       {index === 0 && (
                         <label className="block text-xs font-medium text-gray-600 mb-1">
                           MWST %
@@ -646,14 +636,14 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
                         step="0.1"
                         min="0"
                         max="100"
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm"
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm bg-white"
                       />
                     </div>
                   )}
 
                   {/* Line Discount (conditional) */}
                   {showDiscounts && (
-                    <div className="col-span-1">
+                    <div className="col-span-2">
                       {index === 0 && (
                         <label className="block text-xs font-medium text-gray-600 mb-1">
                           Rabatt %
@@ -667,16 +657,23 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
                         step="0.1"
                         min="0"
                         max="100"
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm"
+                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm bg-white"
                       />
                     </div>
                   )}
 
-                  {/* Delete Button */}
-                  <div className="col-span-1 flex justify-end">
-                    {index === 0 && (
-                      <div className="h-5 mb-1"></div>
-                    )}
+                  {/* Spacer + Delete */}
+                  <div className={`flex items-end justify-between ${selectedCompany?.vat_enabled && showDiscounts ? 'col-span-3' : selectedCompany?.vat_enabled || showDiscounts ? 'col-span-3' : 'col-span-5'}`}>
+                    <div className="text-sm text-gray-600">
+                      <span className="font-semibold text-gray-900">
+                        CHF {getLineTotal(item).toFixed(2)}
+                      </span>
+                      {showDiscounts && parseFloat(item.discount_percent) > 0 && (
+                        <span className="text-xs text-green-600 ml-1.5">
+                          -{item.discount_percent}%
+                        </span>
+                      )}
+                    </div>
                     <button
                       type="button"
                       onClick={() => handleRemoveItem(index)}
@@ -688,18 +685,19 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
                   </div>
                 </div>
 
-                {/* Total for this line */}
-                <div className="flex justify-end pr-11">
-                  <div className="text-sm text-gray-600">
-                    Total: <span className="font-semibold text-gray-900">
-                      CHF {getLineTotal(item).toFixed(2)}
-                    </span>
-                    {showDiscounts && parseFloat(item.discount_percent) > 0 && (
-                      <span className="text-xs text-green-600 ml-2">
-                        (-{item.discount_percent}%)
-                      </span>
-                    )}
-                  </div>
+                {/* Row 2: Description – Rich Text Editor (full width) */}
+                <div>
+                  {index === 0 && (
+                    <label className="block text-xs font-medium text-gray-600 mb-1">
+                      Beschreibung <span className="text-red-500">*</span>
+                      <span className="ml-1 font-normal text-gray-400">(Text auswählen für Formatierung)</span>
+                    </label>
+                  )}
+                  <RichTextEditor
+                    value={item.description}
+                    onChange={(html) => handleItemChange(index, 'description', html)}
+                    placeholder="Beschreibung der Position..."
+                  />
                 </div>
               </div>
             ))}
