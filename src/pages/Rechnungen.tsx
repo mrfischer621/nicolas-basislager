@@ -48,6 +48,9 @@ export default function Rechnungen() {
     items: InvoiceItem[];
     customer: Customer;
     company: Company;
+    logoBase64?: string | null;
+    introText?: string | null;
+    footerText?: string | null;
   } | null>(null);
 
   useEffect(() => {
@@ -435,11 +438,31 @@ export default function Rechnungen() {
       throw new Error(validation.errors.join(' • '));
     }
 
+    // Prefetch logo as base64 so the PDF generator doesn't need a second network call
+    let logoBase64: string | null = null;
+    if (freshCompanyData.logo_url) {
+      try {
+        const resp = await fetch(freshCompanyData.logo_url);
+        if (resp.ok) {
+          const blob = await resp.blob();
+          logoBase64 = await new Promise<string | null>((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.onerror = () => resolve(null);
+            reader.readAsDataURL(blob);
+          });
+        }
+      } catch {
+        // Logo is optional — continue without it
+      }
+    }
+
     return {
       invoice,
       items: items || [],
       customer,
       company: freshCompanyData,
+      logoBase64,
       // Use invoice-specific texts if available, otherwise pdfGenerator falls back to company defaults
       introText: invoice.introduction_text,
       footerText: invoice.footer_text,

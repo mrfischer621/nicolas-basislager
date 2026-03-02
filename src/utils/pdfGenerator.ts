@@ -31,6 +31,8 @@ interface InvoiceData {
   // Optional text templates (loaded from company settings)
   introText?: string | null;
   footerText?: string | null;
+  // Optional company logo as base64 data URL
+  logoBase64?: string | null;
 }
 
 interface QuoteData {
@@ -84,6 +86,42 @@ const FONTS = {
   CONTENT: { size: 8, style: 'normal' as const },
   CONTENT_SMALL: { size: 7, style: 'normal' as const },
 };
+
+// ============================================================================
+// SHARED DOCUMENT DESIGN SYSTEM
+// Applies to both invoice and quote PDFs for visual consistency.
+// ============================================================================
+
+const PDF_STYLE_CONFIG = {
+  /** Accent colour — Swiss pine green */
+  ACCENT: [107, 138, 94] as [number, number, number],
+  /** Company logo: top-right corner */
+  LOGO: { x: 160, y: 15, w: 25, h: 25 },
+  /** Recipient address: window-envelope zone */
+  ADDR: { x: 20, startY: 55 },
+  /** Document title ("RECHNUNG" / "Angebot") */
+  TITLE: { x: 20, y: 85, fontSize: 14 },
+  /** Metadata block below title (Nummer, Datum, etc.) */
+  META: { labelX: 20, valueX: 70, startY: 95, lineH: 6 },
+  /** Table margins */
+  TABLE_MARGIN: { left: 20, right: 20 },
+  /** Table column widths (sum = 170 mm: 210 - 20 left - 20 right) */
+  TABLE_COL: { desc: 90, qty: 20, price: 35, total: 25 },
+  /** Description text width = desc col - 2 × cell padding */
+  DESC_TEXT_W: 84,
+  /** Cell padding inside table */
+  CELL_PAD: 3,
+  /** Totals block alignment */
+  TOTALS: { labelX: 120, valueX: 190 },
+  /** Company footer bar (quote only — invoice uses QR-Bill at bottom) */
+  FOOTER_BAR: { y: 260, lineWidth: 1.5 },
+} as const;
+
+/** A single label/value pair in the document metadata block. */
+interface MetaLine {
+  label: string;
+  value: string;
+}
 
 // ============================================================================
 // SECURITY & SANITIZATION FUNCTIONS
@@ -578,104 +616,101 @@ async function drawPaymentSection(
 }
 
 // ============================================================================
-// INVOICE HEADER & CONTENT
+// SHARED DOCUMENT HEADER (invoices & quotes)
 // ============================================================================
 
-function drawInvoiceHeader(
+/**
+ * Draw the Swiss-style document header used by both invoices and quotes.
+ * Layout:
+ *   - Logo top-right (if available)
+ *   - Recipient address left (~window-envelope position, y≈55)
+ *   - Document title bold 14 pt at y=85
+ *   - Metadata block (number, date, etc.) starting at y=95
+ *
+ * @returns Y position directly after the last metadata line
+ */
+function drawDocumentHeader(
   doc: jsPDF,
-  company: Company,
   customer: Customer,
-  invoice: Invoice
-): void {
-  let y = 20;
+  title: string,
+  metaLines: MetaLine[],
+  logoBase64?: string | null
+): number {
+  doc.setTextColor(0, 0, 0);
 
-  // Company logo placeholder or name (Phase 3.3: includes optional contact name)
-  doc.setFont(PDF_FONT, 'bold');
-  doc.setFontSize(16);
-  y = renderCompanySender(doc, company, 20, y, 16);
+  // ── Logo top-right ───────────────────────────────────────────────────────────
+  if (logoBase64) {
+    try {
+      const { x, y, w, h } = PDF_STYLE_CONFIG.LOGO;
+      doc.addImage(logoBase64, 'AUTO', x, y, w, h);
+    } catch {
+      // Logo is optional — skip silently on error
+    }
+  }
 
-  // Company address
-  doc.setFont(PDF_FONT, 'normal');
-  doc.setFontSize(9);
-  y += 2; // Adjust spacing after sender name
-  doc.text(sanitizeForPDF(formatAddress(company.street, company.house_number)), 20, y);
-  y += 4;
-  doc.text(sanitizeForPDF(`${company.zip_code} ${company.city}`), 20, y);
-  y += 8;
-
-  // Invoice title
-  doc.setFont(PDF_FONT, 'bold');
-  doc.setFontSize(20);
-  doc.text('RECHNUNG', 20, y);
-  y += 10;
-
-  // Customer address (right side)
-  const customerX = 120;
-  let customerY = 40;
-
+  // ── Recipient address (left, window-envelope zone ≈ y=55) ───────────────────
+  let addrY = PDF_STYLE_CONFIG.ADDR.startY;
+  const addrX = PDF_STYLE_CONFIG.ADDR.x;
   doc.setFont(PDF_FONT, 'normal');
   doc.setFontSize(10);
-  doc.text(sanitizeForPDF(customer.name), customerX, customerY);
-  customerY += 5;
+
+  doc.text(sanitizeForPDF(customer.name), addrX, addrY);
+  addrY += 5;
 
   if (customer.contact_person) {
-    doc.text(sanitizeForPDF(customer.contact_person), customerX, customerY);
-    customerY += 5;
+    doc.text(sanitizeForPDF(customer.contact_person), addrX, addrY);
+    addrY += 5;
   }
 
   if (customer.street) {
-    doc.text(sanitizeForPDF(formatAddress(customer.street, customer.house_number)), customerX, customerY);
-    customerY += 5;
+    doc.text(
+      sanitizeForPDF(formatAddress(customer.street, customer.house_number)),
+      addrX, addrY
+    );
+    addrY += 5;
   }
 
   if (customer.zip_code && customer.city) {
-    doc.text(sanitizeForPDF(`${customer.zip_code} ${customer.city}`), customerX, customerY);
-    customerY += 5;
+    doc.text(sanitizeForPDF(`${customer.zip_code} ${customer.city}`), addrX, addrY);
+    addrY += 5;
   }
 
-  // Display country only if different from Switzerland
-  // Normalize country: handle both "CH", "Schweiz", or other formats
+  // Country only when not Switzerland
   const rawCountry = (customer.country || 'CH').trim();
-  const customerCountry = (rawCountry === 'Schweiz' || rawCountry === 'CH')
-    ? 'CH'
-    : rawCountry.substring(0, 2).toUpperCase();
+  const customerCountry =
+    rawCountry === 'Schweiz' || rawCountry === 'CH'
+      ? 'CH'
+      : rawCountry.substring(0, 2).toUpperCase();
 
   if (customerCountry !== 'CH') {
-    doc.text(sanitizeForPDF(getCountryName(customerCountry)), customerX, customerY);
-    customerY += 5;
+    doc.text(sanitizeForPDF(getCountryName(customerCountry)), addrX, addrY);
+    addrY += 5;
   }
 
-  // Invoice details
-  y += 10;
+  // ── Document title ───────────────────────────────────────────────────────────
   doc.setFont(PDF_FONT, 'bold');
+  doc.setFontSize(PDF_STYLE_CONFIG.TITLE.fontSize);
+  doc.text(title, PDF_STYLE_CONFIG.TITLE.x, PDF_STYLE_CONFIG.TITLE.y);
+
+  // ── Metadata block ───────────────────────────────────────────────────────────
+  const { labelX, valueX, startY: metaStartY, lineH } = PDF_STYLE_CONFIG.META;
+  let metaY = metaStartY;
+
   doc.setFontSize(10);
-  doc.text('Rechnungsnummer:', 20, y);
-  doc.setFont(PDF_FONT, 'normal');
-  doc.text(sanitizeForPDF(invoice.invoice_number), 70, y);
-  y += 6;
-
-  doc.setFont(PDF_FONT, 'bold');
-  doc.text('Datum:', 20, y);
-  doc.setFont(PDF_FONT, 'normal');
-  doc.text(formatDate(invoice.issue_date), 70, y);
-  y += 6;
-
-  if (invoice.due_date) {
+  for (const line of metaLines) {
     doc.setFont(PDF_FONT, 'bold');
-    doc.text('Fälligkeitsdatum:', 20, y);
+    doc.text(line.label, labelX, metaY);
     doc.setFont(PDF_FONT, 'normal');
-    doc.text(formatDate(invoice.due_date), 70, y);
-    y += 6;
+    doc.text(line.value, valueX, metaY);
+    metaY += lineH;
   }
 
-  if (company.uid_number) {
-    doc.setFont(PDF_FONT, 'bold');
-    doc.text('UID:', 20, y);
-    doc.setFont(PDF_FONT, 'normal');
-    doc.text(sanitizeForPDF(company.uid_number), 70, y);
-    y += 6;
-  }
+  return metaY;
 }
+
+// ============================================================================
+// INVOICE CONTENT
+// ============================================================================
 
 /**
  * Draw intro text above invoice items
@@ -744,113 +779,195 @@ function drawInvoiceItems(
   invoice: Invoice,
   startY: number
 ): number {
-  let y = startY;
-
-  // Check if any items have discounts
+  const { ACCENT, TABLE_MARGIN, TABLE_COL, DESC_TEXT_W, CELL_PAD, TOTALS } = PDF_STYLE_CONFIG;
   const hasLineDiscounts = items.some(item => (item.discount_percent || 0) > 0);
   const hasTotalDiscount = (invoice.discount_value || 0) > 0;
 
-  // Table header
-  doc.setFont(PDF_FONT, 'bold');
-  doc.setFontSize(10);
-  doc.text('Beschreibung', 20, y);
-  doc.text('Menge', 110, y);
-  doc.text('Preis', 135, y);
+  // ── Column config ─────────────────────────────────────────────────────────
+  // With discount column: 75+20+30+20+25 = 170 mm
+  // Without:              90+20+35+25    = 170 mm  (same as quote)
+  let head: string[][];
+  let tableBody: string[][];
+  let columnStyles: Record<number, object>;
+  let descWidth: number;
+  let descTextWidth: number;
+
   if (hasLineDiscounts) {
-    doc.text('Rabatt', 160, y);
+    descWidth = 75;
+    descTextWidth = descWidth - 2 * CELL_PAD;
+    head = [['Beschreibung', 'Menge', 'Einzelpreis (CHF)', 'Rabatt', 'Total (CHF)']];
+    tableBody = items.map(item => [
+      sanitizeForPDF(item.description || ''),
+      item.quantity % 1 === 0 ? item.quantity.toString() : item.quantity.toFixed(2),
+      formatAmount(item.unit_price),
+      item.discount_percent ? `-${item.discount_percent}%` : '-',
+      formatAmount(item.total),
+    ]);
+    columnStyles = {
+      0: { cellWidth: 75 },
+      1: { cellWidth: 20, halign: 'right' },
+      2: { cellWidth: 30, halign: 'right' },
+      3: { cellWidth: 20, halign: 'right' },
+      4: { cellWidth: 25, halign: 'right' },
+    };
+  } else {
+    descWidth = TABLE_COL.desc;
+    descTextWidth = DESC_TEXT_W;
+    head = [['Beschreibung', 'Menge', 'Einzelpreis (CHF)', 'Total (CHF)']];
+    tableBody = items.map(item => [
+      sanitizeForPDF(item.description || ''),
+      item.quantity % 1 === 0 ? item.quantity.toString() : item.quantity.toFixed(2),
+      formatAmount(item.unit_price),
+      formatAmount(item.total),
+    ]);
+    columnStyles = {
+      0: { cellWidth: TABLE_COL.desc },
+      1: { cellWidth: TABLE_COL.qty, halign: 'right' },
+      2: { cellWidth: TABLE_COL.price, halign: 'right' },
+      3: { cellWidth: TABLE_COL.total, halign: 'right' },
+    };
   }
-  doc.text('Total', 190, y, { align: 'right' });
-  y += 2;
 
-  // Header line
-  doc.setDrawColor(0, 0, 0);
-  doc.setLineWidth(0.5);
-  doc.line(20, y, 190, y);
-  y += 6;
+  autoTable(doc, {
+    startY,
+    // bottom margin leaves room for totals block (~36 mm) + footer bar at y=260
+    margin: { ...TABLE_MARGIN, bottom: 75 },
+    showHead: 'everyPage',
+    theme: 'plain',
+    head,
+    body: tableBody,
+    styles: {
+      font: PDF_FONT,
+      fontSize: 9,
+      cellPadding: CELL_PAD,
+      textColor: [0, 0, 0] as [number, number, number],
+      lineColor: [220, 220, 220] as [number, number, number],
+      lineWidth: 0.1,
+      valign: 'top',
+    },
+    headStyles: {
+      fillColor: ACCENT,
+      textColor: [255, 255, 255] as [number, number, number],
+      fontStyle: 'bold',
+      fontSize: 9,
+    },
+    columnStyles,
 
-  // Items
-  doc.setFont(PDF_FONT, 'normal');
-  doc.setFontSize(9);
-
-  items.forEach((item) => {
-    // Handle long descriptions - sanitize to prevent rendering glitches
-    const description = sanitizeForPDF(item.description || '');
-    const lines = doc.splitTextToSize(description, hasLineDiscounts ? 85 : 95);
-    const lineDiscount = item.discount_percent || 0;
-
-    lines.forEach((line: string, index: number) => {
-      doc.text(line, 20, y);
-      if (index === 0) {
-        doc.text(item.quantity.toString(), 110, y);
-        doc.text(`CHF ${formatAmount(item.unit_price)}`, 135, y);
-        if (hasLineDiscounts) {
-          if (lineDiscount > 0) {
-            doc.text(`-${lineDiscount}%`, 160, y);
-          } else {
-            doc.text('-', 160, y);
-          }
-        }
-        doc.text(`CHF ${formatAmount(item.total)}`, 190, y, { align: 'right' });
+    // Expand description cell so autotable computes correct row height.
+    // splitTextToSize with the active 9pt font gives accurate line counts.
+    didParseCell: (data) => {
+      if (data.section === 'body' && data.column.index === 0) {
+        const rawText = String(
+          Array.isArray(data.row.raw) ? (data.row.raw as string[])[0] ?? '' : ''
+        );
+        const expanded: string[] = [];
+        rawText.split('\n').forEach((line) => {
+          const wrapped = doc.splitTextToSize(sanitizeForPDF(line), descTextWidth);
+          expanded.push(...(wrapped as string[]));
+        });
+        if (expanded.length > 0) data.cell.text = expanded;
       }
-      y += 5;
-    });
+    },
+
+    // Suppress autotable's default description rendering (we do it manually below)
+    willDrawCell: (data) => {
+      if (data.section === 'body' && data.column.index === 0) {
+        data.cell.text = [];
+      }
+    },
+
+    // Manually render description: first line bold (title), rest normal
+    didDrawCell: (data) => {
+      if (data.section === 'body' && data.column.index === 0) {
+        const rawText = String(
+          Array.isArray(data.row.raw) ? (data.row.raw as string[])[0] ?? '' : ''
+        );
+        const [firstLine, ...restLines] = rawText.split('\n');
+        const x = data.cell.x + CELL_PAD;
+        const lineH = 4.5;
+        let y = data.cell.y + CELL_PAD + 3;
+
+        // Title line — bold
+        if (firstLine && firstLine.trim()) {
+          doc.setFont(PDF_FONT, 'bold');
+          doc.setFontSize(9);
+          doc.setTextColor(0, 0, 0);
+          const wrappedTitle = doc.splitTextToSize(
+            sanitizeForPDF(firstLine), descTextWidth
+          ) as string[];
+          wrappedTitle.forEach((l) => { doc.text(l, x, y); y += lineH; });
+        }
+
+        // Body lines — normal, slightly smaller
+        const restText = restLines.join('\n').trim();
+        if (restText) {
+          doc.setFont(PDF_FONT, 'normal');
+          doc.setFontSize(8.5);
+          const wrappedRest = doc.splitTextToSize(
+            sanitizeForPDF(restText), descTextWidth
+          ) as string[];
+          wrappedRest.forEach((l) => { doc.text(l, x, y); y += lineH; });
+        }
+
+        // Reset for subsequent cells
+        doc.setFont(PDF_FONT, 'normal');
+        doc.setFontSize(9);
+        doc.setTextColor(0, 0, 0);
+      }
+    },
   });
 
-  // Spacing
-  y += 5;
+  const finalY: number = (doc as any).lastAutoTable?.finalY ?? startY + 20;
+  let y = finalY + 8;
 
-  // Calculate items subtotal (before total discount)
+  // ── Totals section (aligned with right portion of table: x=120…190) ─────────
+  const { labelX, valueX } = TOTALS;
   const itemsSubtotal = items.reduce((sum, item) => sum + item.total, 0);
 
-  // Subtotal (items total after line discounts)
-  doc.setFont(PDF_FONT, 'bold');
-  doc.text('Zwischensumme:', 145, y);
   doc.setFont(PDF_FONT, 'normal');
-  doc.text(`CHF ${formatAmount(itemsSubtotal)}`, 190, y, { align: 'right' });
+  doc.setFontSize(9);
+  doc.setTextColor(0, 0, 0);
+
+  doc.text('Zwischensumme', labelX, y);
+  doc.text(`CHF ${formatAmount(itemsSubtotal)}`, valueX, y, { align: 'right' });
   y += 6;
 
-  // Total Discount (if any) - NEW SYSTEM (percent or fixed)
   if (hasTotalDiscount) {
     let totalDiscountAmount = 0;
     let discountLabel = '';
 
     if (invoice.discount_type === 'percent') {
       totalDiscountAmount = itemsSubtotal * (invoice.discount_value / 100);
-      discountLabel = `Rabatt (${invoice.discount_value}%):`;
+      discountLabel = `Rabatt (${invoice.discount_value}%)`;
     } else {
-      // Fixed discount (CHF)
       totalDiscountAmount = Math.min(invoice.discount_value, itemsSubtotal);
-      discountLabel = `Rabatt (CHF ${formatAmount(invoice.discount_value)}):`;
+      discountLabel = 'Rabatt';
     }
 
-    doc.setFont(PDF_FONT, 'bold');
-    doc.text(discountLabel, 145, y);
-    doc.setFont(PDF_FONT, 'normal');
-    doc.setTextColor(0, 128, 0); // Green for discount
-    doc.text(`-CHF ${formatAmount(totalDiscountAmount)}`, 190, y, { align: 'right' });
-    doc.setTextColor(0, 0, 0); // Reset to black
+    doc.text(discountLabel, labelX, y);
+    doc.setTextColor(0, 128, 0);
+    doc.text(`- CHF ${formatAmount(totalDiscountAmount)}`, valueX, y, { align: 'right' });
+    doc.setTextColor(0, 0, 0);
     y += 6;
   }
 
-  // VAT
   if (invoice.vat_amount > 0) {
-    doc.setFont(PDF_FONT, 'bold');
-    doc.text(`MWST (${invoice.vat_rate}%):`, 145, y);
-    doc.setFont(PDF_FONT, 'normal');
-    doc.text(`CHF ${formatAmount(invoice.vat_amount)}`, 190, y, { align: 'right' });
+    doc.text(`MWST (${invoice.vat_rate}%)`, labelX, y);
+    doc.text(`CHF ${formatAmount(invoice.vat_amount)}`, valueX, y, { align: 'right' });
     y += 6;
   }
 
-  // Total line
-  doc.setLineWidth(0.5);
-  doc.line(145, y, 190, y);
-  y += 6;
+  // Separator line
+  doc.setDrawColor(180, 180, 180);
+  doc.setLineWidth(0.3);
+  doc.line(labelX, y, valueX, y);
+  y += 5;
 
-  // Total
+  // Total — bold, Swiss-rounded
   doc.setFont(PDF_FONT, 'bold');
   doc.setFontSize(11);
-  doc.text('Gesamtbetrag:', 110, y);
-  doc.text(`CHF ${formatAmount(invoice.total)}`, 190, y, { align: 'right' });
+  doc.text('Total', labelX, y);
+  doc.text(`CHF ${formatAmount(swissRound(invoice.total))}`, valueX, y, { align: 'right' });
 
   return y;
 }
@@ -908,6 +1025,12 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<Blob> {
     throw new Error(
       `Kundenadresse unvollständig: PLZ/Ort fehlt für Kunde "${customer.name}".`
     );
+  }
+
+  // Resolve logo — prefer pre-fetched base64, fall back to live fetch
+  let logoBase64: string | null = data.logoBase64 ?? null;
+  if (!logoBase64 && company.logo_url) {
+    logoBase64 = await fetchLogoAsBase64(company.logo_url);
   }
 
   // Create PDF document
@@ -980,48 +1103,43 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<Blob> {
     width: 200, // High resolution
   });
 
-  // Draw invoice content
-  drawInvoiceHeader(doc, company, customer, invoice);
+  // ── Document header ──────────────────────────────────────────────────────────
+  const metaLines: MetaLine[] = [
+    { label: 'Rechnungsnummer:', value: sanitizeForPDF(invoice.invoice_number) },
+    { label: 'Datum:', value: formatDate(invoice.issue_date) },
+  ];
+  if (invoice.due_date) {
+    metaLines.push({ label: 'Fälligkeitsdatum:', value: formatDate(invoice.due_date) });
+  }
+  if (company.uid_number) {
+    metaLines.push({ label: 'UID:', value: sanitizeForPDF(company.uid_number) });
+  }
+  const headerEndY = drawDocumentHeader(doc, customer, 'RECHNUNG', metaLines, logoBase64);
 
-  // Determine intro/footer text - use passed values or fall back to company defaults
+  // ── Text templates ────────────────────────────────────────────────────────────
+  // Use passed values or fall back to company-level templates
   const introText = data.introText !== undefined ? data.introText : company.invoice_intro_text;
   const footerText = data.footerText !== undefined ? data.footerText : company.invoice_footer_text;
 
-  // Draw intro text (if any) - starts at Y=95 (after header)
-  const contentY = drawIntroText(doc, introText, 95);
+  // ── Intro text ────────────────────────────────────────────────────────────────
+  const introStartY = Math.max(headerEndY + 5, 120);
+  const contentY = drawIntroText(doc, introText, introStartY);
 
-  // Draw invoice items - dynamic start based on intro text
-  const itemsStartY = contentY > 95 ? contentY : 100;
+  // ── Items table ───────────────────────────────────────────────────────────────
+  const itemsStartY = contentY > introStartY ? contentY : introStartY + 5;
   let endY = drawInvoiceItems(doc, items, invoice, itemsStartY);
 
-  // Draw footer text (if any)
-  endY = drawFooterText(doc, footerText, endY);
+  // ── Footer text ───────────────────────────────────────────────────────────────
+  drawFooterText(doc, footerText, endY);
 
-  // Draw separator line with scissors
+  // ── Company footer bar (identical to quote layout) ────────────────────────────
+  drawCompanyFooterBar(doc, company);
+
+  // ── QR-Bill — always on its own page ─────────────────────────────────────────
+  doc.addPage();
   drawSeparatorLine(doc, LAYOUT.SEPARATOR_Y);
-
-  // Draw QR-Bill sections
   drawReceiptSection(doc, company, customer, invoice, qrReference);
   await drawPaymentSection(doc, company, customer, invoice, qrCodeDataURL, qrReference);
-
-  // Add payment instructions at bottom of main content (before QR section)
-  // Position dynamically but ensure it doesn't overlap with QR section
-  const maxFooterY = LAYOUT.SEPARATOR_Y - 25; // Leave space before separator
-  let paymentInstructionsY = Math.min(endY + 10, maxFooterY);
-
-  doc.setFont(PDF_FONT, 'normal');
-  doc.setFontSize(9);
-  doc.text(
-    'Bitte verwenden Sie für die Zahlung den untenstehenden Einzahlungsschein.',
-    20,
-    paymentInstructionsY
-  );
-  paymentInstructionsY += 5;
-  doc.text(
-    'Vielen Dank für Ihr Vertrauen.',
-    20,
-    paymentInstructionsY
-  );
 
   // Convert to blob
   const pdfBlob = doc.output('blob');
@@ -1083,11 +1201,7 @@ async function fetchLogoAsBase64(logoUrl: string): Promise<string | null> {
 
 /**
  * Draw the Swiss-style quote header.
- * Layout:
- *   - Logo top-right (if available)
- *   - Recipient address left (~window-envelope position, y≈55)
- *   - "Angebot" title bold 14pt at y=85
- *   - Metadata block (quote number, date, valid-until) starting at y=95
+ * Thin wrapper around drawDocumentHeader — builds the quote-specific meta lines.
  *
  * @returns Y position directly after the last metadata line
  */
@@ -1097,88 +1211,12 @@ function drawQuoteHeader(
   quote: Quote,
   logoBase64?: string | null
 ): number {
-  doc.setTextColor(0, 0, 0);
-
-  // ── Logo top-right ──────────────────────────────────────────────────────────
-  if (logoBase64) {
-    try {
-      doc.addImage(logoBase64, 'AUTO', 160, 15, 25, 25);
-    } catch {
-      // Logo is optional — skip silently on error
-    }
-  }
-
-  // ── Recipient address (left, window-envelope zone ≈ y=55) ──────────────────
-  let addrY = 55;
-  doc.setFont(PDF_FONT, 'normal');
-  doc.setFontSize(10);
-
-  doc.text(sanitizeForPDF(customer.name), 20, addrY);
-  addrY += 5;
-
-  if (customer.contact_person) {
-    doc.text(sanitizeForPDF(customer.contact_person), 20, addrY);
-    addrY += 5;
-  }
-
-  if (customer.street) {
-    doc.text(
-      sanitizeForPDF(formatAddress(customer.street, customer.house_number)),
-      20, addrY
-    );
-    addrY += 5;
-  }
-
-  if (customer.zip_code && customer.city) {
-    doc.text(sanitizeForPDF(`${customer.zip_code} ${customer.city}`), 20, addrY);
-    addrY += 5;
-  }
-
-  // Country only when not Switzerland
-  const rawCountry = (customer.country || 'CH').trim();
-  const customerCountry =
-    rawCountry === 'Schweiz' || rawCountry === 'CH'
-      ? 'CH'
-      : rawCountry.substring(0, 2).toUpperCase();
-
-  if (customerCountry !== 'CH') {
-    doc.text(sanitizeForPDF(getCountryName(customerCountry)), 20, addrY);
-    addrY += 5;
-  }
-
-  // ── Title ───────────────────────────────────────────────────────────────────
-  doc.setFont(PDF_FONT, 'bold');
-  doc.setFontSize(14);
-  doc.text('Angebot', 20, 85);
-
-  // ── Metadata block ──────────────────────────────────────────────────────────
-  const labelX = 20;
-  const valueX = 70;
-  let metaY = 95;
-
-  doc.setFont(PDF_FONT, 'normal');
-  doc.setFontSize(10);
-
-  doc.setFont(PDF_FONT, 'bold');
-  doc.text('Angebotsnummer:', labelX, metaY);
-  doc.setFont(PDF_FONT, 'normal');
-  doc.text(sanitizeForPDF(quote.quote_number), valueX, metaY);
-  metaY += 6;
-
-  doc.setFont(PDF_FONT, 'bold');
-  doc.text('Datum:', labelX, metaY);
-  doc.setFont(PDF_FONT, 'normal');
-  doc.text(formatDate(quote.issue_date), valueX, metaY);
-  metaY += 6;
-
-  doc.setFont(PDF_FONT, 'bold');
-  doc.text('Gültig bis:', labelX, metaY);
-  doc.setFont(PDF_FONT, 'normal');
-  doc.setTextColor(0, 0, 0); // Black — no red
-  doc.text(formatDate(quote.valid_until), valueX, metaY);
-  metaY += 6;
-
-  return metaY;
+  const metaLines: MetaLine[] = [
+    { label: 'Angebotsnummer:', value: sanitizeForPDF(quote.quote_number) },
+    { label: 'Datum:', value: formatDate(quote.issue_date) },
+    { label: 'Gültig bis:', value: formatDate(quote.valid_until) },
+  ];
+  return drawDocumentHeader(doc, customer, 'Angebot', metaLines, logoBase64);
 }
 
 /**
@@ -1375,13 +1413,20 @@ function drawQuoteItems(
 }
 
 /**
- * Draw the company footer bar at the bottom of the quote page.
+ * Draw the company footer bar at the bottom of the page.
  * Renders an accent-coloured horizontal rule followed by a 2-column
- * contact block: address left | phone + email stacked right.
+ * contact block: address + IBAN left | phone / email / website right.
+ * Used by both invoice and quote PDFs.
  */
-function drawQuoteFooterBar(doc: jsPDF, company: Company): void {
+function drawCompanyFooterBar(doc: jsPDF, company: Company): void {
   const ACCENT: [number, number, number] = [107, 138, 94];
   const BAR_Y = 260;
+
+  // Format IBAN with a space every 4 characters: "CH58 0844 0261 3973 0200 1"
+  const rawIban = company.qr_iban || company.iban;
+  const formattedIban = rawIban
+    ? (sanitizeForPDF(rawIban).replace(/\s+/g, '').toUpperCase().match(/.{1,4}/g)?.join(' ') ?? rawIban)
+    : null;
 
   // Accent line
   doc.setDrawColor(...ACCENT);
@@ -1393,7 +1438,7 @@ function drawQuoteFooterBar(doc: jsPDF, company: Company): void {
   doc.setFontSize(7.5);
   doc.setTextColor(80, 80, 80);
 
-  // Col 1 — Company name + address (x=20)
+  // Col 1 — Company name + address + IBAN (x=20)
   let nameBlock = sanitizeForPDF(company.name);
   if (company.sender_contact_name && company.sender_contact_name.trim()) {
     nameBlock = `${sanitizeForPDF(company.sender_contact_name)} c/o ${sanitizeForPDF(company.name)}`;
@@ -1404,6 +1449,7 @@ function drawQuoteFooterBar(doc: jsPDF, company: Company): void {
   doc.text(nameBlock, 20, textY);
   if (streetLine) doc.text(streetLine, 20, textY + 4);
   if (cityLine)   doc.text(cityLine,  20, textY + 8);
+  if (formattedIban) doc.text(`IBAN: ${formattedIban}`, 20, textY + 12);
 
   // Col 2 — Phone, Email, Website stacked (x=120)
   let contactY = textY;
@@ -1500,7 +1546,7 @@ export async function generateQuotePDF(data: QuoteData): Promise<Blob> {
   drawFooterText(doc, footerText, endY);
 
   // Company footer bar at bottom of page
-  drawQuoteFooterBar(doc, company);
+  drawCompanyFooterBar(doc, company);
 
   return doc.output('blob');
 }
