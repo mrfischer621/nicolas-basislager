@@ -192,19 +192,17 @@ export default function TimeEntryImportModal({
         const heading = `<strong>KW ${group.weekNumber} (${group.monthYear})</strong>`;
 
         // Entries are already sorted chronologically (query: order('date', ascending))
-        const listItems = group.entries
+        const lines = group.entries
           .filter(e => e.hours > 0)
           .map(e => {
             const date = formatDateShort(e.date);
             const hours = formatHours(e.hours);
             const desc = e.description?.trim();
-            return desc
-              ? `<li>${date} — ${desc} (${hours})</li>`
-              : `<li>${date} (${hours})</li>`;
+            return desc ? `${date} — ${desc} (${hours})` : `${date} (${hours})`;
           });
 
-        const description = listItems.length > 0
-          ? `${heading}<ul>${listItems.join('')}</ul>`
+        const description = lines.length > 0
+          ? `${heading}<br>${lines.join('<br>')}`
           : heading;
 
         return {
