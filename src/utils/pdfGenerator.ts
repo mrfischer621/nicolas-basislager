@@ -925,21 +925,7 @@ function drawInvoiceItems(
   });
 
   const finalY: number = (doc as any).lastAutoTable?.finalY ?? startY + 20;
-
-  // Calculate how much vertical space the totals block needs
-  let totalsHeight = 6; // Zwischensumme
-  if (hasTotalDiscount) totalsHeight += 6;
-  if (invoice.vat_amount > 0) totalsHeight += 6;
-  totalsHeight += 13; // separator (5) + Total line (8)
-
-  // If totals don't fit before the footer bar (y=260), push to a new page
-  let y: number;
-  if (finalY + 8 + totalsHeight > 255) {
-    doc.addPage();
-    y = 30;
-  } else {
-    y = finalY + 8;
-  }
+  let y = finalY + 8;
 
   // ── Totals section (aligned with right portion of table: x=120…190) ─────────
   const { labelX, valueX } = TOTALS;
@@ -1379,22 +1365,8 @@ function drawQuoteItems(
   });
 
   const finalY: number = (doc as any).lastAutoTable?.finalY ?? startY + 20;
-
-  // Calculate totals block height to check if it fits before the footer bar
   const hasTotalDiscount = (quote.discount_value || 0) > 0;
-  let quoteTotalsHeight = 6; // Zwischensumme
-  if (hasTotalDiscount) quoteTotalsHeight += 6;
-  if (quote.vat_amount > 0) quoteTotalsHeight += 6;
-  quoteTotalsHeight += 13; // separator (5) + Total line (8)
-
-  // If totals don't fit before the footer bar (y=260), push to a new page
-  let y: number;
-  if (finalY + 8 + quoteTotalsHeight > 255) {
-    doc.addPage();
-    y = 30;
-  } else {
-    y = finalY + 8;
-  }
+  let y = finalY + 8;
 
   // ── Totals section — aligned with right portion of table (x=120…190) ────────
   // Table right edge is x=190; labels start at x=120 (where numeric cols begin)
