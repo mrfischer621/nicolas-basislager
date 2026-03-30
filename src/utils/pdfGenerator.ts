@@ -795,7 +795,7 @@ function drawInvoiceItems(
   if (hasLineDiscounts) {
     descWidth = 75;
     descTextWidth = descWidth - 2 * CELL_PAD;
-    head = [['Beschreibung', 'Menge', 'Einzelpreis (CHF)', 'Rabatt', 'Total (CHF)']];
+    head = [['Beschreibung', 'Menge', 'Einzelpreis', 'Rabatt', 'Total']];
     tableBody = items.map(item => [
       sanitizeForPDF(item.description || ''),
       item.quantity % 1 === 0 ? item.quantity.toString() : item.quantity.toFixed(2),
@@ -813,7 +813,7 @@ function drawInvoiceItems(
   } else {
     descWidth = TABLE_COL.desc;
     descTextWidth = DESC_TEXT_W;
-    head = [['Beschreibung', 'Menge', 'Einzelpreis (CHF)', 'Total (CHF)']];
+    head = [['Beschreibung', 'Menge', 'Einzelpreis', 'Total']];
     tableBody = items.map(item => [
       sanitizeForPDF(item.description || ''),
       item.quantity % 1 === 0 ? item.quantity.toString() : item.quantity.toFixed(2),
@@ -1275,7 +1275,7 @@ function drawQuoteItems(
     margin: { left: 20, right: 20, bottom: 80 },
     rowPageBreak: 'avoid',
     theme: 'plain',
-    head: [['Beschreibung', 'Menge', 'Einzelpreis (CHF)', 'Total (CHF)']],
+    head: [['Beschreibung', 'Menge', 'Einzelpreis', 'Total']],
     body: tableBody,
     styles: {
       font: PDF_FONT,
