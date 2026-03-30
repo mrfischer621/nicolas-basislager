@@ -108,9 +108,9 @@ const PDF_STYLE_CONFIG = {
   /** Table column widths (sum = 170 mm: 210 - 20 left - 20 right) */
   TABLE_COL: { desc: 90, qty: 20, price: 35, total: 25 },
   /** Description text width = desc col - 2 × cell padding */
-  DESC_TEXT_W: 84,
+  DESC_TEXT_W: 80,
   /** Cell padding inside table */
-  CELL_PAD: 3,
+  CELL_PAD: 5,
   /** Totals block alignment */
   TOTALS: { labelX: 120, valueX: 190 },
   /** Company footer bar (quote only — invoice uses QR-Bill at bottom) */
@@ -865,7 +865,13 @@ function drawInvoiceItems(
           const wrapped = doc.splitTextToSize(sanitizeForPDF(line), descTextWidth);
           expanded.push(...(wrapped as string[]));
         });
-        if (expanded.length > 0) data.cell.text = expanded;
+        if (expanded.length > 0) {
+          data.cell.text = expanded;
+          // Force cell height to match our manual rendering metrics
+          const CAP_H = 3; // baseline offset for 9pt font
+          const LINE_H = 4.5;
+          data.cell.styles.minCellHeight = CELL_PAD + CAP_H + expanded.length * LINE_H + CELL_PAD;
+        }
       }
     },
 
@@ -1234,11 +1240,11 @@ function drawQuoteItems(
   startY: number
 ): number {
   const ACCENT: [number, number, number] = [107, 138, 94];
-  const CELL_PAD = 3;
+  const CELL_PAD = 5;
   // Column widths sum to exactly 170mm (210 - 20 left - 20 right margin)
   // Beschreibung:90 + Menge:20 + Einzelpreis:35 + Total:25 = 170mm
   // Table right edge: x = 20 + 170 = 190mm
-  const DESC_TEXT_WIDTH = 84; // 90mm col - 2×3mm padding
+  const DESC_TEXT_WIDTH = 80; // 90mm col - 2×5mm padding
 
   const tableBody: string[][] = items.map((item) => [
     sanitizeForPDF(item.description || ''),
@@ -1290,6 +1296,10 @@ function drawQuoteItems(
         });
         if (expanded.length > 0) {
           data.cell.text = expanded;
+          // Force cell height to match our manual rendering metrics
+          const CAP_H = 3; // baseline offset for 9pt font
+          const LINE_H = 4.5;
+          data.cell.styles.minCellHeight = CELL_PAD + CAP_H + expanded.length * LINE_H + CELL_PAD;
         }
       }
     },
