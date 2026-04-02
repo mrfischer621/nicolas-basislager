@@ -315,14 +315,19 @@ export function TimerButton() {
   // Live seconds display
   const displaySeconds = useLiveSeconds(timer.isRunning, timer.startTime, timer.elapsedSeconds);
 
-  // Load active projects (lazy, on first dropdown open)
+  // Reset projects cache when company changes
+  useEffect(() => {
+    setProjects([]);
+  }, [selectedCompany?.id]);
+
+  // Load active projects (lazy, on dropdown/stop-modal open)
   const loadProjects = useCallback(async () => {
     if (!selectedCompany || projects.length > 0) return;
     const { data } = await supabase
       .from('projects')
-      .select('id, name, status')
+      .select('id, name, status, is_active')
       .eq('company_id', selectedCompany.id)
-      .eq('status', 'aktiv')
+      .eq('is_active', true)
       .order('name');
     if (data) setProjects(data as Project[]);
   }, [selectedCompany, projects.length]);
