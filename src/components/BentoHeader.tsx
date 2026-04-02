@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase';
 import { User, Menu, ChevronDown, Building2, Settings, LogOut, Check, Plus, Search, Users, FolderKanban, Package, FileText, Receipt, Loader2, X } from 'lucide-react';
 import { CreateCompanyModal } from './CreateCompanyModal';
 import { useGlobalSearch, type SearchResult } from '../hooks/useGlobalSearch';
+import { TimerButton } from './TimerButton';
 
 /**
  * SearchResultGroup - Renders a group of search results
@@ -293,6 +294,9 @@ export function BentoHeader({ onMenuClick }: { onMenuClick?: () => void }) {
 
       {/* Right Side - Actions */}
       <div className="flex items-center gap-2">
+        {/* Live Timer */}
+        <TimerButton />
+
         {/* User Menu Dropdown */}
         <div className="relative" ref={userMenuRef}>
           <button
