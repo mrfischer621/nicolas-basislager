@@ -792,7 +792,6 @@ function drawInvoiceItems(
   doc: jsPDF,
   items: InvoiceItem[],
   invoice: Invoice,
-  company: Company,
   startY: number
 ): number {
   const { ACCENT, TABLE_MARGIN, TABLE_COL, DESC_TEXT_W, CELL_PAD, TOTALS } = PDF_STYLE_CONFIG;
@@ -937,11 +936,6 @@ function drawInvoiceItems(
         doc.setFontSize(9);
         doc.setTextColor(0, 0, 0);
       }
-    },
-
-    // Draw company footer bar on every overflow page (page 1 is drawn before table)
-    didAddPage: () => {
-      drawCompanyFooterBar(doc, company);
     },
   });
 
@@ -1163,14 +1157,19 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<Blob> {
     itemsStartY += 8;
   }
 
-  // ── Company footer bar: page 1 (overflow pages handled via didAddPage in table)
-  drawCompanyFooterBar(doc, company);
-
   // ── Items table ───────────────────────────────────────────────────────────────
-  let endY = drawInvoiceItems(doc, items, invoice, company, itemsStartY);
+  let endY = drawInvoiceItems(doc, items, invoice, itemsStartY);
 
   // ── Footer text ───────────────────────────────────────────────────────────────
   drawFooterText(doc, footerText, endY);
+
+  // ── Company footer bar: alle Content-Seiten (QR-Bill-Seite folgt separat) ─────
+  const lastContentPage = doc.getNumberOfPages();
+  for (let p = 1; p <= lastContentPage; p++) {
+    doc.setPage(p);
+    drawCompanyFooterBar(doc, company);
+  }
+  doc.setPage(lastContentPage);
 
   // ── QR-Bill — always on its own page ─────────────────────────────────────────
   doc.addPage();
