@@ -792,6 +792,7 @@ function drawInvoiceItems(
   doc: jsPDF,
   items: InvoiceItem[],
   invoice: Invoice,
+  company: Company,
   startY: number
 ): number {
   const { ACCENT, TABLE_MARGIN, TABLE_COL, DESC_TEXT_W, CELL_PAD, TOTALS } = PDF_STYLE_CONFIG;
@@ -810,7 +811,7 @@ function drawInvoiceItems(
   if (hasLineDiscounts) {
     descWidth = 75;
     descTextWidth = descWidth - 2 * CELL_PAD;
-    head = [['Beschreibung', 'Menge', 'Einzelpreis', 'Rabatt', 'Total']];
+    head = [['Beschreibung', 'Menge', 'Einzelpreis', 'Rabatt', 'Total (CHF)']];
     tableBody = items.map(item => [
       sanitizeForPDF(item.description || ''),
       item.quantity % 1 === 0 ? item.quantity.toString() : item.quantity.toFixed(2),
@@ -828,7 +829,7 @@ function drawInvoiceItems(
   } else {
     descWidth = TABLE_COL.desc;
     descTextWidth = DESC_TEXT_W;
-    head = [['Beschreibung', 'Menge', 'Einzelpreis', 'Total']];
+    head = [['Beschreibung', 'Menge', 'Einzelpreis', 'Total (CHF)']];
     tableBody = items.map(item => [
       sanitizeForPDF(item.description || ''),
       item.quantity % 1 === 0 ? item.quantity.toString() : item.quantity.toFixed(2),
@@ -936,6 +937,11 @@ function drawInvoiceItems(
         doc.setFontSize(9);
         doc.setTextColor(0, 0, 0);
       }
+    },
+
+    // Draw company footer bar on every overflow page (page 1 is drawn before table)
+    didAddPage: () => {
+      drawCompanyFooterBar(doc, company);
     },
   });
 
@@ -1147,15 +1153,24 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<Blob> {
   const introStartY = Math.max(headerEndY + 5, 120);
   const contentY = drawIntroText(doc, introText, introStartY);
 
+  // ── Invoice title / description ───────────────────────────────────────────────
+  let itemsStartY = contentY > introStartY ? contentY : introStartY + 5;
+  if (invoice.title && invoice.title.trim()) {
+    doc.setFont(PDF_FONT, 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(0, 0, 0);
+    doc.text(sanitizeForPDF(invoice.title.trim()), 20, itemsStartY);
+    itemsStartY += 8;
+  }
+
+  // ── Company footer bar: page 1 (overflow pages handled via didAddPage in table)
+  drawCompanyFooterBar(doc, company);
+
   // ── Items table ───────────────────────────────────────────────────────────────
-  const itemsStartY = contentY > introStartY ? contentY : introStartY + 5;
-  let endY = drawInvoiceItems(doc, items, invoice, itemsStartY);
+  let endY = drawInvoiceItems(doc, items, invoice, company, itemsStartY);
 
   // ── Footer text ───────────────────────────────────────────────────────────────
   drawFooterText(doc, footerText, endY);
-
-  // ── Company footer bar (identical to quote layout) ────────────────────────────
-  drawCompanyFooterBar(doc, company);
 
   // ── QR-Bill — always on its own page ─────────────────────────────────────────
   doc.addPage();
@@ -1276,7 +1291,7 @@ function drawQuoteItems(
     margin: { left: 20, right: 20, bottom: 80 },
     rowPageBreak: 'avoid',
     theme: 'plain',
-    head: [['Beschreibung', 'Menge', 'Einzelpreis', 'Total']],
+    head: [['Beschreibung', 'Menge', 'Einzelpreis', 'Total (CHF)']],
     body: tableBody,
     styles: {
       font: PDF_FONT,
