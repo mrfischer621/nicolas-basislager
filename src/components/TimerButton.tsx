@@ -46,6 +46,7 @@ interface StopModalProps {
     description: string;
     date: string;
     billable: boolean;
+    hours: number;
   }) => Promise<void>;
   onCancel: () => void;
 }
@@ -64,6 +65,8 @@ function StopModal({
   const [description, setDescription] = useState(initialDescription);
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [billable, setBillable] = useState(initialBillable);
+  const [editHours, setEditHours] = useState(0);
+  const [editMinutes, setEditMinutes] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -74,19 +77,27 @@ function StopModal({
       setDescription(initialDescription);
       setDate(new Date().toISOString().split('T')[0]);
       setBillable(initialBillable);
+      setEditHours(Math.floor(totalSeconds / 3600));
+      setEditMinutes(Math.floor((totalSeconds % 3600) / 60));
       setError('');
     }
-  }, [isOpen, initialProjectId, initialDescription, initialBillable]);
+  }, [isOpen, initialProjectId, initialDescription, initialBillable, totalSeconds]);
 
   const handleSave = async () => {
     if (!projectId) {
       setError('Bitte ein Projekt auswählen.');
       return;
     }
+    const totalMinutes = editHours * 60 + editMinutes;
+    if (totalMinutes <= 0) {
+      setError('Die erfasste Zeit muss grösser als 0 Minuten sein.');
+      return;
+    }
+    const hours = Math.round((totalMinutes / 60) * 100) / 100;
     setIsSaving(true);
     setError('');
     try {
-      await onSave({ projectId, description, date, billable });
+      await onSave({ projectId, description, date, billable, hours });
     } catch {
       setError('Fehler beim Speichern. Bitte erneut versuchen.');
     } finally {
@@ -97,11 +108,39 @@ function StopModal({
   return (
     <Modal isOpen={isOpen} onClose={onCancel} title="Zeiteintrag speichern" size="sm">
       <div className="space-y-4">
-        {/* Elapsed time display */}
-        <div className="text-center bg-slate-50 rounded-lg py-4">
-          <p className="text-xs text-text-secondary mb-1">Erfasste Zeit</p>
-          <p className="text-3xl font-mono font-semibold text-text-primary tabular-nums">
-            {formatSeconds(totalSeconds)}
+        {/* Editable time */}
+        <div className="bg-slate-50 rounded-lg px-4 py-3">
+          <p className="text-xs text-text-secondary mb-2">Erfasste Zeit (anpassbar)</p>
+          <div className="flex items-center gap-2">
+            <div className="flex-1">
+              <label className="block text-xs text-text-secondary mb-1">Stunden</label>
+              <input
+                type="number"
+                min={0}
+                max={23}
+                value={editHours}
+                onChange={(e) => setEditHours(Math.max(0, Math.floor(Number(e.target.value))))}
+                className="input w-full text-center text-lg font-mono font-semibold"
+              />
+            </div>
+            <span className="text-2xl font-mono text-text-secondary mt-4">:</span>
+            <div className="flex-1">
+              <label className="block text-xs text-text-secondary mb-1">Minuten</label>
+              <input
+                type="number"
+                min={0}
+                max={59}
+                value={editMinutes}
+                onChange={(e) => {
+                  const val = Math.max(0, Math.min(59, Math.floor(Number(e.target.value))));
+                  setEditMinutes(val);
+                }}
+                className="input w-full text-center text-lg font-mono font-semibold"
+              />
+            </div>
+          </div>
+          <p className="text-xs text-text-secondary mt-2 text-right">
+            = {(Math.round(((editHours * 60 + editMinutes) / 60) * 100) / 100).toFixed(2)} Std.
           </p>
         </div>
 
@@ -361,6 +400,7 @@ export function TimerButton() {
     description: string;
     date: string;
     billable: boolean;
+    hours: number;
   }) => {
     if (!selectedCompany) throw new Error('Keine Firma ausgewählt');
 
@@ -377,7 +417,7 @@ export function TimerButton() {
       snapshotSource = rateData[0].source as typeof snapshotSource;
     }
 
-    const hours = Math.round((frozenSeconds / 3600) * 100) / 100;
+    const hours = data.hours;
 
     const { error } = await supabase.from('time_entries').insert({
       company_id: selectedCompany.id,
