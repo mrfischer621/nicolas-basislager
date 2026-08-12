@@ -19,6 +19,9 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# --- Supabase CLI (lokaler Verknuepfungs-State) ---
+supabase/.temp
+
 # --- OS Files ---
 .DS_Store
 
