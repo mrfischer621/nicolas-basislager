@@ -7,7 +7,7 @@ import QuoteTable from '../components/QuoteTable';
 import QuoteToInvoiceModal from '../components/QuoteToInvoiceModal';
 import Modal from '../components/Modal';
 import PdfPreviewModal from '../components/PdfPreviewModal';
-import { downloadQuotePDF, getQuotePdfBlobUrl } from '../utils/pdfGenerator';
+import { downloadQuotePDF, getQuotePdfBlobUrl } from '../utils/pdfLazy';
 import { validateQuoteData } from '../utils/quoteValidation';
 import { canEditQuote, getEditBlockedReason } from '../utils/quoteUtils';
 import { useCompany } from '../context/CompanyContext';

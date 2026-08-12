@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { Trash2, Plus, AlertTriangle, ChevronDown, ChevronUp, Clock } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import type { Invoice, InvoiceItem, Customer, Project, Product } from '../lib/supabase';
@@ -6,7 +6,8 @@ import { useCompany } from '../context/CompanyContext';
 import { shouldWarnOnEdit, getEditWarningMessage } from '../utils/invoiceUtils';
 import { roundRappen, sumRappen } from '../utils/money';
 import TimeEntryImportModal from './TimeEntryImportModal';
-import RichTextEditor from './RichTextEditor';
+// TipTap ist schwer und wird nur im Positions-Editor gebraucht -> erst bei Bedarf laden
+const RichTextEditor = lazy(() => import('./RichTextEditor'));
 
 /** Returns true when an HTML string (or plain string) has no visible text content. */
 function isHtmlEmpty(html: string): boolean {
@@ -699,11 +700,17 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
                       <span className="ml-1 font-normal text-gray-400">(Text auswählen für Formatierung)</span>
                     </label>
                   )}
-                  <RichTextEditor
-                    value={item.description}
-                    onChange={(html) => handleItemChange(index, 'description', html)}
-                    placeholder="Beschreibung der Position..."
-                  />
+                  <Suspense fallback={
+                    <div className="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-400">
+                      Editor wird geladen…
+                    </div>
+                  }>
+                    <RichTextEditor
+                      value={item.description}
+                      onChange={(html) => handleItemChange(index, 'description', html)}
+                      placeholder="Beschreibung der Position..."
+                    />
+                  </Suspense>
                 </div>
               </div>
             ))}

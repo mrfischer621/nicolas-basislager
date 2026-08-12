@@ -23,7 +23,7 @@ let PDF_FONT = 'helvetica';
 // TYPES
 // ============================================================================
 
-interface InvoiceData {
+export interface InvoiceData {
   invoice: Invoice;
   items: InvoiceItem[];
   customer: Customer;
@@ -35,7 +35,7 @@ interface InvoiceData {
   logoBase64?: string | null;
 }
 
-interface QuoteData {
+export interface QuoteData {
   quote: Quote;
   items: QuoteItem[];
   customer: Customer;

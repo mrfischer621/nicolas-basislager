@@ -6,7 +6,7 @@ import InvoiceForm from '../components/InvoiceForm';
 import InvoiceTable from '../components/InvoiceTable';
 import Modal from '../components/Modal';
 import PdfPreviewModal from '../components/PdfPreviewModal';
-import { downloadInvoicePDF, getInvoicePdfBlobUrl } from '../utils/pdfGenerator';
+import { downloadInvoicePDF, getInvoicePdfBlobUrl } from '../utils/pdfLazy';
 import { validateInvoiceData } from '../utils/invoiceValidation';
 import { canEditInvoice, getEditBlockedReason } from '../utils/invoiceUtils';
 import { useCompany } from '../context/CompanyContext';

@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { supabase } from '../lib/supabase';
 import type { TimeEntry, TimeEntryWithStatus, ManualTimeEntryStatus, Project, Customer } from '../lib/supabase';
 import TimeEntryForm from '../components/TimeEntryForm';
 import TimeEntryTable from '../components/TimeEntryTable';
-import TimeReporting from '../components/TimeReporting';
+// Recharts ist schwer und nur im Reporting-Tab noetig -> erst bei Bedarf laden
+const TimeReporting = lazy(() => import('../components/TimeReporting'));
 import Modal from '../components/Modal';
 import { useCompany } from '../context/CompanyContext';
 import { Plus, Calendar, Layers, ClipboardList, BarChart3, Filter, X } from 'lucide-react';
@@ -650,7 +651,13 @@ export default function Zeiterfassung() {
 
       {/* Tab Content: Reporting */}
       {activeTab === 'reporting' && (
-        <TimeReporting entries={entries} projects={projects} />
+        <Suspense fallback={
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <p className="text-gray-500 text-center">Auswertung wird geladen…</p>
+          </div>
+        }>
+          <TimeReporting entries={entries} projects={projects} />
+        </Suspense>
       )}
 
       {/* Modal */}
