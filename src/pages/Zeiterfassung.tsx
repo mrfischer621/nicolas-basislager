@@ -1,14 +1,16 @@
 import { useState, useEffect, useRef, lazy, Suspense } from 'react';
+import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
 import type { TimeEntry, TimeEntryWithStatus, ManualTimeEntryStatus, Project, Customer } from '../lib/supabase';
 import TimeEntryForm from '../components/TimeEntryForm';
 import TimeEntryTable from '../components/TimeEntryTable';
-// Recharts ist schwer und nur im Reporting-Tab noetig -> erst bei Bedarf laden
-const TimeReporting = lazy(() => import('../components/TimeReporting'));
 import Modal from '../components/Modal';
 import { useCompany } from '../context/CompanyContext';
 import { Plus, Calendar, Layers, ClipboardList, BarChart3, Filter, X } from 'lucide-react';
 import { getWeek, getYear, parseISO } from 'date-fns';
+
+// Recharts ist schwer und nur im Reporting-Tab noetig -> erst bei Bedarf laden
+const TimeReporting = lazy(() => import('../components/TimeReporting'));
 
 type GroupingMode = 'date' | 'week';
 type TabMode = 'erfassung' | 'reporting';
@@ -254,7 +256,7 @@ export default function Zeiterfassung() {
       await fetchData();
     } catch (err) {
       console.error('Error quick adding time entry:', err);
-      alert('Fehler beim Speichern des Zeiteintrags.');
+      toast.error('Fehler beim Speichern des Zeiteintrags.');
     } finally {
       setIsQuickAdding(false);
     }
@@ -278,7 +280,7 @@ export default function Zeiterfassung() {
       await fetchData();
     } catch (err) {
       console.error('Error deleting time entry:', err);
-      alert('Fehler beim Löschen des Zeiteintrags.');
+      toast.error('Fehler beim Löschen des Zeiteintrags.');
     }
   };
 
@@ -309,7 +311,7 @@ export default function Zeiterfassung() {
     if (error) {
       console.error('Error updating time entry status:', error);
       setEntries(previous);
-      alert('Status konnte nicht geändert werden.');
+      toast.error('Status konnte nicht geändert werden.');
     }
   };
 

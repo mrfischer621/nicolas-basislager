@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import toast from 'react-hot-toast';
 import { Upload, X, FileText, Image } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useCompany } from '../context/CompanyContext';
@@ -169,12 +170,12 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
       // Validate file type
       const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
       if (!allowedTypes.includes(file.type)) {
-        alert('Bitte wählen Sie eine PDF- oder Bilddatei (JPG, PNG, WebP).');
+        toast.error('Bitte wählen Sie eine PDF- oder Bilddatei (JPG, PNG, WebP).');
         return;
       }
       // Validate file size (max 10MB)
       if (file.size > 10 * 1024 * 1024) {
-        alert('Die Datei darf maximal 10 MB gross sein.');
+        toast.error('Die Datei darf maximal 10 MB gross sein.');
         return;
       }
       setReceiptFile(file);
@@ -212,7 +213,7 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
       return filePath;
     } catch (error) {
       console.error('Error uploading receipt:', error);
-      alert('Fehler beim Hochladen des Belegs.');
+      toast.error('Fehler beim Hochladen des Belegs.');
       return existingReceiptUrl;
     } finally {
       setUploadingReceipt(false);
@@ -400,7 +401,7 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
                               .createSignedUrl(existingReceiptUrl, 60);
                             if (error) {
                               console.error('Error creating signed URL:', error);
-                              alert('Fehler beim Öffnen des Belegs.');
+                              toast.error('Fehler beim Öffnen des Belegs.');
                               return;
                             }
                             if (data?.signedUrl) {

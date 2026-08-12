@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import type { Opportunity, PipelineStage, Customer } from '../lib/supabase';
@@ -179,11 +180,11 @@ export default function Sales() {
 
       if (error) throw error;
 
-      alert('Interessent wurde erfolgreich als Kunde angelegt!');
+      toast.error('Interessent wurde erfolgreich als Kunde angelegt!');
       await fetchData();
     } catch (err) {
       console.error('Error converting prospect:', err);
-      alert('Fehler beim Anlegen des Kunden. Bitte versuchen Sie es erneut.');
+      toast.error('Fehler beim Anlegen des Kunden. Bitte versuchen Sie es erneut.');
     }
   };
 
@@ -222,7 +223,7 @@ export default function Sales() {
       await fetchData();
     } catch (err) {
       console.error('Error deleting opportunity:', err);
-      alert('Fehler beim Löschen des Deals.');
+      toast.error('Fehler beim Löschen des Deals.');
     }
   };
 
@@ -246,7 +247,7 @@ export default function Sales() {
       if (error) throw error;
     } catch (err) {
       console.error('Error toggling lost status:', err);
-      alert('Fehler beim Aktualisieren des Status.');
+      toast.error('Fehler beim Aktualisieren des Status.');
       await fetchData();
     }
   };
@@ -272,7 +273,7 @@ export default function Sales() {
       );
     } catch (err) {
       console.error('Error renaming stage:', err);
-      alert('Fehler beim Umbenennen der Spalte.');
+      toast.error('Fehler beim Umbenennen der Spalte.');
       await fetchData();
     }
   };
@@ -340,7 +341,7 @@ export default function Sales() {
         if (error) throw error;
       } catch (err) {
         console.error('Error moving opportunity:', err);
-        alert('Fehler beim Verschieben des Deals.');
+        toast.error('Fehler beim Verschieben des Deals.');
         // Revert on error
         await fetchData();
       }

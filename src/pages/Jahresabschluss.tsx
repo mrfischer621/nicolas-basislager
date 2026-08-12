@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { useYearEnd } from '../hooks/useYearEnd';
 import type { Asset, PrivateShare, YearEndClosingData } from '../lib/supabase';
 
@@ -113,9 +114,9 @@ export default function Jahresabschluss() {
   const handleSave = async () => {
     try {
       await saveClosing(formData);
-      alert('Jahresabschluss erfolgreich gespeichert!');
+      toast.error('Jahresabschluss erfolgreich gespeichert!');
     } catch (err) {
-      alert('Fehler beim Speichern');
+      toast.error('Fehler beim Speichern');
     }
   };
 
@@ -123,9 +124,9 @@ export default function Jahresabschluss() {
     if (confirm('Möchten Sie diesen Jahresabschluss wirklich abschliessen? Er kann danach nicht mehr bearbeitet werden.')) {
       try {
         await lockClosing();
-        alert('Jahresabschluss abgeschlossen!');
+        toast.error('Jahresabschluss abgeschlossen!');
       } catch (err) {
-        alert('Fehler beim Abschliessen');
+        toast.error('Fehler beim Abschliessen');
       }
     }
   };
@@ -134,15 +135,15 @@ export default function Jahresabschluss() {
     if (confirm('Möchten Sie diesen Jahresabschluss wieder öffnen?')) {
       try {
         await unlockClosing();
-        alert('Jahresabschluss wieder geöffnet!');
+        toast.error('Jahresabschluss wieder geöffnet!');
       } catch (err) {
-        alert('Fehler beim Öffnen');
+        toast.error('Fehler beim Öffnen');
       }
     }
   };
 
   const handleExportPDF = () => {
-    alert('PDF-Export kommt in Phase 3!');
+    toast.error('PDF-Export kommt in Phase 3!');
   };
 
   // ============================================

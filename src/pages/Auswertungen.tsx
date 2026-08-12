@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
+import toast from 'react-hot-toast';
 import { Calendar, BarChart3, FileText, Download, AlertCircle } from 'lucide-react';
 import {
   LineChart,
@@ -224,7 +225,7 @@ export default function Auswertungen() {
   // CSV Export function
   const handleExportCSV = async () => {
     if (!rawTransactions.length) {
-      alert('Keine Daten zum Exportieren vorhanden.');
+      toast.error('Keine Daten zum Exportieren vorhanden.');
       return;
     }
 

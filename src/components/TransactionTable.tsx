@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { createPortal } from 'react-dom';
 import { ChevronLeft, ChevronRight, Eye, MoreVertical, Paperclip } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -273,7 +274,7 @@ export default function TransactionTable({ transactions, customers, projects, on
                             .createSignedUrl(transaction.receipt_url!, 60);
                           if (error) {
                             console.error('Error creating signed URL:', error);
-                            alert('Fehler beim Öffnen des Belegs.');
+                            toast.error('Fehler beim Öffnen des Belegs.');
                             return;
                           }
                           if (data?.signedUrl) {
