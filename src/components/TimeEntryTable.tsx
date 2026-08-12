@@ -387,6 +387,12 @@ export default function TimeEntryTable({
             active: manual === 'verrechnet',
           },
           {
+            value: 'bezahlt',
+            label: 'Bezahlt',
+            hint: 'Zahlung ist eingegangen',
+            active: manual === 'bezahlt',
+          },
+          {
             value: null,
             label: 'Automatisch',
             hint: `Aus der Rechnung ableiten (${statusConfig[autoStatus]?.label ?? 'Offen'})`,

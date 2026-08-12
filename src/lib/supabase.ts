@@ -125,8 +125,9 @@ export interface TimeEntry {
   created_at: string;
 }
 
-// Manueller Status-Override (siehe 20260812_time_entries_manual_status.sql)
-export type ManualTimeEntryStatus = 'offen' | 'verrechnet';
+// Manueller Status-Override (siehe 20260812_time_entries_manual_status.sql
+// und 20260812_manual_status_bezahlt.sql)
+export type ManualTimeEntryStatus = 'offen' | 'verrechnet' | 'bezahlt';
 
 // Extended TimeEntry with dynamic status from view_time_entries_with_status
 export interface TimeEntryWithStatus extends TimeEntry {
