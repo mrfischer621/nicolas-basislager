@@ -7,6 +7,7 @@ import ProductForm from '../components/ProductForm';
 import ProductTable from '../components/ProductTable';
 import Modal from '../components/Modal';
 import { useCompany } from '../context/CompanyContext';
+import { useProducts, useInvalidateData } from '../hooks/queries';
 import { Plus, Layers } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -16,19 +17,28 @@ export default function Produkte() {
   const confirmDialog = useConfirm();
   const { selectedCompany } = useCompany();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Alle Produkte einmal laden und zwischenspeichern; der Filter greift
+  // clientseitig, damit ein Filterwechsel keine neue Abfrage ausloest
+  const { data: allProducts = [], isLoading: loading, error: queryError } = useProducts();
+  const invalidate = useInvalidateData();
+  const error = queryError ? 'Fehler beim Laden der Produkte' : null;
   const [editingProduct, setEditingProduct] = useState<Product | undefined>();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filter, setFilter] = useState<FilterType>('aktiv');
   const [groupByCategory, setGroupByCategory] = useState(false);
 
-  useEffect(() => {
-    if (selectedCompany) {
-      fetchProducts();
-    }
-  }, [selectedCompany, filter]);
+  // Filter clientseitig - die Liste liegt bereits vollstaendig im Cache.
+  // Muss vor dem useEffect stehen, der products als Abhaengigkeit nutzt.
+  const products = useMemo(() => {
+    if (filter === 'aktiv') return allProducts.filter(p => p.is_active);
+    if (filter === 'archiviert') return allProducts.filter(p => !p.is_active);
+    return allProducts;
+  }, [allProducts, filter]);
+
+  /** Nach einer Aenderung den Cache verwerfen, damit neu geladen wird */
+  const fetchProducts = async () => {
+    await invalidate.products();
+  };
 
   // Handle query parameter for opening specific product
   useEffect(() => {
@@ -41,41 +51,6 @@ export default function Produkte() {
       }
     }
   }, [searchParams, products]);
-
-  const fetchProducts = async () => {
-    if (!selectedCompany) return;
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      // Clear existing data to force React re-render
-      setProducts([]);
-
-      let query = supabase
-        .from('products')
-        .select('*')
-        .eq('company_id', selectedCompany.id);
-
-      // Apply filter
-      if (filter === 'aktiv') {
-        query = query.eq('is_active', true);
-      } else if (filter === 'archiviert') {
-        query = query.eq('is_active', false);
-      }
-
-      const { data, error: fetchError } = await query.order('name', { ascending: true });
-
-      if (fetchError) throw fetchError;
-
-      setProducts(data || []);
-    } catch (err) {
-      console.error('Error fetching products:', err);
-      setError('Fehler beim Laden der Produkte');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSubmit = async (data: Omit<Product, 'id' | 'created_at' | 'updated_at'>) => {
     if (!selectedCompany) return;
@@ -106,7 +81,7 @@ export default function Produkte() {
       await fetchProducts();
     } catch (err) {
       console.error('Error saving product:', err);
-      setError('Fehler beim Speichern des Produkts');
+      toast.error('Fehler beim Speichern des Produkts');
       throw err;
     }
   };
