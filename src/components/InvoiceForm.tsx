@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 import type { Invoice, InvoiceItem, Customer, Project, Product } from '../lib/supabase';
 import { useCompany } from '../context/CompanyContext';
 import { shouldWarnOnEdit, getEditWarningMessage } from '../utils/invoiceUtils';
-import { roundRappen, sumRappen } from '../utils/money';
+import { calculateInvoiceTotals } from '../utils/invoiceTotals';
 import TimeEntryImportModal from './TimeEntryImportModal';
 // TipTap ist schwer und wird nur im Positions-Editor gebraucht -> erst bei Bedarf laden
 const RichTextEditor = lazy(() => import('./RichTextEditor'));
@@ -148,72 +148,33 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
     ? projects.filter((p) => p.customer_id === customerId)
     : [];
 
+  // Die eigentliche Rechenlogik liegt in utils/invoiceTotals.ts, damit sie
+  // testbar ist. Hier werden nur die Formularfelder (Strings) uebersetzt.
   const calculateTotals = () => {
-    const vatEnabled = selectedCompany?.vat_enabled || false;
-
-    // Calculate line results with per-line VAT
-    const lineResults = items.map(item => {
-      const qty = parseFloat(item.quantity) || 0;
-      const price = parseFloat(item.unit_price) || 0;
-      const lineDiscount = parseFloat(item.discount_percent) || 0;
-
-      // Line NETTO (after line discount)
-      const lineTotal = qty * price;
-      const lineDiscountAmount = lineTotal * (lineDiscount / 100);
-      const lineNetto = lineTotal - lineDiscountAmount;
-
-      // Line VAT (only if VAT enabled)
-      let lineVatRate = 0;
-      if (vatEnabled) {
-        // Use line-specific VAT rate, or company default if empty
-        const itemVatRate = parseFloat(item.vat_rate);
-        lineVatRate = !isNaN(itemVatRate) && item.vat_rate.trim() !== ''
-          ? itemVatRate
-          : (selectedCompany?.default_vat_rate || 0);
-      }
-      // Auf Rappen runden, sobald der Zeilenbetrag feststeht - nicht erst
-      // bei der Anzeige. Sonst weichen angezeigte Zeilen von der Summe ab.
-      const lineVatAmount = roundRappen(lineNetto * (lineVatRate / 100));
-
-      return { lineNetto: roundRappen(lineNetto), lineVatAmount, lineVatRate };
+    const result = calculateInvoiceTotals({
+      items: items.map(item => {
+        const parsedVatRate = parseFloat(item.vat_rate);
+        return {
+          quantity: parseFloat(item.quantity) || 0,
+          unitPrice: parseFloat(item.unit_price) || 0,
+          discountPercent: parseFloat(item.discount_percent) || 0,
+          // Leeres Feld bedeutet "Firmenstandard verwenden"
+          vatRate: !isNaN(parsedVatRate) && item.vat_rate.trim() !== '' ? parsedVatRate : null,
+        };
+      }),
+      vatEnabled: selectedCompany?.vat_enabled || false,
+      defaultVatRate: selectedCompany?.default_vat_rate || 0,
+      discountType,
+      discountValue: parseFloat(discountValue) || 0,
     });
 
-    // Zwischensumme aus den bereits gerundeten Zeilen
-    const itemsSubtotal = sumRappen(lineResults.map(line => line.lineNetto));
-
-    // Apply total discount to subtotal (NEW SYSTEM: percent or fixed)
-    const discountVal = parseFloat(discountValue) || 0;
-    let totalDiscountAmount = 0;
-
-    if (discountType === 'percent') {
-      // Percentage discount (0-100%)
-      totalDiscountAmount = itemsSubtotal * (discountVal / 100);
-    } else {
-      // Fixed discount (CHF amount)
-      totalDiscountAmount = discountVal;
-    }
-
-    // Ensure discount doesn't exceed subtotal
-    totalDiscountAmount = roundRappen(Math.min(totalDiscountAmount, itemsSubtotal));
-    const subtotalAfterDiscount = roundRappen(itemsSubtotal - totalDiscountAmount);
-
-    // Adjust VAT proportionally after total discount
-    const discountFactor = itemsSubtotal > 0 ? subtotalAfterDiscount / itemsSubtotal : 1;
-    const lineVatAmounts = lineResults.map(line => roundRappen(line.lineVatAmount * discountFactor));
-
-    // MwSt. aus den gerundeten Zeilenbetraegen, damit die Summe der Zeilen
-    // exakt dem ausgewiesenen MwSt.-Betrag entspricht
-    const vat_amount = sumRappen(lineVatAmounts);
-
-    // Total aus zwei bereits gerundeten Werten -> Zwischensumme + MwSt. = Total
-    const total = roundRappen(subtotalAfterDiscount + vat_amount);
-
+    // Feldname vat_amount beibehalten, damit die Aufrufstellen unveraendert bleiben
     return {
-      subtotal: itemsSubtotal,
-      discountAmount: totalDiscountAmount,
-      vat_amount,
-      total,
-      lineVatAmounts,
+      subtotal: result.subtotal,
+      discountAmount: result.discountAmount,
+      vat_amount: result.vatAmount,
+      total: result.total,
+      lineVatAmounts: result.lineVatAmounts,
     };
   };
 
