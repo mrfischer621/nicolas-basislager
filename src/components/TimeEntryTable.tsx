@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { Pencil, Trash2, Check, ChevronDown, Wand2 } from 'lucide-react';
 import type { TimeEntry, TimeEntryWithStatus, ManualTimeEntryStatus, Project } from '../lib/supabase';
 import { getWeek, parseISO, format } from 'date-fns';
@@ -320,10 +320,12 @@ export default function TimeEntryTable({
             {groupingMode === 'week' && groupedEntries ? (
               // Grouped by week
               Object.entries(groupedEntries).map(([weekKey, weekEntries]) => (
-                <>
+                // key ist zwingend: ohne ihn kann React die Wochenbloecke beim
+                // Umsortieren oder Filtern falsch wiederverwenden
+                <Fragment key={weekKey}>
                   {renderGroupHeader(weekKey, weekEntries)}
                   {weekEntries.map(entry => renderTableRow(entry))}
-                </>
+                </Fragment>
               ))
             ) : (
               // Flat list by date

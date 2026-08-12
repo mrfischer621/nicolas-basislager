@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { BentoSidebar } from './BentoSidebar';
 import { BentoHeader } from './BentoHeader';
 import { useCompany } from '../context/CompanyContext';
+import ErrorBoundary from './ErrorBoundary';
 
 /**
  * BentoLayout - Swiss Modern App Shell 2026
@@ -47,8 +48,13 @@ export default function BentoLayout() {
         {/* Main Content - Fills remaining height */}
         <main className="flex-1 min-h-0 overflow-hidden">
           <div className="h-full px-6 py-6 overflow-auto">
-            {/* CRITICAL FIX: Key prop forces complete remount when company changes */}
-            <Outlet key={selectedCompany?.id || 'no-company'} />
+            {/* Faengt Render-Fehler einer Seite ab, statt die ganze App
+                durch eine weisse Seite zu ersetzen. Der resetKey loest den
+                Fehler beim Navigieren auf eine andere Seite wieder auf. */}
+            <ErrorBoundary resetKey={location.pathname}>
+              {/* CRITICAL FIX: Key prop forces complete remount when company changes */}
+              <Outlet key={selectedCompany?.id || 'no-company'} />
+            </ErrorBoundary>
           </div>
         </main>
       </div>

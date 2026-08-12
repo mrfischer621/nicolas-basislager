@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import type { Quote, QuoteItem, Customer, Project, Product } from '../lib/supabase';
 import { useCompany } from '../context/CompanyContext';
 import { shouldWarnOnEdit, getEditWarningMessage } from '../utils/quoteUtils';
+import { roundRappen, sumRappen } from '../utils/money';
 
 /** Round to nearest 5 Rappen */
 function swissRound(amount: number): number {
@@ -139,12 +140,13 @@ export default function QuoteForm({
     : [];
 
   const calculateTotals = () => {
-    // Step 1: Calculate subtotal (sum of all line items)
-    const subtotal = items.reduce((sum, item) => {
+    // Step 1: Zwischensumme aus auf Rappen gerundeten Zeilenbetraegen,
+    // damit die angezeigten Zeilen exakt die angezeigte Summe ergeben
+    const subtotal = sumRappen(items.map(item => {
       const qty = parseFloat(item.quantity) || 0;
       const price = parseFloat(item.unit_price) || 0;
-      return sum + (qty * price);
-    }, 0);
+      return roundRappen(qty * price);
+    }));
 
     // Step 2: Calculate discount amount
     const discountVal = parseFloat(discountValue) || 0;
@@ -159,17 +161,17 @@ export default function QuoteForm({
     }
 
     // Ensure discount doesn't exceed subtotal
-    discountAmount = Math.min(discountAmount, subtotal);
+    discountAmount = roundRappen(Math.min(discountAmount, subtotal));
 
     // Step 3: Net after discount
-    const nettoNachRabatt = subtotal - discountAmount;
+    const nettoNachRabatt = roundRappen(subtotal - discountAmount);
 
     // Step 4: VAT on discounted amount (only if VAT enabled)
     const vatEnabled = selectedCompany?.vat_enabled || false;
-    const vat_amount = vatEnabled ? nettoNachRabatt * (parseFloat(vatRate) / 100) : 0;
+    const vat_amount = vatEnabled ? roundRappen(nettoNachRabatt * (parseFloat(vatRate) / 100)) : 0;
 
-    // Step 5: Grand total
-    const total = nettoNachRabatt + vat_amount;
+    // Step 5: Total aus gerundeten Werten -> Netto + MwSt. = Total
+    const total = roundRappen(nettoNachRabatt + vat_amount);
 
     return { subtotal, discountAmount, vat_amount, total };
   };

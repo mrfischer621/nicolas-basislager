@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import type { Invoice, InvoiceItem, Customer, Project, Product } from '../lib/supabase';
 import { useCompany } from '../context/CompanyContext';
 import { shouldWarnOnEdit, getEditWarningMessage } from '../utils/invoiceUtils';
+import { roundRappen, sumRappen } from '../utils/money';
 import TimeEntryImportModal from './TimeEntryImportModal';
 import RichTextEditor from './RichTextEditor';
 
@@ -169,13 +170,15 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
           ? itemVatRate
           : (selectedCompany?.default_vat_rate || 0);
       }
-      const lineVatAmount = lineNetto * (lineVatRate / 100);
+      // Auf Rappen runden, sobald der Zeilenbetrag feststeht - nicht erst
+      // bei der Anzeige. Sonst weichen angezeigte Zeilen von der Summe ab.
+      const lineVatAmount = roundRappen(lineNetto * (lineVatRate / 100));
 
-      return { lineNetto, lineVatAmount, lineVatRate };
+      return { lineNetto: roundRappen(lineNetto), lineVatAmount, lineVatRate };
     });
 
-    // Sum all line NETTOs = subtotal
-    const itemsSubtotal = lineResults.reduce((sum, line) => sum + line.lineNetto, 0);
+    // Zwischensumme aus den bereits gerundeten Zeilen
+    const itemsSubtotal = sumRappen(lineResults.map(line => line.lineNetto));
 
     // Apply total discount to subtotal (NEW SYSTEM: percent or fixed)
     const discountVal = parseFloat(discountValue) || 0;
@@ -190,23 +193,26 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
     }
 
     // Ensure discount doesn't exceed subtotal
-    totalDiscountAmount = Math.min(totalDiscountAmount, itemsSubtotal);
-    const subtotalAfterDiscount = itemsSubtotal - totalDiscountAmount;
+    totalDiscountAmount = roundRappen(Math.min(totalDiscountAmount, itemsSubtotal));
+    const subtotalAfterDiscount = roundRappen(itemsSubtotal - totalDiscountAmount);
 
     // Adjust VAT proportionally after total discount
     const discountFactor = itemsSubtotal > 0 ? subtotalAfterDiscount / itemsSubtotal : 1;
-    const totalVatBeforeDiscount = lineResults.reduce((sum, line) => sum + line.lineVatAmount, 0);
-    const vat_amount = totalVatBeforeDiscount * discountFactor;
+    const lineVatAmounts = lineResults.map(line => roundRappen(line.lineVatAmount * discountFactor));
 
-    // Grand total = discounted NETTO + VAT
-    const total = subtotalAfterDiscount + vat_amount;
+    // MwSt. aus den gerundeten Zeilenbetraegen, damit die Summe der Zeilen
+    // exakt dem ausgewiesenen MwSt.-Betrag entspricht
+    const vat_amount = sumRappen(lineVatAmounts);
+
+    // Total aus zwei bereits gerundeten Werten -> Zwischensumme + MwSt. = Total
+    const total = roundRappen(subtotalAfterDiscount + vat_amount);
 
     return {
       subtotal: itemsSubtotal,
       discountAmount: totalDiscountAmount,
       vat_amount,
       total,
-      lineVatAmounts: lineResults.map(line => line.lineVatAmount * discountFactor),
+      lineVatAmounts,
     };
   };
 
