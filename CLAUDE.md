@@ -236,9 +236,32 @@ VITE_SUPABASE_ANON_KEY=your-anon-key
 
 ## Testing
 
-**Current State:** No automated testing framework configured
-- Manual testing only
-- ESLint for code quality checks
+**Vitest** (seit 12.08.2026). Ausführen mit `npm test`, im Watch-Modus mit
+`npm run test:watch`. Konfiguration in `vite.config.ts` (`environment: 'node'`,
+nur `src/**/*.test.ts`).
+
+Abgedeckt sind die Stellen, an denen ein Fehler Geld kostet:
+
+- `src/utils/money.test.ts` — Rundung auf Rappen
+- `src/utils/invoiceTotals.test.ts` — Betragsberechnung, Rabatte, MwSt.
+- `src/utils/swissqr.test.ts` — QR-Referenz, IBAN, Latin-1-Konformität
+
+**Geldbeträge:** Immer über `roundRappen`/`sumRappen` aus `src/utils/money.ts`
+rechnen und **auf Rappen runden, sobald ein Betrag feststeht** — nicht erst bei
+der Anzeige. Summen aus bereits gerundeten Teilbeträgen bilden. Sonst weicht
+die Summe der angezeigten Zeilen vom ausgewiesenen Total ab. Die
+Rechenlogik liegt bewusst als reine Funktion in `src/utils/invoiceTotals.ts`,
+damit sie testbar bleibt — nicht als Closure im Formular.
+
+UI-Verhalten wird weiterhin manuell geprüft; ESLint für Codequalität.
+
+## Audit-Stand
+
+`AUDIT_2026-08-12.md` im Wurzelverzeichnis hält den vollständigen Befund des
+Codebase-Audits fest: was behoben ist, was auf dem Branch `refactor/audit-rest`
+liegt und was offen ist. **Vor grösseren Umbauten dort hineinschauen** — es
+enthält mehrere Fallstricke, die sonst erneut auflaufen (RLS von
+`user_companies`, Migrationsreihenfolge, generierte Supabase-Typen).
 
 ## Common Development Tasks
 
