@@ -91,9 +91,13 @@ export default function TimeEntryForm({ onSubmit, editingEntry, onCancelEdit, pr
         rate: parseFloat(rate),
         snapshot_source: rateSource,
         description: description || null,
-        invoiced: false,
         billable,
-        invoice_id: null,
+        // Verknüpfung und Status-Override beim Bearbeiten unangetastet lassen.
+        // Früher wurde hier hart invoice_id: null gesetzt - das hat jeden bereits
+        // verrechneten Eintrag beim Nachbearbeiten wieder auf "offen" zurückgeworfen.
+        invoiced: editingEntry?.invoiced ?? false,
+        invoice_id: editingEntry?.invoice_id ?? null,
+        manual_status: editingEntry?.manual_status ?? null,
       });
       resetForm();
     } catch (error) {

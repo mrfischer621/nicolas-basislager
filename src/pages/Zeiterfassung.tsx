@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
-import type { TimeEntry, TimeEntryWithStatus, Project, Customer } from '../lib/supabase';
+import type { TimeEntry, TimeEntryWithStatus, ManualTimeEntryStatus, Project, Customer } from '../lib/supabase';
 import TimeEntryForm from '../components/TimeEntryForm';
 import TimeEntryTable from '../components/TimeEntryTable';
 import TimeReporting from '../components/TimeReporting';
@@ -156,7 +156,8 @@ export default function Zeiterfassung() {
         // Map to include derived_status for compatibility
         timeEntriesData = (fallbackResult.data || []).map(entry => ({
           ...entry,
-          derived_status: entry.invoice_id ? 'verrechnet' : 'offen',
+          derived_status: entry.manual_status ?? (entry.invoice_id ? 'verrechnet' : 'offen'),
+          is_manual_status: entry.manual_status !== null,
           invoice_number: null,
           invoice_status: null,
           invoice_date: null,
@@ -235,6 +236,7 @@ export default function Zeiterfassung() {
           invoiced: false,
           billable: quickAddData.billable,
           invoice_id: null,
+          manual_status: null,
         }]);
 
       if (error) throw error;
@@ -276,6 +278,37 @@ export default function Zeiterfassung() {
     } catch (err) {
       console.error('Error deleting time entry:', err);
       alert('Fehler beim Löschen des Zeiteintrags.');
+    }
+  };
+
+  // Manueller Status-Override. null = zurück auf automatische Ableitung.
+  const handleStatusChange = async (id: string, manualStatus: ManualTimeEntryStatus | null) => {
+    const previous = entries;
+
+    // Optimistisch aktualisieren, damit das Badge sofort reagiert
+    setEntries(prev =>
+      prev.map(entry => {
+        if (entry.id !== id) return entry;
+        const derived = manualStatus
+          ?? (entry.invoice_id ? entry.invoice_status ?? 'verrechnet' : 'offen');
+        return {
+          ...entry,
+          manual_status: manualStatus,
+          is_manual_status: manualStatus !== null,
+          derived_status: derived,
+        };
+      })
+    );
+
+    const { error } = await supabase
+      .from('time_entries')
+      .update({ manual_status: manualStatus })
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error updating time entry status:', error);
+      setEntries(previous);
+      alert('Status konnte nicht geändert werden.');
     }
   };
 
@@ -607,6 +640,7 @@ export default function Zeiterfassung() {
               projects={projects}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              onStatusChange={handleStatusChange}
               groupingMode={groupingMode}
               groupedEntries={groupedEntries}
             />

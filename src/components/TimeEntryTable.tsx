@@ -1,5 +1,6 @@
-import { Pencil, Trash2 } from 'lucide-react';
-import type { TimeEntry, TimeEntryWithStatus, Project } from '../lib/supabase';
+import { useEffect, useRef, useState } from 'react';
+import { Pencil, Trash2, Check, ChevronDown, Wand2 } from 'lucide-react';
+import type { TimeEntry, TimeEntryWithStatus, ManualTimeEntryStatus, Project } from '../lib/supabase';
 import { getWeek, parseISO, format } from 'date-fns';
 
 // Extended TimeEntry with customer name from project and dynamic status
@@ -26,18 +27,67 @@ type TimeEntryTableProps = {
   projects: Project[];
   onEdit: (entry: TimeEntry) => void;
   onDelete: (id: string) => Promise<void>;
+  onStatusChange?: (id: string, manualStatus: ManualTimeEntryStatus | null) => Promise<void>;
   groupingMode?: GroupingMode;
   groupedEntries?: Record<string, TimeEntryWithCustomer[]> | null;
 };
+
+// Offener Status-Umschalter: Zeile + Bildschirmposition des Buttons
+type StatusMenuState = { entryId: string; top: number; left: number };
 
 export default function TimeEntryTable({
   entries,
   projects,
   onEdit,
   onDelete,
+  onStatusChange,
   groupingMode = 'date',
   groupedEntries,
 }: TimeEntryTableProps) {
+  const [statusMenu, setStatusMenu] = useState<StatusMenuState | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Menü schliessen bei Klick daneben, Escape oder Scrollen
+  // (das Menü ist fixed positioniert und würde sonst wegwandern)
+  useEffect(() => {
+    if (!statusMenu) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setStatusMenu(null);
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setStatusMenu(null);
+    };
+    const handleScroll = () => setStatusMenu(null);
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('scroll', handleScroll, true);
+    window.addEventListener('resize', handleScroll);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('scroll', handleScroll, true);
+      window.removeEventListener('resize', handleScroll);
+    };
+  }, [statusMenu]);
+
+  const openStatusMenu = (entryId: string, target: HTMLElement) => {
+    if (statusMenu?.entryId === entryId) {
+      setStatusMenu(null);
+      return;
+    }
+    const rect = target.getBoundingClientRect();
+    setStatusMenu({ entryId, top: rect.bottom + 4, left: rect.left });
+  };
+
+  const applyStatus = async (entryId: string, manualStatus: ManualTimeEntryStatus | null) => {
+    setStatusMenu(null);
+    await onStatusChange?.(entryId, manualStatus);
+  };
+
   const getProjectName = (projectId: string, entry: TimeEntryWithCustomer) => {
     if (entry.projectName) return entry.projectName;
     const project = projects.find((p) => p.id === projectId);
@@ -136,17 +186,41 @@ export default function TimeEntryTable({
           </span>
         </td>
         <td className="px-4 py-3 whitespace-nowrap text-center">
-          {/* Dynamic status from view - shows invoice status when linked */}
+          {/* Status aus der View: manueller Override, sonst aus der Rechnung abgeleitet */}
           {(() => {
             const status = entry.derived_status || (entry.invoice_id ? 'verrechnet' : 'offen');
             const config = statusConfig[status] || statusConfig.offen;
+            const isManual = entry.is_manual_status ?? entry.manual_status != null;
+
+            const titleParts = [
+              entry.invoice_number ? `Rechnung: ${entry.invoice_number}` : null,
+              isManual ? 'Manuell gesetzt' : null,
+              onStatusChange ? 'Klicken zum Ändern' : null,
+            ].filter(Boolean);
+
+            const badgeClasses = `inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${config.className}`;
+
+            if (!onStatusChange) {
+              return (
+                <span className={badgeClasses} title={titleParts.join(' · ') || undefined}>
+                  {config.label}
+                </span>
+              );
+            }
+
             return (
-              <span
-                className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${config.className}`}
-                title={entry.invoice_number ? `Rechnung: ${entry.invoice_number}` : undefined}
+              <button
+                type="button"
+                onClick={(e) => openStatusMenu(entry.id, e.currentTarget)}
+                className={`${badgeClasses} cursor-pointer transition hover:brightness-95 hover:ring-2 hover:ring-brand/30`}
+                title={titleParts.join(' · ')}
+                aria-haspopup="menu"
+                aria-expanded={statusMenu?.entryId === entry.id}
               >
+                {isManual && <Wand2 size={11} className="opacity-70" />}
                 {config.label}
-              </span>
+                <ChevronDown size={12} className="opacity-60" />
+              </button>
             );
           })()}
         </td>
@@ -282,6 +356,81 @@ export default function TimeEntryTable({
           </tfoot>
         </table>
       </div>
+
+      {/* Status-Umschalter. Fixed positioniert, damit ihn der horizontale
+          Scroll-Container der Tabelle nicht abschneidet. */}
+      {statusMenu && (() => {
+        const entry = entries.find(e => e.id === statusMenu.entryId);
+        if (!entry) return null;
+
+        const manual = entry.manual_status ?? null;
+        const autoStatus = entry.invoice_id
+          ? entry.invoice_status ?? 'verrechnet'
+          : 'offen';
+
+        const options: Array<{
+          value: ManualTimeEntryStatus | null;
+          label: string;
+          hint: string;
+          active: boolean;
+        }> = [
+          {
+            value: 'offen',
+            label: 'Offen',
+            hint: 'Als noch nicht verrechnet markieren',
+            active: manual === 'offen',
+          },
+          {
+            value: 'verrechnet',
+            label: 'Verrechnet',
+            hint: 'Als abgerechnet markieren',
+            active: manual === 'verrechnet',
+          },
+          {
+            value: null,
+            label: 'Automatisch',
+            hint: `Aus der Rechnung ableiten (${statusConfig[autoStatus]?.label ?? 'Offen'})`,
+            active: manual === null,
+          },
+        ];
+
+        return (
+          <div
+            ref={menuRef}
+            role="menu"
+            style={{ top: statusMenu.top, left: statusMenu.left }}
+            className="fixed z-50 w-60 rounded-lg border border-gray-200 bg-white py-1 shadow-lg"
+          >
+            <div className="px-3 py-1.5 text-xs font-medium text-gray-400 uppercase tracking-wider">
+              Status setzen
+            </div>
+            {options.map(option => (
+              <button
+                key={option.label}
+                type="button"
+                role="menuitem"
+                onClick={() => applyStatus(entry.id, option.value)}
+                className={`flex w-full items-start gap-2 px-3 py-2 text-left transition hover:bg-gray-50 ${
+                  option.active ? 'text-brand' : 'text-gray-700'
+                }`}
+              >
+                <span className="mt-0.5 w-3.5 shrink-0">
+                  {option.active && <Check size={14} />}
+                </span>
+                <span>
+                  <span className="block text-sm font-medium">{option.label}</span>
+                  <span className="block text-xs text-gray-500">{option.hint}</span>
+                </span>
+              </button>
+            ))}
+            {entry.invoice_number && (
+              <div className="mt-1 border-t border-gray-100 px-3 py-2 text-xs text-gray-500">
+                Verknüpft mit Rechnung {entry.invoice_number}
+              </div>
+            )}
+          </div>
+        );
+      })()}
     </div>
   );
 }

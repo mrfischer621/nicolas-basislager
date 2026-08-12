@@ -120,12 +120,19 @@ export interface TimeEntry {
   invoiced: boolean;
   billable: boolean; // true = verrechenbar
   invoice_id: string | null; // Reference to invoice if already invoiced
+  /** Manuelle Übersteuerung des Status. null = automatisch aus invoice_id ableiten */
+  manual_status: ManualTimeEntryStatus | null;
   created_at: string;
 }
 
+// Manueller Status-Override (siehe 20260812_time_entries_manual_status.sql)
+export type ManualTimeEntryStatus = 'offen' | 'verrechnet';
+
 // Extended TimeEntry with dynamic status from view_time_entries_with_status
 export interface TimeEntryWithStatus extends TimeEntry {
-  derived_status: 'offen' | 'entwurf' | 'versendet' | 'bezahlt' | 'überfällig';
+  derived_status: 'offen' | 'verrechnet' | 'entwurf' | 'versendet' | 'bezahlt' | 'überfällig';
+  /** true, wenn derived_status aus manual_status stammt */
+  is_manual_status: boolean;
   invoice_number: string | null;
   invoice_status: 'entwurf' | 'versendet' | 'bezahlt' | 'überfällig' | null;
   invoice_date: string | null;

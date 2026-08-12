@@ -252,8 +252,33 @@ export default function Rechnungen() {
 
         if (itemsError) throw itemsError;
 
+        // Zeiteinträge, die beim Bearbeiten dazu importiert wurden, ebenfalls verknüpfen.
+        // Ohne das blieben sie dauerhaft auf "offen", obwohl sie auf der Rechnung stehen.
+        if (timeEntryIds && timeEntryIds.length > 0) {
+          const { error: timeEntriesError } = await supabase
+            .from('time_entries')
+            .update({ invoice_id: editingInvoice.id })
+            .in('id', timeEntryIds);
+
+          if (timeEntriesError) {
+            console.error('Error linking time entries:', timeEntriesError);
+            handleCloseModal();
+            setToast({
+              type: 'success',
+              message: `Rechnung aktualisiert, aber ${timeEntryIds.length} Zeiteinträge konnten nicht verknüpft werden.`
+            });
+            await fetchData();
+            return;
+          }
+        }
+
         handleCloseModal();
-        setToast({ type: 'success', message: 'Rechnung erfolgreich aktualisiert!' });
+        setToast({
+          type: 'success',
+          message: timeEntryIds && timeEntryIds.length > 0
+            ? `Rechnung aktualisiert mit ${timeEntryIds.length} neu verknüpften Zeiteinträgen!`
+            : 'Rechnung erfolgreich aktualisiert!'
+        });
         await fetchData();
       } else {
         // CREATE MODE: Insert new invoice

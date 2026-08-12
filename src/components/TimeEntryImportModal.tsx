@@ -95,6 +95,8 @@ export default function TimeEntryImportModal({
         .eq('company_id', selectedCompany.id)
         .eq('billable', true)
         .is('invoice_id', null)
+        // Manuell als verrechnet markierte Einträge nicht erneut anbieten
+        .or('manual_status.is.null,manual_status.neq.verrechnet')
         .order('date', { ascending: true });
 
       // Filter by project's customer

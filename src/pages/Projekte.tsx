@@ -90,7 +90,7 @@ export default function Projekte() {
         // Use view if available, otherwise join with invoices
         supabase
           .from('view_time_entries_with_status')
-          .select('project_id, hours, invoice_id, invoice_status')
+          .select('project_id, hours, invoice_id, invoice_status, manual_status')
           .eq('company_id', selectedCompany.id)
           .eq('billable', true),
       ]);
@@ -104,7 +104,7 @@ export default function Projekte() {
         console.warn('View not available for open hours, using fallback:', timeEntriesResult.error.message);
         const fallbackResult = await supabase
           .from('time_entries')
-          .select('project_id, hours, invoice_id')
+          .select('project_id, hours, invoice_id, manual_status')
           .eq('company_id', selectedCompany.id)
           .eq('billable', true)
           .is('invoice_id', null);
@@ -114,11 +114,12 @@ export default function Projekte() {
       }
 
       // Calculate open hours per project
-      // "Open" = not invoiced OR invoiced but still in draft status
+      // "Open" = manueller Override, sonst: nicht verrechnet ODER nur im Rechnungsentwurf
       const openHoursMap = new Map<string, number>();
       (timeEntriesData || []).forEach((entry: any) => {
-        // Count as open if: no invoice OR invoice is draft
-        const isOpen = !entry.invoice_id || entry.invoice_status === 'entwurf';
+        const isOpen = entry.manual_status
+          ? entry.manual_status === 'offen'
+          : !entry.invoice_id || entry.invoice_status === 'entwurf';
         if (isOpen) {
           const currentHours = openHoursMap.get(entry.project_id) || 0;
           openHoursMap.set(entry.project_id, currentHours + (entry.hours || 0));
