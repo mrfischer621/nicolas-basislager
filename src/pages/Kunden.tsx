@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useConfirm } from '../context/ConfirmProvider';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import type { Customer } from '../lib/supabase';
@@ -18,6 +19,7 @@ export interface CustomerWithStats extends Customer {
 type FilterType = 'alle' | 'aktiv' | 'archiviert';
 
 export default function Kunden() {
+  const confirmDialog = useConfirm();
   const navigate = useNavigate();
   const { selectedCompany } = useCompany();
   const [customers, setCustomers] = useState<CustomerWithStats[]>([]);
@@ -191,7 +193,7 @@ export default function Kunden() {
   };
 
   const handleArchive = async (id: string) => {
-    if (!confirm('Möchten Sie diesen Kunden wirklich archivieren?')) return;
+    if (!(await confirmDialog({ title: 'Kunde archivieren', confirmLabel: 'Archivieren', message: 'Möchten Sie diesen Kunden wirklich archivieren?', destructive: true }))) return;
 
     try {
       const { error } = await supabase
@@ -225,7 +227,7 @@ export default function Kunden() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Möchten Sie diesen Kunden wirklich endgültig löschen? Diese Aktion kann nicht rückgängig gemacht werden.')) return;
+    if (!(await confirmDialog({ title: 'Kunde endgültig löschen', confirmLabel: 'Endgültig löschen', message: 'Möchten Sie diesen Kunden wirklich endgültig löschen? Diese Aktion kann nicht rückgängig gemacht werden.', destructive: true }))) return;
 
     try {
       const { error } = await supabase

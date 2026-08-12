@@ -1,4 +1,5 @@
 import { Download, Trash2, Pencil, Eye } from 'lucide-react';
+import { useConfirm } from '../context/ConfirmProvider';
 import type { Invoice, Customer } from '../lib/supabase';
 import { canEditInvoice, getEditBlockedReason } from '../utils/invoiceUtils';
 
@@ -26,13 +27,14 @@ const statusLabels = {
 };
 
 export default function InvoiceTable({ invoices, customers, onDelete, onDownloadPDF, onPreviewPDF, onEdit }: InvoiceTableProps) {
+  const confirmDialog = useConfirm();
   const getCustomerName = (customerId: string) => {
     const customer = customers.find((c) => c.id === customerId);
     return customer?.name || 'Unbekannt';
   };
 
   const handleDelete = async (id: string, invoiceNumber: string) => {
-    if (window.confirm(`Möchten Sie die Rechnung "${invoiceNumber}" wirklich löschen?`)) {
+    if (await confirmDialog({ title: 'Rechnung löschen', confirmLabel: 'Löschen', message: `Möchten Sie die Rechnung "${invoiceNumber}" wirklich löschen?`, destructive: true })) {
       await onDelete(id);
     }
   };

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useConfirm } from '../context/ConfirmProvider';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import type { Project, Customer } from '../lib/supabase';
@@ -17,6 +18,7 @@ export interface ProjectWithOpenHours extends Project {
 }
 
 export default function Projekte() {
+  const confirmDialog = useConfirm();
   const { selectedCompany } = useCompany();
   const [searchParams, setSearchParams] = useSearchParams();
   const [projects, setProjects] = useState<ProjectWithOpenHours[]>([]);
@@ -179,7 +181,7 @@ export default function Projekte() {
   };
 
   const handleArchive = async (id: string) => {
-    if (!confirm('Möchten Sie dieses Projekt wirklich archivieren?')) return;
+    if (!(await confirmDialog({ title: 'Projekt archivieren', confirmLabel: 'Archivieren', message: 'Möchten Sie dieses Projekt wirklich archivieren?', destructive: true }))) return;
 
     try {
       const { error } = await supabase

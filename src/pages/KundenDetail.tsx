@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useConfirm } from '../context/ConfirmProvider';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import type { Customer, CustomerContact, Project, Invoice } from '../lib/supabase';
@@ -25,6 +26,7 @@ import CustomerForm from '../components/CustomerForm';
 type TabType = 'overview' | 'kontakte' | 'projekte' | 'rechnungen';
 
 export default function KundenDetail() {
+  const confirmDialog = useConfirm();
   const { id: customerId } = useParams<{ id: string }>();
   const { selectedCompany } = useCompany();
 
@@ -184,7 +186,7 @@ export default function KundenDetail() {
   };
 
   const handleDeleteContact = async (contactId: string) => {
-    if (!confirm('Möchten Sie diesen Kontakt wirklich löschen?')) return;
+    if (!(await confirmDialog({ title: 'Kontakt löschen', confirmLabel: 'Löschen', message: 'Möchten Sie diesen Kontakt wirklich löschen?', destructive: true }))) return;
 
     try {
       const { error } = await supabase

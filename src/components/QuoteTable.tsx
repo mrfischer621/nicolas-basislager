@@ -1,4 +1,5 @@
 import { Download, Trash2, FileCheck, Pencil, Eye } from 'lucide-react';
+import { useConfirm } from '../context/ConfirmProvider';
 import type { Quote, Customer } from '../lib/supabase';
 import { canEditQuote, getEditBlockedReason } from '../utils/quoteUtils';
 
@@ -39,13 +40,14 @@ export default function QuoteTable({
   onConvertToInvoice,
   onEdit,
 }: QuoteTableProps) {
+  const confirmDialog = useConfirm();
   const getCustomerName = (customerId: string) => {
     const customer = customers.find((c) => c.id === customerId);
     return customer?.name || 'Unbekannt';
   };
 
   const handleDelete = async (id: string, quoteNumber: string) => {
-    if (window.confirm(`Möchten Sie das Angebot "${quoteNumber}" wirklich löschen?`)) {
+    if (await confirmDialog({ title: 'Angebot löschen', confirmLabel: 'Löschen', message: `Möchten Sie das Angebot "${quoteNumber}" wirklich löschen?`, destructive: true })) {
       await onDelete(id);
     }
   };

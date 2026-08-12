@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useConfirm } from '../context/ConfirmProvider';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
@@ -26,6 +27,7 @@ import { PageHeader, Button } from '../components/ui';
 // ============================================================================
 
 export default function Sales() {
+  const confirmDialog = useConfirm();
   const { selectedCompany } = useCompany();
   const navigate = useNavigate();
   const [stages, setStages] = useState<PipelineStage[]>([]);
@@ -171,7 +173,7 @@ export default function Sales() {
   };
 
   const handleConvert = async (opportunity: Opportunity) => {
-    if (!confirm('Möchten Sie diesen Interessenten als Kunde anlegen?')) return;
+    if (!(await confirmDialog({ title: 'Interessent übernehmen', confirmLabel: 'Übernehmen', message: 'Möchten Sie diesen Interessenten als Kunde anlegen?', destructive: true }))) return;
 
     try {
       const { error } = await supabase.rpc('convert_prospect_to_customer', {
@@ -209,7 +211,7 @@ export default function Sales() {
 
   // Delete opportunity permanently
   const handleDelete = async (opportunity: Opportunity) => {
-    if (!confirm(`Möchten Sie den Deal "${opportunity.title}" wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.`)) {
+    if (!(await confirmDialog({ title: 'Deal löschen', confirmLabel: 'Löschen', message: `Möchten Sie den Deal "${opportunity.title}" wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.`, destructive: true }))) {
       return;
     }
 

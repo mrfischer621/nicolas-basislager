@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useConfirm } from '../context/ConfirmProvider';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import type { Invoice, InvoiceItem, Customer, Project, Company } from '../lib/supabase';
@@ -23,6 +24,7 @@ interface Toast {
 }
 
 export default function Rechnungen() {
+  const confirmDialog = useConfirm();
   const { selectedCompany } = useCompany();
   const [searchParams, setSearchParams] = useSearchParams();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -357,7 +359,7 @@ export default function Rechnungen() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Möchten Sie diese Rechnung wirklich löschen?')) return;
+    if (!(await confirmDialog({ title: 'Rechnung löschen', confirmLabel: 'Löschen', message: 'Möchten Sie diese Rechnung wirklich löschen?', destructive: true }))) return;
 
     try {
       // First, unlink any time entries from this invoice (set invoice_id to NULL)

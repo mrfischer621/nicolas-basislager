@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useRef, useState } from 'react';
+import { useConfirm } from '../context/ConfirmProvider';
 import { Pencil, Trash2, Check, ChevronDown, Wand2 } from 'lucide-react';
 import type { TimeEntry, TimeEntryWithStatus, ManualTimeEntryStatus, Project } from '../lib/supabase';
 import { getWeek, parseISO, format } from 'date-fns';
@@ -44,6 +45,7 @@ export default function TimeEntryTable({
   groupingMode = 'date',
   groupedEntries,
 }: TimeEntryTableProps) {
+  const confirmDialog = useConfirm();
   const [statusMenu, setStatusMenu] = useState<StatusMenuState | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -106,7 +108,7 @@ export default function TimeEntryTable({
   };
 
   const handleDelete = async (id: string, projectName: string) => {
-    if (window.confirm(`Möchten Sie den Zeiteintrag für "${projectName}" wirklich löschen?`)) {
+    if (await confirmDialog({ title: 'Zeiteintrag löschen', confirmLabel: 'Löschen', message: `Möchten Sie den Zeiteintrag für "${projectName}" wirklich löschen?`, destructive: true })) {
       await onDelete(id);
     }
   };

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, lazy, Suspense } from 'react';
+import { useConfirm } from '../context/ConfirmProvider';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
 import type { TimeEntry, TimeEntryWithStatus, ManualTimeEntryStatus, Project, Customer } from '../lib/supabase';
@@ -22,6 +23,7 @@ interface TimeEntryWithCustomer extends TimeEntryWithStatus {
 }
 
 export default function Zeiterfassung() {
+  const confirmDialog = useConfirm();
   const { selectedCompany } = useCompany();
   const [entries, setEntries] = useState<TimeEntryWithCustomer[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -268,7 +270,7 @@ export default function Zeiterfassung() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Möchten Sie diesen Zeiteintrag wirklich löschen?')) return;
+    if (!(await confirmDialog({ title: 'Zeiteintrag löschen', confirmLabel: 'Löschen', message: 'Möchten Sie diesen Zeiteintrag wirklich löschen?', destructive: true }))) return;
 
     try {
       const { error } = await supabase

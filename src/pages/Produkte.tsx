@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useConfirm } from '../context/ConfirmProvider';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import type { Product } from '../lib/supabase';
@@ -12,6 +13,7 @@ import toast from 'react-hot-toast';
 type FilterType = 'alle' | 'aktiv' | 'archiviert';
 
 export default function Produkte() {
+  const confirmDialog = useConfirm();
   const { selectedCompany } = useCompany();
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
@@ -115,7 +117,7 @@ export default function Produkte() {
   };
 
   const handleArchive = async (id: string) => {
-    if (!confirm('Möchten Sie dieses Produkt wirklich archivieren?')) return;
+    if (!(await confirmDialog({ title: 'Produkt archivieren', confirmLabel: 'Archivieren', message: 'Möchten Sie dieses Produkt wirklich archivieren?', destructive: true }))) return;
 
     try {
       const { error: archiveError } = await supabase

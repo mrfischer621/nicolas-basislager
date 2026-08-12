@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useConfirm } from '../context/ConfirmProvider';
 import toast from 'react-hot-toast';
 import { createPortal } from 'react-dom';
 import { ChevronLeft, ChevronRight, Eye, MoreVertical, Paperclip } from 'lucide-react';
@@ -31,6 +32,7 @@ function ActionMenu({
   onToggle: () => void;
   onClose: () => void;
 }) {
+  const confirmDialog = useConfirm();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
@@ -96,8 +98,13 @@ function ActionMenu({
             Bearbeiten
           </button>
           <button
-            onClick={() => {
-              if (confirm('Möchten Sie diese Buchung wirklich löschen?')) {
+            onClick={async () => {
+              if (await confirmDialog({
+                title: 'Buchung löschen',
+                message: 'Möchten Sie diese Buchung wirklich löschen?',
+                confirmLabel: 'Löschen',
+                destructive: true,
+              })) {
                 onDelete(transaction.id);
               }
               onClose();

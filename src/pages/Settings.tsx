@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useConfirm } from '../context/ConfirmProvider';
 import { supabase } from '../lib/supabase';
 import type { PipelineStage, Category, CategoryType } from '../lib/supabase';
 import { useCompany } from '../context/CompanyContext';
@@ -36,6 +37,7 @@ interface Toast {
 type TabType = 'company' | 'profile' | 'templates' | 'pipeline' | 'categories' | 'product_categories';
 
 export default function Settings() {
+  const confirmDialog = useConfirm();
   const { selectedCompany, refreshCompanies } = useCompany();
   const { user, profile } = useAuth();
   const [activeTab, setActiveTab] = useState<TabType>('company');
@@ -289,7 +291,7 @@ export default function Settings() {
   };
 
   const handleDeleteCategory = async (categoryId: string) => {
-    if (!confirm('Möchten Sie diese Kategorie wirklich deaktivieren?')) return;
+    if (!(await confirmDialog({ title: 'Kategorie deaktivieren', confirmLabel: 'Deaktivieren', message: 'Möchten Sie diese Kategorie wirklich deaktivieren?', destructive: true }))) return;
 
     try {
       // Soft delete - set is_active to false
@@ -541,7 +543,7 @@ export default function Settings() {
       return;
     }
 
-    if (!confirm(`Möchten Sie die Phase "${stage.name}" wirklich löschen?`)) {
+    if (!(await confirmDialog({ title: 'Phase löschen', confirmLabel: 'Löschen', message: `Möchten Sie die Phase "${stage.name}" wirklich löschen?`, destructive: true }))) {
       return;
     }
 
@@ -668,7 +670,7 @@ export default function Settings() {
   };
 
   const handleDeleteProductCategory = async (index: number) => {
-    if (!confirm('Möchten Sie diese Produktkategorie wirklich löschen?')) return;
+    if (!(await confirmDialog({ title: 'Produktkategorie löschen', confirmLabel: 'Löschen', message: 'Möchten Sie diese Produktkategorie wirklich löschen?', destructive: true }))) return;
 
     try {
       const updatedCategories = productCategories.filter((_, i) => i !== index);

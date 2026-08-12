@@ -6,13 +6,16 @@ import App from './App.tsx'
 import { AuthProvider } from './context/AuthProvider'
 import { CompanyProvider } from './context/CompanyContext'
 import { TimerProvider } from './context/TimerContext'
+import { ConfirmProvider } from './context/ConfirmProvider'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <AuthProvider>
       <CompanyProvider>
         <TimerProvider>
-          <App />
+          <ConfirmProvider>
+            <App />
+          </ConfirmProvider>
           {/* Ohne diese Komponente rendert react-hot-toast nichts. Sie fehlte,
               wodurch saemtliche toast()-Aufrufe in 6 Seiten wirkungslos waren. */}
           <Toaster

@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useConfirm } from '../context/ConfirmProvider';
 import toast from 'react-hot-toast';
 import { useYearEnd } from '../hooks/useYearEnd';
 import type { Asset, PrivateShare, YearEndClosingData } from '../lib/supabase';
 
 export default function Jahresabschluss() {
+  const confirmDialog = useConfirm();
   // Year selection (default to current year)
   const currentYear = new Date().getFullYear();
   const [selectedYear, setSelectedYear] = useState(currentYear);
@@ -121,7 +123,7 @@ export default function Jahresabschluss() {
   };
 
   const handleLock = async () => {
-    if (confirm('Möchten Sie diesen Jahresabschluss wirklich abschliessen? Er kann danach nicht mehr bearbeitet werden.')) {
+    if (await confirmDialog({ title: 'Jahresabschluss abschliessen', confirmLabel: 'Abschliessen', message: 'Möchten Sie diesen Jahresabschluss wirklich abschliessen? Er kann danach nicht mehr bearbeitet werden.', destructive: true })) {
       try {
         await lockClosing();
         toast.error('Jahresabschluss abgeschlossen!');
@@ -132,7 +134,7 @@ export default function Jahresabschluss() {
   };
 
   const handleUnlock = async () => {
-    if (confirm('Möchten Sie diesen Jahresabschluss wieder öffnen?')) {
+    if (await confirmDialog({ title: 'Jahresabschluss öffnen', confirmLabel: 'Öffnen', message: 'Möchten Sie diesen Jahresabschluss wieder öffnen?', destructive: true })) {
       try {
         await unlockClosing();
         toast.error('Jahresabschluss wieder geöffnet!');
