@@ -118,12 +118,6 @@
     );
     padding-inline: 0.06em;
   }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme='light']) .bw-marker {
-      background-image: none;
-      color: rgb(var(--bw-cta));
-    }
-  }
   :root[data-theme='dark'] .bw-marker {
     background-image: none;
     color: rgb(var(--bw-cta));
@@ -172,6 +166,18 @@
   }
   .btn-danger {
     @apply btn border border-danger bg-surface text-danger hover:bg-danger-subtle;
+  }
+
+  /* Umschalter / Filtergruppe: aktive Option in Tinte auf Weiss, inaktive
+     gedaempft. Keine Tinte-Flaechen (helles Thema). */
+  .toggle-group {
+    @apply inline-flex flex-wrap gap-0.5 rounded-lg bg-raised p-0.5;
+  }
+  .toggle-on {
+    @apply bg-surface font-bold text-fg shadow-sm ring-1 ring-line-strong;
+  }
+  .toggle-off {
+    @apply text-fg-muted hover:bg-surface/60 hover:text-fg;
   }
 
   /* Textlink: Tinte, hellblau unterstrichen */

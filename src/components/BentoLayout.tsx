@@ -31,7 +31,7 @@ export default function BentoLayout() {
   return (
     <div className="h-screen w-screen overflow-hidden flex">
       {/* Sidebar - Dark, Fixed Width (Desktop) / Fixed Overlay (Mobile) */}
-      <aside className="w-60 flex-shrink-0 bg-ink hidden md:flex flex-col">
+      <aside className="w-60 flex-shrink-0 hidden md:flex flex-col">
         <BentoSidebar />
       </aside>
 

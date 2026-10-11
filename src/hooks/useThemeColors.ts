@@ -19,12 +19,9 @@ export function useThemeColors(): ThemeColors {
   const [colors, setColors] = useState<ThemeColors>(read);
   useEffect(() => {
     const update = () => setColors(read());
-    const media = window.matchMedia('(prefers-color-scheme: dark)');
-    media.addEventListener('change', update);
     const observer = new MutationObserver(update);
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     return () => {
-      media.removeEventListener('change', update);
       observer.disconnect();
     };
   }, []);

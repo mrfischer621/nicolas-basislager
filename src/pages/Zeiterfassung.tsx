@@ -400,8 +400,8 @@ export default function Zeiterfassung() {
                 onClick={() => setIsFilterOpen(!isFilterOpen)}
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition ${
                   selectedProjectId
-                    ? 'bg-brand text-accent-fg'
-                    : 'bg-raised text-fg-muted hover:bg-sunken'
+                    ? 'toggle-on'
+                    : 'toggle-off bg-raised'
                 }`}
                 title="Nach Projekt filtern"
                 aria-label="Nach Projekt filtern"

@@ -256,7 +256,7 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
   return (
     <form onSubmit={(e) => handleSubmit(e, false)} className="space-y-5">
       {/* Typ */}
-      <div role="group" aria-label="Art der Buchung" className="inline-flex rounded-lg border border-line-strong p-0.5">
+      <div role="group" aria-label="Art der Buchung" className="toggle-group">
         {(['ausgabe', 'einnahme'] as const).map((type) => (
           <button
             key={type}
@@ -264,7 +264,7 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
             aria-pressed={activeTab === type}
             onClick={() => handleTabChange(type)}
             className={`rounded-md px-4 py-1.5 font-display text-sm font-bold transition-colors ${
-              activeTab === type ? 'bg-accent text-accent-fg' : 'text-fg-muted hover:bg-raised hover:text-fg'
+              activeTab === type ? 'toggle-on' : 'toggle-off'
             }`}
           >
             {type === 'ausgabe' ? 'Ausgabe' : 'Einnahme'}

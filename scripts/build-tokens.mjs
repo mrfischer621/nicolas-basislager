@@ -77,13 +77,8 @@ ${scalar('spacing', '')}
   color-scheme: light;
 }
 
-/* Thema dark (Tiefsee): folgt dem System, ausser der Benutzer hat "Hell" gewaehlt */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-${block('dark').replace(/^/gm, '  ')}
-    color-scheme: dark;
-  }
-}
+/* Thema dark (Tiefsee): nur, wenn es in den Einstellungen ausdruecklich
+   gewaehlt ist. Standard ist immer hell, unabhaengig vom Betriebssystem. */
 :root[data-theme='dark'] {
 ${block('dark')}
   color-scheme: dark;

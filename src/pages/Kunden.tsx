@@ -299,8 +299,8 @@ export default function Kunden() {
           onClick={() => setFilter('alle')}
           className={`px-4 py-2 rounded-lg font-medium transition ${
             filter === 'alle'
-              ? 'bg-brand text-accent-fg'
-              : 'bg-surface text-fg-muted hover:bg-raised border border-line'
+              ? 'toggle-on'
+              : 'toggle-off bg-raised'
           }`}
         >
           Alle
@@ -309,8 +309,8 @@ export default function Kunden() {
           onClick={() => setFilter('aktiv')}
           className={`px-4 py-2 rounded-lg font-medium transition ${
             filter === 'aktiv'
-              ? 'bg-brand text-accent-fg'
-              : 'bg-surface text-fg-muted hover:bg-raised border border-line'
+              ? 'toggle-on'
+              : 'toggle-off bg-raised'
           }`}
         >
           Aktiv
@@ -319,8 +319,8 @@ export default function Kunden() {
           onClick={() => setFilter('archiviert')}
           className={`px-4 py-2 rounded-lg font-medium transition ${
             filter === 'archiviert'
-              ? 'bg-brand text-accent-fg'
-              : 'bg-surface text-fg-muted hover:bg-raised border border-line'
+              ? 'toggle-on'
+              : 'toggle-off bg-raised'
           }`}
         >
           Archiviert

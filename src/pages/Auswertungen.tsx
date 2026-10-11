@@ -211,7 +211,7 @@ export default function Auswertungen() {
 
       {/* Zeitraum */}
       <div className="flex flex-wrap items-center gap-3">
-        <div role="group" aria-label="Zeitraum" className="flex flex-wrap gap-1 rounded-lg border border-line-strong bg-surface p-0.5">
+        <div role="group" aria-label="Zeitraum" className="toggle-group">
           {PRESETS.map((p) => (
             <button
               key={p.value}
@@ -219,7 +219,7 @@ export default function Auswertungen() {
               aria-pressed={selectedPreset === p.value}
               onClick={() => (p.value === 'custom' ? handleCustomRange() : handlePresetChange(p.value))}
               className={`rounded-md px-3 py-1.5 font-display text-sm font-bold transition-colors ${
-                selectedPreset === p.value ? 'bg-accent text-accent-fg' : 'text-fg-muted hover:bg-raised hover:text-fg'
+                selectedPreset === p.value ? 'toggle-on' : 'toggle-off'
               }`}
             >
               {p.label}

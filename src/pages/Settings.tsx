@@ -1227,11 +1227,10 @@ export default function Settings() {
         {/* Darstellung: pro Geraet, Standard folgt dem System */}
         <div className="card p-5 md:p-7">
           <h2 className="mb-1 text-lg font-bold text-fg">Darstellung</h2>
-          <p className="mb-4 text-sm text-fg-muted">Gilt für dieses Gerät. «System» folgt der Einstellung des Betriebssystems.</p>
+          <p className="mb-4 text-sm text-fg-muted">Standard ist hell, unabhängig vom Betriebssystem. «Dunkel» gilt nur für dieses Gerät.</p>
           <SegmentedControl
             label="Darstellung"
             options={[
-              { value: 'system' as ThemePreference, label: 'System' },
               { value: 'light' as ThemePreference, label: 'Hell' },
               { value: 'dark' as ThemePreference, label: 'Dunkel' },
             ]}

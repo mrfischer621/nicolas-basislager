@@ -107,8 +107,8 @@ export function BentoSidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: 
           transition-colors duration-150
           ${
             isActive
-              ? 'bg-ink-raised text-fg-inverted shadow-[inset_4px_0_0_rgb(var(--bw-cta))]'
-              : 'text-fg-inverted-muted hover:text-fg-inverted hover:bg-ink-raised'
+              ? 'bg-accent-subtle text-fg font-semibold shadow-[inset_4px_0_0_rgb(var(--bw-cta))]'
+              : 'text-fg-muted hover:text-fg hover:bg-raised'
           }
         `.trim().replace(/\s+/g, ' ')
       }
@@ -139,8 +139,8 @@ export function BentoSidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: 
                 transition-colors duration-150
                 ${
                   isActive
-                    ? 'bg-ink-raised text-fg-inverted shadow-[inset_4px_0_0_rgb(var(--bw-cta))]'
-                    : 'text-fg-inverted-muted hover:text-fg-inverted hover:bg-ink-raised'
+                    ? 'bg-accent-subtle text-fg font-semibold shadow-[inset_4px_0_0_rgb(var(--bw-cta))]'
+                    : 'text-fg-muted hover:text-fg hover:bg-raised'
                 }
               `.trim().replace(/\s+/g, ' ')
             }
@@ -159,8 +159,8 @@ export function BentoSidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: 
               transition-colors duration-150
               ${
                 isKundenActive && !isKundenOpen
-                  ? 'bg-ink-raised text-fg-inverted'
-                  : 'text-fg-inverted-muted hover:text-fg-inverted hover:bg-ink-raised'
+                  ? 'bg-accent-subtle text-fg'
+                  : 'text-fg-muted hover:text-fg hover:bg-raised'
               }
             `.trim().replace(/\s+/g, ' ')}
           >
@@ -190,8 +190,8 @@ export function BentoSidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: 
                     transition-colors duration-150
                     ${
                       isActive
-                        ? 'bg-ink-raised text-fg-inverted shadow-[inset_4px_0_0_rgb(var(--bw-cta))]'
-                        : 'text-fg-inverted-muted hover:text-fg-inverted hover:bg-ink-raised'
+                        ? 'bg-accent-subtle text-fg font-semibold shadow-[inset_4px_0_0_rgb(var(--bw-cta))]'
+                        : 'text-fg-muted hover:text-fg hover:bg-raised'
                     }
                   `.trim().replace(/\s+/g, ' ')
                 }
@@ -223,19 +223,19 @@ export function BentoSidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: 
       {/* Sidebar */}
       <div
         className={`
-          h-full flex flex-col bg-sidebar-bg
+          h-full flex flex-col bg-surface border-r border-line
           transition-transform duration-300 ease-in-out
           md:translate-x-0
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         `.trim().replace(/\s+/g, ' ')}
       >
         {/* Company Header */}
-        <div className="px-5 py-5 border-b border-sidebar-border">
-          <p className="truncate font-display text-base font-extrabold uppercase tracking-[0.02em] text-fg-inverted">
+        <div className="px-5 py-5 border-b border-line">
+          <p className="truncate font-display text-base font-extrabold uppercase tracking-[0.02em] text-fg">
             {isLoading ? 'Laden …' : companyDisplayName(selectedCompany) || 'Blauwasser CRM'}
           </p>
           {user && (
-            <p className="mt-1 truncate text-xs text-fg-inverted-muted">
+            <p className="mt-1 truncate text-xs text-fg-muted">
               {user.email}
             </p>
           )}
@@ -248,7 +248,7 @@ export function BentoSidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: 
             <div key={group.title}>
               {/* Group Title */}
               <div className="px-3 mb-2 mt-5 first:mt-0">
-                <h2 className="font-display text-[11px] font-extrabold uppercase tracking-caps text-fg-inverted-muted">
+                <h2 className="font-display text-[11px] font-extrabold uppercase tracking-caps text-fg-muted">
                   {group.title}
                 </h2>
               </div>
@@ -264,16 +264,16 @@ export function BentoSidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: 
 
               {/* Divider after each group except last */}
               {groupIndex < navigationGroups.length - 1 && (
-                <div className="my-4 h-px bg-line-inverted" />
+                <div className="my-4 h-px bg-line" />
               )}
             </div>
           ))}
         </nav>
 
         {/* System Section - Fixed at bottom */}
-        <div className="px-3 pb-4 border-t border-sidebar-border pt-4">
+        <div className="px-3 pb-4 border-t border-line pt-4">
           <div className="px-3 mb-2">
-            <h2 className="font-display text-[11px] font-extrabold uppercase tracking-caps text-fg-inverted-muted">
+            <h2 className="font-display text-[11px] font-extrabold uppercase tracking-caps text-fg-muted">
               System
             </h2>
           </div>
@@ -289,8 +289,8 @@ export function BentoSidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: 
                 transition-colors duration-150
                 ${
                   isActive
-                    ? 'bg-ink-raised text-fg-inverted shadow-[inset_4px_0_0_rgb(var(--bw-cta))]'
-                    : 'text-fg-inverted-muted hover:text-fg-inverted hover:bg-ink-raised'
+                    ? 'bg-accent-subtle text-fg font-semibold shadow-[inset_4px_0_0_rgb(var(--bw-cta))]'
+                    : 'text-fg-muted hover:text-fg hover:bg-raised'
                 }
               `.trim().replace(/\s+/g, ' ')
             }

@@ -542,8 +542,8 @@ export default function QuoteForm({
                       onClick={() => setDiscountType('percent')}
                       className={`px-2 py-1 text-xs font-medium transition ${
                         discountType === 'percent'
-                          ? 'bg-brand text-accent-fg'
-                          : 'bg-surface text-fg hover:bg-canvas'
+                          ? 'toggle-on'
+                          : 'toggle-off bg-raised'
                       }`}
                     >
                       %
@@ -553,8 +553,8 @@ export default function QuoteForm({
                       onClick={() => setDiscountType('fixed')}
                       className={`px-2 py-1 text-xs font-medium transition ${
                         discountType === 'fixed'
-                          ? 'bg-brand text-accent-fg'
-                          : 'bg-surface text-fg hover:bg-canvas'
+                          ? 'toggle-on'
+                          : 'toggle-off bg-raised'
                       }`}
                     >
                       CHF
