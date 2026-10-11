@@ -98,7 +98,7 @@ export default function ProductForm({ onSubmit, editingProduct, onCancel }: Prod
   const unitOptions = ['Stück', 'Stunden', 'kg', 'Liter', 'm', 'm²', 'm³', 'Paket', 'Set'];
 
   return (
-    <form onSubmit={handleSubmit} className="bg-surface rounded-lg shadow-sm p-6 space-y-4">
+    <form onSubmit={handleSubmit} className="card p-6 space-y-4">
       <h2 className="text-xl font-semibold text-fg">
         {editingProduct ? 'Produkt bearbeiten' : 'Neues Produkt'}
       </h2>
