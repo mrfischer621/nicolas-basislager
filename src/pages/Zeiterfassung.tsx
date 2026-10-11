@@ -404,6 +404,7 @@ export default function Zeiterfassung() {
                     : 'bg-raised text-fg-muted hover:bg-sunken'
                 }`}
                 title="Nach Projekt filtern"
+                aria-label="Nach Projekt filtern"
               >
                 <Filter size={16} />
                 {selectedProjectId && (

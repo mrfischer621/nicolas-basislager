@@ -129,6 +129,7 @@ export default function ProjectTable({ projects, customers, onEdit, onArchive, o
                       onClick={() => onEdit(project)}
                       className="p-2 text-brand hover:bg-canvas rounded-lg transition"
                       title="Bearbeiten"
+                      aria-label="Bearbeiten"
                     >
                       <Pencil size={18} />
                     </button>
@@ -137,6 +138,7 @@ export default function ProjectTable({ projects, customers, onEdit, onArchive, o
                         onClick={() => onArchive(project.id)}
                         className="p-2 text-warning hover:bg-warning-subtle rounded-lg transition"
                         title="Archivieren"
+                        aria-label="Archivieren"
                       >
                         <Archive size={18} />
                       </button>
@@ -145,6 +147,7 @@ export default function ProjectTable({ projects, customers, onEdit, onArchive, o
                         onClick={() => onRestore(project.id)}
                         className="p-2 text-success hover:bg-success-subtle rounded-lg transition"
                         title="Wiederherstellen"
+                        aria-label="Wiederherstellen"
                       >
                         <RotateCcw size={18} />
                       </button>

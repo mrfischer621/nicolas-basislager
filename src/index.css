@@ -49,6 +49,11 @@
     letter-spacing: -0.01em;
   }
 
+  /* Icons: Lucide, Strich 1.5 (Design System), ueberall gleich */
+  svg.lucide {
+    stroke-width: 1.5;
+  }
+
   /* Betraege und Zahlen: gleich breite Ziffern */
   table,
   .tabular-nums,

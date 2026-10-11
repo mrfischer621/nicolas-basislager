@@ -300,6 +300,7 @@ export default function TransactionTable({ transactions, customers, projects, on
                         }}
                         className="inline-flex items-center justify-center text-fg-subtle hover:text-brand transition-colors"
                         title="Beleg anzeigen"
+                        aria-label="Beleg anzeigen"
                       >
                         <Paperclip className="w-5 h-5" />
                       </button>
@@ -313,6 +314,7 @@ export default function TransactionTable({ transactions, customers, projects, on
                         onClick={() => onEdit(transaction)}
                         className="text-fg-subtle hover:text-brand transition-colors"
                         title="Details anzeigen"
+                        aria-label="Details anzeigen"
                       >
                         <Eye className="w-5 h-5" />
                       </button>

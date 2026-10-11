@@ -327,6 +327,7 @@ export default function KundenKontakte() {
                           onClick={() => handleSetPrimary(contact.id)}
                           className="p-1 text-fg-subtle hover:text-warning transition"
                           title="Als Hauptkontakt setzen"
+                          aria-label="Als Hauptkontakt setzen"
                         >
                           <StarOff size={16} />
                         </button>
@@ -338,6 +339,7 @@ export default function KundenKontakte() {
                           onClick={() => openModal(contact)}
                           className="p-2 text-brand hover:bg-canvas rounded-lg transition"
                           title="Bearbeiten"
+                          aria-label="Bearbeiten"
                         >
                           <Pencil size={18} />
                         </button>
@@ -345,6 +347,7 @@ export default function KundenKontakte() {
                           onClick={() => handleDelete(contact.id)}
                           className="p-2 text-danger hover:bg-danger-subtle rounded-lg transition"
                           title="Löschen"
+                          aria-label="Löschen"
                         >
                           <Trash2 size={18} />
                         </button>

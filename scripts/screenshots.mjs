@@ -3,6 +3,10 @@
 // Aufruf: node scripts/screenshots.mjs <ordner> [basis-url] [hell|dunkel] [breite]
 import { chromium } from 'playwright';
 import fs from 'node:fs';
+import { installMock } from './mock/route.mjs';
+
+// MOCK=1: erfundene Testdaten statt Live-Datenbank (fuer das oeffentliche Repo)
+const mock = process.env.MOCK === '1';
 
 const [dir = 'docs/design-review/nachher', base = 'http://localhost:5173', theme = 'hell', width = '1440'] = process.argv.slice(2);
 const pages = (process.env.PAGES ?? 'login,dashboard,buchungen,buchung-maske,rechnungen,jahresabschluss,auswertungen,einstellungen').split(',');
@@ -18,14 +22,20 @@ const routes = {
   kategorien: '/settings?tab=categories',
 };
 fs.mkdirSync(dir, { recursive: true });
-const hasState = fs.existsSync('.auth/state.json');
+const hasState = mock || fs.existsSync('.auth/state.json');
 const browser = await chromium.launch();
 const context = await browser.newContext({
   viewport: { width: Number(width), height: 900 },
   colorScheme: theme === 'dunkel' ? 'dark' : 'light',
-  storageState: hasState ? '.auth/state.json' : undefined,
+  storageState: !mock && hasState ? '.auth/state.json' : undefined,
   deviceScaleFactor: 1,
+  timezoneId: 'Europe/Zurich',
+  locale: 'de-CH',
 });
+if (mock) {
+  await installMock(context);
+  await context.clock?.setFixedTime?.(new Date('2026-10-11T10:00:00+02:00'));
+}
 for (const name of pages) {
   if (!hasState && name !== 'login') continue;
   const page = await context.newPage();

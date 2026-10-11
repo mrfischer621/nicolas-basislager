@@ -103,16 +103,16 @@ export function BentoSidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: 
           rounded-lg
           mb-0.5
           text-sm font-medium
-          transition-all duration-150
+          transition-colors duration-150
           ${
             isActive
-              ? 'bg-brand text-accent-fg shadow-glow-brand'
-              : 'text-sidebar-text hover:text-white hover:bg-sidebar-hover'
+              ? 'bg-ink-raised text-fg-inverted shadow-[inset_4px_0_0_rgb(var(--bw-cta))]'
+              : 'text-fg-inverted-muted hover:text-fg-inverted hover:bg-ink-raised'
           }
         `.trim().replace(/\s+/g, ' ')
       }
     >
-      <item.icon size={18} strokeWidth={2} />
+      <item.icon size={18} strokeWidth={1.5} aria-hidden="true" />
       <span>{item.name}</span>
     </NavLink>
   );
@@ -135,35 +135,38 @@ export function BentoSidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: 
                 px-3 py-2.5
                 rounded-l-lg
                 text-sm font-medium
-                transition-all duration-150
+                transition-colors duration-150
                 ${
                   isActive
-                    ? 'bg-brand text-accent-fg shadow-glow-brand'
-                    : 'text-sidebar-text hover:text-white hover:bg-sidebar-hover'
+                    ? 'bg-ink-raised text-fg-inverted shadow-[inset_4px_0_0_rgb(var(--bw-cta))]'
+                    : 'text-fg-inverted-muted hover:text-fg-inverted hover:bg-ink-raised'
                 }
               `.trim().replace(/\s+/g, ' ')
             }
           >
-            <Users size={18} strokeWidth={2} />
+            <Users size={18} strokeWidth={1.5} aria-hidden="true" />
             <span>Kunden</span>
           </NavLink>
           <button
+            type="button"
             onClick={() => setIsKundenOpen(!isKundenOpen)}
+            aria-expanded={isKundenOpen}
+            aria-label={isKundenOpen ? 'Untermenü Kunden schliessen' : 'Untermenü Kunden öffnen'}
             className={`
               px-2 py-2.5
               rounded-r-lg
-              transition-all duration-150
+              transition-colors duration-150
               ${
                 isKundenActive && !isKundenOpen
-                  ? 'bg-brand/80 text-accent-fg'
-                  : 'text-sidebar-text hover:text-white hover:bg-sidebar-hover'
+                  ? 'bg-ink-raised text-fg-inverted'
+                  : 'text-fg-inverted-muted hover:text-fg-inverted hover:bg-ink-raised'
               }
             `.trim().replace(/\s+/g, ' ')}
           >
             {isKundenOpen ? (
-              <ChevronDown size={16} />
+              <ChevronDown size={16} strokeWidth={1.5} aria-hidden="true" />
             ) : (
-              <ChevronRight size={16} />
+              <ChevronRight size={16} strokeWidth={1.5} aria-hidden="true" />
             )}
           </button>
         </div>
@@ -183,19 +186,19 @@ export function BentoSidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: 
                     px-3 py-2
                     rounded-lg
                     text-sm
-                    transition-all duration-150
+                    transition-colors duration-150
                     ${
                       isActive
-                        ? 'bg-brand text-accent-fg shadow-glow-brand'
-                        : 'text-sidebar-text hover:text-white hover:bg-sidebar-hover'
+                        ? 'bg-ink-raised text-fg-inverted shadow-[inset_4px_0_0_rgb(var(--bw-cta))]'
+                        : 'text-fg-inverted-muted hover:text-fg-inverted hover:bg-ink-raised'
                     }
                   `.trim().replace(/\s+/g, ' ')
                 }
               >
                 {subItem.icon ? (
-                  <subItem.icon size={16} strokeWidth={2} />
+                  <subItem.icon size={16} strokeWidth={1.5} aria-hidden="true" />
                 ) : (
-                  <Users size={16} strokeWidth={2} />
+                  <Users size={16} strokeWidth={1.5} aria-hidden="true" />
                 )}
                 <span>{subItem.name}</span>
               </NavLink>
@@ -227,26 +230,26 @@ export function BentoSidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: 
       >
         {/* Company Header */}
         <div className="px-5 py-5 border-b border-sidebar-border">
-          <h1 className="text-base font-semibold text-white tracking-tight truncate">
-            {isLoading ? 'Laden...' : companyDisplayName(selectedCompany) || 'Blauwasser CRM'}
-          </h1>
+          <p className="truncate font-display text-base font-extrabold uppercase tracking-[0.02em] text-fg-inverted">
+            {isLoading ? 'Laden …' : companyDisplayName(selectedCompany) || 'Blauwasser CRM'}
+          </p>
           {user && (
-            <p className="text-xs text-sidebar-text truncate mt-1">
+            <p className="mt-1 truncate text-xs text-fg-inverted-muted">
               {user.email}
             </p>
           )}
         </div>
 
         {/* Navigation */}
-        <nav className="px-3 py-4 flex-1 overflow-y-auto">
+        <nav aria-label="Hauptnavigation" className="px-3 py-4 flex-1 overflow-y-auto">
           {/* Render navigation groups */}
           {navigationGroups.map((group, groupIndex) => (
             <div key={group.title}>
               {/* Group Title */}
               <div className="px-3 mb-2 mt-5 first:mt-0">
-                <h3 className="text-xs font-semibold text-sidebar-text/60 uppercase tracking-wider">
+                <h2 className="font-display text-[11px] font-extrabold uppercase tracking-caps text-fg-inverted-muted">
                   {group.title}
-                </h3>
+                </h2>
               </div>
 
               {/* Group Items */}
@@ -260,7 +263,7 @@ export function BentoSidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: 
 
               {/* Divider after each group except last */}
               {groupIndex < navigationGroups.length - 1 && (
-                <div className="h-px bg-sidebar-border/30 my-4" />
+                <div className="my-4 h-px bg-line-inverted" />
               )}
             </div>
           ))}
@@ -269,9 +272,9 @@ export function BentoSidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: 
         {/* System Section - Fixed at bottom */}
         <div className="px-3 pb-4 border-t border-sidebar-border pt-4">
           <div className="px-3 mb-2">
-            <h3 className="text-xs font-semibold text-sidebar-text/60 uppercase tracking-wider">
+            <h2 className="font-display text-[11px] font-extrabold uppercase tracking-caps text-fg-inverted-muted">
               System
-            </h3>
+            </h2>
           </div>
           <NavLink
             to="/settings"
@@ -282,16 +285,16 @@ export function BentoSidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: 
                 px-3 py-2.5
                 rounded-lg
                 text-sm font-medium
-                transition-all duration-150
+                transition-colors duration-150
                 ${
                   isActive
-                    ? 'bg-brand text-accent-fg shadow-glow-brand'
-                    : 'text-sidebar-text hover:text-white hover:bg-sidebar-hover'
+                    ? 'bg-ink-raised text-fg-inverted shadow-[inset_4px_0_0_rgb(var(--bw-cta))]'
+                    : 'text-fg-inverted-muted hover:text-fg-inverted hover:bg-ink-raised'
                 }
               `.trim().replace(/\s+/g, ' ')
             }
           >
-            <Settings size={18} strokeWidth={2} />
+            <Settings size={18} strokeWidth={1.5} aria-hidden="true" />
             <span>Einstellungen</span>
           </NavLink>
         </div>

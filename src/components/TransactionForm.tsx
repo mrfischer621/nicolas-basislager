@@ -454,6 +454,7 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
                     onClick={removeReceipt}
                     className="p-1 text-fg-subtle hover:text-danger transition-colors"
                     title="Beleg entfernen"
+                    aria-label="Beleg entfernen"
                   >
                     <X className="w-5 h-5" />
                   </button>

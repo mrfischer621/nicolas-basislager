@@ -181,7 +181,7 @@ export function BentoHeader({ onMenuClick }: { onMenuClick?: () => void }) {
         <button
           onClick={onMenuClick}
           className="md:hidden p-2 -ml-2 rounded-lg text-text-secondary hover:text-text-primary hover:bg-raised transition-colors"
-          aria-label="Menu öffnen"
+          aria-label="Menü öffnen"
         >
           <Menu size={20} strokeWidth={2} />
         </button>
@@ -301,7 +301,11 @@ export function BentoHeader({ onMenuClick }: { onMenuClick?: () => void }) {
         {/* User Menu Dropdown */}
         <div className="relative" ref={userMenuRef}>
           <button
+            type="button"
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+            aria-haspopup="menu"
+            aria-expanded={isUserMenuOpen}
+            aria-label="Benutzermenü und Firmenwechsel" 
             className="
               flex items-center gap-2
               px-3 py-2
@@ -313,7 +317,7 @@ export function BentoHeader({ onMenuClick }: { onMenuClick?: () => void }) {
             "
           >
             <div className="w-6 h-6 rounded-full bg-brand flex items-center justify-center">
-              <User size={14} strokeWidth={2} className="text-white" />
+              <User size={14} className="text-accent-fg" aria-hidden="true" />
             </div>
             <span className="text-sm font-medium hidden sm:block">
               {profile?.full_name || user?.email?.split('@')[0] || 'User'}
@@ -343,7 +347,7 @@ export function BentoHeader({ onMenuClick }: { onMenuClick?: () => void }) {
               <div className="px-4 py-3 border-b border-surface-border">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-brand flex items-center justify-center">
-                    <User size={18} strokeWidth={2} className="text-white" />
+                    <User size={18} className="text-accent-fg" aria-hidden="true" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-text-primary truncate">

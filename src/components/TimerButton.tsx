@@ -464,6 +464,7 @@ export function TimerButton() {
       <button
         onClick={timer.isRunning ? handlePauseClick : handlePlayClick}
         title={timer.isRunning ? 'Pausieren' : timer.isPaused ? 'Fortsetzen' : 'Timer starten'}
+        aria-label={timer.isRunning ? 'Pausieren' : timer.isPaused ? 'Fortsetzen' : 'Timer starten'}
         className={`
           p-2 rounded-lg transition-colors duration-150
           ${
@@ -489,9 +490,10 @@ export function TimerButton() {
         <button
           onClick={handleStopClick}
           title="Timer stoppen & speichern"
+          aria-label="Timer stoppen & speichern"
           className="p-2 rounded-lg bg-danger-subtle text-danger hover:bg-danger-subtle transition-colors duration-150"
         >
-          <Square size={16} strokeWidth={2} fill="currentColor" />
+          <Square size={16} strokeWidth={2} />
         </button>
       )}
 
@@ -500,6 +502,7 @@ export function TimerButton() {
         <button
           onClick={handleChevronClick}
           title="Timer vorkonfigurieren"
+          aria-label="Timer vorkonfigurieren"
           className="p-2 rounded-lg bg-raised text-text-secondary hover:bg-sunken hover:text-text-primary transition-colors duration-150"
         >
           <ChevronDown
@@ -515,6 +518,7 @@ export function TimerButton() {
         <button
           onClick={() => timer.resetTimer()}
           title="Timer zurücksetzen"
+          aria-label="Timer zurücksetzen"
           className="p-2 rounded-lg bg-raised text-text-secondary hover:bg-danger-subtle hover:text-danger transition-colors duration-150"
         >
           <X size={14} strokeWidth={2} />

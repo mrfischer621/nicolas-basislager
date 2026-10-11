@@ -392,6 +392,7 @@ export default function Sales() {
                   }
                 `}
                 title={showLost ? 'Verlorene Deals ausblenden' : 'Verlorene Deals anzeigen'}
+                aria-label={showLost ? 'Verlorene Deals ausblenden' : 'Verlorene Deals anzeigen'}
               >
                 {showLost ? <Eye size={16} /> : <EyeOff size={16} />}
                 <span>{showLost ? 'Verlorene sichtbar' : 'Verlorene ausgeblendet'}</span>

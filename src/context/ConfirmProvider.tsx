@@ -60,21 +60,28 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
           aria-labelledby="confirm-title"
           onKeyDown={(e) => {
             if (e.key === 'Escape') close(false);
+            // Fokusfalle: Tab bleibt zwischen den beiden Knoepfen
+            if (e.key === 'Tab') {
+              const buttons = Array.from(e.currentTarget.querySelectorAll<HTMLButtonElement>('button'));
+              const i = buttons.indexOf(document.activeElement as HTMLButtonElement);
+              e.preventDefault();
+              buttons[(i + (e.shiftKey ? buttons.length - 1 : 1)) % buttons.length]?.focus();
+            }
           }}
         >
           <div
             className="fixed inset-0 bg-ink/50"
             onClick={() => close(false)}
           />
-          <div className="relative w-full max-w-md rounded-lg bg-surface p-6 shadow-xl">
+          <div className="relative w-full max-w-md rounded-card bg-surface p-6 shadow-lg">
             <div className="mb-3 flex items-start gap-3">
               {options.destructive && (
                 <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-danger-subtle text-danger">
-                  <AlertTriangle size={18} />
+                  <AlertTriangle size={18} aria-hidden="true" />
                 </span>
               )}
               <div>
-                <h2 id="confirm-title" className="text-lg font-semibold text-fg">
+                <h2 id="confirm-title" className="text-lg font-bold text-fg">
                   {options.title}
                 </h2>
                 <p className="mt-1 whitespace-pre-line text-sm text-fg-muted">{options.message}</p>
@@ -84,20 +91,17 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
             <div className="mt-6 flex justify-end gap-2">
               <button
                 type="button"
+                autoFocus={!!options.destructive}
                 onClick={() => close(false)}
-                className="rounded-lg border border-line px-4 py-2 text-sm font-medium text-fg transition hover:bg-canvas"
+                className="btn-secondary"
               >
                 {options.cancelLabel ?? 'Abbrechen'}
               </button>
               <button
                 type="button"
-                autoFocus
+                autoFocus={!options.destructive}
                 onClick={() => close(true)}
-                className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition ${
-                  options.destructive
-                    ? 'bg-danger hover:bg-danger'
-                    : 'bg-brand hover:bg-brand-dark'
-                }`}
+                className={options.destructive ? 'btn bg-danger text-white hover:opacity-90' : 'btn-primary'}
               >
                 {options.confirmLabel ?? 'Bestätigen'}
               </button>

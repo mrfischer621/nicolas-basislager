@@ -216,6 +216,7 @@ export default function TimeEntryTable({
                 onClick={(e) => openStatusMenu(entry.id, e.currentTarget)}
                 className={`${badgeClasses} cursor-pointer transition hover:brightness-95 hover:ring-2 hover:ring-brand/30`}
                 title={titleParts.join(' · ')}
+                aria-label={titleParts.join(' · ')}
                 aria-haspopup="menu"
                 aria-expanded={statusMenu?.entryId === entry.id}
               >
@@ -232,6 +233,7 @@ export default function TimeEntryTable({
               onClick={() => onEdit(entry)}
               className="p-1.5 text-brand hover:bg-canvas rounded transition"
               title="Bearbeiten"
+              aria-label="Bearbeiten"
             >
               <Pencil size={16} />
             </button>
@@ -239,6 +241,7 @@ export default function TimeEntryTable({
               onClick={() => handleDelete(entry.id, projectName)}
               className="p-1.5 text-danger hover:bg-danger-subtle rounded transition"
               title="Löschen"
+              aria-label="Löschen"
             >
               <Trash2 size={16} />
             </button>

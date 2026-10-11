@@ -1,65 +1,39 @@
 import type { ReactNode } from 'react';
 
 interface PageHeaderProps {
-  title: string;
+  /** Seitentitel; erscheint in Versalien (Albert Sans 900). */
+  title: ReactNode;
   description?: string;
   actions?: ReactNode;
   breadcrumbs?: Array<{ label: string; href?: string }>;
 }
 
-/**
- * PageHeader - Swiss Modern Page Title Component
- *
- * Usage:
- * <PageHeader
- *   title="Dashboard"
- *   description="Übersicht Ihrer Finanzen"
- *   actions={<button className="btn-primary">Neu</button>}
- * />
- */
 export function PageHeader({ title, description, actions, breadcrumbs }: PageHeaderProps) {
   return (
     <div className="mb-6">
-      {/* Breadcrumbs (optional) */}
       {breadcrumbs && breadcrumbs.length > 0 && (
-        <nav className="flex items-center gap-2 text-sm text-text-secondary mb-2">
+        <nav aria-label="Brotkrumen" className="mb-2 flex items-center gap-2 text-sm text-fg-muted">
           {breadcrumbs.map((crumb, index) => (
             <span key={index} className="flex items-center gap-2">
-              {index > 0 && <span className="text-text-tertiary">/</span>}
+              {index > 0 && <span aria-hidden="true">/</span>}
               {crumb.href ? (
-                <a
-                  href={crumb.href}
-                  className="hover:text-text-primary transition-colors"
-                >
+                <a href={crumb.href} className="hover:text-fg">
                   {crumb.label}
                 </a>
               ) : (
-                <span className="text-text-primary">{crumb.label}</span>
+                <span className="text-fg">{crumb.label}</span>
               )}
             </span>
           ))}
         </nav>
       )}
 
-      {/* Title Row */}
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-text-primary tracking-tight">
-            {title}
-          </h1>
-          {description && (
-            <p className="mt-1 text-sm text-text-secondary">
-              {description}
-            </p>
-          )}
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="page-title">{title}</h1>
+          {description && <p className="mt-2 text-sm text-fg-muted">{description}</p>}
         </div>
-
-        {/* Actions Slot */}
-        {actions && (
-          <div className="flex items-center gap-3 flex-shrink-0">
-            {actions}
-          </div>
-        )}
+        {actions && <div className="flex flex-wrap items-center gap-3">{actions}</div>}
       </div>
     </div>
   );

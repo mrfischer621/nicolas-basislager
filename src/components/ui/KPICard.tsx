@@ -1,79 +1,37 @@
 import type { ReactNode } from 'react';
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
+/**
+ * Kennzahl: Etikette in Versalien, Zahl in Albert Sans 900, Akzentlinie
+ * (4 px cta) links. Betraege stehen in Tinte, nicht in Rot/Gruen; eine
+ * Einordnung erscheint immer als Wort (hint).
+ */
 interface KPICardProps {
   label: string;
   value: string | number;
+  hint?: string;
+  /** veraltet: wird nur noch als Wort im Hinweis verwendet */
   trend?: 'up' | 'down' | 'neutral';
   trendValue?: string;
   icon?: ReactNode;
   loading?: boolean;
 }
 
-/**
- * KPICard - Swiss Modern Metric Display
- *
- * Usage:
- * <KPICard
- *   label="Einnahmen"
- *   value="CHF 12'500"
- *   trend="up"
- *   trendValue="+12%"
- * />
- */
-export function KPICard({ label, value, trend, trendValue, icon, loading = false }: KPICardProps) {
-  const trendColors = {
-    up: 'text-success',
-    down: 'text-danger',
-    neutral: 'text-text-secondary',
-  };
-
-  const TrendIcon = {
-    up: TrendingUp,
-    down: TrendingDown,
-    neutral: Minus,
-  };
-
-  const CurrentTrendIcon = trend ? TrendIcon[trend] : null;
-
+export function KPICard({ label, value, hint, trendValue, icon, loading = false }: KPICardProps) {
   return (
-    <div className="card p-6 hover:shadow-hover transition-shadow duration-200">
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          {/* Label */}
-          <p className="text-sm font-medium text-text-secondary mb-1">
-            {label}
-          </p>
-
-          {/* Value */}
-          <p className={`text-3xl font-bold tracking-tight ${
-            trend === 'up' ? 'text-success' :
-            trend === 'down' ? 'text-danger' :
-            'text-text-primary'
-          }`}>
-            {loading ? (
-              <span className="inline-block w-24 h-8 bg-sunken rounded animate-pulse" />
-            ) : (
-              value
-            )}
-          </p>
-
-          {/* Trend Indicator */}
-          {trend && trendValue && !loading && (
-            <div className={`flex items-center gap-1 mt-2 text-sm font-medium ${trendColors[trend]}`}>
-              {CurrentTrendIcon && <CurrentTrendIcon size={14} />}
-              <span>{trendValue}</span>
-            </div>
-          )}
-        </div>
-
-        {/* Icon (optional) */}
+    <div className="card relative overflow-hidden p-5 md:p-6">
+      <span aria-hidden="true" className="absolute inset-y-0 left-0 w-1 bg-cta" />
+      <div className="flex items-start justify-between gap-3">
+        <p className="caps-sm">{label}</p>
         {icon && (
-          <div className="w-10 h-10 rounded-lg bg-brand/10 flex items-center justify-center text-brand">
+          <span aria-hidden="true" className="flex h-9 w-9 items-center justify-center rounded-tile bg-accent-subtle text-fg">
             {icon}
-          </div>
+          </span>
         )}
       </div>
+      <p className="kpi-value mt-2">
+        {loading ? <span className="skeleton inline-block h-8 w-32 align-middle" aria-label="Wird geladen" /> : value}
+      </p>
+      {(hint || trendValue) && !loading && <p className="mt-1 text-sm text-fg-muted">{hint ?? trendValue}</p>}
     </div>
   );
 }

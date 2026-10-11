@@ -154,6 +154,7 @@ export default function InvoiceTable({ invoices, customers, onDelete, onDownload
                       disabled={!canEditInvoice(invoice.status)}
                       className="p-2 text-content-secondary hover:bg-raised rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed"
                       title={canEditInvoice(invoice.status) ? 'Bearbeiten' : getEditBlockedReason(invoice.status)}
+                      aria-label={canEditInvoice(invoice.status) ? 'Bearbeiten' : getEditBlockedReason(invoice.status)}
                     >
                       <Pencil size={18} />
                     </button>
@@ -161,6 +162,7 @@ export default function InvoiceTable({ invoices, customers, onDelete, onDownload
                       onClick={() => onPreviewPDF(invoice)}
                       className="p-2 text-brand hover:bg-brand-light rounded-lg transition"
                       title="PDF Vorschau"
+                      aria-label="PDF Vorschau"
                     >
                       <Eye size={18} />
                     </button>
@@ -168,6 +170,7 @@ export default function InvoiceTable({ invoices, customers, onDelete, onDownload
                       onClick={() => onDownloadPDF(invoice)}
                       className="p-2 text-brand hover:bg-canvas rounded-lg transition"
                       title="PDF herunterladen"
+                      aria-label="PDF herunterladen"
                     >
                       <Download size={18} />
                     </button>
@@ -175,6 +178,7 @@ export default function InvoiceTable({ invoices, customers, onDelete, onDownload
                       onClick={() => handleDelete(invoice.id, invoice.invoice_number)}
                       className="p-2 text-danger hover:bg-danger-subtle rounded-lg transition"
                       title="Löschen"
+                      aria-label="Löschen"
                     >
                       <Trash2 size={18} />
                     </button>

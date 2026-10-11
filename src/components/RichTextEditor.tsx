@@ -56,6 +56,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
             }}
             className={`p-1 rounded transition ${editor.isActive('bold') ? 'bg-surface/25 text-white' : 'text-white/80 hover:bg-surface/15 hover:text-white'}`}
             title="Fett (Ctrl+B)"
+            aria-label="Fett (Ctrl+B)"
           >
             <Bold size={13} />
           </button>
@@ -67,6 +68,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
             }}
             className={`p-1 rounded transition ${editor.isActive('italic') ? 'bg-surface/25 text-white' : 'text-white/80 hover:bg-surface/15 hover:text-white'}`}
             title="Kursiv (Ctrl+I)"
+            aria-label="Kursiv (Ctrl+I)"
           >
             <Italic size={13} />
           </button>
@@ -79,6 +81,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
             }}
             className={`p-1 rounded transition ${editor.isActive('bulletList') ? 'bg-surface/25 text-white' : 'text-white/80 hover:bg-surface/15 hover:text-white'}`}
             title="Aufzählungsliste"
+            aria-label="Aufzählungsliste"
           >
             <List size={13} />
           </button>
@@ -90,6 +93,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
             }}
             className={`p-1 rounded transition ${editor.isActive('orderedList') ? 'bg-surface/25 text-white' : 'text-white/80 hover:bg-surface/15 hover:text-white'}`}
             title="Nummerierte Liste"
+            aria-label="Nummerierte Liste"
           >
             <ListOrdered size={13} />
           </button>

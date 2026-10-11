@@ -1478,6 +1478,7 @@ export default function Settings() {
                           onClick={() => handleUpdateProductCategory(index)}
                           className="p-2 hover:bg-success-subtle rounded transition"
                           title="Speichern"
+                          aria-label="Speichern"
                         >
                           <Check size={18} className="text-success" />
                         </button>
@@ -1485,6 +1486,7 @@ export default function Settings() {
                           onClick={cancelEditProductCategory}
                           className="p-2 hover:bg-danger-subtle rounded transition"
                           title="Abbrechen"
+                          aria-label="Abbrechen"
                         >
                           <X size={18} className="text-danger" />
                         </button>
@@ -1498,6 +1500,7 @@ export default function Settings() {
                           onClick={() => startEditProductCategory(index)}
                           className="p-2 hover:bg-sunken rounded transition"
                           title="Bearbeiten"
+                          aria-label="Bearbeiten"
                         >
                           <Edit2 size={18} className="text-fg-muted" />
                         </button>
@@ -1505,6 +1508,7 @@ export default function Settings() {
                           onClick={() => handleDeleteProductCategory(index)}
                           className="p-2 hover:bg-danger-subtle rounded transition"
                           title="Löschen"
+                          aria-label="Löschen"
                         >
                           <Trash2 size={18} className="text-danger" />
                         </button>
@@ -1594,6 +1598,7 @@ export default function Settings() {
                           onClick={() => handleSaveStage(stage.id)}
                           className="p-2 hover:bg-success-subtle rounded transition"
                           title="Speichern"
+                          aria-label="Speichern"
                         >
                           <Check size={18} className="text-success" />
                         </button>
@@ -1601,6 +1606,7 @@ export default function Settings() {
                           onClick={handleCancelEdit}
                           className="p-2 hover:bg-danger-subtle rounded transition"
                           title="Abbrechen"
+                          aria-label="Abbrechen"
                         >
                           <X size={18} className="text-danger" />
                         </button>
@@ -1611,6 +1617,7 @@ export default function Settings() {
                           onClick={() => handleEditStage(stage)}
                           className="p-2 hover:bg-raised rounded transition"
                           title="Bearbeiten"
+                          aria-label="Bearbeiten"
                         >
                           <Edit2 size={18} className="text-fg-muted" />
                         </button>
@@ -1618,6 +1625,7 @@ export default function Settings() {
                           onClick={() => handleDeleteStage(stage)}
                           className="p-2 hover:bg-danger-subtle rounded transition"
                           title="Löschen"
+                          aria-label="Löschen"
                         >
                           <Trash2 size={18} className="text-danger" />
                         </button>
@@ -1809,6 +1817,7 @@ export default function Settings() {
                           onClick={() => handleUpdateCategory(category.id)}
                           className="p-2 hover:bg-success-subtle rounded transition"
                           title="Speichern"
+                          aria-label="Speichern"
                         >
                           <Check size={18} className="text-success" />
                         </button>
@@ -1816,6 +1825,7 @@ export default function Settings() {
                           onClick={cancelEditCategory}
                           className="p-2 hover:bg-danger-subtle rounded transition"
                           title="Abbrechen"
+                          aria-label="Abbrechen"
                         >
                           <X size={18} className="text-danger" />
                         </button>
@@ -1850,6 +1860,7 @@ export default function Settings() {
                           onClick={() => startEditCategory(category)}
                           className="p-2 hover:bg-sunken rounded transition"
                           title="Bearbeiten"
+                          aria-label="Bearbeiten"
                         >
                           <Edit2 size={18} className="text-fg-muted" />
                         </button>
@@ -1857,6 +1868,7 @@ export default function Settings() {
                           onClick={() => handleDeleteCategory(category.id)}
                           className="p-2 hover:bg-danger-subtle rounded transition"
                           title="Deaktivieren"
+                          aria-label="Deaktivieren"
                         >
                           <Trash2 size={18} className="text-danger" />
                         </button>

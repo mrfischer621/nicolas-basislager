@@ -90,6 +90,7 @@ export default function ProductTable({ products, onEdit, onArchive, onRestore }:
                       onClick={() => onEdit(product)}
                       className="p-2 text-brand hover:bg-canvas rounded-lg transition"
                       title="Bearbeiten"
+                      aria-label="Bearbeiten"
                     >
                       <Pencil size={18} />
                     </button>
@@ -98,6 +99,7 @@ export default function ProductTable({ products, onEdit, onArchive, onRestore }:
                         onClick={() => onArchive(product.id)}
                         className="p-2 text-warning hover:bg-warning-subtle rounded-lg transition"
                         title="Archivieren"
+                        aria-label="Archivieren"
                       >
                         <Archive size={18} />
                       </button>
@@ -106,6 +108,7 @@ export default function ProductTable({ products, onEdit, onArchive, onRestore }:
                         onClick={() => onRestore(product.id)}
                         className="p-2 text-success hover:bg-success-subtle rounded-lg transition"
                         title="Wiederherstellen"
+                        aria-label="Wiederherstellen"
                       >
                         <RotateCcw size={18} />
                       </button>

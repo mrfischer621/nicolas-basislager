@@ -137,6 +137,7 @@ export default function QuoteTable({
                         disabled={!canEditQuote(quote.status)}
                         className="p-2 text-fg-muted hover:bg-raised rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed"
                         title={canEditQuote(quote.status) ? 'Bearbeiten' : getEditBlockedReason(quote.status)}
+                        aria-label={canEditQuote(quote.status) ? 'Bearbeiten' : getEditBlockedReason(quote.status)}
                       >
                         <Pencil size={18} />
                       </button>
@@ -147,6 +148,7 @@ export default function QuoteTable({
                       onClick={() => onPreviewPDF(quote)}
                       className="p-2 text-accent hover:bg-accent-subtle rounded-lg transition"
                       title="PDF Vorschau"
+                      aria-label="PDF Vorschau"
                     >
                       <Eye size={18} />
                     </button>
@@ -156,6 +158,7 @@ export default function QuoteTable({
                       onClick={() => onDownloadPDF(quote)}
                       className="p-2 text-brand hover:bg-canvas rounded-lg transition"
                       title="PDF herunterladen"
+                      aria-label="PDF herunterladen"
                     >
                       <Download size={18} />
                     </button>
@@ -166,6 +169,7 @@ export default function QuoteTable({
                         onClick={() => onConvertToInvoice(quote)}
                         className="p-2 text-success hover:bg-success-subtle rounded-lg transition"
                         title="Als Rechnung erstellen"
+                        aria-label="Als Rechnung erstellen"
                       >
                         <FileCheck size={18} />
                       </button>
@@ -177,6 +181,7 @@ export default function QuoteTable({
                         onClick={() => handleDelete(quote.id, quote.quote_number)}
                         className="p-2 text-danger hover:bg-danger-subtle rounded-lg transition"
                         title="Löschen"
+                        aria-label="Löschen"
                       >
                         <Trash2 size={18} />
                       </button>

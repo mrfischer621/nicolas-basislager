@@ -112,6 +112,7 @@ export function KanbanColumn({
             transition-all duration-150
           "
           title="Neuer Deal"
+          aria-label="Neuer Deal"
         >
           <Plus size={16} />
         </button>
