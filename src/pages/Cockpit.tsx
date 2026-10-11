@@ -211,14 +211,14 @@ export default function Cockpit() {
                 <div>
                   <dt className="flex items-center gap-1.5 text-fg-muted">
                     <span className="h-2 w-2 shrink-0 rounded-sm bg-fg-muted" />
-                    AHV/IV/EO {settings?.ahv_rate ?? 10} %
+                    AHV/IV/EO {settings?.ahv_rate ?? 10}{'\u00a0'}%
                   </dt>
                   <dd className="font-semibold tabular-nums text-fg">{formatChfDisplay(cash.ahv, { decimals: 0 })}</dd>
                 </div>
                 <div>
                   <dt className="flex items-center gap-1.5 text-fg-muted">
                     <span className="h-2 w-2 rounded-sm bg-line-strong" />
-                    Steuern {settings?.tax_rate != null ? `${settings.tax_rate} %` : ''}
+                    Steuern {settings?.tax_rate != null ? `${settings.tax_rate}\u00a0%` : ''}
                   </dt>
                   <dd className="font-semibold tabular-nums text-fg">
                     {cash.taxMissing ? (
