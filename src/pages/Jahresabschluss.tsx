@@ -85,7 +85,7 @@ function BalanceItemsEditor({
               type="button"
               aria-label={`${labelPlaceholder} ${i + 1} entfernen`}
               onClick={() => onChange(items.filter((_, j) => j !== i))}
-              className="rounded-lg px-2 text-fg-muted hover:bg-raised hover:text-danger"
+              className="tap rounded-lg px-2 text-fg-muted hover:bg-raised hover:text-danger"
             >
               <Trash2 size={16} strokeWidth={1.5} />
             </button>
@@ -96,7 +96,7 @@ function BalanceItemsEditor({
         <button
           type="button"
           onClick={() => onChange([...items, { label: '', amount: 0 }])}
-          className="inline-flex items-center gap-1 text-sm font-medium text-fg underline"
+          className="inline-flex min-h-[44px] items-center gap-1 text-sm font-medium text-fg underline md:min-h-0"
         >
           <Plus size={14} strokeWidth={1.5} /> {addLabel}
         </button>
@@ -454,14 +454,14 @@ export default function Jahresabschluss() {
               <input aria-label={`Abschreibungssatz Anlage ${i + 1}`} type="number" step="0.5" className={numberClass} value={a.depreciation_rate || ''} disabled={isLocked} onChange={(e) => updateAsset(i, 'depreciation_rate', Number(e.target.value))} />
               <input aria-label={`Abschreibung Anlage ${i + 1}`} type="number" step="0.01" className={numberClass} value={a.amount || ''} disabled={isLocked} onChange={(e) => updateAsset(i, 'amount', Number(e.target.value))} />
               {!isLocked && (
-                <button type="button" aria-label={`Anlage ${i + 1} entfernen`} className="rounded-lg px-2 text-fg-muted hover:bg-raised hover:text-danger" onClick={() => setFormData({ ...formData, assets: formData.assets.filter((_, j) => j !== i) })}>
+                <button type="button" aria-label={`Anlage ${i + 1} entfernen`} className="tap rounded-lg px-2 text-fg-muted hover:bg-raised hover:text-danger" onClick={() => setFormData({ ...formData, assets: formData.assets.filter((_, j) => j !== i) })}>
                   <Trash2 size={16} strokeWidth={1.5} />
                 </button>
               )}
             </div>
           ))}
           {!isLocked && (
-            <button type="button" className="inline-flex items-center gap-1 text-sm font-medium text-fg underline" onClick={() => setFormData({ ...formData, assets: [...formData.assets, { name: '', value: 0, depreciation_rate: 40, amount: 0 }] })}>
+            <button type="button" className="inline-flex min-h-[44px] items-center gap-1 text-sm font-medium text-fg underline md:min-h-0" onClick={() => setFormData({ ...formData, assets: [...formData.assets, { name: '', value: 0, depreciation_rate: 40, amount: 0 }] })}>
               <Plus size={14} strokeWidth={1.5} /> Anlage hinzufügen
             </button>
           )}
@@ -475,14 +475,14 @@ export default function Jahresabschluss() {
               <input aria-label={`Privatanteil ${i + 1} in Prozent`} type="number" className={numberClass} placeholder="%" value={s.percentage || ''} disabled={isLocked} onChange={(e) => updateShare(i, 'percentage', Number(e.target.value))} />
               <input aria-label={`Privatanteil ${i + 1} Betrag`} type="number" step="0.01" className={numberClass} placeholder="CHF" value={s.amount || ''} disabled={isLocked} onChange={(e) => updateShare(i, 'amount', Number(e.target.value))} />
               {!isLocked && (
-                <button type="button" aria-label={`Privatanteil ${i + 1} entfernen`} className="rounded-lg px-2 text-fg-muted hover:bg-raised hover:text-danger" onClick={() => setFormData({ ...formData, private_shares: formData.private_shares.filter((_, j) => j !== i) })}>
+                <button type="button" aria-label={`Privatanteil ${i + 1} entfernen`} className="tap rounded-lg px-2 text-fg-muted hover:bg-raised hover:text-danger" onClick={() => setFormData({ ...formData, private_shares: formData.private_shares.filter((_, j) => j !== i) })}>
                   <Trash2 size={16} strokeWidth={1.5} />
                 </button>
               )}
             </div>
           ))}
           {!isLocked && (
-            <button type="button" className="inline-flex items-center gap-1 text-sm font-medium text-fg underline" onClick={() => setFormData({ ...formData, private_shares: [...formData.private_shares, { category: '', percentage: 0, amount: 0 }] })}>
+            <button type="button" className="inline-flex min-h-[44px] items-center gap-1 text-sm font-medium text-fg underline md:min-h-0" onClick={() => setFormData({ ...formData, private_shares: [...formData.private_shares, { category: '', percentage: 0, amount: 0 }] })}>
               <Plus size={14} strokeWidth={1.5} /> Privatanteil hinzufügen
             </button>
           )}

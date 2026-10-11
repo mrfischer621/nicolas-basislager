@@ -987,7 +987,7 @@ export default function Settings({ section }: { section: TabType }) {
                   id="vat_enabled"
                   checked={companyFormData.vat_enabled}
                   onChange={(e) => handleCompanyFieldChange('vat_enabled', e.target.checked)}
-                  className="w-4 h-4 text-brand border-line-strong rounded focus:ring-brand mt-1"
+                  className="mt-1 h-6 w-6 rounded border-line-strong text-brand focus:ring-brand md:h-4 md:w-4"
                 />
                 <div className="ml-3">
                   <label htmlFor="vat_enabled" className="text-sm font-medium text-fg">

@@ -108,7 +108,7 @@ export function RowMenu({ items, label }: { items: RowMenuItem[]; label: string 
           setOpen((o) => !o);
         }}
         onKeyDown={(e) => e.stopPropagation()}
-        className="rounded-lg p-1.5 text-fg-muted transition-colors hover:bg-raised hover:text-fg"
+        className="tap rounded-lg p-1.5 text-fg-muted transition-colors hover:bg-raised hover:text-fg"
       >
         <MoreHorizontal className="h-5 w-5" aria-hidden="true" />
       </button>

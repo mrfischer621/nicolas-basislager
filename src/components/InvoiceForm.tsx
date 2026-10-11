@@ -530,7 +530,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
             <button
               type="button"
               onClick={loadCompanyTemplate}
-              className="text-xs text-brand hover:underline"
+              className="tap -my-3 text-xs text-brand hover:underline"
             >
               Vorlage laden
             </button>

@@ -95,7 +95,7 @@ export default function Modal({ isOpen, onClose, title, children, size = 'lg' }:
               type="button"
               onClick={onClose}
               aria-label="Dialog schliessen"
-              className="-mr-2 rounded-lg p-2 text-fg-muted hover:bg-raised hover:text-fg"
+              className="tap -mr-2 rounded-lg p-2 text-fg-muted hover:bg-raised hover:text-fg"
             >
               <X size={20} strokeWidth={1.5} aria-hidden="true" />
             </button>

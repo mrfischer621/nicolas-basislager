@@ -32,7 +32,7 @@ export function RecordHeader({
 }) {
   return (
     <header className="space-y-5">
-      <Link to={back.to} className="inline-flex items-center gap-2 text-sm text-fg-muted hover:text-fg">
+      <Link to={back.to} className="inline-flex min-h-[44px] items-center gap-2 text-sm text-fg-muted hover:text-fg md:min-h-0">
         <ArrowLeft size={16} aria-hidden="true" />
         {back.label}
       </Link>

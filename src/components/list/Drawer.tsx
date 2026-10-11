@@ -89,7 +89,7 @@ export function Drawer({
             </h2>
             {subtitle && <div className="mt-0.5 text-sm text-fg-muted">{subtitle}</div>}
           </div>
-          <button type="button" onClick={onClose} aria-label="Panel schliessen" className="-mr-2 rounded-lg p-2 text-fg-muted hover:bg-raised hover:text-fg">
+          <button type="button" onClick={onClose} aria-label="Panel schliessen" className="tap -mr-2 rounded-lg p-2 text-fg-muted hover:bg-raised hover:text-fg">
             <X size={20} aria-hidden="true" />
           </button>
         </div>

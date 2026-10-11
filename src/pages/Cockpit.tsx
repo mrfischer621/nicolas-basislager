@@ -241,7 +241,7 @@ export default function Cockpit() {
           info="Letzter Kontostand plus offene Rechnungen nach Fälligkeit minus wiederkehrende Ausgaben. Überfällige Rechnungen zählen nicht als Eingang."
           action={
             balance && (
-              <button type="button" className="text-xs text-fg-muted underline hover:text-fg" onClick={() => setBalanceOpen(true)}>
+              <button type="button" className="tap -my-3 text-xs text-fg-muted underline hover:text-fg" onClick={() => setBalanceOpen(true)}>
                 Kontostand erfassen
               </button>
             )

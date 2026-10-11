@@ -480,7 +480,7 @@ export function TimerButton() {
         title={timer.isRunning ? 'Pausieren' : timer.isPaused ? 'Fortsetzen' : 'Timer starten'}
         aria-label={timer.isRunning ? 'Pausieren' : timer.isPaused ? 'Fortsetzen' : 'Timer starten'}
         className={`
-          p-2 rounded-lg transition-colors duration-150
+          tap p-2 rounded-lg transition-colors duration-150
           ${
             timer.isRunning
               ? 'bg-success-subtle text-success-on-subtle hover:bg-success-subtle'
@@ -491,11 +491,11 @@ export function TimerButton() {
         `}
       >
         {timer.isRunning ? (
-          <Pause size={16} strokeWidth={2} />
+          <Pause size={16} strokeWidth={1.5} />
         ) : timer.isPaused ? (
-          <Play size={16} strokeWidth={2} />
+          <Play size={16} strokeWidth={1.5} />
         ) : (
-          <Timer size={16} strokeWidth={2} />
+          <Timer size={16} strokeWidth={1.5} />
         )}
       </button>
 
@@ -505,9 +505,9 @@ export function TimerButton() {
           onClick={handleStopClick}
           title="Timer stoppen & speichern"
           aria-label="Timer stoppen & speichern"
-          className="p-2 rounded-lg bg-danger-subtle text-danger-on-subtle hover:bg-danger-subtle transition-colors duration-150"
+          className="tap p-2 rounded-lg bg-danger-subtle text-danger-on-subtle hover:bg-danger-subtle transition-colors duration-150"
         >
-          <Square size={16} strokeWidth={2} />
+          <Square size={16} strokeWidth={1.5} />
         </button>
       )}
 
@@ -517,11 +517,11 @@ export function TimerButton() {
           onClick={handleChevronClick}
           title="Timer vorkonfigurieren"
           aria-label="Timer vorkonfigurieren"
-          className="p-2 rounded-lg bg-raised text-text-secondary hover:bg-sunken hover:text-text-primary transition-colors duration-150"
+          className="tap p-2 rounded-lg bg-raised text-text-secondary hover:bg-sunken hover:text-text-primary transition-colors duration-150"
         >
           <ChevronDown
             size={14}
-            strokeWidth={2}
+            strokeWidth={1.5}
             className={`transition-transform duration-150 ${isDropdownOpen ? 'rotate-180' : ''}`}
           />
         </button>
@@ -535,7 +535,7 @@ export function TimerButton() {
           aria-label="Zeit verwerfen"
           className="p-2 rounded-lg bg-raised text-text-secondary hover:bg-danger-subtle hover:text-danger transition-colors duration-150"
         >
-          <X size={14} strokeWidth={2} />
+          <X size={14} strokeWidth={1.5} />
         </button>
       )}
 

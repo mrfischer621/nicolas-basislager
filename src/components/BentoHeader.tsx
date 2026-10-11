@@ -98,10 +98,10 @@ export function BentoHeader({ onMenuClick }: { onMenuClick?: () => void }) {
         {/* Mobile Menu Button */}
         <button
           onClick={onMenuClick}
-          className="md:hidden p-2 -ml-2 rounded-lg text-text-secondary hover:text-text-primary hover:bg-raised transition-colors"
+          className="tap md:hidden p-2 -ml-2 rounded-lg text-text-secondary hover:text-text-primary hover:bg-raised transition-colors"
           aria-label="Menü öffnen"
         >
-          <Menu size={20} strokeWidth={2} />
+          <Menu size={20} strokeWidth={1.5} aria-hidden="true" />
         </button>
 
         {/* Breadcrumb area reserved for future use */}
@@ -134,7 +134,7 @@ export function BentoHeader({ onMenuClick }: { onMenuClick?: () => void }) {
             aria-expanded={isUserMenuOpen}
             aria-label="Benutzermenü und Firmenwechsel" 
             className="
-              flex items-center gap-2
+              flex min-h-[44px] items-center gap-2 md:min-h-0
               px-3 py-2
               rounded-lg
               bg-raised

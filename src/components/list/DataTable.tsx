@@ -246,13 +246,16 @@ export function DataTable<T>({
                 return (
                   <li key={id} className={`flex items-center gap-3 border-b border-line px-4 py-3 ${selected ? 'bg-accent-subtle' : ''}`}>
                     {selection && canSelect(row) && (
-                      <input
-                        type="checkbox"
-                        aria-label={`${rowLabel(row)} auswählen`}
-                        checked={!!selected}
-                        onChange={() => selection.toggle(id)}
-                        className="h-5 w-5 shrink-0 rounded border-line-strong accent-[rgb(var(--bw-fg))]"
-                      />
+                      // Label als Trefferflaeche: 44 x 44 px um die Checkbox
+                      <label className="-my-3 -ml-3 flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center">
+                        <input
+                          type="checkbox"
+                          aria-label={`${rowLabel(row)} auswählen`}
+                          checked={!!selected}
+                          onChange={() => selection.toggle(id)}
+                          className="h-5 w-5 rounded border-line-strong accent-[rgb(var(--bw-fg))]"
+                        />
+                      </label>
                     )}
                     <button
                       type="button"

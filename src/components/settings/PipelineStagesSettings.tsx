@@ -93,10 +93,10 @@ function Editor({ stages }: { stages: PipelineStage[] }) {
         {drafts.map((d, i) => (
           <li key={d.id} className="flex flex-wrap items-center gap-2 rounded-lg border border-line p-2 sm:flex-nowrap">
             <div className="flex flex-col">
-              <button type="button" className="rounded p-0.5 text-fg-muted hover:bg-raised hover:text-fg disabled:opacity-30" disabled={i === 0} onClick={() => move(i, -1)} aria-label={`${d.name} nach oben`}>
+              <button type="button" className="tap rounded p-0.5 text-fg-muted hover:bg-raised hover:text-fg disabled:opacity-30" disabled={i === 0} onClick={() => move(i, -1)} aria-label={`${d.name} nach oben`}>
                 <ArrowUp size={14} aria-hidden="true" />
               </button>
-              <button type="button" className="rounded p-0.5 text-fg-muted hover:bg-raised hover:text-fg disabled:opacity-30" disabled={i === drafts.length - 1} onClick={() => move(i, 1)} aria-label={`${d.name} nach unten`}>
+              <button type="button" className="tap rounded p-0.5 text-fg-muted hover:bg-raised hover:text-fg disabled:opacity-30" disabled={i === drafts.length - 1} onClick={() => move(i, 1)} aria-label={`${d.name} nach unten`}>
                 <ArrowDown size={14} aria-hidden="true" />
               </button>
             </div>
