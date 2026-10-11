@@ -122,7 +122,7 @@ export default function TimeEntryTable({
 
   if (entries.length === 0) {
     return (
-      <div className="bg-surface rounded-lg shadow-sm p-6">
+      <div className="card p-6">
         <p className="text-fg-muted text-center">Keine Zeiteinträge vorhanden. Erstellen Sie den ersten Eintrag.</p>
       </div>
     );
@@ -281,7 +281,7 @@ export default function TimeEntryTable({
   };
 
   return (
-    <div className="bg-surface rounded-lg shadow-sm overflow-hidden">
+    <div className="card overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead className="bg-canvas border-b border-line">

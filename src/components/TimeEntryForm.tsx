@@ -115,7 +115,7 @@ export default function TimeEntryForm({ onSubmit, editingEntry, onCancelEdit, pr
   const amount = calculateAmount();
 
   return (
-    <div className="bg-surface rounded-lg shadow-sm p-6">
+    <div className="card p-6">
       <h2 className="text-xl font-semibold text-fg mb-4">
         {editingEntry ? 'Zeiteintrag bearbeiten' : 'Neuer Zeiteintrag'}
       </h2>

@@ -361,10 +361,10 @@ export default function Zeiterfassung() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-fg">Zeiterfassung</h1>
-          <p className="text-fg-muted mt-1">Erfassen und analysieren Sie Ihre Arbeitszeiten</p>
+          <h1 className="page-title">Zeiterfassung</h1>
+          <p className="mt-2 text-sm text-fg-muted">Erfassen und analysieren Sie Ihre Arbeitszeiten</p>
         </div>
         {activeTab === 'erfassung' && (
           <div className="flex items-center gap-3">
@@ -468,9 +468,9 @@ export default function Zeiterfassung() {
 
             <button
               onClick={handleAddNew}
-              className="flex items-center gap-2 px-4 py-2 bg-brand text-accent-fg rounded-lg hover:bg-brand-dark transition"
+              className="btn-cta"
             >
-              <Plus size={20} />
+              <Plus size={18} aria-hidden="true" />
               Detailliert
             </button>
           </div>
@@ -507,8 +507,8 @@ export default function Zeiterfassung() {
 
       {/* Error Message */}
       {error && (
-        <div className="bg-danger-subtle border border-danger-subtle text-danger px-4 py-3 rounded-lg">
-          {error}
+        <div role="alert" className="rounded-lg border border-danger bg-danger-subtle px-4 py-3 text-danger">
+          <strong>Fehler:</strong> {error}
         </div>
       )}
 
@@ -524,7 +524,7 @@ export default function Zeiterfassung() {
         <>
           {/* Quick-Add Inline Form */}
       {projects.length > 0 && (
-        <div className="bg-surface rounded-lg shadow-sm p-4">
+        <div className="card p-4">
           <form onSubmit={handleQuickAdd} className="flex flex-wrap gap-3 items-end">
             <div className="flex-1 min-w-[140px]">
               <label className="block text-xs font-medium text-fg-muted mb-1">Projekt</label>
@@ -637,7 +637,7 @@ export default function Zeiterfassung() {
 
           {/* Table */}
           {isLoading ? (
-            <div className="bg-surface rounded-lg shadow-sm p-6">
+            <div className="card p-6">
               <p className="text-fg-muted text-center">Lädt Zeiteinträge...</p>
             </div>
           ) : (
@@ -657,7 +657,7 @@ export default function Zeiterfassung() {
       {/* Tab Content: Reporting */}
       {activeTab === 'reporting' && (
         <Suspense fallback={
-          <div className="bg-surface rounded-lg shadow-sm p-6">
+          <div className="card p-6">
             <p className="text-fg-muted text-center">Auswertung wird geladen…</p>
           </div>
         }>

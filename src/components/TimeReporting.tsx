@@ -158,7 +158,7 @@ export default function TimeReporting({ entries, projects }: TimeReportingProps)
   return (
     <div className="space-y-6">
       {/* Filters */}
-      <div className="bg-surface rounded-lg shadow-sm p-4">
+      <div className="card p-4">
         <div className="flex items-center gap-2 mb-4">
           <Filter size={18} className="text-fg-muted" />
           <h3 className="font-medium text-fg">Filter</h3>
@@ -262,7 +262,7 @@ export default function TimeReporting({ entries, projects }: TimeReportingProps)
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-surface rounded-lg shadow-sm p-4">
+        <div className="card p-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-accent-subtle rounded-lg">
               <FileText size={20} className="text-accent" />
@@ -274,7 +274,7 @@ export default function TimeReporting({ entries, projects }: TimeReportingProps)
           </div>
         </div>
 
-        <div className="bg-surface rounded-lg shadow-sm p-4">
+        <div className="card p-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-accent-subtle rounded-lg">
               <Clock size={20} className="text-accent" />
@@ -286,7 +286,7 @@ export default function TimeReporting({ entries, projects }: TimeReportingProps)
           </div>
         </div>
 
-        <div className="bg-surface rounded-lg shadow-sm p-4">
+        <div className="card p-4">
           <div className="flex items-center gap-3">
             <div className={`p-2 rounded-lg ${kpis.billablePercent >= 70 ? 'bg-success-subtle' : 'bg-warning-subtle'}`}>
               <TrendingUp size={20} className={kpis.billablePercent >= 70 ? 'text-success' : 'text-warning'} />
@@ -298,7 +298,7 @@ export default function TimeReporting({ entries, projects }: TimeReportingProps)
           </div>
         </div>
 
-        <div className="bg-surface rounded-lg shadow-sm p-4">
+        <div className="card p-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-success-subtle rounded-lg">
               <DollarSign size={20} className="text-success" />
@@ -312,7 +312,7 @@ export default function TimeReporting({ entries, projects }: TimeReportingProps)
       </div>
 
       {/* Revenue Summary */}
-      <div className="bg-surface rounded-lg shadow-sm p-4">
+      <div className="card p-4">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-fg-muted">Gesamtumsatz (verrechenbare Stunden)</p>
@@ -328,7 +328,7 @@ export default function TimeReporting({ entries, projects }: TimeReportingProps)
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Bar Chart: Billable vs Non-Billable */}
-        <div className="bg-surface rounded-lg shadow-sm p-4">
+        <div className="card p-4">
           <h3 className="font-medium text-fg mb-4">Stunden nach Verrechenbarkeit</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -351,7 +351,7 @@ export default function TimeReporting({ entries, projects }: TimeReportingProps)
         </div>
 
         {/* Project Breakdown */}
-        <div className="bg-surface rounded-lg shadow-sm p-4">
+        <div className="card p-4">
           <h3 className="font-medium text-fg mb-4">Stunden nach Projekt</h3>
           {projectBreakdown.length === 0 ? (
             <p className="text-fg-muted text-center py-8">Keine Daten für den gewählten Zeitraum</p>
