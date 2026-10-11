@@ -7,7 +7,7 @@ import { useCompany } from '../context/CompanyContext';
 import { useYearEnd } from '../hooks/useYearEnd';
 import { useCategories } from '../hooks/queries';
 import Modal from '../components/Modal';
-import { Badge, Button, Card, PageHeader, SegmentedControl } from '../components/ui';
+import { Badge, Button, Card, SegmentedControl } from '../components/ui';
 import type { Asset, BalanceItem, PrivateShare, YearEndClosingData } from '../lib/supabase';
 import { formatChfDisplay, roundRappen } from '../utils/money';
 import { INVOICE_CATEGORY, type FinanceEntry } from '../utils/financeAggregation';
@@ -270,11 +270,13 @@ export default function Jahresabschluss() {
   const c = report.checks;
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
-      <PageHeader
-        title="Jahresabschluss"
-        description="Einnahmen-Ausgaben-Rechnung und Vermögenslage nach Art. 957 Abs. 2 OR"
-        actions={
+    <div className="space-y-6">
+      {/* Eingebettet in Berichte > Jahresabschluss: Kopf als Abschnittstitel */}
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h2 className="text-lg font-bold text-fg">Jahresabschluss {selectedYear}</h2>
+          <p className="mt-1 text-sm text-fg-muted">Einnahmen-Ausgaben-Rechnung und Vermögenslage nach Art. 957 Abs. 2 OR</p>
+        </div>
           <div className="flex flex-wrap items-center gap-3">
             <label htmlFor="year-select" className="sr-only">
               Geschäftsjahr
@@ -295,8 +297,7 @@ export default function Jahresabschluss() {
               {isLocked ? 'Abgeschlossen' : 'Entwurf'}
             </Badge>
           </div>
-        }
-      />
+      </div>
 
       {error && <div role="alert" className="rounded-lg border border-danger bg-danger-subtle p-4 text-danger-on-subtle"><strong>Fehler:</strong> {error}</div>}
 
