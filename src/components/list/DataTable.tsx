@@ -21,6 +21,8 @@ export interface MobileCard {
   subtitle?: ReactNode;
   amount?: ReactNode;
   badge?: ReactNode;
+  /** kleine Knoepfe rechts in der Karte (z. B. Anrufen, E-Mail) */
+  actions?: ReactNode;
 }
 
 export interface RowGroup<T> {
@@ -274,6 +276,7 @@ export function DataTable<T>({
                         </div>
                       )}
                     </button>
+                    {card.actions}
                     {menu && <RowMenu items={menu(row)} label={`Aktionen für ${rowLabel(row)}`} />}
                   </li>
                 );

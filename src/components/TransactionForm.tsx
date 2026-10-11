@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
+import { parseNumber } from '../utils/numberInput';
+import { roundRappen } from '../utils/money';
 import { Upload, X, FileText, Image, Camera, Paperclip } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useCompany } from '../context/CompanyContext';
@@ -118,6 +120,12 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
 
   const handleSubmit = async (e: React.FormEvent, saveAndNew = false) => {
     e.preventDefault();
+    // Textfeld statt type=number: Komma und Tausender-Apostroph sind erlaubt
+    const parsedAmount = parseNumber(amount);
+    if (parsedAmount === null || parsedAmount <= 0) {
+      toast.error('Bitte einen Betrag grösser als 0 eingeben.');
+      return;
+    }
     setLoading(true);
 
     try {
@@ -131,7 +139,7 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
         type: activeTab,
         transaction_number: transactionNumber || null, // Let DB trigger generate if empty
         date,
-        amount: parseFloat(amount),
+        amount: roundRappen(parsedAmount),
         category: emptyToNull(categoryName),
         description: emptyToNull(description),
         counterparty: emptyToNull(counterparty),
@@ -290,10 +298,11 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
           </label>
           <input
             id="transaction-amount"
-            type="number"
+            type="text"
             inputMode="decimal"
-            step="0.01"
-            min="0"
+            enterKeyHint="next"
+            autoComplete="off"
+            placeholder="0.00"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             className="input text-right"

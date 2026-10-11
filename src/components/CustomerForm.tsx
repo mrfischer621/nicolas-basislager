@@ -193,6 +193,7 @@ export default function CustomerForm({ onSubmit, editingCustomer, onCancelEdit, 
               </label>
               <input
                 type="email"
+                autoComplete="email"
                 id="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -207,6 +208,7 @@ export default function CustomerForm({ onSubmit, editingCustomer, onCancelEdit, 
               </label>
               <input
                 type="tel"
+                autoComplete="tel"
                 id="phone"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}

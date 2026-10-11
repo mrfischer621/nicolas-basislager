@@ -82,6 +82,7 @@ export function SearchField({ value, onChange, placeholder }: { value: string; o
       <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-muted" aria-hidden="true" />
       <input
         type="search"
+        enterKeyHint="search"
         value={text}
         onChange={(e) => setText(e.target.value)}
         placeholder={placeholder}

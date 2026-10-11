@@ -1,3 +1,4 @@
+import { ContactActions } from '../ContactActions';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -186,10 +187,12 @@ function Form({ target, stages, onClose }: { target: DrawerTarget; stages: Pipel
           </select>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
-            <input aria-label="Firmenname" className="input" placeholder="Firma" value={prospect.company ?? ''} onChange={(e) => setP('company', e.target.value)} />
-            <input aria-label="Person" className="input" placeholder="Person" value={prospect.contact_person ?? (prospect.company ? prospect.name ?? '' : '')} onChange={(e) => setP('contact_person', e.target.value)} />
-            <input aria-label="E-Mail" type="email" className="input" placeholder="E-Mail" value={prospect.email ?? ''} onChange={(e) => setP('email', e.target.value)} />
-            <input aria-label="Telefon" className="input" placeholder="Telefon" value={prospect.phone ?? ''} onChange={(e) => setP('phone', e.target.value)} />
+            <input aria-label="Firmenname" autoComplete="organization" className="input" placeholder="Firma" value={prospect.company ?? ''} onChange={(e) => setP('company', e.target.value)} />
+            <input aria-label="Person" autoComplete="name" className="input" placeholder="Person" value={prospect.contact_person ?? (prospect.company ? prospect.name ?? '' : '')} onChange={(e) => setP('contact_person', e.target.value)} />
+            <input aria-label="E-Mail" type="email" autoComplete="email" className="input" placeholder="E-Mail" value={prospect.email ?? ''} onChange={(e) => setP('email', e.target.value)} />
+            <input aria-label="Telefon" type="tel" autoComplete="tel" className="input" placeholder="Telefon" value={prospect.phone ?? ''} onChange={(e) => setP('phone', e.target.value)} />
+            {/* Unterwegs: direkt anrufen oder schreiben, ohne das Panel zu verlassen */}
+            <ContactActions name={prospect.contact_person || prospect.company || 'Kontakt'} phone={prospect.phone} email={prospect.email} className="sm:col-span-2" />
           </div>
         )}
       </fieldset>

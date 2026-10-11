@@ -8,6 +8,8 @@ import { CompanyEditor, PersonEditor } from '../components/contacts/Editors';
 import { useConfirm } from '../context/ConfirmProvider';
 import { useCompany } from '../context/CompanyContext';
 import { useCompanyList, useInvalidateContacts, usePersonList, type PersonRow } from '../hooks/useContacts';
+import { ContactActions } from '../components/ContactActions';
+import { telHref } from '../utils/contactLinks';
 import { useFinanceEntries } from '../hooks/useFinance';
 import { useInvoiceSummary } from '../hooks/useInvoices';
 import { useCustomers } from '../hooks/queries';
@@ -106,6 +108,7 @@ export default function Kontakte() {
   const personMenu = (p: PersonRow): RowMenuItem[] => [
     { label: 'Bearbeiten', onSelect: () => setPersonEditor({ person: p }) },
     { label: 'Zur Firma', onSelect: () => navigate(`/kontakte/firmen/${p.customer_id}`) },
+    { label: 'Anrufen', onSelect: () => void (window.location.href = telHref(p.phone) ?? ''), hidden: !telHref(p.phone) },
     { label: 'E-Mail schreiben', onSelect: () => void (window.location.href = `mailto:${p.email}`), hidden: !p.email },
     {
       label: 'Löschen',
@@ -279,7 +282,7 @@ export default function Kontakte() {
             onRowClick={(p) => setPersonEditor({ person: p })}
             menu={personMenu}
             loading={persons.isLoading}
-            mobile={(p) => ({ title: p.name, subtitle: `${p.role ? `${p.role}, ` : ''}${p.customer.name}` })}
+            mobile={(p) => ({ title: p.name, subtitle: `${p.role ? `${p.role}, ` : ''}${p.customer.name}`, actions: <ContactActions name={p.name} phone={p.phone} email={p.email} /> })}
             empty={<EmptyState icon={<Users size={20} />} title="Keine Personen gefunden" />}
           />
         )}

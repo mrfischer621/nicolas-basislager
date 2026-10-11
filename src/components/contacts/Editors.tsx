@@ -114,25 +114,25 @@ function PersonForm({ person, customerId, onClose }: { person: CustomerContact |
           <label htmlFor="p-name" className="label">
             Name
           </label>
-          <input id="p-name" className="input" required {...field('name')} />
+          <input id="p-name" autoComplete="name" className="input" required {...field('name')} />
         </div>
         <div>
           <label htmlFor="p-rolle" className="label">
             Funktion
           </label>
-          <input id="p-rolle" className="input" {...field('role')} />
+          <input id="p-rolle" autoComplete="organization-title" className="input" {...field('role')} />
         </div>
         <div>
           <label htmlFor="p-mail" className="label">
             E-Mail
           </label>
-          <input id="p-mail" type="email" className="input" {...field('email')} />
+          <input id="p-mail" type="email" autoComplete="email" className="input" {...field('email')} />
         </div>
         <div>
           <label htmlFor="p-tel" className="label">
             Telefon
           </label>
-          <input id="p-tel" type="tel" className="input" {...field('phone')} />
+          <input id="p-tel" type="tel" autoComplete="tel" className="input" {...field('phone')} />
         </div>
       </div>
       <label className="flex items-center gap-2 text-sm text-fg">

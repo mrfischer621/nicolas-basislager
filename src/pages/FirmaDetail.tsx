@@ -1,3 +1,5 @@
+import { ContactActions } from '../components/ContactActions';
+import { telHref } from '../utils/contactLinks';
 import { useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -230,13 +232,13 @@ export default function FirmaDetail() {
                     <dt className="caps-sm">Kontakt</dt>
                     <dd className="mt-1 space-y-1">
                       {c.email && (
-                        <a className="flex items-center gap-2 hover:underline" href={`mailto:${c.email}`}>
+                        <a className="flex min-h-[44px] items-center gap-2 hover:underline md:min-h-0" href={`mailto:${c.email}`}>
                           <Mail size={14} aria-hidden="true" />
                           {c.email}
                         </a>
                       )}
                       {c.phone && (
-                        <a className="flex items-center gap-2 hover:underline" href={`tel:${c.phone}`}>
+                        <a className="flex min-h-[44px] items-center gap-2 hover:underline md:min-h-0" href={telHref(c.phone) ?? undefined}>
                           <Phone size={14} aria-hidden="true" />
                           {c.phone}
                         </a>
@@ -449,10 +451,11 @@ export default function FirmaDetail() {
                       </span>
                       <span className="block truncate text-xs text-fg-muted">{[p.role, p.email, p.phone].filter(Boolean).join(' · ')}</span>
                     </button>
+                    <ContactActions name={p.name} phone={p.phone} email={p.email} className="md:hidden" />
                     {!p.is_primary && (
                       <button
                         type="button"
-                        className="shrink-0 text-xs text-fg-muted underline hover:text-fg"
+                        className="tap -my-2 shrink-0 text-xs text-fg-muted underline hover:text-fg"
                         onClick={async () => {
                           await supabase.from('customer_contacts').update({ is_primary: false }).eq('customer_id', c.id);
                           await supabase.from('customer_contacts').update({ is_primary: true }).eq('id', p.id);
