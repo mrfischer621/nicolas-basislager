@@ -2,12 +2,14 @@ import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import hotToast from 'react-hot-toast';
 import { uploadCompanyLogo, validateLogoFile } from '../utils/logoUpload';
+import { getThemePreference, setThemePreference, type ThemePreference } from '../utils/theme';
+import { SegmentedControl } from '../components/ui';
 import { useConfirm } from '../context/ConfirmProvider';
 import { supabase } from '../lib/supabase';
 import type { PipelineStage, Category, CategoryType } from '../lib/supabase';
 import { useCompany } from '../context/CompanyContext';
 import { useAuth } from '../context/AuthProvider';
-import { Building2, Save, AlertCircle, CheckCircle, TrendingUp, Edit2, Check, X, Trash2, Plus, User, FileText, Tags, ArrowDownCircle, ArrowUpCircle, Package } from 'lucide-react';
+import { Building2, Save, AlertCircle, CheckCircle, TrendingUp, Edit2, Check, X, Trash2, Plus, User, FileText, Tags, Package } from 'lucide-react';
 
 interface CompanyFormData {
   name: string;
@@ -45,6 +47,7 @@ export default function Settings() {
   const { selectedCompany, refreshCompanies } = useCompany();
   const { user, profile } = useAuth();
   const [searchParams] = useSearchParams();
+  const [themePref, setThemePref] = useState<ThemePreference>(getThemePreference);
   const [activeTab, setActiveTab] = useState<TabType>(() => {
     const tab = searchParams.get('tab');
     return tab && TAB_IDS.includes(tab as TabType) ? (tab as TabType) : 'company';
@@ -775,17 +778,16 @@ export default function Settings() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-fg">Einstellungen</h1>
-        <p className="text-fg-muted mt-1">Verwalten Sie Ihre Firmen- und Benutzereinstellungen</p>
+        <h1 className="page-title">Einstellungen</h1>
+        <p className="mt-2 text-sm text-fg-muted">Firma, Benutzer, Vorlagen, Pipeline und Kategorien</p>
       </div>
 
       {/* Toast Notification */}
       {toast && (
         <div
-          className={`flex items-center gap-3 p-4 rounded-lg ${
-            toast.type === 'success'
-              ? 'bg-success-subtle border border-success-subtle'
-              : 'bg-danger-subtle border border-danger-subtle'
+          role="status"
+          className={`flex items-center gap-3 rounded-lg border p-4 ${
+            toast.type === 'success' ? 'border-success bg-success-subtle' : 'border-danger bg-danger-subtle'
           }`}
         >
           {toast.type === 'success' ? (
@@ -801,16 +803,17 @@ export default function Settings() {
 
       {/* Tabs */}
       <div className="border-b border-line">
-        <nav className="flex space-x-8">
+        <nav aria-label="Bereiche der Einstellungen" className="-mb-px flex gap-6 overflow-x-auto">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`pb-3 px-1 border-b-2 font-medium text-sm transition flex items-center gap-2 ${
+              aria-current={activeTab === tab.id ? 'page' : undefined}
+              className={`flex items-center gap-2 whitespace-nowrap border-b-4 px-1 pb-3 font-display text-sm font-bold transition-colors ${
                 activeTab === tab.id
-                  ? 'border-brand text-brand'
-                  : 'border-transparent text-fg-muted hover:text-fg hover:border-line-strong'
+                  ? 'border-cta text-fg'
+                  : 'border-transparent text-fg-muted hover:border-line-strong hover:text-fg'
               }`}
             >
               <tab.icon size={18} />
@@ -822,7 +825,7 @@ export default function Settings() {
 
       {/* Tab Content: Company Profile */}
       {activeTab === 'company' && (
-        <div className="bg-surface rounded-lg shadow-sm p-6">
+        <div className="card p-5 md:p-7">
           <form onSubmit={handleCompanySubmit} className="space-y-6">
             {/* Company Name */}
             <div>
@@ -1220,7 +1223,26 @@ export default function Settings() {
 
       {/* Tab Content: User Profile */}
       {activeTab === 'profile' && (
-        <div className="bg-surface rounded-lg shadow-sm p-6">
+        <>
+        {/* Darstellung: pro Geraet, Standard folgt dem System */}
+        <div className="card p-5 md:p-7">
+          <h2 className="mb-1 text-lg font-bold text-fg">Darstellung</h2>
+          <p className="mb-4 text-sm text-fg-muted">Gilt für dieses Gerät. «System» folgt der Einstellung des Betriebssystems.</p>
+          <SegmentedControl
+            label="Darstellung"
+            options={[
+              { value: 'system' as ThemePreference, label: 'System' },
+              { value: 'light' as ThemePreference, label: 'Hell' },
+              { value: 'dark' as ThemePreference, label: 'Dunkel' },
+            ]}
+            value={themePref}
+            onChange={(v) => {
+              setThemePref(v);
+              setThemePreference(v);
+            }}
+          />
+        </div>
+        <div className="card p-5 md:p-7">
           <div className="mb-6">
             <h2 className="text-lg font-semibold text-fg mb-2">Benutzerprofil</h2>
             <p className="text-sm text-fg-muted">
@@ -1309,11 +1331,12 @@ export default function Settings() {
             </div>
           </form>
         </div>
+        </>
       )}
 
       {/* Tab Content: Text Templates */}
       {activeTab === 'templates' && (
-        <div className="bg-surface rounded-lg shadow-sm p-6">
+        <div className="card p-5 md:p-7">
           <div className="mb-6">
             <h2 className="text-lg font-semibold text-fg mb-2">Textvorlagen</h2>
             <p className="text-sm text-fg-muted">
@@ -1409,7 +1432,7 @@ export default function Settings() {
 
       {/* Tab Content: Product Categories (Phase 3.2) */}
       {activeTab === 'product_categories' && (
-        <div className="bg-surface rounded-lg shadow-sm p-6">
+        <div className="card p-5 md:p-7">
           <div className="mb-6">
             <h2 className="text-lg font-semibold text-fg mb-2">Produktkategorien verwalten</h2>
             <p className="text-sm text-fg-muted">
@@ -1528,7 +1551,7 @@ export default function Settings() {
 
       {/* Tab Content: Pipeline Settings */}
       {activeTab === 'pipeline' && (
-        <div className="bg-surface rounded-lg shadow-sm p-6">
+        <div className="card p-5 md:p-7">
           <div className="mb-6">
             <h2 className="text-lg font-semibold text-fg mb-2">Pipeline-Phasen verwalten</h2>
             <p className="text-sm text-fg-muted">
@@ -1650,7 +1673,7 @@ export default function Settings() {
 
       {/* Tab Content: Buchungskategorien */}
       {activeTab === 'categories' && (
-        <div className="bg-surface rounded-lg shadow-sm p-6">
+        <div className="card p-5 md:p-7">
           <div className="mb-6">
             <h2 className="text-lg font-semibold text-fg mb-2">Buchungskategorien verwalten</h2>
             <p className="text-sm text-fg-muted">
@@ -1659,39 +1682,17 @@ export default function Settings() {
           </div>
 
           {/* Type Filter */}
-          <div className="flex gap-2 mb-4">
-            <button
-              onClick={() => setCategoryTypeFilter('all')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                categoryTypeFilter === 'all'
-                  ? 'bg-ink text-white'
-                  : 'bg-raised text-fg hover:bg-sunken'
-              }`}
-            >
-              Alle
-            </button>
-            <button
-              onClick={() => setCategoryTypeFilter('income')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 ${
-                categoryTypeFilter === 'income'
-                  ? 'bg-success text-white'
-                  : 'bg-success-subtle text-success hover:bg-success-subtle'
-              }`}
-            >
-              <ArrowDownCircle size={16} />
-              Einnahmen
-            </button>
-            <button
-              onClick={() => setCategoryTypeFilter('expense')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 ${
-                categoryTypeFilter === 'expense'
-                  ? 'bg-danger text-white'
-                  : 'bg-danger-subtle text-danger hover:bg-danger-subtle'
-              }`}
-            >
-              <ArrowUpCircle size={16} />
-              Ausgaben
-            </button>
+          <div className="mb-4">
+            <SegmentedControl
+              label="Kategorien filtern"
+              options={[
+                { value: 'all' as const, label: 'Alle' },
+                { value: 'income' as const, label: 'Einnahmen' },
+                { value: 'expense' as const, label: 'Ausgaben' },
+              ]}
+              value={categoryTypeFilter}
+              onChange={setCategoryTypeFilter}
+            />
           </div>
 
           {/* Add New Category */}
@@ -1842,15 +1843,11 @@ export default function Settings() {
                           {category.account_number || '–'}
                         </span>
                         <span className="font-medium text-fg">{category.name}</span>
-                        <span className={`text-xs px-2 py-0.5 rounded-full ${
-                          category.type === 'income'
-                            ? 'bg-success-subtle text-success'
-                            : 'bg-danger-subtle text-danger'
-                        }`}>
+                        <span className={category.type === 'income' ? 'badge-accent' : 'badge-neutral'}>
                           {category.type === 'income' ? 'Einnahme' : 'Ausgabe'}
                         </span>
                         {category.is_tax_relevant && (
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-accent-subtle text-accent">
+                          <span className="badge-neutral">
                             Steuerrelevant
                           </span>
                         )}

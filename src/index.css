@@ -333,3 +333,15 @@
 .rich-text-display strong {
   font-weight: 600;
 }
+
+/* Eingabefelder brauchen einen Rand mit 3:1 (WCAG 1.4.11). Der Hairline-
+   Rand "line" ist dekorativ (1.3:1); an Feldern wird er auf line-strong
+   (3.9:1) angehoben. Hoehere Spezifitaet als die Tailwind-Klasse. */
+input.border-line:not([type='checkbox']):not([type='radio']):not([type='color']),
+select.border-line,
+textarea.border-line,
+input.border-surface-border,
+select.border-surface-border,
+textarea.border-surface-border {
+  border-color: rgb(var(--bw-line-strong));
+}

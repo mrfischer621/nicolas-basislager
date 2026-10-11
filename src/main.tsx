@@ -3,6 +3,10 @@ import { createRoot } from 'react-dom/client'
 import { Toaster } from 'react-hot-toast'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import './index.css'
+import { applyTheme } from './utils/theme'
+
+// Gespeicherte Darstellung (Hell/Dunkel/System) vor dem ersten Rendern setzen
+applyTheme()
 import App from './App.tsx'
 import { AuthProvider } from './context/AuthProvider'
 import { CompanyProvider } from './context/CompanyContext'
