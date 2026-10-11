@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { MoreHorizontal } from 'lucide-react';
+import { useIsMobile } from '../../hooks/useMediaQuery';
 
 export interface RowMenuItem {
   label: string;
@@ -14,10 +15,12 @@ export interface RowMenuItem {
 /**
  * Ein Menue pro Zeile (⋯) statt mehrerer Icons. Ausgeblendete Eintraege
  * erscheinen nicht; gefaehrliche stehen zuletzt, durch eine Linie getrennt.
- * Pfeiltasten bewegen den Fokus, Escape schliesst.
+ * Pfeiltasten bewegen den Fokus, Escape schliesst. Auf dem Handy als Blatt
+ * von unten mit grossen Eintraegen (gleiche Eintraege, gleiche Logik).
  */
 export function RowMenu({ items, label }: { items: RowMenuItem[]; label: string }) {
   const [open, setOpen] = useState(false);
+  const mobile = useIsMobile();
   const [pos, setPos] = useState({ top: 0, left: 0 });
   const buttonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -28,6 +31,10 @@ export function RowMenu({ items, label }: { items: RowMenuItem[]; label: string 
 
   useLayoutEffect(() => {
     if (!open || !buttonRef.current) return;
+    if (mobile) {
+      menuRef.current?.querySelector<HTMLElement>('[role="menuitem"]')?.focus();
+      return;
+    }
     const rect = buttonRef.current.getBoundingClientRect();
     const width = 224;
     const height = menuRef.current?.offsetHeight ?? 0;
@@ -37,7 +44,7 @@ export function RowMenu({ items, label }: { items: RowMenuItem[]; label: string 
       left: Math.max(8, Math.min(rect.right - width, window.innerWidth - width - 8)),
     });
     menuRef.current?.querySelector<HTMLElement>('[role="menuitem"]')?.focus();
-  }, [open]);
+  }, [open, mobile]);
 
   useEffect(() => {
     if (!open) return;
@@ -61,15 +68,18 @@ export function RowMenu({ items, label }: { items: RowMenuItem[]; label: string 
     const onScroll = () => setOpen(false);
     document.addEventListener('mousedown', onDown);
     document.addEventListener('keydown', onKey, true);
-    window.addEventListener('resize', onScroll);
-    document.addEventListener('scroll', onScroll, true);
+    // Das Blatt auf dem Handy bleibt beim Scrollen offen (es haengt an keiner Zeile)
+    if (!mobile) {
+      window.addEventListener('resize', onScroll);
+      document.addEventListener('scroll', onScroll, true);
+    }
     return () => {
       document.removeEventListener('mousedown', onDown);
       document.removeEventListener('keydown', onKey, true);
       window.removeEventListener('resize', onScroll);
       document.removeEventListener('scroll', onScroll, true);
     };
-  }, [open]);
+  }, [open, mobile]);
 
   if (visible.length === 0) return <span className="inline-block w-8" aria-hidden="true" />;
 
@@ -87,7 +97,7 @@ export function RowMenu({ items, label }: { items: RowMenuItem[]; label: string 
         e.stopPropagation();
         void run(item);
       }}
-      className={`block w-full px-4 py-2 text-left text-sm focus-visible:[outline-offset:-2px] ${
+      className={`block w-full text-left focus-visible:[outline-offset:-2px] ${mobile ? 'min-h-[48px] px-5 py-3 text-base' : 'px-4 py-2 text-sm'} ${
         item.danger ? 'text-danger-on-subtle hover:bg-danger-subtle focus:bg-danger-subtle' : 'text-fg hover:bg-raised focus:bg-raised'
       }`}
     >
@@ -113,6 +123,39 @@ export function RowMenu({ items, label }: { items: RowMenuItem[]; label: string 
         <MoreHorizontal className="h-5 w-5" aria-hidden="true" />
       </button>
       {open &&
+        mobile &&
+        createPortal(
+          <div className="fixed inset-0 z-[60]">
+            <div className="fixed inset-0 bg-ink/30" aria-hidden="true" />
+            <div
+              ref={menuRef}
+              role="menu"
+              aria-label={label}
+              onClick={(e) => e.stopPropagation()}
+              className="fixed inset-x-0 bottom-0 max-h-[85dvh] overflow-y-auto rounded-t-card bg-surface pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] shadow-lg"
+            >
+              <p className="truncate border-b border-line px-5 py-3 text-sm text-fg-muted">{label.replace(/^Aktionen für /, '')}</p>
+              {normal.map(renderItem)}
+              {danger.length > 0 && normal.length > 0 && <div role="separator" className="border-t border-line" />}
+              {danger.map(renderItem)}
+              <div role="separator" className="border-t border-line" />
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setOpen(false);
+                  buttonRef.current?.focus();
+                }}
+                className="block min-h-[48px] w-full px-5 py-3 text-left text-base font-semibold text-fg-muted focus-visible:[outline-offset:-2px]"
+              >
+                Abbrechen
+              </button>
+            </div>
+          </div>,
+          document.body
+        )}
+      {open &&
+        !mobile &&
         createPortal(
           <div
             ref={menuRef}
