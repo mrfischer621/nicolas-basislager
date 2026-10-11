@@ -60,6 +60,8 @@ const shots = [
   ['buchung-detail', '/buchungen', { clickCss: 'ul li button.text-left' }],
   ['lead-detail', '/leads', { clickCss: 'ul li button.text-left' }],
   ['zahlungsdaten', '/rechnungen', { click: { role: 'button', name: /Zahlungsdaten nachtragen/i } }],
+  ['timer-laeuft', '/rechnungen', 'timer'],
+  ['timer-stopp', '/', { timer: true, click: { role: 'button', name: 'Timer stoppen und speichern' } }],
 ];
 const only = process.env.PAGES?.split(',');
 
@@ -166,6 +168,13 @@ for (const width of widths) {
       const errors = [];
       page.on('pageerror', (e) => errors.push(e.message));
       if (action === 'logout') await page.addInitScript(() => localStorage.clear());
+      // laufender Timer seit 42 Minuten (Timer-Leiste auf dem Handy)
+      if (action === 'timer' || action?.timer) {
+        await page.addInitScript(() => localStorage.setItem('basislager_timer', JSON.stringify({
+          isRunning: true, isPaused: false, startTime: Date.now(), elapsedSeconds: 2520,
+          selectedProjectId: '', description: 'Startseite umsetzen', billable: true,
+        })));
+      }
       await page.goto(base + path, { waitUntil: 'networkidle' });
       await page.waitForTimeout(1000);
       if (action?.click) {

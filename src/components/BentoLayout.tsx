@@ -64,7 +64,7 @@ export default function BentoLayout() {
 
         {/* Main Content - Fills remaining height */}
         <main className="flex-1 min-h-0 overflow-hidden">
-          <div className="h-full overflow-auto scroll-pb-[calc(5rem+env(safe-area-inset-bottom))] md:scroll-pb-0 pb-[calc(6rem+env(safe-area-inset-bottom))] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pt-5 md:px-8 md:py-7">
+          <div className="h-full overflow-auto scroll-pb-[calc(7.5rem+env(safe-area-inset-bottom))] md:scroll-pb-0 pb-[calc(8rem+env(safe-area-inset-bottom))] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pt-5 md:px-8 md:py-7">
             {/* Faengt Render-Fehler einer Seite ab, statt die ganze App
                 durch eine weisse Seite zu ersetzen. Der resetKey loest den
                 Fehler beim Navigieren auf eine andere Seite wieder auf. */}
