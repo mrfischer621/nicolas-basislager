@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
-import { Upload, X, FileText, Image } from 'lucide-react';
+import { Upload, X, FileText, Image, Camera, Paperclip } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useCompany } from '../context/CompanyContext';
 import { useAuth } from '../context/AuthProvider';
@@ -42,6 +42,10 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
   const [projectId, setProjectId] = useState(transaction?.project_id || '');
   const [tags, setTags] = useState<string[]>(transaction?.tags || []);
   const [tagInput, setTagInput] = useState('');
+  // Weitere Angaben offen, wenn die Buchung dort schon etwas enthaelt
+  const [moreOpen, setMoreOpen] = useState(
+    !!(transaction?.customer_id || transaction?.project_id || transaction?.tags?.length)
+  );
   const [loading, setLoading] = useState(false);
 
   // Receipt upload state
@@ -229,355 +233,319 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
 
   const getFileIcon = () => {
     if (!receiptFile) return null;
-    if (receiptFile.type === 'application/pdf') {
-      return <FileText className="w-5 h-5 text-danger" />;
-    }
-    return <Image className="w-5 h-5 text-accent" />;
+    return receiptFile.type === 'application/pdf' ? (
+      <FileText className="h-5 w-5 text-fg-muted" aria-hidden="true" />
+    ) : (
+      <Image className="h-5 w-5 text-fg-muted" aria-hidden="true" />
+    );
   };
 
-  return (
-    <div className="fixed inset-0 bg-ink/50 flex items-center justify-center z-50">
-      <div className="bg-surface rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          <h2 className="text-2xl font-bold mb-6">{transaction ? 'Buchung bearbeiten' : 'Buchung hinzufügen'}</h2>
+  const openReceipt = async () => {
+    if (!existingReceiptUrl) return;
+    const { data, error } = await supabase.storage.from('receipts').createSignedUrl(existingReceiptUrl, 60);
+    if (error) {
+      console.error('Error creating signed URL:', error);
+      toast.error('Fehler beim Öffnen des Belegs.');
+      return;
+    }
+    if (data?.signedUrl) window.open(data.signedUrl, '_blank');
+  };
 
-          {/* Tabs */}
-          <div className="flex gap-2 mb-6">
+  // Formular ohne eigenes Overlay: Es steht im Modal der Seite Buchungen
+  // (vorher oeffnete es ein zweites Overlay ueber dem Modal).
+  return (
+    <form onSubmit={(e) => handleSubmit(e, false)} className="space-y-5">
+      {/* Typ */}
+      <div role="group" aria-label="Art der Buchung" className="inline-flex rounded-lg border border-line-strong p-0.5">
+        {(['ausgabe', 'einnahme'] as const).map((type) => (
+          <button
+            key={type}
+            type="button"
+            aria-pressed={activeTab === type}
+            onClick={() => handleTabChange(type)}
+            className={`rounded-md px-4 py-1.5 font-display text-sm font-bold transition-colors ${
+              activeTab === type ? 'bg-accent text-accent-fg' : 'text-fg-muted hover:bg-raised hover:text-fg'
+            }`}
+          >
+            {type === 'ausgabe' ? 'Ausgabe' : 'Einnahme'}
+          </button>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <label htmlFor="transaction-date" className="label">
+            Datum
+          </label>
+          <input id="transaction-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="input" required />
+        </div>
+        <div>
+          <label htmlFor="transaction-amount" className="label">
+            Betrag (CHF)
+          </label>
+          <input
+            id="transaction-amount"
+            type="number"
+            inputMode="decimal"
+            step="0.01"
+            min="0"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            className="input text-right"
+            required
+          />
+        </div>
+        <div>
+          <label htmlFor="transaction-category" className="label">
+            Kategorie
+          </label>
+          <select
+            id="transaction-category"
+            value={categoryName}
+            onChange={(e) => handleCategoryChange(e.target.value)}
+            className="input"
+            disabled={isLoadingCategories}
+          >
+            {isLoadingCategories ? (
+              <option value="">Lädt …</option>
+            ) : categoryOptions.length === 0 ? (
+              <option value="">Keine Kategorien verfügbar</option>
+            ) : (
+              <>
+                <option value="">Ohne Kategorie</option>
+                {incomeOptions.length > 0 && (
+                  <optgroup label="Einnahmen">
+                    {incomeOptions.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+                {expenseOptions.length > 0 && (
+                  <optgroup label="Ausgaben">
+                    {expenseOptions.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+                {otherOptions.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </>
+            )}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="transaction-counterparty" className="label">
+            {activeTab === 'ausgabe' ? 'Lieferant' : 'Zahler'}
+          </label>
+          <input
+            id="transaction-counterparty"
+            type="text"
+            list="transaction-counterparty-suggestions"
+            autoComplete="off"
+            value={counterparty}
+            onChange={(e) => setCounterparty(e.target.value)}
+            className="input"
+            placeholder={activeTab === 'ausgabe' ? 'z.B. Infomaniak' : 'z.B. Kunde AG'}
+          />
+          <datalist id="transaction-counterparty-suggestions">
+            {counterpartySuggestions.map((name) => (
+              <option key={name} value={name} />
+            ))}
+          </datalist>
+        </div>
+      </div>
+
+      <div>
+        <label htmlFor="transaction-description" className="label">
+          Beschreibung
+        </label>
+        <textarea
+          id="transaction-description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={2}
+          className="input"
+          placeholder="Details zur Buchung"
+        />
+      </div>
+
+      {/* Beleg: Datei waehlen oder auf dem Handy direkt fotografieren */}
+      <div>
+        <span id="receipt-label" className="label">
+          Beleg
+        </span>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/*"
+          onChange={handleFileSelect}
+          className="sr-only"
+          id="receipt-upload"
+          aria-labelledby="receipt-label"
+        />
+        <input
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={handleFileSelect}
+          className="sr-only"
+          id="receipt-camera"
+          aria-label="Beleg fotografieren"
+        />
+        {!receiptFile && !existingReceiptUrl ? (
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <label
+              htmlFor="receipt-camera"
+              className="btn-secondary cursor-pointer sm:hidden"
+            >
+              <Camera className="h-4 w-4" aria-hidden="true" /> Foto aufnehmen
+            </label>
+            <label
+              htmlFor="receipt-upload"
+              className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-line-strong px-4 py-3 text-sm text-fg-muted hover:bg-canvas"
+            >
+              <Upload className="h-4 w-4" aria-hidden="true" />
+              PDF oder Bild wählen (max. 10 MB)
+            </label>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between gap-3 rounded-lg border border-line bg-canvas px-4 py-3">
+            <div className="flex min-w-0 items-center gap-3">
+              {receiptFile ? (
+                <>
+                  {getFileIcon()}
+                  <span className="truncate text-sm text-fg">{receiptFile.name}</span>
+                  <span className="text-xs text-fg-muted">({(receiptFile.size / 1024).toFixed(0)} KB)</span>
+                </>
+              ) : (
+                <>
+                  <Paperclip className="h-4 w-4 text-fg-muted" aria-hidden="true" />
+                  <button type="button" onClick={openReceipt} className="bw-textlink text-sm">
+                    Beleg anzeigen
+                  </button>
+                </>
+              )}
+            </div>
             <button
               type="button"
-              onClick={() => handleTabChange('einnahme')}
-              className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-                activeTab === 'einnahme'
-                  ? 'bg-success text-white'
-                  : 'bg-raised text-fg hover:bg-sunken'
-              }`}
+              onClick={removeReceipt}
+              className="rounded-lg p-1.5 text-fg-muted hover:bg-raised hover:text-danger"
+              aria-label="Beleg entfernen"
             >
-              Einnahme
-            </button>
-            <button
-              type="button"
-              onClick={() => handleTabChange('ausgabe')}
-              className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-                activeTab === 'ausgabe'
-                  ? 'bg-danger text-white'
-                  : 'bg-raised text-fg hover:bg-sunken'
-              }`}
-            >
-              Ausgabe
+              <X className="h-4 w-4" aria-hidden="true" />
             </button>
           </div>
+        )}
+        {uploadingReceipt && <p className="mt-1 text-sm text-fg-muted">Beleg wird hochgeladen …</p>}
+      </div>
 
-          <form onSubmit={(e) => handleSubmit(e, false)} className="space-y-4">
-            {/* Transaction Number and Date */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-fg mb-1">
-                  Beleg-Nr {!transaction && <span className="text-xs text-fg-muted">(wird automatisch generiert)</span>}
-                </label>
-                <input
-                  type="text"
-                  value={transactionNumber}
-                  onChange={(e) => setTransactionNumber(e.target.value)}
-                  className="w-full px-3 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent bg-canvas"
-                  placeholder="Automatisch"
-                  disabled={!transaction}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-fg mb-1">
-                  Datum
-                </label>
-                <input
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="w-full px-3 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Amount and Category */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-fg mb-1">
-                  Betrag (CHF)
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  className="w-full px-3 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="transaction-category" className="block text-sm font-medium text-fg mb-1">
-                  Kategorie
-                </label>
-                <select
-                  id="transaction-category"
-                  value={categoryName}
-                  onChange={(e) => handleCategoryChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
-                  disabled={isLoadingCategories}
-                >
-                  {isLoadingCategories ? (
-                    <option value="">Lädt...</option>
-                  ) : categoryOptions.length === 0 ? (
-                    <option value="">Keine Kategorien verfügbar</option>
-                  ) : (
-                    <>
-                      <option value="">Ohne Kategorie</option>
-                      {incomeOptions.length > 0 && (
-                        <optgroup label="Einnahmen">
-                          {incomeOptions.map((o) => (
-                            <option key={o.value} value={o.value}>{o.label}</option>
-                          ))}
-                        </optgroup>
-                      )}
-                      {expenseOptions.length > 0 && (
-                        <optgroup label="Ausgaben">
-                          {expenseOptions.map((o) => (
-                            <option key={o.value} value={o.value}>{o.label}</option>
-                          ))}
-                        </optgroup>
-                      )}
-                      {otherOptions.map((o) => (
-                        <option key={o.value} value={o.value}>{o.label}</option>
-                      ))}
-                    </>
-                  )}
-                </select>
-              </div>
-            </div>
-
-            {/* Lieferant (Ausgabe) bzw. Zahler (Einnahme) */}
-            <div>
-              <label htmlFor="transaction-counterparty" className="block text-sm font-medium text-fg mb-1">
-                {activeTab === 'ausgabe' ? 'Lieferant' : 'Zahler'}
-              </label>
+      <details
+        open={moreOpen}
+        onToggle={(e) => setMoreOpen((e.currentTarget as HTMLDetailsElement).open)}
+        className="group rounded-lg border border-line px-4 py-2 [&_summary::-webkit-details-marker]:hidden">
+        <summary className="cursor-pointer list-none py-1 text-sm font-semibold text-fg">
+          Weitere Angaben <span className="font-normal text-fg-muted">(Beleg-Nr, Kunde, Projekt, Tags)</span>
+        </summary>
+        <div className="mt-3 grid grid-cols-1 gap-4 pb-2 sm:grid-cols-2">
+          <div>
+            <label htmlFor="transaction-number" className="label">
+              Beleg-Nr {!transaction && <span className="font-normal text-fg-muted">(automatisch)</span>}
+            </label>
+            <input
+              id="transaction-number"
+              type="text"
+              value={transactionNumber}
+              onChange={(e) => setTransactionNumber(e.target.value)}
+              className="input"
+              placeholder="Automatisch"
+              disabled={!transaction}
+            />
+          </div>
+          <div>
+            <label htmlFor="transaction-customer" className="label">
+              Kunde
+            </label>
+            <select id="transaction-customer" value={customerId} onChange={(e) => setCustomerId(e.target.value)} className="input">
+              <option value="">Keine Auswahl</option>
+              {customers.map((customer) => (
+                <option key={customer.id} value={customer.id}>
+                  {customer.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="transaction-project" className="label">
+              Projekt
+            </label>
+            <select id="transaction-project" value={projectId} onChange={(e) => setProjectId(e.target.value)} className="input">
+              <option value="">Keine Auswahl</option>
+              {projects.map((project) => (
+                <option key={project.id} value={project.id}>
+                  {project.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="transaction-tag" className="label">
+              Tags
+            </label>
+            <div className="flex gap-2">
               <input
-                id="transaction-counterparty"
+                id="transaction-tag"
                 type="text"
-                list="transaction-counterparty-suggestions"
-                autoComplete="off"
-                value={counterparty}
-                onChange={(e) => setCounterparty(e.target.value)}
-                className="w-full px-3 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
-                placeholder={activeTab === 'ausgabe' ? 'z.B. Infomaniak' : 'z.B. Kunde AG'}
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addTag();
+                  }
+                }}
+                className="input"
+                placeholder="Tag eingeben"
               />
-              <datalist id="transaction-counterparty-suggestions">
-                {counterpartySuggestions.map((name) => (
-                  <option key={name} value={name} />
-                ))}
-              </datalist>
+              <button type="button" onClick={addTag} className="btn-secondary">
+                Hinzufügen
+              </button>
             </div>
-
-            {/* Description */}
-            <div>
-              <label className="block text-sm font-medium text-fg mb-1">
-                Beschreibung
-              </label>
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={3}
-                className="w-full px-3 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
-                placeholder="Details zur Buchung..."
-              />
-            </div>
-
-            {/* Receipt Upload */}
-            <div>
-              <label className="block text-sm font-medium text-fg mb-1">
-                Beleg (optional)
-              </label>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".pdf,.jpg,.jpeg,.png,.webp"
-                onChange={handleFileSelect}
-                className="hidden"
-                id="receipt-upload"
-              />
-
-              {!receiptFile && !existingReceiptUrl ? (
-                <label
-                  htmlFor="receipt-upload"
-                  className="flex items-center justify-center gap-2 w-full px-4 py-3 border-2 border-dashed border-line-strong rounded-lg cursor-pointer hover:border-brand hover:bg-canvas transition-colors"
-                >
-                  <Upload className="w-5 h-5 text-fg-subtle" />
-                  <span className="text-sm text-fg-muted">PDF oder Bild hochladen (max. 10 MB)</span>
-                </label>
-              ) : (
-                <div className="flex items-center justify-between px-4 py-3 bg-canvas border border-line rounded-lg">
-                  <div className="flex items-center gap-3">
-                    {receiptFile ? (
-                      <>
-                        {getFileIcon()}
-                        <span className="text-sm text-fg truncate max-w-[200px]">
-                          {receiptFile.name}
-                        </span>
-                        <span className="text-xs text-fg-muted">
-                          ({(receiptFile.size / 1024).toFixed(0)} KB)
-                        </span>
-                      </>
-                    ) : existingReceiptUrl ? (
-                      <>
-                        <FileText className="w-5 h-5 text-success" />
-                        <button
-                          type="button"
-                          onClick={async () => {
-                            const { data, error } = await supabase.storage
-                              .from('receipts')
-                              .createSignedUrl(existingReceiptUrl, 60);
-                            if (error) {
-                              console.error('Error creating signed URL:', error);
-                              toast.error('Fehler beim Öffnen des Belegs.');
-                              return;
-                            }
-                            if (data?.signedUrl) {
-                              window.open(data.signedUrl, '_blank');
-                            }
-                          }}
-                          className="text-sm text-brand hover:underline"
-                        >
-                          Beleg anzeigen
-                        </button>
-                      </>
-                    ) : null}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={removeReceipt}
-                    className="p-1 text-fg-subtle hover:text-danger transition-colors"
-                    title="Beleg entfernen"
-                    aria-label="Beleg entfernen"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-              )}
-              {uploadingReceipt && (
-                <p className="mt-1 text-sm text-fg-muted">Beleg wird hochgeladen...</p>
-              )}
-            </div>
-
-            {/* Customer and Project */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-fg mb-1">
-                  Kund:in wählen (optional)
-                </label>
-                <select
-                  value={customerId}
-                  onChange={(e) => setCustomerId(e.target.value)}
-                  className="w-full px-3 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
-                >
-                  <option value="">-- Keine Auswahl --</option>
-                  {customers.map((customer) => (
-                    <option key={customer.id} value={customer.id}>
-                      {customer.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-fg mb-1">
-                  Projekt (optional)
-                </label>
-                <select
-                  value={projectId}
-                  onChange={(e) => setProjectId(e.target.value)}
-                  className="w-full px-3 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
-                >
-                  <option value="">-- Keine Auswahl --</option>
-                  {projects.map((project) => (
-                    <option key={project.id} value={project.id}>
-                      {project.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {/* Tags */}
-            <div>
-              <label className="block text-sm font-medium text-fg mb-1">
-                Tags (optional)
-              </label>
-              <div className="flex gap-2 mb-2">
-                <input
-                  type="text"
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      addTag();
-                    }
-                  }}
-                  className="flex-1 px-3 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
-                  placeholder="Tag hinzufügen..."
-                />
-                <button
-                  type="button"
-                  onClick={addTag}
-                  className="px-4 py-2 bg-raised text-fg rounded-lg hover:bg-sunken"
-                >
-                  Hinzufügen
-                </button>
-              </div>
-              <div className="flex flex-wrap gap-2">
+            {tags.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-2">
                 {tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="inline-flex items-center gap-1 px-3 py-1 bg-brand text-accent-fg rounded-full text-sm"
-                  >
+                  <span key={tag} className="badge-neutral gap-1">
                     {tag}
-                    <button
-                      type="button"
-                      onClick={() => removeTag(tag)}
-                      className="hover:text-fg-subtle"
-                    >
-                      ×
+                    <button type="button" onClick={() => removeTag(tag)} aria-label={`Tag ${tag} entfernen`} className="hover:text-danger">
+                      <X className="h-3 w-3" aria-hidden="true" />
                     </button>
                   </span>
                 ))}
               </div>
-            </div>
-
-            {/* Buttons */}
-            <div className="flex justify-end gap-3 pt-4">
-              <button
-                type="button"
-                onClick={onCancel}
-                className="px-4 py-2 text-fg hover:bg-raised rounded-lg"
-                disabled={loading}
-              >
-                Abbrechen
-              </button>
-              <button
-                type="button"
-                onClick={(e) => handleSubmit(e, true)}
-                className="px-4 py-2 bg-sunken text-fg rounded-lg hover:bg-sunken"
-                disabled={loading}
-              >
-                Speichern & neu
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 bg-brand text-accent-fg rounded-lg hover:bg-opacity-90"
-                disabled={loading}
-              >
-                {loading ? 'Speichern...' : 'Speichern'}
-              </button>
-            </div>
-          </form>
+            )}
+          </div>
         </div>
+      </details>
+
+      <div className="flex flex-col-reverse gap-2 border-t border-line pt-4 sm:flex-row sm:justify-end">
+        <button type="button" onClick={onCancel} className="btn-ghost" disabled={loading}>
+          Abbrechen
+        </button>
+        {!transaction && (
+          <button type="button" onClick={(e) => handleSubmit(e, true)} className="btn-secondary" disabled={loading}>
+            Speichern und neue Buchung
+          </button>
+        )}
+        <button type="submit" className="btn-primary" disabled={loading}>
+          {loading ? 'Speichern …' : 'Speichern'}
+        </button>
       </div>
-    </div>
+    </form>
   );
 }

@@ -2,7 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import { useConfirm } from '../context/ConfirmProvider';
 import toast from 'react-hot-toast';
 import { createPortal } from 'react-dom';
-import { ChevronLeft, ChevronRight, Eye, MoreVertical, Paperclip } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MoreVertical, Paperclip } from 'lucide-react';
+import { EmptyState } from './ui';
 import { supabase } from '../lib/supabase';
 import type { Transaction, Customer, Project } from '../lib/supabase';
 import { formatChfDisplay } from '../utils/money';
@@ -78,15 +79,20 @@ function ActionMenu({
     <>
       <button
         ref={buttonRef}
+        type="button"
         onClick={onToggle}
-        className="text-fg-subtle hover:text-brand transition-colors"
+        aria-haspopup="menu"
+        aria-expanded={isOpen}
+        aria-label={`Aktionen für Buchung ${transaction.transaction_number ?? ''}`.trim()}
+        className="rounded-lg p-1.5 text-fg-muted transition-colors hover:bg-raised hover:text-fg"
       >
-        <MoreVertical className="w-5 h-5" />
+        <MoreVertical className="h-5 w-5" aria-hidden="true" />
       </button>
       {isOpen && createPortal(
         <div
           ref={menuRef}
-          className="fixed w-48 bg-surface rounded-lg shadow-lg border border-line z-50"
+          role="menu"
+          className="fixed z-50 w-48 overflow-hidden rounded-lg border border-line bg-surface py-1 shadow-lg"
           style={{ top: menuPosition.top, left: menuPosition.left }}
         >
           <button
@@ -94,7 +100,10 @@ function ActionMenu({
               onEdit(transaction);
               onClose();
             }}
-            className="block w-full text-left px-4 py-2 text-sm text-fg hover:bg-raised rounded-t-lg"
+            type="button"
+            role="menuitem"
+            autoFocus
+            className="block w-full px-4 py-2 text-left text-sm text-fg hover:bg-raised focus:bg-raised"
           >
             Bearbeiten
           </button>
@@ -110,7 +119,9 @@ function ActionMenu({
               }
               onClose();
             }}
-            className="block w-full text-left px-4 py-2 text-sm text-danger hover:bg-raised rounded-b-lg"
+            type="button"
+            role="menuitem"
+            className="block w-full px-4 py-2 text-left text-sm text-danger hover:bg-danger-subtle focus:bg-danger-subtle"
           >
             Löschen
           </button>
@@ -149,30 +160,24 @@ export default function TransactionTable({ transactions, customers, projects, on
     return project?.name || '-';
   };
 
-  const getCategoryBadgeColor = (category: string | null) => {
-    if (!category) return 'bg-raised text-fg';
+  const dmy = (day: string) => `${day.slice(8, 10)}.${day.slice(5, 7)}.${day.slice(0, 4)}`;
 
-    const colors: Record<string, string> = {
-      'Materialaufwand': 'bg-accent-subtle text-accent',
-      'Sonstige': 'bg-raised text-fg',
-      'Personalkosten': 'bg-accent-subtle text-accent',
-      'Miete': 'bg-warning-subtle text-warning',
-      'Marketing': 'bg-accent-subtle text-accent',
-    };
+  // Betrag in Tinte; Einnahmen mit "+" (Richtung als Zeichen und Spalte, nicht nur als Farbe)
+  const formatAmount = (amount: number, type: 'einnahme' | 'ausgabe') => (
+    <span className="font-semibold tabular-nums text-fg">
+      {type === 'einnahme' ? '+ ' : '− '}
+      {formatChfDisplay(amount)}
+    </span>
+  );
 
-    return colors[category] || 'bg-raised text-fg';
-  };
-
-  const formatAmount = (amount: number, type: 'einnahme' | 'ausgabe') => {
-    const formatted = amount.toFixed(2);
-    const prefix = type === 'einnahme' ? '+' : '-';
-    const colorClass = type === 'einnahme' ? 'text-success' : 'text-danger';
-
-    return (
-      <span className={`font-semibold ${colorClass}`}>
-        {prefix} CHF {formatted}
-      </span>
-    );
+  const openReceipt = async (path: string) => {
+    const { data, error } = await supabase.storage.from('receipts').createSignedUrl(path, 60);
+    if (error) {
+      console.error('Error creating signed URL:', error);
+      toast.error('Fehler beim Öffnen des Belegs.');
+      return;
+    }
+    if (data?.signedUrl) window.open(data.signedUrl, '_blank');
   };
 
   const calculateTotal = () => {
@@ -186,157 +191,121 @@ export default function TransactionTable({ transactions, customers, projects, on
 
   if (transactions.length === 0) {
     return (
-      <div className="bg-surface rounded-lg shadow-sm p-6">
-        <p className="text-fg-muted text-center">Keine Buchungen vorhanden. Erstellen Sie die erste Buchung.</p>
+      <div className="card">
+        <EmptyState title="Keine Buchungen gefunden" text="Passe Filter oder Suche an, oder erfasse eine neue Buchung." />
       </div>
     );
   }
 
   return (
-    <div className="bg-surface rounded-lg shadow-sm overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-canvas border-b border-line">
+    <div className="card overflow-hidden">
+      {/* Handy: Liste */}
+      <ul className="divide-y divide-line md:hidden">
+        {paginatedTransactions.map((t) => (
+          <li key={t.id} className="flex items-start justify-between gap-3 px-4 py-3">
+            <button type="button" onClick={() => onEdit(t)} className="min-w-0 flex-1 text-left">
+              <span className="block truncate font-medium text-fg">{t.counterparty || t.description || t.category || 'Buchung'}</span>
+              <span className="block truncate text-xs text-fg-muted">
+                {dmy(t.date)} · {t.transaction_number} · {t.category || 'Ohne Kategorie'}
+                {!t.receipt_url && t.id.startsWith('invoice-') === false ? ' · ohne Beleg' : ''}
+              </span>
+            </button>
+            <div className="flex items-center gap-1">
+              {formatAmount(t.amount, t.type)}
+              {!t.id.startsWith('invoice-') && (
+                <ActionMenu
+                  transaction={t}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                  isOpen={openMenuId === t.id}
+                  onToggle={() => setOpenMenuId(openMenuId === t.id ? null : t.id)}
+                  onClose={() => setOpenMenuId(null)}
+                />
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
+
+      {/* Desktop: Tabelle */}
+      <div className="hidden overflow-x-auto md:block">
+        <table className="table">
+          <thead>
             <tr>
-              <th className="sticky left-0 z-10 bg-canvas px-6 py-3 text-left text-xs font-medium text-fg-muted uppercase tracking-wider">
-                Datum ↓
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-fg-muted uppercase tracking-wider">
-                Nr
-              </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-fg-muted uppercase tracking-wider">
-                Betrag
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-fg-muted uppercase tracking-wider">
-                Text
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-fg-muted uppercase tracking-wider">
-                Kategorie
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-fg-muted uppercase tracking-wider">
-                Lieferant / Zahler
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-fg-muted uppercase tracking-wider">
-                Kunde
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-fg-muted uppercase tracking-wider">
-                Projekt
-              </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-fg-muted uppercase tracking-wider">
-                Beleg
-              </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-fg-muted uppercase tracking-wider">
-                Aktionen
-              </th>
+              <th scope="col">Datum</th>
+              <th scope="col">Nr</th>
+              <th scope="col">Lieferant / Zahler</th>
+              <th scope="col">Text</th>
+              <th scope="col">Kategorie</th>
+              <th scope="col" className="text-right">Betrag</th>
+              <th scope="col" className="text-center">Beleg</th>
+              <th scope="col"><span className="sr-only">Aktionen</span></th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-line">
-            {paginatedTransactions.map((transaction, index) => (
-                <tr
-                  key={transaction.id}
-                  className={`${index % 2 === 0 ? 'bg-surface' : 'bg-canvas'} hover:bg-raised transition-colors`}
-                >
-                  <td className={`sticky left-0 z-10 px-6 py-4 whitespace-nowrap text-sm text-fg ${index % 2 === 0 ? 'bg-surface' : 'bg-canvas'} group-hover:bg-raised`}>
-                    {new Date(transaction.date).toLocaleDateString('de-CH')}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-fg">
-                    {transaction.transaction_number}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
-                    {formatAmount(transaction.amount, transaction.type)}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-fg">
-                    <div className="max-w-xs truncate">
-                      {transaction.description || '-'}
+          <tbody>
+            {paginatedTransactions.map((transaction) => (
+              <tr key={transaction.id}>
+                <td className="whitespace-nowrap tabular-nums">{dmy(transaction.date)}</td>
+                <td className="whitespace-nowrap font-medium">{transaction.transaction_number}</td>
+                <td className="max-w-[12rem] truncate">{transaction.counterparty || '–'}</td>
+                <td className="max-w-xs">
+                  <div className="truncate">{transaction.description || '–'}</div>
+                  {(transaction.customer_id || transaction.project_id) && (
+                    <div className="truncate text-xs text-fg-muted">
+                      {[getCustomerName(transaction.customer_id), getProjectName(transaction.project_id)].filter((x) => x !== '-').join(' · ')}
                     </div>
-                    {transaction.tags && transaction.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {transaction.tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="inline-flex px-2 py-0.5 text-xs rounded-full bg-brand text-accent-fg"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {transaction.category && (
-                      <span
-                        className={`px-2 py-1 text-xs font-medium rounded-full ${getCategoryBadgeColor(
-                          transaction.category
-                        )}`}
-                      >
-                        {transaction.category}
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-fg">
-                    {transaction.counterparty || '-'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-fg">
-                    {getCustomerName(transaction.customer_id)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-fg">
-                    {getProjectName(transaction.project_id)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center">
-                    {transaction.receipt_url ? (
-                      <button
-                        onClick={async () => {
-                          const { data, error } = await supabase.storage
-                            .from('receipts')
-                            .createSignedUrl(transaction.receipt_url!, 60);
-                          if (error) {
-                            console.error('Error creating signed URL:', error);
-                            toast.error('Fehler beim Öffnen des Belegs.');
-                            return;
-                          }
-                          if (data?.signedUrl) {
-                            window.open(data.signedUrl, '_blank');
-                          }
-                        }}
-                        className="inline-flex items-center justify-center text-fg-subtle hover:text-brand transition-colors"
-                        title="Beleg anzeigen"
-                        aria-label="Beleg anzeigen"
-                      >
-                        <Paperclip className="w-5 h-5" />
-                      </button>
-                    ) : (
-                      <span className="text-fg-subtle">-</span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center">
-                    <div className="flex items-center justify-center gap-2">
-                      <button
-                        onClick={() => onEdit(transaction)}
-                        className="text-fg-subtle hover:text-brand transition-colors"
-                        title="Details anzeigen"
-                        aria-label="Details anzeigen"
-                      >
-                        <Eye className="w-5 h-5" />
-                      </button>
-                      <ActionMenu
-                        transaction={transaction}
-                        onEdit={onEdit}
-                        onDelete={onDelete}
-                        isOpen={openMenuId === transaction.id}
-                        onToggle={() => setOpenMenuId(openMenuId === transaction.id ? null : transaction.id)}
-                        onClose={() => setOpenMenuId(null)}
-                      />
+                  )}
+                  {transaction.tags && transaction.tags.length > 0 && (
+                    <div className="mt-1 flex flex-wrap gap-1">
+                      {transaction.tags.map((tag) => (
+                        <span key={tag} className="badge-accent">
+                          {tag}
+                        </span>
+                      ))}
                     </div>
-                  </td>
-                </tr>
-              ))}
+                  )}
+                </td>
+                <td className="whitespace-nowrap">
+                  {transaction.category ? <span className="badge-neutral">{transaction.category}</span> : <span className="text-fg-muted">–</span>}
+                </td>
+                <td className="whitespace-nowrap text-right">{formatAmount(transaction.amount, transaction.type)}</td>
+                <td className="text-center">
+                  {transaction.receipt_url ? (
+                    <button
+                      type="button"
+                      onClick={() => openReceipt(transaction.receipt_url!)}
+                      className="rounded-lg p-1.5 text-fg-muted hover:bg-raised hover:text-fg"
+                      aria-label={`Beleg zu ${transaction.transaction_number ?? 'Buchung'} anzeigen`}
+                    >
+                      <Paperclip className="h-4 w-4" aria-hidden="true" />
+                    </button>
+                  ) : transaction.id.startsWith('invoice-') ? (
+                    <span className="text-xs text-fg-muted">Rechnung</span>
+                  ) : (
+                    <span className="badge-warning">fehlt</span>
+                  )}
+                </td>
+                <td className="text-right">
+                  {!transaction.id.startsWith('invoice-') && (
+                    <ActionMenu
+                      transaction={transaction}
+                      onEdit={onEdit}
+                      onDelete={onDelete}
+                      isOpen={openMenuId === transaction.id}
+                      onToggle={() => setOpenMenuId(openMenuId === transaction.id ? null : transaction.id)}
+                      onClose={() => setOpenMenuId(null)}
+                    />
+                  )}
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
 
       {/* Footer: Pagination + Total Summary */}
       {transactions.length > 0 && (
-        <div className="px-6 py-4 bg-canvas border-t border-line">
+        <div className="border-t border-line bg-canvas px-4 py-4 md:px-5">
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex items-center justify-between mb-4">
@@ -345,6 +314,7 @@ export default function TransactionTable({ transactions, customers, projects, on
               </span>
               <div className="flex items-center gap-2">
                 <button
+                  type="button"
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
                   className="p-1.5 rounded-md border border-line-strong text-fg-muted hover:bg-raised disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
@@ -356,6 +326,7 @@ export default function TransactionTable({ transactions, customers, projects, on
                   Seite {currentPage} / {totalPages}
                 </span>
                 <button
+                  type="button"
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
                   className="p-1.5 rounded-md border border-line-strong text-fg-muted hover:bg-raised disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
@@ -370,9 +341,9 @@ export default function TransactionTable({ transactions, customers, projects, on
           {/* Total Summary */}
           <div className="flex justify-between items-center">
             <span className="text-sm font-medium text-fg">
-              Saldo der angezeigten Buchungen:
+              Saldo der angezeigten Buchungen
             </span>
-            <span className={`text-lg font-bold ${calculateTotal() >= 0 ? 'text-success' : 'text-danger'}`}>
+            <span className="whitespace-nowrap font-display text-lg font-black tabular-nums text-fg">
               {formatChfDisplay(calculateTotal())}
             </span>
           </div>

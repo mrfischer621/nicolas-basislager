@@ -34,7 +34,12 @@ export default function BentoLayout() {
       </aside>
 
       {/* Mobile Sidebar - Fixed Overlay */}
-      <aside className="fixed inset-y-0 left-0 w-60 z-50 md:hidden">
+      {/* Geschlossen: unsichtbar und nicht klickbar. Vorher ueberdeckte die
+          zugeklappte Leiste auf dem Handy die linken 240 px und schluckte Klicks. */}
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 w-60 md:hidden ${isMobileMenuOpen ? '' : 'pointer-events-none invisible'}`}
+        aria-hidden={!isMobileMenuOpen}
+      >
         <BentoSidebar isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
       </aside>
 

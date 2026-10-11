@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import toast from 'react-hot-toast';
 import { useSearchParams } from 'react-router-dom';
-import { Plus, Filter } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
+import { PageHeader, SegmentedControl } from '../components/ui';
 import { supabase } from '../lib/supabase';
 import type { Transaction, Customer, Project } from '../lib/supabase';
 import TransactionForm from '../components/TransactionForm';
@@ -246,94 +247,67 @@ export default function Buchungen() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-content-heading">Buchungen</h1>
-          <p className="text-content-secondary mt-1">Verwalten Sie Ihre Einnahmen und Ausgaben</p>
-        </div>
-        <button
-          onClick={handleNewTransaction}
-          className="flex items-center gap-2 px-4 py-2 bg-brand text-accent-fg rounded-lg hover:bg-brand-dark transition"
-        >
-          <Plus size={20} />
-          Neue Buchung
-        </button>
-      </div>
+      <PageHeader
+        title="Buchungen"
+        description="Einnahmen und Ausgaben mit Beleg"
+        actions={
+          <button type="button" onClick={handleNewTransaction} className="btn-cta">
+            <Plus size={18} aria-hidden="true" />
+            Neue Buchung
+          </button>
+        }
+      />
 
       <PaidWithoutDateNotice invoices={finance.data?.paidWithoutDate ?? []} />
 
-      {/* Filters */}
-      <div className="bg-surface rounded-lg shadow-sm p-4">
-        <div className="flex flex-wrap gap-4 items-center">
-          {/* Account Filter (Tabs) */}
-          <div className="flex gap-2">
-            <button
-              onClick={() => setFilterType('all')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                filterType === 'all'
-                  ? 'bg-brand text-accent-fg'
-                  : 'bg-raised text-content-body hover:bg-sunken'
-              }`}
-            >
-              Alle Konten
-            </button>
-            <button
-              onClick={() => setFilterType('einnahme')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                filterType === 'einnahme'
-                  ? 'bg-success-dark text-white'
-                  : 'bg-raised text-content-body hover:bg-sunken'
-              }`}
-            >
-              Einnahmen
-            </button>
-            <button
-              onClick={() => setFilterType('ausgabe')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                filterType === 'ausgabe'
-                  ? 'bg-danger-dark text-white'
-                  : 'bg-raised text-content-body hover:bg-sunken'
-              }`}
-            >
-              Ausgaben
-            </button>
-          </div>
-
-          {/* Suche: Text, Lieferant/Zahler, Beleg-Nr, Kategorie */}
-          <div className="ml-auto">
-            <label htmlFor="buchungen-suche" className="sr-only">Buchungen durchsuchen</label>
-            <input
-              id="buchungen-suche"
-              type="search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Suchen (Text, Lieferant, Nr)"
-              className="w-64 px-3 py-2 border border-surface-border rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
-            />
-          </div>
-
-          {/* Period Filter */}
-          <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-content-tertiary" />
-            <select
-              value={filterPeriod}
-              onChange={(e) => setFilterPeriod(e.target.value as any)}
-              className="px-3 py-2 border border-surface-border rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
-            >
-              <option value="30">Letzte 30 Tage</option>
-              <option value="90">Letzte 90 Tage</option>
-              <option value="365">Letztes Jahr</option>
-              <option value="all">Alle Zeiträume</option>
-            </select>
-          </div>
+      {/* Filter */}
+      <div className="flex flex-col gap-3 md:flex-row md:flex-wrap md:items-center">
+        <SegmentedControl
+          label="Art"
+          options={[
+            { value: 'all' as const, label: 'Alle' },
+            { value: 'einnahme' as const, label: 'Einnahmen' },
+            { value: 'ausgabe' as const, label: 'Ausgaben' },
+          ]}
+          value={filterType}
+          onChange={setFilterType}
+        />
+        <div className="relative md:ml-auto md:w-72">
+          <label htmlFor="buchungen-suche" className="sr-only">
+            Buchungen durchsuchen
+          </label>
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-muted" aria-hidden="true" />
+          <input
+            id="buchungen-suche"
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Suchen: Text, Lieferant, Nr"
+            className="input pl-9"
+          />
+        </div>
+        <div>
+          <label htmlFor="buchungen-zeitraum" className="sr-only">
+            Zeitraum
+          </label>
+          <select
+            id="buchungen-zeitraum"
+            value={filterPeriod}
+            onChange={(e) => setFilterPeriod(e.target.value as typeof filterPeriod)}
+            className="input md:w-auto"
+          >
+            <option value="30">Letzte 30 Tage</option>
+            <option value="90">Letzte 90 Tage</option>
+            <option value="365">Letzte 365 Tage</option>
+            <option value="all">Alle Zeiträume</option>
+          </select>
         </div>
       </div>
 
       {/* Error Message */}
       {error && (
-        <div className="bg-danger-subtle border border-danger-subtle text-danger px-4 py-3 rounded-lg">
-          {error}
+        <div role="alert" className="rounded-lg border border-danger bg-danger-subtle px-4 py-3 text-danger">
+          <strong>Fehler:</strong> {error}
         </div>
       )}
 
