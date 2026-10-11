@@ -6,6 +6,7 @@ import { useCompany } from '../context/CompanyContext';
 import { Search, Star, Mail, Phone, Building2, Plus, X, ChevronDown } from 'lucide-react';
 import Modal from '../components/Modal';
 import toast from 'react-hot-toast';
+import { asError } from '../utils/errors';
 
 interface ContactWithCustomer extends CustomerContact {
   customer: Pick<Customer, 'id' | 'name'>;
@@ -64,7 +65,7 @@ export default function AlleKontakte() {
 
       // Filter by company (RLS should handle this, but double-check)
       const companyContacts = (contactsData || []).filter(
-        (c: any) => c.customer?.company_id === selectedCompany.id
+        (c: { customer?: { company_id?: string } | null }) => c.customer?.company_id === selectedCompany.id
       );
 
       setContacts(companyContacts as ContactWithCustomer[]);
@@ -166,7 +167,8 @@ export default function AlleKontakte() {
       toast.success('Kontakt erstellt');
       handleCloseModal();
       await fetchData();
-    } catch (err: any) {
+    } catch (caught) {
+      const err = asError(caught);
       console.error('Error creating contact:', err);
       toast.error(err.message || 'Fehler beim Erstellen des Kontakts');
     } finally {

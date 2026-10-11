@@ -621,7 +621,7 @@ export default function Settings() {
           name: stageName.trim(),
           position: maxPosition + 1,
           color: '#6B7280',
-        }] as any);
+        }]);
 
       if (error) throw error;
 

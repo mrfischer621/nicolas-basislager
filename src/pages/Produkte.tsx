@@ -63,7 +63,7 @@ export default function Produkte() {
         // Update existing product
         const { error: updateError } = await supabase
           .from('products')
-          .update(data as any)
+          .update(data)
           .eq('id', editingProduct.id);
 
         if (updateError) throw updateError;
@@ -71,7 +71,7 @@ export default function Produkte() {
         // Insert new product with company_id
         const { error: insertError } = await supabase
           .from('products')
-          .insert([{ ...data, company_id: selectedCompany.id } as any]);
+          .insert([{ ...data, company_id: selectedCompany.id }]);
 
         if (insertError) throw insertError;
       }
@@ -97,7 +97,7 @@ export default function Produkte() {
     try {
       const { error: archiveError } = await supabase
         .from('products')
-        .update({ is_active: false } as any)
+        .update({ is_active: false })
         .eq('id', id);
 
       if (archiveError) throw archiveError;
@@ -114,7 +114,7 @@ export default function Produkte() {
     try {
       const { error: restoreError } = await supabase
         .from('products')
-        .update({ is_active: true } as any)
+        .update({ is_active: true })
         .eq('id', id);
 
       if (restoreError) throw restoreError;

@@ -9,6 +9,7 @@ import Modal from '../components/Modal';
 import { useCompany } from '../context/CompanyContext';
 import { Plus, Search } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { asError } from '../utils/errors';
 
 // Extended customer type with computed fields
 export interface CustomerWithStats extends Customer {
@@ -148,7 +149,7 @@ export default function Kunden() {
         // Create new customer and get the ID
         const { data: newCustomer, error } = await supabase
           .from('customers')
-          .insert([{ ...customerData, company_id: selectedCompany.id }] as any)
+          .insert([{ ...customerData, company_id: selectedCompany.id }])
           .select('id')
           .single();
 
@@ -220,7 +221,8 @@ export default function Kunden() {
       if (error) throw error;
       toast.success('Kunde wiederhergestellt');
       await fetchCustomers();
-    } catch (err) {
+    } catch (caught) {
+      const err = asError(caught);
       console.error('Error restoring customer:', err);
       toast.error('Fehler beim Wiederherstellen des Kunden.');
     }
@@ -238,7 +240,8 @@ export default function Kunden() {
       if (error) throw error;
       toast.success('Kunde gelöscht');
       await fetchCustomers();
-    } catch (err: any) {
+    } catch (caught) {
+      const err = asError(caught);
       console.error('Error deleting customer:', err);
       // Check for FK constraint violation
       if (err?.code === '23503' || err?.message?.includes('foreign key') || err?.message?.includes('violates')) {

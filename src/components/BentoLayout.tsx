@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { BentoSidebar } from './BentoSidebar';
 import { BentoHeader } from './BentoHeader';
@@ -21,10 +21,12 @@ export default function BentoLayout() {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Close mobile menu on route change
-  useEffect(() => {
+  // Mobiles Menue beim Seitenwechsel schliessen (auch Zurueck/Vor im Browser)
+  const [menuPath, setMenuPath] = useState(location.pathname);
+  if (menuPath !== location.pathname) {
+    setMenuPath(location.pathname);
     setIsMobileMenuOpen(false);
-  }, [location.pathname]);
+  }
 
   return (
     <div className="h-screen w-screen overflow-hidden flex">

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Trash2, Plus, AlertCircle } from 'lucide-react';
 import type { Quote, QuoteItem, Customer } from '../lib/supabase';
+import { asError } from '../utils/errors';
 
 interface QuoteToInvoiceModalProps {
   quote: Quote;
@@ -101,7 +102,8 @@ export default function QuoteToInvoiceModal({
         items: validItems,
         vatRate: parseFloat(vatRate),
       });
-    } catch (err: any) {
+    } catch (caught) {
+      const err = asError(caught);
       setError(err?.message || 'Fehler beim Erstellen der Rechnung.');
     } finally {
       setIsSubmitting(false);

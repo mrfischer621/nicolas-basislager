@@ -98,7 +98,7 @@ export default function TimeEntryTable({
 
   const getCustomerName = (entry: TimeEntryWithCustomer) => {
     if (entry.customerName) return entry.customerName;
-    const project = projects.find((p) => p.id === entry.project_id) as any;
+    const project = projects.find((p) => p.id === entry.project_id) as (Project & { customers?: { name?: string } | null }) | undefined;
     return project?.customers?.name || '-';
   };
 

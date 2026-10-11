@@ -14,6 +14,7 @@ import { useCompany } from '../context/CompanyContext';
 import { useInvalidateFinance } from '../hooks/useFinance';
 import { paidDateToTimestamp } from '../utils/financeAggregation';
 import { Plus, AlertCircle } from 'lucide-react';
+import { asError } from '../utils/errors';
 
 type InvoiceFormData = {
   invoice: Omit<Invoice, 'id' | 'created_at' | 'subtotal' | 'vat_amount' | 'total' | 'total_discount_percent'>;
@@ -176,7 +177,7 @@ export default function Rechnungen() {
 
       if (invoicesResult.data && invoicesResult.data.length > 0) {
         for (const invoice of invoicesResult.data) {
-          const invoiceNumber = (invoice as any).invoice_number;
+          const invoiceNumber = invoice.invoice_number;
           const match = invoiceNumber?.match(/RE-(\d{4})-(\d{3})/);
           if (match) {
             const invoiceYear = parseInt(match[1]);
@@ -278,7 +279,7 @@ export default function Rechnungen() {
 
         const { error: itemsError } = await supabase
           .from('invoice_items')
-          .insert(itemsWithInvoiceId as any);
+          .insert(itemsWithInvoiceId);
 
         if (itemsError) throw itemsError;
 
@@ -320,7 +321,7 @@ export default function Rechnungen() {
             subtotal: calculatedTotals.subtotal,
             vat_amount: calculatedTotals.vat_amount,
             total: calculatedTotals.total,
-          }] as any)
+          }])
           .select()
           .single();
 
@@ -328,7 +329,7 @@ export default function Rechnungen() {
 
         // Insert invoice items with discount and VAT
         const itemsWithInvoiceId = data.items.map(item => ({
-          invoice_id: (invoiceData as any).id,
+          invoice_id: invoiceData.id,
           description: item.description,
           quantity: item.quantity,
           unit_price: item.unit_price,
@@ -340,7 +341,7 @@ export default function Rechnungen() {
 
         const { error: itemsError } = await supabase
           .from('invoice_items')
-          .insert(itemsWithInvoiceId as any);
+          .insert(itemsWithInvoiceId);
 
         if (itemsError) throw itemsError;
 
@@ -348,7 +349,7 @@ export default function Rechnungen() {
         if (timeEntryIds && timeEntryIds.length > 0) {
           const { error: timeEntriesError } = await supabase
             .from('time_entries')
-            .update({ invoice_id: (invoiceData as any).id })
+            .update({ invoice_id: invoiceData.id })
             .in('id', timeEntryIds);
 
           if (timeEntriesError) {
@@ -368,7 +369,8 @@ export default function Rechnungen() {
         handleCloseModal();
         await fetchData();
       }
-    } catch (err: any) {
+    } catch (caught) {
+      const err = asError(caught);
       console.error('Error saving invoice:', err);
       // Show user-friendly error message
       if (err?.code === '23505') {
@@ -533,7 +535,8 @@ export default function Rechnungen() {
       setPreviewData(data);
       setPreviewBlobUrl(blobUrl);
       setIsPreviewOpen(true);
-    } catch (err) {
+    } catch (caught) {
+      const err = asError(caught);
       console.error('Error generating PDF preview:', err);
       setToast({
         type: 'error',
@@ -559,7 +562,8 @@ export default function Rechnungen() {
     try {
       await downloadInvoicePDF(previewData);
       setToast({ type: 'success', message: 'PDF erfolgreich heruntergeladen' });
-    } catch (err) {
+    } catch (caught) {
+      const err = asError(caught);
       console.error('Error downloading PDF:', err);
       setToast({
         type: 'error',
@@ -573,7 +577,8 @@ export default function Rechnungen() {
       const data = await preparePdfData(invoice);
       await downloadInvoicePDF(data);
       setToast({ type: 'success', message: 'PDF erfolgreich erstellt' });
-    } catch (err) {
+    } catch (caught) {
+      const err = asError(caught);
       console.error('Error generating PDF:', err);
       setToast({
         type: 'error',

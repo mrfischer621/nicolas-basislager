@@ -20,4 +20,10 @@ export default defineConfig([
       globals: globals.browser,
     },
   },
+  {
+    // Kontext-Dateien exportieren Provider und zugehoerigen Hook gemeinsam;
+    // das betrifft nur Fast Refresh in der Entwicklung, nicht die App.
+    files: ['src/context/**/*.tsx'],
+    rules: { 'react-refresh/only-export-components': 'off' },
+  },
 ])

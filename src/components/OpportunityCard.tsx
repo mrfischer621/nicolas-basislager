@@ -65,9 +65,10 @@ export function OpportunityCard({
   };
 
   // Check if last contact was more than 14 days ago
+  const [now] = useState(() => Date.now());
   const lastContactDate = new Date(opportunity.last_contact_at);
   const daysSinceContact = Math.floor(
-    (Date.now() - lastContactDate.getTime()) / (1000 * 60 * 60 * 24)
+    (now - lastContactDate.getTime()) / (1000 * 60 * 60 * 24)
   );
   const isStale = daysSinceContact > 14;
 

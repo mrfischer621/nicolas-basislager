@@ -150,6 +150,7 @@ export function sanitizeForQR(text: string): string {
 
   // Step 1: Remove ALL control characters (0x00-0x1F and 0x7F-0x9F)
   // This includes: \n, \r, \t, and other invisible characters
+  // eslint-disable-next-line no-control-regex -- Steuerzeichen bewusst entfernen (PDF-Sicherheit)
   sanitized = sanitized.replace(/[\x00-\x1F\x7F-\x9F]/g, ' ');
 
   // Step 2: Strip characters NOT in Latin-1 subset
@@ -219,6 +220,7 @@ function sanitizeForPDF(text: string): string {
 
   // Remove control characters except newlines and tabs
   // (jsPDF can handle these for multiline text)
+  // eslint-disable-next-line no-control-regex -- Steuerzeichen bewusst entfernen (QR-Rechnung)
   sanitized = sanitized.replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F-\x9F]/g, '');
 
   // Remove emojis and characters outside Latin-1
@@ -295,7 +297,7 @@ function drawScissors(doc: jsPDF, x: number, y: number): void {
 function drawSeparatorLine(doc: jsPDF, y: number): void {
   doc.setDrawColor(0, 0, 0);
   doc.setLineWidth(0.2);
-  (doc as any).setLineDash([2, 2], 0);
+  (doc as unknown as { setLineDash: (d: number[], p: number) => void }).setLineDash([2, 2], 0);
 
   // Horizontal separator (full page width)
   doc.line(0, y, LAYOUT.PAGE_WIDTH, y);
@@ -303,7 +305,7 @@ function drawSeparatorLine(doc: jsPDF, y: number): void {
   // Vertical separator between Empfangsschein (62mm) and Zahlteil
   doc.line(LAYOUT.RECEIPT_WIDTH, y, LAYOUT.RECEIPT_WIDTH, LAYOUT.PAGE_HEIGHT);
 
-  (doc as any).setLineDash([], 0); // Reset to solid line
+  (doc as unknown as { setLineDash: (d: number[], p: number) => void }).setLineDash([], 0); // Reset to solid line
 
   // Scissors at left end of horizontal line and at intersection
   drawScissors(doc, 3, y + 1);
@@ -527,7 +529,7 @@ async function drawPaymentSection(
   qrReference?: string
 ): Promise<void> {
   const x = LAYOUT.PAYMENT_X; // = 67mm (left edge of Zahlteil)
-  let y = LAYOUT.QR_SECTION_Y + 5; // = 197mm
+  const y = LAYOUT.QR_SECTION_Y + 5; // = 197mm
 
   // ── Title: "Zahlteil" (11pt bold) ────────────────────────────────────────
   doc.setFont(PDF_FONT, 'bold');
@@ -945,7 +947,7 @@ function drawInvoiceItems(
     },
   });
 
-  const finalY: number = (doc as any).lastAutoTable?.finalY ?? startY + 20;
+  const finalY: number = (doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? startY + 20;
   let y = finalY + 8;
 
   // ── Totals section (aligned with right portion of table: x=120…190) ─────────
@@ -1164,7 +1166,7 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<Blob> {
   }
 
   // ── Items table ───────────────────────────────────────────────────────────────
-  let endY = drawInvoiceItems(doc, items, invoice, itemsStartY);
+  const endY = drawInvoiceItems(doc, items, invoice, itemsStartY);
 
   // ── Footer text ───────────────────────────────────────────────────────────────
   drawFooterText(doc, footerText, endY);
@@ -1422,7 +1424,7 @@ function drawQuoteItems(
     },
   });
 
-  const finalY: number = (doc as any).lastAutoTable?.finalY ?? startY + 20;
+  const finalY: number = (doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? startY + 20;
   const hasTotalDiscount = (quote.discount_value || 0) > 0;
   let y = finalY + 8;
 
@@ -1610,7 +1612,7 @@ export async function generateQuotePDF(data: QuoteData): Promise<Blob> {
 
   // Items table
   const itemsStartY = contentY > introStartY ? contentY : introStartY + 5;
-  let endY = drawQuoteItems(doc, items, quote, itemsStartY);
+  const endY = drawQuoteItems(doc, items, quote, itemsStartY);
 
   // Dynamic footer text (from company settings — no hardcoded fallback)
   drawFooterText(doc, footerText, endY);

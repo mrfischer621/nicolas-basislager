@@ -118,7 +118,7 @@ export default function Projekte() {
       // Calculate open hours per project
       // "Open" = manueller Override, sonst: nicht verrechnet ODER nur im Rechnungsentwurf
       const openHoursMap = new Map<string, number>();
-      (timeEntriesData || []).forEach((entry: any) => {
+      (timeEntriesData || []).forEach((entry: { project_id: string; hours: number; invoice_id: string | null; invoice_status?: string | null; manual_status?: string | null }) => {
         const isOpen = entry.manual_status
           ? entry.manual_status === 'offen'
           : !entry.invoice_id || entry.invoice_status === 'entwurf';
@@ -161,7 +161,7 @@ export default function Projekte() {
       } else {
         const { error } = await supabase
           .from('projects')
-          .insert([{ ...projectData, company_id: selectedCompany.id }] as any);
+          .insert([{ ...projectData, company_id: selectedCompany.id }]);
 
         if (error) throw error;
       }

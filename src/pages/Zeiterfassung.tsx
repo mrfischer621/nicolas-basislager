@@ -27,7 +27,7 @@ export default function Zeiterfassung() {
   const { selectedCompany } = useCompany();
   const [entries, setEntries] = useState<TimeEntryWithCustomer[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
-  const [_customers, setCustomers] = useState<Customer[]>([]);
+  const [, setCustomers] = useState<Customer[]>([]);
   const [editingEntry, setEditingEntry] = useState<TimeEntry | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string>('');
@@ -175,7 +175,7 @@ export default function Zeiterfassung() {
       // Enrich entries with project and customer names
       const projectsData = projectsResult.data || [];
       const enrichedEntries: TimeEntryWithCustomer[] = (timeEntriesData || []).map(entry => {
-        const project = projectsData.find(p => p.id === entry.project_id) as any;
+        const project = projectsData.find(p => p.id === entry.project_id) as (Project & { customers?: { name?: string } | null }) | undefined;
         return {
           ...entry,
           projectName: project?.name || 'Unbekannt',
@@ -208,7 +208,7 @@ export default function Zeiterfassung() {
       } else {
         const { error } = await supabase
           .from('time_entries')
-          .insert([{ ...entryData, company_id: selectedCompany.id }] as any);
+          .insert([{ ...entryData, company_id: selectedCompany.id }]);
 
         if (error) throw error;
       }

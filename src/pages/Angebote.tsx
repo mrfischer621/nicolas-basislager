@@ -12,6 +12,7 @@ import { validateQuoteData } from '../utils/quoteValidation';
 import { canEditQuote, getEditBlockedReason } from '../utils/quoteUtils';
 import { useCompany } from '../context/CompanyContext';
 import { Plus, AlertCircle } from 'lucide-react';
+import { asError } from '../utils/errors';
 
 type QuoteFormData = {
   quote: Omit<Quote, 'id' | 'created_at' | 'updated_at' | 'subtotal' | 'vat_amount' | 'total'>;
@@ -142,7 +143,7 @@ export default function Angebote() {
 
       if (quotesResult.data && quotesResult.data.length > 0) {
         for (const quote of quotesResult.data) {
-          const quoteNumber = (quote as any).quote_number;
+          const quoteNumber = quote.quote_number;
           const match = quoteNumber?.match(/AN-(\d{4})-(\d{3})/);
           if (match) {
             const quoteYear = parseInt(match[1]);
@@ -159,7 +160,7 @@ export default function Angebote() {
       let highestInvoiceNumber = 0;
       if (invoicesResult.data && invoicesResult.data.length > 0) {
         for (const invoice of invoicesResult.data) {
-          const invoiceNumber = (invoice as any).invoice_number;
+          const invoiceNumber = invoice.invoice_number;
           const match = invoiceNumber?.match(/RE-(\d{4})-(\d{3})/);
           if (match) {
             const invoiceYear = parseInt(match[1]);
@@ -245,7 +246,7 @@ export default function Angebote() {
 
         const { error: itemsError } = await supabase
           .from('quote_items')
-          .insert(itemsWithQuoteId as any);
+          .insert(itemsWithQuoteId);
 
         if (itemsError) throw itemsError;
 
@@ -262,7 +263,7 @@ export default function Angebote() {
             subtotal: calculatedTotals.subtotal,
             vat_amount: calculatedTotals.vat_amount,
             total: calculatedTotals.total,
-          }] as any)
+          }])
           .select()
           .single();
 
@@ -270,7 +271,7 @@ export default function Angebote() {
 
         // Insert quote items
         const itemsWithQuoteId = data.items.map((item, index) => ({
-          quote_id: (quoteData as any).id,
+          quote_id: quoteData.id,
           description: item.description,
           quantity: item.quantity,
           unit_price: item.unit_price,
@@ -280,7 +281,7 @@ export default function Angebote() {
 
         const { error: itemsError } = await supabase
           .from('quote_items')
-          .insert(itemsWithQuoteId as any);
+          .insert(itemsWithQuoteId);
 
         if (itemsError) throw itemsError;
 
@@ -288,7 +289,8 @@ export default function Angebote() {
         setToast({ type: 'success', message: 'Angebot erfolgreich erstellt!' });
         await fetchData();
       }
-    } catch (err: any) {
+    } catch (caught) {
+      const err = asError(caught);
       console.error('Error saving quote:', err);
       if (err?.code === '23505') {
         setToast({
@@ -444,7 +446,8 @@ export default function Angebote() {
       setPreviewData(data);
       setPreviewBlobUrl(blobUrl);
       setIsPreviewOpen(true);
-    } catch (err) {
+    } catch (caught) {
+      const err = asError(caught);
       console.error('Error generating PDF preview:', err);
       setToast({
         type: 'error',
@@ -470,7 +473,8 @@ export default function Angebote() {
     try {
       await downloadQuotePDF(previewData);
       setToast({ type: 'success', message: 'PDF erfolgreich heruntergeladen' });
-    } catch (err) {
+    } catch (caught) {
+      const err = asError(caught);
       console.error('Error downloading PDF:', err);
       setToast({
         type: 'error',
@@ -484,7 +488,8 @@ export default function Angebote() {
       const data = await preparePdfData(quote);
       await downloadQuotePDF(data);
       setToast({ type: 'success', message: 'PDF erfolgreich erstellt' });
-    } catch (err) {
+    } catch (caught) {
+      const err = asError(caught);
       console.error('Error generating PDF:', err);
       setToast({
         type: 'error',
@@ -546,7 +551,7 @@ export default function Angebote() {
           total,
           status: 'entwurf',
           paid_at: null,
-        }] as any)
+        }])
         .select()
         .single();
 
@@ -554,7 +559,7 @@ export default function Angebote() {
 
       // Create invoice items
       const invoiceItems = data.items.map((item) => ({
-        invoice_id: (invoiceData as any).id,
+        invoice_id: invoiceData.id,
         description: item.description,
         quantity: item.quantity,
         unit_price: item.unit_price,
@@ -563,7 +568,7 @@ export default function Angebote() {
 
       const { error: itemsError } = await supabase
         .from('invoice_items')
-        .insert(invoiceItems as any);
+        .insert(invoiceItems);
 
       if (itemsError) throw itemsError;
 
@@ -572,7 +577,7 @@ export default function Angebote() {
         .from('quotes')
         .update({
           status: 'bestaetigt',
-          converted_to_invoice_id: (invoiceData as any).id,
+          converted_to_invoice_id: invoiceData.id,
           converted_at: new Date().toISOString(),
         })
         .eq('id', convertingQuote.id);
@@ -584,7 +589,8 @@ export default function Angebote() {
       setConvertingQuoteItems([]);
       setToast({ type: 'success', message: 'Rechnung erfolgreich erstellt!' });
       await fetchData();
-    } catch (err: any) {
+    } catch (caught) {
+      const err = asError(caught);
       console.error('Error converting quote to invoice:', err);
       setToast({
         type: 'error',

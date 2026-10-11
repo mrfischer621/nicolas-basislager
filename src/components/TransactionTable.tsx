@@ -133,20 +133,16 @@ function ActionMenu({
 }
 
 export default function TransactionTable({ transactions, customers, projects, onEdit, onDelete }: TransactionTableProps) {
-  const [currentPage, setCurrentPage] = useState(1);
+  const [requestedPage, setCurrentPage] = useState(1);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
 
   // Calculate pagination
   const totalPages = Math.ceil(transactions.length / ITEMS_PER_PAGE);
+  // Ausserhalb des Bereichs (z.B. nach Filtern) auf Seite 1 zurueck, ohne Effekt
+  const currentPage = requestedPage > totalPages ? 1 : requestedPage;
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const paginatedTransactions = transactions.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
-  // Reset to page 1 if transactions change and current page is out of bounds
-  useEffect(() => {
-    if (currentPage > totalPages && totalPages > 0) {
-      setCurrentPage(1);
-    }
-  }, [transactions.length, totalPages, currentPage]);
 
   const getCustomerName = (customerId: string | null) => {
     if (!customerId) return '-';

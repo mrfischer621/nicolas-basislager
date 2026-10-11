@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useConfirm } from '../context/ConfirmProvider';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
@@ -153,7 +153,7 @@ export default function Sales() {
       } else {
         const { error } = await supabase
           .from('opportunities')
-          .insert([{ ...opportunityData, company_id: selectedCompany.id }] as any);
+          .insert([{ ...opportunityData, company_id: selectedCompany.id }]);
 
         if (error) throw error;
       }
@@ -285,8 +285,9 @@ export default function Sales() {
   };
 
   // BUGFIX: Strict string comparison and immutable array updates
-  const handleDragEnd = useCallback(
-    async (event: DragEndEvent) => {
+  // Normale Funktion statt useCallback: Der Hook stand nach einem fruehen
+  // return (keine Firma) und verletzte die Hook-Reihenfolge.
+  const handleDragEnd = async (event: DragEndEvent) => {
       const { active, over } = event;
       setActiveId(null);
 
@@ -347,9 +348,7 @@ export default function Sales() {
         // Revert on error
         await fetchData();
       }
-    },
-    [opportunities, selectedCompany]
-  );
+  };
 
   if (isLoading) {
     return (

@@ -17,6 +17,7 @@ import {
   Contact,
   Settings,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { useCompany } from '../context/CompanyContext';
 import { useAuth } from '../context/AuthProvider';
 import { companyDisplayName } from '../utils/companyDisplay';
@@ -90,7 +91,7 @@ export function BentoSidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: 
   };
 
   // Render regular nav item
-  const renderNavItem = (item: { name: string; path: string; icon: any }) => (
+  const renderNavItem = (item: { name: string; path: string; icon: LucideIcon }) => (
     <NavLink
       key={item.path}
       to={item.path}

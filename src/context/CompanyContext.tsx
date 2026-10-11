@@ -1,6 +1,9 @@
 import { createContext, useContext, useState, useEffect, useRef, type ReactNode } from 'react';
 import { supabase } from '../lib/supabase';
 import type { Company } from '../lib/supabase';
+
+/** Zeile aus der RPC get_user_companies (company_id/company_name plus Firmenfelder) */
+type CompanyRpcRow = Omit<Company, 'id' | 'name'> & { company_id: string; company_name: string };
 import { useAuth } from './AuthProvider';
 
 interface CompanyContextType {
@@ -57,7 +60,7 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
       // The RPC now returns full company data, so no separate SELECT needed!
       console.log('[CompanyContext] Mapping company data. First row:', data[0]);
 
-      const companiesData: Company[] = data.map((row: any) => ({
+      const companiesData: Company[] = (data as CompanyRpcRow[]).map((row) => ({
         id: row.company_id,
         name: row.company_name,
         alternativ_name: row.alternativ_name || null,
@@ -94,7 +97,7 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
         quote_footer_text: row.quote_footer_text || null,
         // Timestamps
         created_at: row.created_at,
-        updated_at: row.updated_at || null,
+        updated_at: row.updated_at || undefined,
       }));
 
       console.log('[CompanyContext] Mapped companies:', companiesData);
@@ -103,7 +106,7 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
 
       // Create data array with is_active flag for selectInitialCompany
       // Note: is_active is calculated client-side based on last_active_company_id
-      const dataWithActiveFlag = data.map((row: any) => ({
+      const dataWithActiveFlag = (data as CompanyRpcRow[]).map((row) => ({
         company_id: row.company_id,
         is_active: profile?.last_active_company_id === row.company_id,
       }));

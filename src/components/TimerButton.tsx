@@ -15,21 +15,22 @@ function formatSeconds(totalSecs: number): string {
 }
 
 function useLiveSeconds(isRunning: boolean, startTime: number | null, elapsedSeconds: number) {
-  const [display, setDisplay] = useState(Math.floor(elapsedSeconds));
+  // Aktuelle Zeit als State, vom Intervall fortgeschrieben (kein setState
+  // synchron im Effekt, kein Date.now() waehrend des Renderns)
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
-    setDisplay(Math.floor(elapsedSeconds));
     if (!isRunning || startTime === null) return;
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    const first = setTimeout(() => setNow(Date.now()), 0);
+    return () => {
+      clearInterval(id);
+      clearTimeout(first);
+    };
+  }, [isRunning, startTime]);
 
-    const tick = () =>
-      setDisplay(Math.floor(elapsedSeconds + (Date.now() - startTime) / 1000));
-
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, [isRunning, startTime, elapsedSeconds]);
-
-  return display;
+  if (!isRunning || startTime === null) return Math.floor(elapsedSeconds);
+  return Math.max(Math.floor(elapsedSeconds), Math.floor(elapsedSeconds + (now - startTime) / 1000));
 }
 
 // ─── Stop Modal ───────────────────────────────────────────────────────────────
@@ -249,13 +250,17 @@ function PreConfigDropdown({
   const [billable, setBillable] = useState(initialBillable);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  // Beim Oeffnen mit den aktuellen Werten vorbelegen (Zustand waehrend des
+  // Renderns anpassen statt im Effekt, wie von React empfohlen)
+  const [wasOpen, setWasOpen] = useState(isOpen);
+  if (isOpen !== wasOpen) {
+    setWasOpen(isOpen);
     if (isOpen) {
       setProjectId(initialProjectId);
       setDescription(initialDescription);
       setBillable(initialBillable);
     }
-  }, [isOpen, initialProjectId, initialDescription, initialBillable]);
+  }
 
   // Close on outside click
   useEffect(() => {
@@ -354,10 +359,12 @@ export function TimerButton() {
   // Live seconds display
   const displaySeconds = useLiveSeconds(timer.isRunning, timer.startTime, timer.elapsedSeconds);
 
-  // Reset projects cache when company changes
-  useEffect(() => {
+  // Projekt-Cache leeren, wenn die Firma wechselt
+  const [projectsCompanyId, setProjectsCompanyId] = useState(selectedCompany?.id);
+  if (projectsCompanyId !== selectedCompany?.id) {
+    setProjectsCompanyId(selectedCompany?.id);
     setProjects([]);
-  }, [selectedCompany?.id]);
+  }
 
   // Load active projects (lazy, on dropdown/stop-modal open)
   const loadProjects = useCallback(async () => {
