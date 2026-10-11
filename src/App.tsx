@@ -6,6 +6,7 @@ import Leads from './pages/Leads';
 import KundenDetail from './pages/KundenDetail';
 import Kontakte from './pages/Kontakte';
 import Projekte from './pages/Projekte';
+import ProjektDetail from './pages/ProjektDetail';
 import Zeiterfassung from './pages/Zeiterfassung';
 import Offerten from './pages/Offerten';
 import OfferteDetail from './pages/OfferteDetail';
@@ -57,6 +58,7 @@ function App() {
           <Route path="offerten" element={<Offerten />} />
           <Route path="offerten/:id" element={<OfferteDetail />} />
           <Route path="projekte" element={<Projekte />} />
+          <Route path="projekte/:id" element={<ProjektDetail />} />
           <Route path="zeiterfassung" element={<Zeiterfassung />} />
           <Route path="rechnungen" element={<RechnungenRoute />} />
           <Route path="rechnungen/:id" element={<RechnungDetail />} />

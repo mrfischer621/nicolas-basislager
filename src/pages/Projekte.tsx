@@ -1,323 +1,137 @@
-import { useState, useEffect } from 'react';
-import { useConfirm } from '../context/ConfirmProvider';
-import { useSearchParams } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
-import type { Project, Customer } from '../lib/supabase';
-import ProjectForm from '../components/ProjectForm';
-import ProjectTable from '../components/ProjectTable';
-import Modal from '../components/Modal';
-import { useCompany } from '../context/CompanyContext';
-import { Plus } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { Briefcase, Plus } from 'lucide-react';
+import { DataTable, FilterSelect, ListPage, SearchField, Toolbar, ViewTabs, activeFilterCount, useListState, type Column, type RowMenuItem } from '../components/list';
+import { EmptyState } from '../components/ui';
+import { ProgressBar } from '../components/cockpit/CockpitCard';
+import { ProjectEditor } from '../components/projects/ProjectEditor';
+import { useCompany } from '../context/CompanyContext';
+import { useCustomers, useProjects } from '../hooks/queries';
+import { useTimeSummary } from '../hooks/useTimeEntries';
+import { supabase } from '../lib/supabase';
+import type { Project } from '../lib/supabase';
+import { useQueryClient } from '@tanstack/react-query';
+import { formatChfDisplay } from '../utils/money';
+import { formatHours, formatPercent } from '../utils/format';
+import { PROJECT_STATUS_BADGE, PROJECT_STATUS_LABEL, PROJECT_VIEWS, matchesProjectView, projectStats, type ProjectView } from '../utils/projects';
 
-type FilterType = 'alle' | 'aktiv' | 'archiviert';
+const DEFAULTS = { ansicht: 'laufend' };
+type Row = Project & { customers?: { name?: string } | null; stats: ReturnType<typeof projectStats> };
 
-// Extended Project type with open hours calculation
-export interface ProjectWithOpenHours extends Project {
-  open_hours: number;
-}
-
+/**
+ * Projekte mit Budget, Verbrauch und offenen Stunden. Die Projektliste ist
+ * klein; gefiltert wird im Browser, der Zustand steht in der URL.
+ */
 export default function Projekte() {
-  const confirmDialog = useConfirm();
+  const navigate = useNavigate();
+  const qc = useQueryClient();
   const { selectedCompany } = useCompany();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [projects, setProjects] = useState<ProjectWithOpenHours[]>([]);
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [editingProject, setEditingProject] = useState<Project | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [filter, setFilter] = useState<FilterType>('aktiv');
+  const { state, set, reset } = useListState(DEFAULTS);
+  const view = (PROJECT_VIEWS.some((v) => v.value === state.ansicht) ? state.ansicht : 'laufend') as ProjectView;
+  const { data: projects = [], isLoading } = useProjects();
+  const { data: customers = [] } = useCustomers();
+  const time = useTimeSummary();
+  const [editor, setEditor] = useState<{ project: Project | null } | null>(() => (state.neu === '1' ? { project: null } : null));
 
   useEffect(() => {
-    if (selectedCompany) {
-      fetchData();
-    }
-  }, [selectedCompany, filter]);
+    if (state.neu) set({ neu: null });
+    if (state.id) navigate(`/projekte/${state.id}`, { replace: true });
+  }, [state.neu, state.id, set, navigate]);
 
-  // Handle query parameter for opening specific project
-  useEffect(() => {
-    const projectId = searchParams.get('id');
-    if (projectId && projects.length > 0) {
-      const project = projects.find(p => p.id === projectId);
-      if (project) {
-        handleEdit(project);
-        setSearchParams({}); // Clear query param after opening
-      }
-    }
-  }, [searchParams, projects]);
+  const rows: Row[] = useMemo(() => (projects as Row[]).map((p) => ({ ...p, stats: projectStats(p, time.rows) })), [projects, time.rows]);
+  const q = state.q?.trim().toLowerCase();
+  const filtered = rows.filter((p) => (!state.firma || p.customer_id === state.firma) && (!q || p.name.toLowerCase().includes(q) || (p.customers?.name ?? '').toLowerCase().includes(q)));
+  const inView = filtered.filter((p) => matchesProjectView(p, view));
+  const counts = Object.fromEntries(PROJECT_VIEWS.map((v) => [v.value, filtered.filter((p) => matchesProjectView(p, v.value)).length])) as Record<ProjectView, number>;
+  const unbilled = rows.filter((r) => r.is_active).reduce((s, r) => s + r.stats.unbilledAmount, 0);
 
-  // Early return if no company selected
-  if (!selectedCompany) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-fg-muted">Firma wird geladen...</p>
-      </div>
-    );
-  }
+  if (!selectedCompany) return null;
 
-  const fetchData = async () => {
-    if (!selectedCompany) return;
-
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      // Clear existing data to force React re-render
-      setProjects([]);
-      setCustomers([]);
-
-      // Build projects query with filter
-      let projectsQuery = supabase
-        .from('projects')
-        .select('*')
-        .eq('company_id', selectedCompany.id);
-
-      // Apply filter
-      if (filter === 'aktiv') {
-        projectsQuery = projectsQuery.eq('is_active', true);
-      } else if (filter === 'archiviert') {
-        projectsQuery = projectsQuery.eq('is_active', false);
-      }
-
-      const [projectsResult, customersResult, timeEntriesResult] = await Promise.all([
-        projectsQuery.order('created_at', { ascending: false }),
-        supabase
-          .from('customers')
-          .select('*')
-          .eq('company_id', selectedCompany.id)
-          .eq('is_active', true) // Only show active customers in dropdown
-          .order('name', { ascending: true }),
-        // Fetch time entries with invoice status for open hours calculation
-        // Use view if available, otherwise join with invoices
-        supabase
-          .from('view_time_entries_with_status')
-          .select('project_id, hours, invoice_id, invoice_status, manual_status')
-          .eq('company_id', selectedCompany.id)
-          .eq('billable', true),
-      ]);
-
-      if (projectsResult.error) throw projectsResult.error;
-      if (customersResult.error) throw customersResult.error;
-
-      // Fallback to simple query if view doesn't exist
-      let timeEntriesData = timeEntriesResult.data;
-      if (timeEntriesResult.error) {
-        console.warn('View not available for open hours, using fallback:', timeEntriesResult.error.message);
-        const fallbackResult = await supabase
-          .from('time_entries')
-          .select('project_id, hours, invoice_id, manual_status')
-          .eq('company_id', selectedCompany.id)
-          .eq('billable', true)
-          .is('invoice_id', null);
-
-        if (fallbackResult.error) throw fallbackResult.error;
-        timeEntriesData = (fallbackResult.data || []).map(e => ({ ...e, invoice_status: null }));
-      }
-
-      // Calculate open hours per project
-      // "Open" = manueller Override, sonst: nicht verrechnet ODER nur im Rechnungsentwurf
-      const openHoursMap = new Map<string, number>();
-      (timeEntriesData || []).forEach((entry: { project_id: string; hours: number; invoice_id: string | null; invoice_status?: string | null; manual_status?: string | null }) => {
-        const isOpen = entry.manual_status
-          ? entry.manual_status === 'offen'
-          : !entry.invoice_id || entry.invoice_status === 'entwurf';
-        if (isOpen) {
-          const currentHours = openHoursMap.get(entry.project_id) || 0;
-          openHoursMap.set(entry.project_id, currentHours + (entry.hours || 0));
-        }
-      });
-
-      // Merge projects with open hours
-      const projectsWithOpenHours: ProjectWithOpenHours[] = (projectsResult.data || []).map((project) => ({
-        ...project,
-        open_hours: openHoursMap.get(project.id) || 0,
-      }));
-
-      setProjects(projectsWithOpenHours);
-      setCustomers(customersResult.data || []);
-    } catch (err) {
-      console.error('Error fetching data:', err);
-      setError('Fehler beim Laden der Daten. Bitte überprüfen Sie Ihre Supabase-Konfiguration.');
-    } finally {
-      setIsLoading(false);
-    }
+  const setActive = async (p: Project, active: boolean) => {
+    const { error } = await supabase.from('projects').update({ is_active: active }).eq('id', p.id);
+    if (error) toast.error(error.message);
+    else toast.success(active ? 'Projekt wiederhergestellt.' : 'Projekt archiviert.');
+    await qc.invalidateQueries({ queryKey: ['projects'] });
   };
 
-  const handleSubmit = async (projectData: Omit<Project, 'id' | 'created_at'>) => {
-    if (!selectedCompany) return;
+  const menu = (p: Row): RowMenuItem[] => [
+    { label: 'Öffnen', onSelect: () => navigate(`/projekte/${p.id}`) },
+    { label: 'Bearbeiten', onSelect: () => setEditor({ project: p }) },
+    { label: 'Zeiten anzeigen', onSelect: () => navigate(`/zeiterfassung?ansicht=alle&projekt=${p.id}`) },
+    { label: 'Archivieren', onSelect: () => setActive(p, false), hidden: !p.is_active },
+    { label: 'Wiederherstellen', onSelect: () => setActive(p, true), hidden: p.is_active },
+  ];
 
-    try {
-      // Set active company session before INSERT/UPDATE
-      await supabase.rpc('set_active_company', { company_id: selectedCompany.id });
-
-      if (editingProject) {
-        const { error } = await supabase
-          .from('projects')
-          .update(projectData)
-          .eq('id', editingProject.id);
-
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from('projects')
-          .insert([{ ...projectData, company_id: selectedCompany.id }]);
-
-        if (error) throw error;
-      }
-
-      setIsModalOpen(false);
-      setEditingProject(null);
-      await fetchData();
-    } catch (err) {
-      console.error('Error saving project:', err);
-      throw err;
-    }
-  };
-
-  const handleEdit = (project: Project) => {
-    setEditingProject(project);
-    setIsModalOpen(true);
-  };
-
-  const handleArchive = async (id: string) => {
-    if (!(await confirmDialog({ title: 'Projekt archivieren', confirmLabel: 'Archivieren', message: 'Möchten Sie dieses Projekt wirklich archivieren?', destructive: true }))) return;
-
-    try {
-      const { error } = await supabase
-        .from('projects')
-        .update({ is_active: false })
-        .eq('id', id);
-
-      if (error) throw error;
-      toast.success('Projekt archiviert');
-      await fetchData();
-    } catch (err) {
-      console.error('Error archiving project:', err);
-      toast.error('Fehler beim Archivieren des Projekts.');
-    }
-  };
-
-  const handleRestore = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('projects')
-        .update({ is_active: true })
-        .eq('id', id);
-
-      if (error) throw error;
-      toast.success('Projekt wiederhergestellt');
-      await fetchData();
-    } catch (err) {
-      console.error('Error restoring project:', err);
-      toast.error('Fehler beim Wiederherstellen des Projekts.');
-    }
-  };
-
-  const handleAddNew = () => {
-    setEditingProject(null);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setEditingProject(null);
-  };
+  const columns: Column<Row>[] = [
+    {
+      key: 'name',
+      header: 'Projekt',
+      cell: (p) => (
+        <span className="block max-w-[20rem]">
+          <span className="block truncate font-semibold">{p.name}</span>
+          <span className="block truncate text-xs text-fg-muted">{p.customers?.name ?? ''}</span>
+        </span>
+      ),
+    },
+    { key: 'status', header: 'Status', cell: (p) => <span className={PROJECT_STATUS_BADGE[p.status]}>{PROJECT_STATUS_LABEL[p.status]}</span> },
+    {
+      key: 'budget',
+      header: 'Budget',
+      cell: (p) =>
+        p.budget ? (
+          <span className="block w-40">
+            <span className="mb-1 flex justify-between text-xs tabular-nums">
+              <span>{formatChfDisplay(p.stats.amount, { decimals: 0 })}</span>
+              <span className="text-fg-muted">von {formatChfDisplay(Number(p.budget), { decimals: 0 })}</span>
+            </span>
+            <ProgressBar percent={p.stats.budgetUsed ?? 0} level={p.stats.level} label={`Budget ${p.name}: ${formatPercent(p.stats.budgetUsed ?? 0)}`} />
+          </span>
+        ) : (
+          <span className="text-fg-muted">ohne Budget</span>
+        ),
+    },
+    { key: 'stunden', header: 'Stunden', align: 'right', cell: (p) => p.stats.hours.toFixed(2) },
+    { key: 'offen', header: 'Nicht verrechnet', align: 'right', cell: (p) => (p.stats.unbilledHours ? <span className="text-attention">{formatHours(p.stats.unbilledHours)} · {formatChfDisplay(p.stats.unbilledAmount, { decimals: 0 })}</span> : <span className="text-fg-muted">–</span>) },
+  ];
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="page-title">Projekte</h1>
-          <p className="mt-2 text-sm text-fg-muted">Verwalten Sie Ihre Projekte</p>
-        </div>
-        <button
-          onClick={handleAddNew}
-          className="btn-cta"
-        >
-          <Plus size={18} aria-hidden="true" />
-          Neues Projekt
-        </button>
-      </div>
-
-      {/* Filter Tabs */}
-      <div className="flex gap-2">
-        <button
-          onClick={() => setFilter('alle')}
-          className={`px-4 py-2 rounded-lg font-medium transition ${
-            filter === 'alle'
-              ? 'toggle-on'
-              : 'toggle-off bg-raised'
-          }`}
-        >
-          Alle
-        </button>
-        <button
-          onClick={() => setFilter('aktiv')}
-          className={`px-4 py-2 rounded-lg font-medium transition ${
-            filter === 'aktiv'
-              ? 'toggle-on'
-              : 'toggle-off bg-raised'
-          }`}
-        >
-          Aktiv
-        </button>
-        <button
-          onClick={() => setFilter('archiviert')}
-          className={`px-4 py-2 rounded-lg font-medium transition ${
-            filter === 'archiviert'
-              ? 'toggle-on'
-              : 'toggle-off bg-raised'
-          }`}
-        >
-          Archiviert
-        </button>
-      </div>
-
-      {/* Error Message */}
-      {error && (
-        <div role="alert" className="rounded-lg border border-danger bg-danger-subtle px-4 py-3 text-danger-on-subtle">
-          <strong>Fehler:</strong> {error}
-        </div>
-      )}
-
-      {/* Warning if no customers */}
-      {customers.length === 0 && !isLoading && (
-        <div className="bg-warning-subtle border border-warning-subtle text-warning-on-subtle px-4 py-3 rounded-lg">
-          Bitte erstellen Sie zuerst Kunden, bevor Sie Projekte anlegen.
-        </div>
-      )}
-
-      {/* Table */}
-      {isLoading ? (
-        <div className="card p-6">
-          <p className="text-fg-muted text-center">Lädt Projekte...</p>
-        </div>
-      ) : (
-        <ProjectTable
-          projects={projects}
-          customers={customers}
-          onEdit={handleEdit}
-          onArchive={handleArchive}
-          onRestore={handleRestore}
-        />
-      )}
-
-      {/* Modal */}
-      <Modal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        title={editingProject ? 'Projekt bearbeiten' : 'Neues Projekt'}
-        size="lg"
+    <>
+      <ListPage
+        title="Projekte"
+        summary={isLoading ? ' ' : `${counts.laufend} laufend${unbilled ? `, ${formatChfDisplay(unbilled, { decimals: 0 })} nicht verrechnet` : ''}.`}
+        primary={
+          <button type="button" className="btn-cta" onClick={() => setEditor({ project: null })}>
+            <Plus size={18} aria-hidden="true" />
+            Neues Projekt
+          </button>
+        }
+        tabs={<ViewTabs tabs={PROJECT_VIEWS.map((v) => ({ ...v, count: counts[v.value] }))} value={view} onChange={(v) => set({ ansicht: v }, { push: true })} />}
+        toolbar={
+          <Toolbar filterCount={activeFilterCount(state, DEFAULTS)} onReset={reset}>
+            <SearchField value={state.q ?? ''} onChange={(v) => set({ q: v })} placeholder="Projekt oder Firma suchen" />
+            <FilterSelect label="Firma" allLabel="Alle Firmen" value={state.firma ?? ''} onChange={(v) => set({ firma: v })} options={customers.map((c) => ({ value: c.id, label: c.name }))} />
+          </Toolbar>
+        }
       >
-        <ProjectForm
-          onSubmit={handleSubmit}
-          editingProject={editingProject}
-          onCancelEdit={handleCloseModal}
-          customers={customers}
+        <DataTable
+          rows={inView}
+          rowKey={(p) => p.id}
+          rowLabel={(p) => `Projekt ${p.name}`}
+          columns={columns}
+          onRowClick={(p) => navigate(`/projekte/${p.id}`)}
+          menu={menu}
+          loading={isLoading}
+          mobile={(p) => ({
+            title: p.name,
+            subtitle: p.customers?.name ?? '',
+            amount: p.stats.unbilledHours ? `${p.stats.unbilledHours.toFixed(1)} h offen` : undefined,
+            badge: <span className={PROJECT_STATUS_BADGE[p.status]}>{PROJECT_STATUS_LABEL[p.status]}</span>,
+          })}
+          empty={<EmptyState icon={<Briefcase size={20} />} title="Keine Projekte in dieser Ansicht" />}
         />
-      </Modal>
-    </div>
+      </ListPage>
+      <ProjectEditor open={!!editor} project={editor?.project ?? null} onClose={() => setEditor(null)} />
+    </>
   );
 }
