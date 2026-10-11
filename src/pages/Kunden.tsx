@@ -262,16 +262,16 @@ export default function Kunden() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-fg">Kunden</h1>
-          <p className="text-fg-muted mt-1">Verwalten Sie Ihre Kundendaten</p>
+          <h1 className="page-title">Kunden</h1>
+          <p className="mt-2 text-sm text-fg-muted">Verwalten Sie Ihre Kundendaten</p>
         </div>
         <button
           onClick={handleAddNew}
-          className="flex items-center gap-2 px-4 py-2 bg-brand text-accent-fg rounded-lg hover:bg-brand-dark transition"
+          className="btn-cta"
         >
-          <Plus size={20} />
+          <Plus size={18} aria-hidden="true" />
           Neuer Kunde
         </button>
       </div>
@@ -327,14 +327,14 @@ export default function Kunden() {
 
       {/* Error Message */}
       {error && (
-        <div className="bg-danger-subtle border border-danger-subtle text-danger px-4 py-3 rounded-lg">
-          {error}
+        <div role="alert" className="rounded-lg border border-danger bg-danger-subtle px-4 py-3 text-danger">
+          <strong>Fehler:</strong> {error}
         </div>
       )}
 
       {/* Table */}
       {isLoading ? (
-        <div className="bg-surface rounded-lg shadow-sm p-6">
+        <div className="card p-6">
           <p className="text-fg-muted text-center">Lädt Kunden...</p>
         </div>
       ) : (

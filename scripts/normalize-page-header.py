@@ -13,3 +13,12 @@ for p in sys.argv[1:]:
                   '<div role="alert" className="rounded-lg border border-danger bg-danger-subtle px-4 py-3 text-danger">\n          <strong>Fehler:</strong> {error}')
     open(p, 'w').write(s)
     print('ok', p)
+
+# Karten-Container vereinheitlichen (radius-card, shadow-card)
+for p in sys.argv[1:]:
+    s = open(p).read()
+    s2 = re.sub(r'bg-surface rounded-(?:lg|xl) shadow(?:-sm)?(?= |")', 'card', s)
+    s2 = re.sub(r'bg-surface rounded-(?:lg|xl) border border-(?:line|surface-border) shadow(?:-sm)?(?= |")', 'card', s2)
+    if s2 != s:
+        open(p, 'w').write(s2)
+        print('karten', p)

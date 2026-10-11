@@ -124,7 +124,7 @@ export default function CustomerForm({ onSubmit, editingCustomer, onCancelEdit }
   ];
 
   return (
-    <div className="bg-surface rounded-lg shadow-sm p-6">
+    <div className="card p-6">
       <h2 className="text-xl font-semibold text-fg mb-6">
         {editingCustomer ? 'Kunde bearbeiten' : 'Neuer Kunde'}
       </h2>
