@@ -95,7 +95,8 @@ export default function ProjektDetail() {
       {stats.budgetUsed !== null && <ProgressBar percent={stats.budgetUsed} level={stats.level} label="Budgetverbrauch" />}
 
       <div className="grid gap-6 xl:grid-cols-3">
-        <div className="space-y-4 xl:col-span-2">
+        {/* min-w-0: sonst dehnt die Tab-Zeile die Rasterspalte ueber den Bildschirm */}
+        <div className="min-w-0 space-y-4 xl:col-span-2">
           <ViewTabs label="Bereich" tabs={TABS.map((t) => ({ ...t, count: t.value === 'zeiten' ? entries.length : t.value === 'rechnungen' ? invoices.data?.length : undefined }))} value={tab} onChange={(v) => set({ tab: v })} />
           <section className="card p-5">
             {tab === 'zeiten' &&

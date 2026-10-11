@@ -1252,7 +1252,7 @@ export default function Settings({ section }: { section: TabType }) {
                 }
               }}
               placeholder="Neue Produktkategorie..."
-              className="flex-1 px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition bg-surface"
+              className="min-w-0 flex-1 px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition bg-surface"
             />
             <button
               onClick={handleAddProductCategory}
@@ -1445,7 +1445,7 @@ export default function Settings({ section }: { section: TabType }) {
               {filteredCategories.map((category) => (
                 <div
                   key={category.id}
-                  className="flex items-center justify-between p-3 bg-canvas rounded-lg border border-line"
+                  className="flex items-center justify-between gap-2 p-3 bg-canvas rounded-lg border border-line"
                 >
                   {editingCategoryId === category.id ? (
                     <>
@@ -1511,7 +1511,7 @@ export default function Settings({ section }: { section: TabType }) {
                     </>
                   ) : (
                     <>
-                      <div className="flex items-center gap-3">
+                      <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
                         <div
                           className="w-4 h-4 rounded-full flex-shrink-0"
                           style={{ backgroundColor: category.color }}

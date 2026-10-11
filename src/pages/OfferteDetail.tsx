@@ -133,7 +133,7 @@ export default function OfferteDetail() {
         ]}
       />
       <div className="grid gap-6 xl:grid-cols-3">
-        <section className="overflow-hidden rounded-card bg-surface shadow-card xl:col-span-2" aria-label="Vorschau">
+        <section className="min-w-0 overflow-hidden rounded-card bg-surface shadow-card xl:col-span-2" aria-label="Vorschau">
           {preview.url ? <PdfFrame title={`Vorschau ${quote.quote_number}`} url={preview.url} filename={`${quote.quote_number}.pdf`} /> : preview.error ? <EmptyState title="Vorschau nicht möglich" text={preview.error} /> : <div className="skeleton m-6 h-[60vh]" />}
         </section>
         <div className="space-y-6">

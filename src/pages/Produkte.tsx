@@ -184,8 +184,8 @@ export default function Produkte() {
       </div>
 
       {/* Filter Tabs & Group Toggle */}
-      <div className="flex items-center justify-between">
-        <div className="flex gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setFilter('alle')}
             className={`px-4 py-2 rounded-lg font-medium transition ${

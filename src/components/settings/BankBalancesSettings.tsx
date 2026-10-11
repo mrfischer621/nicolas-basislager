@@ -97,6 +97,7 @@ export function BankBalancesSettings() {
         ) : balances.length === 0 ? (
           <p className="text-sm text-fg-muted">Noch kein Kontostand erfasst.</p>
         ) : (
+          <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr>
@@ -132,6 +133,7 @@ export function BankBalancesSettings() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </SettingsSection>

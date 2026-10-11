@@ -159,7 +159,7 @@ export default function RechnungDetail() {
       />
 
       <div className="grid gap-6 xl:grid-cols-3">
-        <section className="overflow-hidden rounded-card bg-surface shadow-card xl:col-span-2" aria-label="Vorschau">
+        <section className="min-w-0 overflow-hidden rounded-card bg-surface shadow-card xl:col-span-2" aria-label="Vorschau">
           {preview.url ? (
             <PdfFrame title={`Vorschau ${invoice.invoice_number}`} url={preview.url} filename={`${invoice.invoice_number}.pdf`} />
           ) : preview.error ? (
