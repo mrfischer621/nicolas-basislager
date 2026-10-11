@@ -1,21 +1,10 @@
 import { useState, useMemo } from 'react';
 import toast from 'react-hot-toast';
-import { Calendar, BarChart3, FileText, Download, AlertCircle } from 'lucide-react';
-import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
+import { Download } from 'lucide-react';
+import FinancialChart from '../components/FinancialChart';
+import HBarChart from '../components/HBarChart';
+import { Card, EmptyState, KPICard, PageHeader, SegmentedControl } from '../components/ui';
+import { formatChfDisplay } from '../utils/money';
 import { useAnalytics } from '../hooks/useAnalytics';
 import { useCategories } from '../hooks/queries';
 import { supabase } from '../lib/supabase';
@@ -39,25 +28,19 @@ interface FinancialBookkeepingData {
   gewinnVerlust: number;
 }
 
-// Format CHF currency
-const formatCHF = (value: number) => {
-  return new Intl.NumberFormat('de-CH', {
-    style: 'currency',
-    currency: 'CHF',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value);
-};
+const formatCHF = (value: number) => formatChfDisplay(value);
+const dmy = (day: string) => `${day.slice(8, 10)}.${day.slice(5, 7)}.${day.slice(0, 4)}`;
 
-// Color palette - Sage brand colors
-const COLORS = {
-  income: '#166534', // success-dark (green-800)
-  expense: '#991b1b', // danger-dark (red-800)
-  profit: '#6b8a5e', // sage-500 (brand)
-  primary: '#6b8a5e', // sage-500 (brand)
-};
+const PRESETS = [
+  { value: 'current_month', label: 'Aktueller Monat' },
+  { value: 'last_month', label: 'Letzter Monat' },
+  { value: 'current_year', label: 'Dieses Jahr' },
+  { value: 'last_year', label: 'Letztes Jahr' },
+  { value: 'last_30_days', label: '30 Tage' },
+  { value: 'last_90_days', label: '90 Tage' },
+  { value: 'custom', label: 'Eigener Zeitraum' },
+];
 
-const PIE_COLORS = ['#6b8a5e', '#8aa67c', '#aec2a3', '#547047', '#435839', '#ced9c7', '#38472f', '#2f3a28'];
 
 type ViewMode = 'charts' | 'bookkeeping';
 
@@ -79,6 +62,8 @@ export default function Auswertungen() {
   const { loading, error, kpi, timeline, byCustomer, byCategory, byTags, entries, paidWithoutDate } =
     useAnalytics(dateRange);
   const { data: categories = [] } = useCategories();
+  const categoryExpenses = byCategory.filter((c) => c.type === 'ausgabe').slice(0, 10);
+  const customerIncome = byCustomer.filter((c) => c.type === 'einnahme').slice(0, 10);
 
   const bookkeepingData = useMemo<FinancialBookkeepingData>(() => {
     const categoryByName = new Map(categories.map((c) => [c.name, c]));
@@ -197,541 +182,205 @@ export default function Auswertungen() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-xl text-content-secondary">Lädt...</div>
+        <div className="text-fg-muted">Auswertung wird geladen …</div>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-3xl font-bold text-content-heading">Auswertungen</h1>
+      <PageHeader
+        title="Auswertungen"
+        description={`Zeitraum ${dmy(dateRange.from)} bis ${dmy(dateRange.to)}`}
+        actions={
+          <>
+            <SegmentedControl
+              label="Ansicht"
+              options={[
+                { value: 'bookkeeping' as ViewMode, label: 'Buchungen' },
+                { value: 'charts' as ViewMode, label: 'Charts' },
+              ]}
+              value={viewMode}
+              onChange={setViewMode}
+            />
+            <button type="button" onClick={handleExportCSV} className="btn-secondary">
+              <Download className="h-4 w-4" aria-hidden="true" />
+              CSV für Treuhänder
+            </button>
+          </>
+        }
+      />
 
-          {/* View Mode Toggle & Export */}
-          <div className="flex items-center gap-3">
-            <div className="flex bg-raised rounded-lg p-1">
-              <button
-                onClick={() => setViewMode('bookkeeping')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-                  viewMode === 'bookkeeping'
-                    ? 'bg-surface text-content-heading shadow-sm'
-                    : 'text-content-secondary hover:text-content-heading'
-                }`}
-              >
-                <FileText className="w-4 h-4" />
-                Buchungen
-              </button>
-              <button
-                onClick={() => setViewMode('charts')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-                  viewMode === 'charts'
-                    ? 'bg-surface text-content-heading shadow-sm'
-                    : 'text-content-secondary hover:text-content-heading'
-                }`}
-              >
-                <BarChart3 className="w-4 h-4" />
-                Charts
-              </button>
-            </div>
-
-            {viewMode === 'bookkeeping' && (
-              <button
-                onClick={handleExportCSV}
-                className="flex items-center gap-2 px-4 py-2 bg-brand text-accent-fg rounded-lg font-medium hover:bg-brand-dark transition-colors"
-              >
-                <Download className="w-4 h-4" />
-                Export für Treuhänder (CSV)
-              </button>
-            )}
-          </div>
+      {/* Zeitraum */}
+      <div className="flex flex-wrap items-center gap-3">
+        <div role="group" aria-label="Zeitraum" className="flex flex-wrap gap-1 rounded-lg border border-line-strong bg-surface p-0.5">
+          {PRESETS.map((p) => (
+            <button
+              key={p.value}
+              type="button"
+              aria-pressed={selectedPreset === p.value}
+              onClick={() => (p.value === 'custom' ? handleCustomRange() : handlePresetChange(p.value))}
+              className={`rounded-md px-3 py-1.5 font-display text-sm font-bold transition-colors ${
+                selectedPreset === p.value ? 'bg-accent text-accent-fg' : 'text-fg-muted hover:bg-raised hover:text-fg'
+              }`}
+            >
+              {p.label}
+            </button>
+          ))}
         </div>
-
-        {/* Filter Bar */}
-        <div className="bg-surface rounded-lg shadow p-4">
-          <div className="flex gap-3 items-center flex-wrap">
-            <button
-              onClick={() => handlePresetChange('current_month')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                selectedPreset === 'current_month'
-                  ? 'bg-brand text-accent-fg'
-                  : 'bg-raised text-content-body hover:bg-sunken'
-              }`}
-            >
-              Aktueller Monat
-            </button>
-            <button
-              onClick={() => handlePresetChange('last_month')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                selectedPreset === 'last_month'
-                  ? 'bg-brand text-accent-fg'
-                  : 'bg-raised text-content-body hover:bg-sunken'
-              }`}
-            >
-              Letzter Monat
-            </button>
-            <button
-              onClick={() => handlePresetChange('current_year')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                selectedPreset === 'current_year'
-                  ? 'bg-brand text-accent-fg'
-                  : 'bg-raised text-content-body hover:bg-sunken'
-              }`}
-            >
-              Dieses Jahr
-            </button>
-            <button
-              onClick={() => handlePresetChange('last_year')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                selectedPreset === 'last_year'
-                  ? 'bg-brand text-accent-fg'
-                  : 'bg-raised text-content-body hover:bg-sunken'
-              }`}
-            >
-              Letztes Jahr
-            </button>
-            <button
-              onClick={() => handlePresetChange('last_30_days')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                selectedPreset === 'last_30_days'
-                  ? 'bg-brand text-accent-fg'
-                  : 'bg-raised text-content-body hover:bg-sunken'
-              }`}
-            >
-              Letzte 30 Tage
-            </button>
-            <button
-              onClick={() => handlePresetChange('last_90_days')}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                selectedPreset === 'last_90_days'
-                  ? 'bg-brand text-accent-fg'
-                  : 'bg-raised text-content-body hover:bg-sunken'
-              }`}
-            >
-              Letzte 90 Tage
-            </button>
-            <button
-              onClick={handleCustomRange}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
-                selectedPreset === 'custom'
-                  ? 'bg-brand text-accent-fg'
-                  : 'bg-raised text-content-body hover:bg-sunken'
-              }`}
-            >
-              <Calendar className="w-4 h-4" />
-              Benutzerdefiniert
-            </button>
+        {showCustomPicker && customRange && (
+          <div className="flex flex-wrap items-center gap-3">
+            <label className="flex items-center gap-2 text-sm text-fg-muted">
+              Von
+              <input
+                type="date"
+                value={customRange.from}
+                onChange={(e) => e.target.value && applyCustomRange(e.target.value, customRange.to)}
+                className="input w-auto"
+              />
+            </label>
+            <label className="flex items-center gap-2 text-sm text-fg-muted">
+              Bis
+              <input
+                type="date"
+                value={customRange.to}
+                onChange={(e) => e.target.value && applyCustomRange(customRange.from, e.target.value)}
+                className="input w-auto"
+              />
+            </label>
           </div>
-
-          {/* Custom Date Picker */}
-          {showCustomPicker && customRange && (
-            <div className="mt-4 flex gap-4 items-center">
-              <div className="flex items-center gap-2">
-                <label className="text-sm font-medium text-content-secondary">Von:</label>
-                <input
-                  type="date"
-                  value={customRange.from}
-                  onChange={(e) => {
-                    e.preventDefault();
-                    if (e.target.value) {
-                      applyCustomRange(e.target.value, customRange.to);
-                    }
-                  }}
-                  className="px-3 py-2 border border-surface-border rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
-                />
-              </div>
-              <div className="flex items-center gap-2">
-                <label className="text-sm font-medium text-content-secondary">Bis:</label>
-                <input
-                  type="date"
-                  value={customRange.to}
-                  onChange={(e) => {
-                    e.preventDefault();
-                    if (e.target.value) {
-                      applyCustomRange(customRange.from, e.target.value);
-                    }
-                  }}
-                  className="px-3 py-2 border border-surface-border rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
-                />
-              </div>
-            </div>
-          )}
-        </div>
+        )}
       </div>
 
       <PaidWithoutDateNotice invoices={paidWithoutDate} />
 
       {/* Error Message */}
       {error && (
-        <div className="mb-6 p-4 bg-danger-subtle border border-danger-subtle rounded-lg text-danger">
-          {error}
+        <div role="alert" className="rounded-lg border border-danger bg-danger-subtle p-4 text-danger">
+          <strong>Fehler:</strong> {error}
         </div>
       )}
 
       {/* Financial Bookkeeping View */}
       {viewMode === 'bookkeeping' && (
         <>
-          {bookkeepingLoading ? (
-            <div className="flex items-center justify-center h-64">
-              <div className="text-xl text-content-secondary">Lädt Buchungen...</div>
-            </div>
-          ) : bookkeepingData ? (
-            <div className="space-y-6">
-              {/* Summary KPI Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-surface rounded-lg shadow p-6">
-                  <div className="text-sm font-medium text-content-secondary mb-2">Total Einnahmen</div>
-                  <div className="text-3xl font-bold text-success-dark">{formatCHF(bookkeepingData.totalEinnahmen)}</div>
-                  <div className="text-sm text-content-tertiary mt-1">{bookkeepingData.einnahmen.reduce((s, e) => s + e.count, 0)} Buchungen</div>
-                </div>
-                <div className="bg-surface rounded-lg shadow p-6">
-                  <div className="text-sm font-medium text-content-secondary mb-2">Total Ausgaben</div>
-                  <div className="text-3xl font-bold text-danger-dark">{formatCHF(bookkeepingData.totalAusgaben)}</div>
-                  <div className="text-sm text-content-tertiary mt-1">{bookkeepingData.ausgaben.reduce((s, a) => s + a.count, 0)} Buchungen</div>
-                </div>
-                <div className="bg-surface rounded-lg shadow p-6 border-2 border-surface-border">
-                  <div className="text-sm font-medium text-content-secondary mb-2">Gewinn / Verlust</div>
-                  <div className={`text-3xl font-bold ${bookkeepingData.gewinnVerlust >= 0 ? 'text-success-dark' : 'text-danger-dark'}`}>
-                    {formatCHF(bookkeepingData.gewinnVerlust)}
-                  </div>
-                </div>
-              </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <KPICard
+              label="Einnahmen"
+              value={formatCHF(bookkeepingData.totalEinnahmen)}
+              hint={`${bookkeepingData.einnahmen.reduce((s, e) => s + e.count, 0)} Buchungen`}
+              loading={bookkeepingLoading}
+            />
+            <KPICard
+              label="Ausgaben"
+              value={formatCHF(bookkeepingData.totalAusgaben)}
+              hint={`${bookkeepingData.ausgaben.reduce((s, a) => s + a.count, 0)} Buchungen`}
+              loading={bookkeepingLoading}
+            />
+            <KPICard
+              label="Ergebnis"
+              value={formatCHF(bookkeepingData.gewinnVerlust)}
+              hint={bookkeepingData.gewinnVerlust >= 0 ? 'Gewinn' : 'Verlust'}
+              loading={bookkeepingLoading}
+            />
+          </div>
 
-              {/* Two-Column Layout: Einnahmen / Ausgaben */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Einnahmen Section */}
-                <div className="bg-surface rounded-lg shadow overflow-hidden">
-                  <div className="bg-success-subtle px-6 py-4 border-b border-success-subtle">
-                    <h2 className="text-lg font-semibold text-success flex items-center gap-2">
-                      <div className="w-3 h-3 bg-success rounded-full" />
-                      Einnahmen
-                    </h2>
-                  </div>
-                  <div className="divide-y divide-line">
-                    {bookkeepingData.einnahmen.length === 0 ? (
-                      <div className="px-6 py-8 text-center text-content-tertiary">
-                        Keine Einnahmen im gewählten Zeitraum
-                      </div>
-                    ) : (
-                      bookkeepingData.einnahmen.map((cat) => (
-                        <div key={cat.categoryName} className="px-6 py-4 flex items-center justify-between hover:bg-canvas">
-                          <div className="flex items-center gap-3">
-                            <div
-                              className="w-3 h-3 rounded-full flex-shrink-0"
-                              style={{ backgroundColor: cat.categoryColor }}
-                            />
-                            <div>
-                              <div className="font-medium text-content-heading flex items-center gap-2">
-                                {cat.categoryName}
-                                {cat.isTaxRelevant && (
-                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-warning-subtle text-warning">
-                                    <AlertCircle className="w-3 h-3 mr-0.5" />
-                                    Steuer
-                                  </span>
-                                )}
-                              </div>
-                              <div className="text-sm text-content-tertiary">{cat.count} Buchung{cat.count !== 1 ? 'en' : ''}</div>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div className="font-semibold text-success-dark">{formatCHF(cat.total)}</div>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                  {bookkeepingData.einnahmen.length > 0 && (
-                    <div className="bg-success-subtle px-6 py-4 border-t border-success-subtle flex justify-between items-center">
-                      <span className="font-medium text-success">Total Einnahmen</span>
-                      <span className="font-bold text-success text-lg">{formatCHF(bookkeepingData.totalEinnahmen)}</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Ausgaben Section */}
-                <div className="bg-surface rounded-lg shadow overflow-hidden">
-                  <div className="bg-danger-subtle px-6 py-4 border-b border-danger-subtle">
-                    <h2 className="text-lg font-semibold text-danger flex items-center gap-2">
-                      <div className="w-3 h-3 bg-danger rounded-full" />
-                      Ausgaben
-                    </h2>
-                  </div>
-                  <div className="divide-y divide-line">
-                    {bookkeepingData.ausgaben.length === 0 ? (
-                      <div className="px-6 py-8 text-center text-content-tertiary">
-                        Keine Ausgaben im gewählten Zeitraum
-                      </div>
-                    ) : (
-                      bookkeepingData.ausgaben.map((cat) => (
-                        <div key={cat.categoryName} className="px-6 py-4 flex items-center justify-between hover:bg-canvas">
-                          <div className="flex items-center gap-3">
-                            <div
-                              className="w-3 h-3 rounded-full flex-shrink-0"
-                              style={{ backgroundColor: cat.categoryColor }}
-                            />
-                            <div>
-                              <div className="font-medium text-content-heading flex items-center gap-2">
-                                {cat.categoryName}
-                                {cat.isTaxRelevant && (
-                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-warning-subtle text-warning">
-                                    <AlertCircle className="w-3 h-3 mr-0.5" />
-                                    Steuer
-                                  </span>
-                                )}
-                              </div>
-                              <div className="text-sm text-content-tertiary">{cat.count} Buchung{cat.count !== 1 ? 'en' : ''}</div>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div className="font-semibold text-danger-dark">{formatCHF(cat.total)}</div>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                  {bookkeepingData.ausgaben.length > 0 && (
-                    <div className="bg-danger-subtle px-6 py-4 border-t border-danger-subtle flex justify-between items-center">
-                      <span className="font-medium text-danger">Total Ausgaben</span>
-                      <span className="font-bold text-danger text-lg">{formatCHF(bookkeepingData.totalAusgaben)}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Result Banner */}
-              <div className={`rounded-lg shadow p-6 ${bookkeepingData.gewinnVerlust >= 0 ? 'bg-success-subtle border border-success-subtle' : 'bg-danger-subtle border border-danger-subtle'}`}>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className={`text-lg font-semibold ${bookkeepingData.gewinnVerlust >= 0 ? 'text-success' : 'text-danger'}`}>
-                      {bookkeepingData.gewinnVerlust >= 0 ? 'Gewinn' : 'Verlust'}
-                    </h3>
-                    <p className="text-sm text-content-secondary mt-1">
-                      Einnahmen ({formatCHF(bookkeepingData.totalEinnahmen)}) - Ausgaben ({formatCHF(bookkeepingData.totalAusgaben)})
-                    </p>
-                  </div>
-                  <div className={`text-4xl font-bold ${bookkeepingData.gewinnVerlust >= 0 ? 'text-success-dark' : 'text-danger-dark'}`}>
-                    {formatCHF(Math.abs(bookkeepingData.gewinnVerlust))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="flex items-center justify-center h-64">
-              <div className="text-content-tertiary">Keine Daten verfügbar</div>
-            </div>
-          )}
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            {(
+              [
+                ['Einnahmen', bookkeepingData.einnahmen, bookkeepingData.totalEinnahmen],
+                ['Ausgaben', bookkeepingData.ausgaben, bookkeepingData.totalAusgaben],
+              ] as const
+            ).map(([title, rows, total]) => (
+              <Card key={title} padding="none" className="overflow-hidden">
+                <h2 className="border-b border-line px-5 py-4 text-lg font-bold text-fg md:px-7">{title}</h2>
+                {rows.length === 0 ? (
+                  <EmptyState title={`Keine ${title} im Zeitraum`} />
+                ) : (
+                  <table className="table">
+                    <thead className="sr-only">
+                      <tr>
+                        <th>Kategorie</th>
+                        <th>Betrag</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rows.map((cat) => (
+                        <tr key={cat.categoryName}>
+                          <td className="pl-5 md:pl-7">
+                            <span className="font-medium">{cat.categoryName}</span>
+                            <span className="ml-2 text-xs text-fg-muted">
+                              {cat.count} {cat.count === 1 ? 'Buchung' : 'Buchungen'}
+                              {!cat.isTaxRelevant && ' · nicht steuerrelevant'}
+                            </span>
+                          </td>
+                          <td className="pr-5 text-right tabular-nums md:pr-7">{formatCHF(cat.total)}</td>
+                        </tr>
+                      ))}
+                      <tr className="font-semibold">
+                        <td className="pl-5 md:pl-7">Total {title}</td>
+                        <td className="pr-5 text-right tabular-nums md:pr-7">{formatCHF(total)}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                )}
+              </Card>
+            ))}
+          </div>
         </>
       )}
 
       {/* Charts View */}
       {viewMode === 'charts' && (
         <>
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        {/* Total Income */}
-        <div className="bg-surface rounded-lg shadow p-6">
-          <div className="text-sm font-medium text-content-secondary mb-2">Gesamteinnahmen</div>
-          <div className="text-3xl font-bold text-success-dark">{formatCHF(kpi.income)}</div>
-        </div>
-
-        {/* Total Expenses */}
-        <div className="bg-surface rounded-lg shadow p-6">
-          <div className="text-sm font-medium text-content-secondary mb-2">Gesamtausgaben</div>
-          <div className="text-3xl font-bold text-danger-dark">{formatCHF(kpi.expense)}</div>
-        </div>
-
-        {/* Net Profit */}
-        <div className="bg-surface rounded-lg shadow p-6">
-          <div className="text-sm font-medium text-content-secondary mb-2">Nettogewinn</div>
-          <div
-            className={`text-3xl font-bold ${
-              kpi.profit >= 0 ? 'text-success-dark' : 'text-danger-dark'
-            }`}
-          >
-            {formatCHF(kpi.profit)}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <KPICard label="Einnahmen" value={formatCHF(kpi.income)} hint="Im gewählten Zeitraum" />
+            <KPICard label="Ausgaben" value={formatCHF(kpi.expense)} hint="Im gewählten Zeitraum" />
+            <KPICard
+              label="Ergebnis"
+              value={formatCHF(kpi.profit)}
+              hint={kpi.profit >= 0 ? 'Gewinn' : 'Verlust'}
+            />
           </div>
-        </div>
-      </div>
 
-      {/* Main Timeline Chart */}
-      <div className="bg-surface rounded-lg shadow p-6 mb-8">
-        <h2 className="text-xl font-bold text-content-heading mb-6">Zeitverlauf</h2>
-        <ResponsiveContainer width="100%" height={400}>
-          <LineChart data={timeline}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-            <XAxis
-              dataKey="date"
-              stroke="#6b7280"
-              style={{ fontSize: '12px' }}
-            />
-            <YAxis
-              stroke="#6b7280"
-              style={{ fontSize: '12px' }}
-              tickFormatter={(value) => formatCHF(value)}
-            />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: 'white',
-                border: '1px solid #e5e7eb',
-                borderRadius: '8px',
-              }}
-              formatter={(value: number | undefined) => value !== undefined ? formatCHF(value) : ''}
-            />
-            <Legend />
-            <Line
-              type="monotone"
-              dataKey="income"
-              name="Einnahmen"
-              stroke={COLORS.income}
-              strokeWidth={2}
-              dot={{ fill: COLORS.income }}
-            />
-            <Line
-              type="monotone"
-              dataKey="expense"
-              name="Ausgaben"
-              stroke={COLORS.expense}
-              strokeWidth={2}
-              dot={{ fill: COLORS.expense }}
-            />
-            <Line
-              type="monotone"
-              dataKey="monthlyProfit"
-              name="Perioden-Gewinn"
-              stroke={COLORS.profit}
-              strokeWidth={2}
-              dot={{ fill: COLORS.profit }}
-            />
-            <Line
-              type="monotone"
-              dataKey="cumulativeProfit"
-              name="Kumulativer Gewinn"
-              stroke={COLORS.primary}
-              strokeWidth={2}
-              strokeDasharray="5 5"
-              dot={{ fill: COLORS.primary }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+          <Card padding="md">
+            <Card.Header title="Zeitverlauf" subtitle="Einnahmen und Ausgaben pro Periode" />
+            {timeline.every((p) => p.income === 0 && p.expense === 0) ? (
+              <EmptyState title="Keine Buchungen im Zeitraum" text="Wähle einen anderen Zeitraum." />
+            ) : (
+              <FinancialChart
+                data={timeline.map((p) => ({ period: p.date, revenue: p.income, expenses: p.expense }))}
+                height={360}
+              />
+            )}
+          </Card>
 
-      {/* Breakdown Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* By Customer */}
-        <div className="bg-surface rounded-lg shadow p-6">
-          <h2 className="text-xl font-bold text-content-heading mb-6">Pro Kunde</h2>
-          {byCustomer.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={byCustomer.slice(0, 10)} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis
-                  type="number"
-                  stroke="#6b7280"
-                  style={{ fontSize: '12px' }}
-                  tickFormatter={(value) => formatCHF(value)}
-                />
-                <YAxis
-                  type="category"
-                  dataKey="name"
-                  stroke="#6b7280"
-                  style={{ fontSize: '12px' }}
-                  width={120}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'white',
-                    border: '1px solid #e5e7eb',
-                    borderRadius: '8px',
-                  }}
-                  formatter={(value: number | undefined) => value !== undefined ? formatCHF(value) : ''}
-                />
-                <Bar dataKey="amount" fill={COLORS.primary}>
-                  {byCustomer.slice(0, 10).map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={entry.type === 'einnahme' ? COLORS.income : COLORS.expense}
-                    />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="text-center text-content-tertiary py-8">Keine Daten verfügbar</div>
-          )}
-        </div>
-
-        {/* By Category */}
-        <div className="bg-surface rounded-lg shadow p-6">
-          <h2 className="text-xl font-bold text-content-heading mb-6">Nach Konto (Kategorie)</h2>
-          {byCategory.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={byCategory.slice(0, 8)}
-                  dataKey="amount"
-                  nameKey="category"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={100}
-                  label={(entry: any) => `${entry.category}: ${formatCHF(entry.amount)}`}
-                  labelLine={false}
-                >
-                  {byCategory.slice(0, 8).map((_entry, index) => (
-                    <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'white',
-                    border: '1px solid #e5e7eb',
-                    borderRadius: '8px',
-                  }}
-                  formatter={(value: number | undefined) => value !== undefined ? formatCHF(value) : ''}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="text-center text-content-tertiary py-8">Keine Daten verfügbar</div>
-          )}
-        </div>
-
-        {/* By Tags */}
-        <div className="bg-surface rounded-lg shadow p-6 lg:col-span-2">
-          <h2 className="text-xl font-bold text-content-heading mb-6">Nach Tags</h2>
-          {byTags.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={byTags.slice(0, 10)} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis
-                  type="number"
-                  stroke="#6b7280"
-                  style={{ fontSize: '12px' }}
-                  tickFormatter={(value) => formatCHF(value)}
-                />
-                <YAxis
-                  type="category"
-                  dataKey="tag"
-                  stroke="#6b7280"
-                  style={{ fontSize: '12px' }}
-                  width={150}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'white',
-                    border: '1px solid #e5e7eb',
-                    borderRadius: '8px',
-                  }}
-                  formatter={(value: number | undefined) => value !== undefined ? formatCHF(value) : ''}
-                />
-                <Bar dataKey="amount" fill={COLORS.primary} />
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="text-center text-content-tertiary py-8">Keine Tags vorhanden</div>
-          )}
-        </div>
-      </div>
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <Card padding="md">
+              <Card.Header title="Ausgaben nach Kategorie" />
+              {categoryExpenses.length > 0 ? (
+                <HBarChart data={categoryExpenses} labelKey="category" color="fg" label="Ausgaben nach Kategorie in CHF" />
+              ) : (
+                <EmptyState title="Keine Ausgaben im Zeitraum" />
+              )}
+            </Card>
+            <Card padding="md">
+              <Card.Header title="Einnahmen nach Kunde" />
+              {customerIncome.length > 0 ? (
+                <HBarChart data={customerIncome} labelKey="name" label="Einnahmen nach Kunde in CHF" />
+              ) : (
+                <EmptyState title="Keine Einnahmen mit Kunde im Zeitraum" />
+              )}
+            </Card>
+            <Card padding="md" className="lg:col-span-2">
+              <Card.Header title="Nach Tags" />
+              {byTags.length > 0 ? (
+                <HBarChart data={byTags.slice(0, 10)} labelKey="tag" label="Beträge nach Tags in CHF" />
+              ) : (
+                <EmptyState title="Keine Tags im Zeitraum" />
+              )}
+            </Card>
+          </div>
         </>
       )}
     </div>
