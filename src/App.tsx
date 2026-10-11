@@ -12,8 +12,7 @@ import Rechnungen from './pages/Rechnungen';
 import RechnungDetail from './pages/RechnungDetail';
 import Buchungen from './pages/Buchungen';
 import Berichte from './pages/Berichte';
-import Produkte from './pages/Produkte';
-import Settings from './pages/Settings';
+import Einstellungen from './pages/Einstellungen';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -62,8 +61,7 @@ function App() {
           <Route path="buchungen" element={<Buchungen />} />
           <Route path="berichte" element={<Berichte />} />
           <Route path="einstellungen" element={<Navigate to="/einstellungen/unternehmen" replace />} />
-          <Route path="einstellungen/leistungen" element={<Produkte />} />
-          <Route path="einstellungen/:bereich" element={<Settings />} />
+          <Route path="einstellungen/:bereich" element={<Einstellungen />} />
 
           {/* Alte Adressen (vor Oktober 2026) */}
           <Route path="sales" element={<Legacy fallback="/pipeline" />} />

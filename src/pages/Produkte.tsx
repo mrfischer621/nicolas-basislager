@@ -171,18 +171,15 @@ export default function Produkte() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Kopf: eingebettet in Einstellungen > Leistungen und Produkte */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="page-title">Produkte</h1>
-          <p className="mt-2 text-sm text-fg-muted">Verwalten Sie Ihre Produkte und Dienstleistungen</p>
+          <h2 className="text-lg font-bold text-fg">Leistungen und Produkte</h2>
+          <p className="mt-1 text-sm text-fg-muted">Vorlagen für Positionen in Offerten und Rechnungen.</p>
         </div>
-        <button
-          onClick={handleAddNew}
-          className="btn-cta"
-        >
+        <button onClick={handleAddNew} className="btn-primary">
           <Plus size={18} aria-hidden="true" />
-          Neues Produkt
+          Neue Leistung
         </button>
       </div>
 

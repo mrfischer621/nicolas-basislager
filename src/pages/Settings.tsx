@@ -1,16 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { SETTINGS_TAB_TO_SECTION } from '../routes/legacy';
 import hotToast from 'react-hot-toast';
 import { uploadCompanyLogo, validateLogoFile } from '../utils/logoUpload';
-import { getThemePreference, setThemePreference, type ThemePreference } from '../utils/theme';
-import { SegmentedControl } from '../components/ui';
 import { useConfirm } from '../context/ConfirmProvider';
 import { supabase } from '../lib/supabase';
-import type { PipelineStage, Category, CategoryType } from '../lib/supabase';
+import type { Category, CategoryType } from '../lib/supabase';
 import { useCompany } from '../context/CompanyContext';
 import { useAuth } from '../context/AuthProvider';
-import { Building2, Save, AlertCircle, CheckCircle, TrendingUp, Edit2, Check, X, Trash2, Plus, User, FileText, Tags, Package } from 'lucide-react';
+import { Save, AlertCircle, CheckCircle, Edit2, Check, X, Trash2, Plus, Tags, Package } from 'lucide-react';
+import { SegmentedControl } from '../components/ui';
 
 interface CompanyFormData {
   name: string;
@@ -40,19 +37,18 @@ interface Toast {
   message: string;
 }
 
-type TabType = 'company' | 'profile' | 'templates' | 'pipeline' | 'categories' | 'product_categories';
+export type TabType = 'company' | 'profile' | 'templates' | 'categories' | 'product_categories';
 
-export default function Settings() {
+/**
+ * Bisherige Bereiche der Einstellungen (Unternehmen, Benutzer, Textvorlagen,
+ * Kategorien, Produktkategorien), eingebettet in die Seite Einstellungen
+ * mit linker Unternavigation (pages/Einstellungen.tsx).
+ */
+export default function Settings({ section }: { section: TabType }) {
   const confirmDialog = useConfirm();
   const { selectedCompany, refreshCompanies } = useCompany();
   const { user, profile } = useAuth();
-  const navigate = useNavigate();
-  const { bereich } = useParams();
-  const [themePref, setThemePref] = useState<ThemePreference>(getThemePreference);
-  // Bereich steht in der URL (/einstellungen/<bereich>), siehe routes/legacy.ts
-  const activeTab: TabType =
-    (Object.entries(SETTINGS_TAB_TO_SECTION).find(([, section]) => section === bereich)?.[0] as TabType | undefined) ?? 'company';
-  const setActiveTab = (tab: TabType) => navigate(`/einstellungen/${SETTINGS_TAB_TO_SECTION[tab]}`);
+  const activeTab = section;
 
   // Company settings state
   const [companyFormData, setCompanyFormData] = useState<CompanyFormData>({
@@ -121,11 +117,6 @@ export default function Settings() {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Pipeline settings state
-  const [stages, setStages] = useState<PipelineStage[]>([]);
-  const [editingStageId, setEditingStageId] = useState<string | null>(null);
-  const [editStageName, setEditStageName] = useState('');
-  const [editStageColor, setEditStageColor] = useState('');
-  const [isLoadingStages, setIsLoadingStages] = useState(false);
 
   // Categories (Buchungskategorien) state
   const [categories, setCategories] = useState<Category[]>([]);
@@ -190,12 +181,6 @@ export default function Settings() {
     }
   }, [profile]);
 
-  // Load pipeline stages when pipeline tab is active
-  useEffect(() => {
-    if (activeTab === 'pipeline' && selectedCompany) {
-      fetchStages();
-    }
-  }, [activeTab, selectedCompany]);
 
   // Load categories when categories tab is active
   useEffect(() => {
@@ -222,26 +207,6 @@ export default function Settings() {
     );
   }
 
-  const fetchStages = async () => {
-    if (!selectedCompany) return;
-
-    try {
-      setIsLoadingStages(true);
-      const { data, error } = await supabase
-        .from('pipeline_stages')
-        .select('*')
-        .eq('company_id', selectedCompany.id)
-        .order('position', { ascending: true });
-
-      if (error) throw error;
-      setStages(data || []);
-    } catch (err) {
-      console.error('Error fetching stages:', err);
-      showToast('error', 'Fehler beim Laden der Pipeline-Phasen.');
-    } finally {
-      setIsLoadingStages(false);
-    }
-  };
 
   const fetchCategories = async () => {
     if (!selectedCompany) return;
@@ -528,111 +493,6 @@ export default function Settings() {
     }
   };
 
-  // Pipeline stage handlers
-  const handleEditStage = (stage: PipelineStage) => {
-    setEditingStageId(stage.id);
-    setEditStageName(stage.name);
-    setEditStageColor(stage.color);
-  };
-
-  const handleSaveStage = async (stageId: string) => {
-    if (!editStageName.trim()) {
-      showToast('error', 'Phasenname darf nicht leer sein.');
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from('pipeline_stages')
-        .update({
-          name: editStageName.trim(),
-          color: editStageColor
-        })
-        .eq('id', stageId);
-
-      if (error) throw error;
-
-      setStages(stages.map(s =>
-        s.id === stageId
-          ? { ...s, name: editStageName.trim(), color: editStageColor }
-          : s
-      ));
-      setEditingStageId(null);
-      showToast('success', 'Phase erfolgreich aktualisiert.');
-    } catch (err) {
-      console.error('Error updating stage:', err);
-      showToast('error', 'Fehler beim Aktualisieren der Phase.');
-    }
-  };
-
-  const handleCancelEdit = () => {
-    setEditingStageId(null);
-    setEditStageName('');
-    setEditStageColor('');
-  };
-
-  const handleDeleteStage = async (stage: PipelineStage) => {
-    const { data: opportunities, error: checkError } = await supabase
-      .from('opportunities')
-      .select('id')
-      .eq('stage_id', stage.id)
-      .limit(1);
-
-    if (checkError) {
-      showToast('error', 'Fehler beim Prüfen der Phase.');
-      return;
-    }
-
-    if (opportunities && opportunities.length > 0) {
-      showToast('error', 'Diese Phase enthält noch Deals. Bitte verschieben Sie diese zuerst.');
-      return;
-    }
-
-    if (!(await confirmDialog({ title: 'Phase löschen', confirmLabel: 'Löschen', message: `Möchten Sie die Phase "${stage.name}" wirklich löschen?`, destructive: true }))) {
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from('pipeline_stages')
-        .delete()
-        .eq('id', stage.id);
-
-      if (error) throw error;
-
-      await fetchStages();
-      showToast('success', 'Phase erfolgreich gelöscht.');
-    } catch (err) {
-      console.error('Error deleting stage:', err);
-      showToast('error', 'Fehler beim Löschen der Phase.');
-    }
-  };
-
-  const handleAddStage = async () => {
-    const stageName = prompt('Name der neuen Phase:');
-    if (!stageName || !stageName.trim()) return;
-
-    try {
-      const maxPosition = stages.length > 0 ? Math.max(...stages.map(s => s.position)) : -1;
-
-      const { error } = await supabase
-        .from('pipeline_stages')
-        .insert([{
-          company_id: selectedCompany.id,
-          name: stageName.trim(),
-          position: maxPosition + 1,
-          color: '#6B7280',
-        }]);
-
-      if (error) throw error;
-
-      await fetchStages();
-      showToast('success', 'Phase erfolgreich hinzugefügt.');
-    } catch (err) {
-      console.error('Error adding stage:', err);
-      showToast('error', 'Fehler beim Hinzufügen der Phase.');
-    }
-  };
 
   // Product Categories handlers (Phase 3.2)
   const handleAddProductCategory = async () => {
@@ -755,33 +615,10 @@ export default function Settings() {
     setEditProductCategoryValue('');
   };
 
-  const tabs = [
-    { id: 'company' as TabType, label: 'Firmenprofil', icon: Building2 },
-    { id: 'profile' as TabType, label: 'Benutzerprofil', icon: User },
-    { id: 'templates' as TabType, label: 'Textvorlagen', icon: FileText },
-    { id: 'categories' as TabType, label: 'Buchungskategorien', icon: Tags },
-    { id: 'product_categories' as TabType, label: 'Produktkategorien', icon: Package },
-    { id: 'pipeline' as TabType, label: 'Sales Pipeline', icon: TrendingUp },
-  ];
 
-  const colorOptions = [
-    { value: '#6B7280', label: 'Grau' },
-    { value: '#3B82F6', label: 'Blau' },
-    { value: '#8B5CF6', label: 'Lila' },
-    { value: '#F59E0B', label: 'Gelb' },
-    { value: '#EF4444', label: 'Rot' },
-    { value: '#10B981', label: 'Grün' },
-    { value: '#EC4899', label: 'Pink' },
-    { value: '#14B8A6', label: 'Türkis' },
-  ];
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="page-title">Einstellungen</h1>
-        <p className="mt-2 text-sm text-fg-muted">Firma, Benutzer, Vorlagen, Pipeline und Kategorien</p>
-      </div>
 
       {/* Toast Notification */}
       {toast && (
@@ -802,27 +639,6 @@ export default function Settings() {
         </div>
       )}
 
-      {/* Tabs */}
-      <div className="border-b border-line">
-        <nav aria-label="Bereiche der Einstellungen" className="-mb-px flex gap-6 overflow-x-auto">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setActiveTab(tab.id)}
-              aria-current={activeTab === tab.id ? 'page' : undefined}
-              className={`flex items-center gap-2 whitespace-nowrap border-b-4 px-1 pb-3 font-display text-sm font-bold transition-colors ${
-                activeTab === tab.id
-                  ? 'border-cta text-fg'
-                  : 'border-transparent text-fg-muted hover:border-line-strong hover:text-fg'
-              }`}
-            >
-              <tab.icon size={18} />
-              {tab.label}
-            </button>
-          ))}
-        </nav>
-      </div>
 
       {/* Tab Content: Company Profile */}
       {activeTab === 'company' && (
@@ -1225,23 +1041,6 @@ export default function Settings() {
       {/* Tab Content: User Profile */}
       {activeTab === 'profile' && (
         <>
-        {/* Darstellung: pro Geraet, Standard folgt dem System */}
-        <div className="card p-5 md:p-7">
-          <h2 className="mb-1 text-lg font-bold text-fg">Darstellung</h2>
-          <p className="mb-4 text-sm text-fg-muted">Standard ist hell, unabhängig vom Betriebssystem. «Dunkel» gilt nur für dieses Gerät.</p>
-          <SegmentedControl
-            label="Darstellung"
-            options={[
-              { value: 'light' as ThemePreference, label: 'Hell' },
-              { value: 'dark' as ThemePreference, label: 'Dunkel' },
-            ]}
-            value={themePref}
-            onChange={(v) => {
-              setThemePref(v);
-              setThemePreference(v);
-            }}
-          />
-        </div>
         <div className="card p-5 md:p-7">
           <div className="mb-6">
             <h2 className="text-lg font-semibold text-fg mb-2">Benutzerprofil</h2>
@@ -1546,128 +1345,6 @@ export default function Settings() {
           <p className="text-xs text-fg-muted mt-4">
             Hinweis: Produktkategorien dienen zur Gruppierung im Produktkatalog und erscheinen als Dropdown bei der Produkterfassung.
           </p>
-        </div>
-      )}
-
-      {/* Tab Content: Pipeline Settings */}
-      {activeTab === 'pipeline' && (
-        <div className="card p-5 md:p-7">
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold text-fg mb-2">Pipeline-Phasen verwalten</h2>
-            <p className="text-sm text-fg-muted">
-              Definieren Sie die Phasen Ihrer Sales Pipeline. Diese werden im Kanban-Board angezeigt.
-            </p>
-          </div>
-
-          {isLoadingStages ? (
-            <div className="flex items-center justify-center h-32">
-              <p className="text-fg-muted">Lädt...</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {stages.map((stage, index) => (
-                <div
-                  key={stage.id}
-                  className="flex items-center gap-4 p-4 border border-line rounded-lg hover:border-line-strong transition"
-                >
-                  {/* Position */}
-                  <div className="w-8 text-center text-sm font-medium text-fg-muted">
-                    {index + 1}
-                  </div>
-
-                  {/* Color */}
-                  {editingStageId === stage.id ? (
-                    <select
-                      value={editStageColor}
-                      onChange={(e) => setEditStageColor(e.target.value)}
-                      className="px-3 py-2 border border-line-strong rounded-lg focus:border-brand focus:ring-1 focus:ring-brand "
-                    >
-                      {colorOptions.map((color) => (
-                        <option key={color.value} value={color.value}>
-                          {color.label}
-                        </option>
-                      ))}
-                    </select>
-                  ) : (
-                    <div
-                      className="w-6 h-6 rounded-full border-2 border-line flex-shrink-0"
-                      style={{ backgroundColor: stage.color }}
-                      title={stage.color}
-                    />
-                  )}
-
-                  {/* Name */}
-                  {editingStageId === stage.id ? (
-                    <input
-                      type="text"
-                      value={editStageName}
-                      onChange={(e) => setEditStageName(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleSaveStage(stage.id);
-                        if (e.key === 'Escape') handleCancelEdit();
-                      }}
-                      className="flex-1 px-3 py-2 border border-line-strong rounded-lg focus:border-brand focus:ring-1 focus:ring-brand "
-                      autoFocus
-                    />
-                  ) : (
-                    <div className="flex-1 font-medium text-fg">{stage.name}</div>
-                  )}
-
-                  {/* Actions */}
-                  <div className="flex gap-2">
-                    {editingStageId === stage.id ? (
-                      <>
-                        <button
-                          onClick={() => handleSaveStage(stage.id)}
-                          className="p-2 hover:bg-success-subtle rounded transition"
-                          title="Speichern"
-                          aria-label="Speichern"
-                        >
-                          <Check size={18} className="text-success" />
-                        </button>
-                        <button
-                          onClick={handleCancelEdit}
-                          className="p-2 hover:bg-danger-subtle rounded transition"
-                          title="Abbrechen"
-                          aria-label="Abbrechen"
-                        >
-                          <X size={18} className="text-danger" />
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          onClick={() => handleEditStage(stage)}
-                          className="p-2 hover:bg-raised rounded transition"
-                          title="Bearbeiten"
-                          aria-label="Bearbeiten"
-                        >
-                          <Edit2 size={18} className="text-fg-muted" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteStage(stage)}
-                          className="p-2 hover:bg-danger-subtle rounded transition"
-                          title="Löschen"
-                          aria-label="Löschen"
-                        >
-                          <Trash2 size={18} className="text-danger" />
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </div>
-              ))}
-
-              {/* Add New Stage Button */}
-              <button
-                onClick={handleAddStage}
-                className="w-full p-4 border-2 border-dashed border-line-strong rounded-lg hover:border-line-strong hover:bg-canvas transition flex items-center justify-center gap-2 text-fg-muted hover:text-fg"
-              >
-                <Plus size={20} />
-                <span className="font-medium">Neue Phase hinzufügen</span>
-              </button>
-            </div>
-          )}
         </div>
       )}
 

@@ -10,7 +10,7 @@ export const SETTINGS_TAB_TO_SECTION: Record<string, string> = {
   profile: 'benutzer',
   templates: 'rechnungen-offerten',
   categories: 'kategorien',
-  product_categories: 'produktkategorien',
+  product_categories: 'leistungen',
   pipeline: 'pipeline',
 };
 
