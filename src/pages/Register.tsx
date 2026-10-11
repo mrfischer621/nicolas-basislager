@@ -26,7 +26,7 @@ export default function Register() {
 
       if (signUpError) {
         if (signUpError.message.includes('already registered')) {
-          setError('This email is already registered. Please log in instead.');
+          setError('Diese E-Mail ist bereits registriert. Bitte melde dich an.');
         } else {
           setError(signUpError.message);
         }
@@ -35,7 +35,7 @@ export default function Register() {
       }
 
       if (!authData.user) {
-        setError('Failed to create user account.');
+        setError('Das Benutzerkonto konnte nicht erstellt werden.');
         setLoading(false);
         return;
       }
@@ -54,7 +54,7 @@ export default function Register() {
 
       if (companyError) {
         console.error('Error creating company:', companyError);
-        setError('Failed to create company. Please try again.');
+        setError('Die Firma konnte nicht erstellt werden. Bitte versuche es nochmals.');
         setLoading(false);
         return;
       }
@@ -67,7 +67,7 @@ export default function Register() {
 
       if (profileError) {
         console.error('Error updating profile:', profileError);
-        setError('Failed to link company to user profile. Please contact support.');
+        setError('Die Firma konnte nicht mit dem Benutzer verknüpft werden.');
         setLoading(false);
         return;
       }
@@ -76,90 +76,87 @@ export default function Register() {
       navigate('/');
     } catch (err) {
       console.error('Registration error:', err);
-      setError('An unexpected error occurred. Please try again.');
+      setError('Die Registrierung ist fehlgeschlagen. Bitte versuche es nochmals.');
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-accent-subtle to-accent-subtle flex items-center justify-center p-4">
-      <div className="bg-surface rounded-2xl shadow-xl w-full max-w-md p-8">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-fg mb-2">Create Account</h1>
-          <p className="text-fg-muted">Start managing your business today</p>
-        </div>
+    <main className="flex min-h-screen items-center justify-center bg-canvas p-4">
+      <div className="w-full max-w-md">
+        <img src="/favicon.svg" alt="" aria-hidden="true" className="mb-6 h-12 w-12" />
+        <div className="card p-6 md:p-8">
+          <h1 className="page-title mb-2">Konto erstellen</h1>
+          <p className="mb-6 text-sm text-fg-muted">Lege dein Benutzerkonto und deine erste Firma an.</p>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {error && (
-            <div className="bg-danger-subtle border border-danger-subtle text-danger px-4 py-3 rounded-lg">
-              {error}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {error && (
+              <div role="alert" className="rounded-lg border border-danger bg-danger-subtle px-4 py-3 text-sm text-danger">
+                <strong>Fehler:</strong> {error}
+              </div>
+            )}
+
+            <div>
+              <label htmlFor="companyName" className="label">
+                Firmenname
+              </label>
+              <input
+                id="companyName"
+                type="text"
+                autoComplete="organization"
+                required
+                value={formData.companyName}
+                onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
+                className="input py-2.5"
+                placeholder="Muster GmbH"
+              />
             </div>
-          )}
 
-          <div>
-            <label htmlFor="companyName" className="block text-sm font-medium text-fg mb-2">
-              Company Name
-            </label>
-            <input
-              id="companyName"
-              type="text"
-              required
-              value={formData.companyName}
-              onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-              className="w-full px-4 py-3 border border-line-strong rounded-lg focus:ring-2 focus:ring-focus focus:border-transparent transition"
-              placeholder="Acme Corp"
-            />
-          </div>
+            <div>
+              <label htmlFor="email" className="label">
+                E-Mail
+              </label>
+              <input
+                id="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className="input py-2.5"
+                placeholder="name@firma.ch"
+              />
+            </div>
 
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-fg mb-2">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              required
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full px-4 py-3 border border-line-strong rounded-lg focus:ring-2 focus:ring-focus focus:border-transparent transition"
-              placeholder="you@example.com"
-            />
-          </div>
+            <div>
+              <label htmlFor="password" className="label">
+                Passwort <span className="font-normal text-fg-muted">(mindestens 6 Zeichen)</span>
+              </label>
+              <input
+                id="password"
+                type="password"
+                autoComplete="new-password"
+                required
+                minLength={6}
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                className="input py-2.5"
+              />
+            </div>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-fg mb-2">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              required
-              minLength={6}
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              className="w-full px-4 py-3 border border-line-strong rounded-lg focus:ring-2 focus:ring-focus focus:border-transparent transition"
-              placeholder="At least 6 characters"
-            />
-          </div>
+            <button type="submit" disabled={loading} className="btn-cta w-full">
+              {loading ? 'Konto wird erstellt …' : 'Konto erstellen'}
+            </button>
+          </form>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-accent text-accent-fg py-3 rounded-lg font-semibold hover:bg-accent transition disabled:bg-fg-muted disabled:cursor-not-allowed"
-          >
-            {loading ? 'Creating Account...' : 'Create Account'}
-          </button>
-        </form>
-
-        <div className="mt-6 text-center">
-          <p className="text-fg-muted">
-            Already have an account?{' '}
-            <Link to="/login" className="text-accent font-semibold hover:text-accent">
-              Log in
+          <p className="mt-6 text-center text-sm text-fg-muted">
+            Schon ein Konto?{' '}
+            <Link to="/login" className="bw-textlink">
+              Anmelden
             </Link>
           </p>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
