@@ -81,6 +81,17 @@
     color: rgb(var(--bw-fg));
   }
 
+  /* Handy: Felder mit 16 px, sonst zoomt iOS Safari beim Fokus heran und
+     nicht mehr zurueck. Ab md bleibt die Schrift wie gehabt. */
+  @media (max-width: 767.98px) {
+    input:not([type='checkbox']):not([type='radio']):not([type='range']):not([type='color']),
+    select,
+    textarea,
+    .rich-editor {
+      font-size: 16px !important; /* auch gegen text-sm an einzelnen Feldern */
+    }
+  }
+
   /* Bewegung sparsam, unter reduced motion nur noch kurzes Ueberblenden */
   @media (prefers-reduced-motion: reduce) {
     *,
