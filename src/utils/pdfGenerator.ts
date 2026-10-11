@@ -312,14 +312,16 @@ function drawSwissCross(doc: jsPDF, x: number, y: number, size: number = 7): voi
   doc.setFillColor(0, 0, 0);
   doc.rect(x + 0.7 * s, y + 0.7 * s, 18.4 * s, 18.4 * s, 'F');
 
-  // White cross arms (exact SVG coordinates)
+  // Weisses Kreuz, exakt um die Mitte (9.9) des 19.8er-Rasters zentriert.
+  // Balken 3.3 breit, 11 lang: jeder Arm 3.85 lang, also 7:6 laenger als
+  // breit (Proportion des Schweizerkreuzes). Die frueher uebernommenen
+  // SVG-Koordinaten (y 4 / 7.9) lagen 0.13 mm zu hoch.
   doc.setFillColor(255, 255, 255);
-
-  // Vertical bar: x=8.3, y=4, w=3.3, h=11
-  doc.rect(x + 8.3 * s, y + 4 * s, 3.3 * s, 11 * s, 'F');
-
-  // Horizontal bar: x=4.4, y=7.9, w=11, h=3.3
-  doc.rect(x + 4.4 * s, y + 7.9 * s, 11 * s, 3.3 * s, 'F');
+  const arm = 3.3;
+  const len = 11;
+  const c = 19.8 / 2;
+  doc.rect(x + (c - arm / 2) * s, y + (c - len / 2) * s, arm * s, len * s, 'F'); // senkrecht
+  doc.rect(x + (c - len / 2) * s, y + (c - arm / 2) * s, len * s, arm * s, 'F'); // waagrecht
 }
 
 /**
