@@ -19,7 +19,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
     },
     editorProps: {
       attributes: {
-        class: 'rich-editor focus:outline-none',
+        class: 'rich-editor ',
       },
     },
   });

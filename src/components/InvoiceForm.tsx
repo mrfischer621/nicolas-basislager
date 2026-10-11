@@ -359,7 +359,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
               value={customerId}
               onChange={(e) => setCustomerId(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
             >
               <option value="">Kunde auswählen</option>
               {customers.map((customer) => (
@@ -379,7 +379,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
               value={projectId}
               onChange={(e) => setProjectId(e.target.value)}
               disabled={!customerId}
-              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition disabled:bg-canvas"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition disabled:bg-canvas"
             >
               <option value="">Kein Projekt</option>
               {customerProjects.map((project) => (
@@ -417,7 +417,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="z.B. Webentwicklung Januar 2026"
-            className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+            className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
           />
         </div>
 
@@ -433,7 +433,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
               value={issueDate}
               onChange={(e) => setIssueDate(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
             />
           </div>
 
@@ -446,7 +446,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
               id="dueDate"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
-              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
             />
           </div>
 
@@ -462,7 +462,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
                 setStatus(next);
                 if (next === 'bezahlt' && !paidDate) setPaidDate(zurichDay(new Date()));
               }}
-              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
             >
               <option value="entwurf">Entwurf</option>
               <option value="versendet">Versendet</option>
@@ -482,7 +482,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
                 required
                 value={paidDate}
                 onChange={(e) => setPaidDate(e.target.value)}
-                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
               />
             </div>
           )}
@@ -508,7 +508,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
             onChange={(e) => setIntroText(e.target.value)}
             placeholder="Einleitungstext für die Rechnung..."
             rows={2}
-            className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition resize-none"
+            className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition resize-none"
           />
         </div>
 
@@ -562,7 +562,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
                     <select
                       value={item.product_id || ''}
                       onChange={(e) => handleProductSelect(index, e.target.value)}
-                      className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm bg-surface"
+                      className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition text-sm bg-surface"
                     >
                       <option value="">Frei</option>
                       {products.map((product) => (
@@ -588,7 +588,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
                       step="0.01"
                       min="0"
                       required
-                      className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm bg-surface"
+                      className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition text-sm bg-surface"
                     />
                   </div>
 
@@ -607,7 +607,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
                       step="0.01"
                       min="0"
                       required
-                      className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm bg-surface"
+                      className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition text-sm bg-surface"
                     />
                   </div>
 
@@ -627,7 +627,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
                         step="0.1"
                         min="0"
                         max="100"
-                        className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm bg-surface"
+                        className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition text-sm bg-surface"
                       />
                     </div>
                   )}
@@ -648,7 +648,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
                         step="0.1"
                         min="0"
                         max="100"
-                        className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm bg-surface"
+                        className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition text-sm bg-surface"
                       />
                     </div>
                   )}
@@ -712,7 +712,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
             onChange={(e) => setFooterText(e.target.value)}
             placeholder="Bemerkungen oder zusätzliche Informationen..."
             rows={2}
-            className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition resize-none"
+            className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition resize-none"
           />
         </div>
 

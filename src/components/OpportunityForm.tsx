@@ -138,7 +138,7 @@ export default function OpportunityForm({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
-            className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+            className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
             placeholder="z.B. Website Redesign für Musterfirma"
           />
         </div>
@@ -187,7 +187,7 @@ export default function OpportunityForm({
               value={selectedCustomerId}
               onChange={(e) => setSelectedCustomerId(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
             >
               <option value="">-- Bitte auswählen --</option>
               {customers.map((customer) => (
@@ -213,7 +213,7 @@ export default function OpportunityForm({
                 id="prospectName"
                 value={prospectName}
                 onChange={(e) => setProspectName(e.target.value)}
-                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
                 placeholder="z.B. Max Mustermann"
               />
             </div>
@@ -227,7 +227,7 @@ export default function OpportunityForm({
                 id="prospectCompany"
                 value={prospectCompany}
                 onChange={(e) => setProspectCompany(e.target.value)}
-                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
                 placeholder="z.B. Musterfirma AG"
               />
             </div>
@@ -241,7 +241,7 @@ export default function OpportunityForm({
                 id="prospectEmail"
                 value={prospectEmail}
                 onChange={(e) => setProspectEmail(e.target.value)}
-                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
                 placeholder="interessent@example.com"
               />
             </div>
@@ -255,7 +255,7 @@ export default function OpportunityForm({
                 id="prospectPhone"
                 value={prospectPhone}
                 onChange={(e) => setProspectPhone(e.target.value)}
-                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
                 placeholder="+41 79 123 45 67"
               />
             </div>
@@ -274,7 +274,7 @@ export default function OpportunityForm({
             onChange={(e) => setExpectedValue(e.target.value)}
             step="0.01"
             min="0"
-            className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+            className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
             placeholder="z.B. 15000.00"
           />
         </div>
@@ -289,7 +289,7 @@ export default function OpportunityForm({
             id="nextActionDate"
             value={nextActionDate}
             onChange={(e) => setNextActionDate(e.target.value)}
-            className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+            className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
           />
         </div>
 
@@ -303,7 +303,7 @@ export default function OpportunityForm({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={4}
-            className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition resize-none"
+            className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition resize-none"
             placeholder="Zusätzliche Informationen zum Deal..."
           />
         </div>

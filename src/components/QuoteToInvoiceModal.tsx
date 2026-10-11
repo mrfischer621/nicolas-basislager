@@ -162,7 +162,7 @@ export default function QuoteToInvoiceModal({
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
             />
           </div>
 
@@ -178,7 +178,7 @@ export default function QuoteToInvoiceModal({
               step="0.1"
               min="0"
               max="100"
-              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
             />
           </div>
         </div>
@@ -213,7 +213,7 @@ export default function QuoteToInvoiceModal({
                     onChange={(e) => handleItemChange(index, 'description', e.target.value)}
                     placeholder="Beschreibung"
                     required
-                    className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm"
+                    className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition text-sm"
                   />
                 </div>
 
@@ -232,7 +232,7 @@ export default function QuoteToInvoiceModal({
                     step="0.01"
                     min="0"
                     required
-                    className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm"
+                    className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition text-sm"
                   />
                 </div>
 
@@ -251,7 +251,7 @@ export default function QuoteToInvoiceModal({
                     step="0.01"
                     min="0"
                     required
-                    className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm"
+                    className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition text-sm"
                   />
                 </div>
 

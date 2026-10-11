@@ -287,7 +287,7 @@ export default function QuoteForm({
               value={customerId}
               onChange={(e) => setCustomerId(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
             >
               <option value="">Kunde auswählen</option>
               {customers.map((customer) => (
@@ -307,7 +307,7 @@ export default function QuoteForm({
               value={projectId}
               onChange={(e) => setProjectId(e.target.value)}
               disabled={!customerId}
-              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition disabled:bg-canvas"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition disabled:bg-canvas"
             >
               <option value="">Kein Projekt</option>
               {customerProjects.map((project) => (
@@ -345,7 +345,7 @@ export default function QuoteForm({
               value={issueDate}
               onChange={(e) => setIssueDate(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
             />
           </div>
 
@@ -359,7 +359,7 @@ export default function QuoteForm({
               value={validUntil}
               onChange={(e) => setValidUntil(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
             />
           </div>
 
@@ -371,7 +371,7 @@ export default function QuoteForm({
               id="status"
               value={status}
               onChange={(e) => setStatus(e.target.value as Quote['status'])}
-              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
             >
               <option value="offen">Offen</option>
               <option value="versendet">Versendet</option>
@@ -396,7 +396,7 @@ export default function QuoteForm({
             }}
             placeholder={selectedCompany?.quote_intro_text || 'Einleitungstext für dieses Angebot…'}
             rows={3}
-            className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm resize-none overflow-hidden"
+            className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition text-sm resize-none overflow-hidden"
             style={{ minHeight: '72px' }}
           />
         </div>
@@ -437,7 +437,7 @@ export default function QuoteForm({
                   <select
                     value={item.product_id || ''}
                     onChange={(e) => handleProductSelect(index, e.target.value)}
-                    className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm bg-surface"
+                    className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition text-sm bg-surface"
                   >
                     <option value="">Freie Eingabe</option>
                     {products.map((product) => (
@@ -466,7 +466,7 @@ export default function QuoteForm({
                     placeholder={"Titel (wird fett im PDF)\nZusätzliche Beschreibung (optional)"}
                     rows={2}
                     required
-                    className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm resize-none overflow-hidden bg-surface"
+                    className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition text-sm resize-none overflow-hidden bg-surface"
                     style={{ minHeight: '56px' }}
                   />
                 </div>
@@ -485,7 +485,7 @@ export default function QuoteForm({
                       step="0.01"
                       min="0"
                       required
-                      className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm bg-surface"
+                      className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition text-sm bg-surface"
                     />
                   </div>
 
@@ -501,7 +501,7 @@ export default function QuoteForm({
                       step="0.01"
                       min="0"
                       required
-                      className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm bg-surface"
+                      className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition text-sm bg-surface"
                     />
                   </div>
 
@@ -641,7 +641,7 @@ export default function QuoteForm({
             }}
             placeholder={selectedCompany?.quote_footer_text || 'Schlusstext / Dank für dieses Angebot…'}
             rows={3}
-            className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm resize-none overflow-hidden"
+            className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition text-sm resize-none overflow-hidden"
             style={{ minHeight: '72px' }}
           />
         </div>

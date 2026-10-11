@@ -92,7 +92,7 @@ export default function ProjectForm({ onSubmit, editingProject, onCancelEdit, cu
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
               placeholder="Projektname"
             />
           </div>
@@ -106,7 +106,7 @@ export default function ProjectForm({ onSubmit, editingProject, onCancelEdit, cu
               value={customerId}
               onChange={(e) => setCustomerId(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
             >
               <option value="">Kunde auswählen</option>
               {customers.map((customer) => (
@@ -127,7 +127,7 @@ export default function ProjectForm({ onSubmit, editingProject, onCancelEdit, cu
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
-            className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition resize-none"
+            className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition resize-none"
             placeholder="Projektbeschreibung..."
           />
         </div>
@@ -141,7 +141,7 @@ export default function ProjectForm({ onSubmit, editingProject, onCancelEdit, cu
               id="status"
               value={status}
               onChange={(e) => setStatus(e.target.value as Project['status'])}
-              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
             >
               {statusOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -162,7 +162,7 @@ export default function ProjectForm({ onSubmit, editingProject, onCancelEdit, cu
               onChange={(e) => setBudget(e.target.value)}
               step="0.01"
               min="0"
-              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
               placeholder="0.00"
             />
           </div>
@@ -178,7 +178,7 @@ export default function ProjectForm({ onSubmit, editingProject, onCancelEdit, cu
               onChange={(e) => setHourlyRate(e.target.value)}
               step="0.01"
               min="0"
-              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
               placeholder="Kunde/Standard"
             />
             <p className="mt-1 text-xs text-fg-muted">

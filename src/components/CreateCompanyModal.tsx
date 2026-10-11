@@ -218,7 +218,7 @@ export function CreateCompanyModal({ isOpen, onClose, onSuccess }: CreateCompany
                   value={formData.name}
                   onChange={(e) => handleFieldChange('name', e.target.value)}
                   disabled={isSubmitting}
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-focus/20 outline-none transition disabled:bg-canvas disabled:cursor-not-allowed ${
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-focus/20 transition disabled:bg-canvas disabled:cursor-not-allowed ${
                     errors.name ? 'border-danger' : 'border-line focus:border-accent'
                   }`}
                   placeholder="z.B. Muster AG"
@@ -239,7 +239,7 @@ export function CreateCompanyModal({ isOpen, onClose, onSuccess }: CreateCompany
                     value={formData.street}
                     onChange={(e) => handleFieldChange('street', e.target.value)}
                     disabled={isSubmitting}
-                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-focus/20 outline-none transition disabled:bg-canvas disabled:cursor-not-allowed ${
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-focus/20 transition disabled:bg-canvas disabled:cursor-not-allowed ${
                       errors.street ? 'border-danger' : 'border-line focus:border-accent'
                     }`}
                     placeholder="Musterstrasse"
@@ -257,7 +257,7 @@ export function CreateCompanyModal({ isOpen, onClose, onSuccess }: CreateCompany
                     value={formData.house_number}
                     onChange={(e) => handleFieldChange('house_number', e.target.value)}
                     disabled={isSubmitting}
-                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-focus/20 outline-none transition disabled:bg-canvas disabled:cursor-not-allowed ${
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-focus/20 transition disabled:bg-canvas disabled:cursor-not-allowed ${
                       errors.house_number ? 'border-danger' : 'border-line focus:border-accent'
                     }`}
                     placeholder="123"
@@ -279,7 +279,7 @@ export function CreateCompanyModal({ isOpen, onClose, onSuccess }: CreateCompany
                     value={formData.zip_code}
                     onChange={(e) => handleFieldChange('zip_code', e.target.value)}
                     disabled={isSubmitting}
-                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-focus/20 outline-none transition disabled:bg-canvas disabled:cursor-not-allowed ${
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-focus/20 transition disabled:bg-canvas disabled:cursor-not-allowed ${
                       errors.zip_code ? 'border-danger' : 'border-line focus:border-accent'
                     }`}
                     placeholder="8000"
@@ -298,7 +298,7 @@ export function CreateCompanyModal({ isOpen, onClose, onSuccess }: CreateCompany
                     value={formData.city}
                     onChange={(e) => handleFieldChange('city', e.target.value)}
                     disabled={isSubmitting}
-                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-focus/20 outline-none transition disabled:bg-canvas disabled:cursor-not-allowed ${
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-focus/20 transition disabled:bg-canvas disabled:cursor-not-allowed ${
                       errors.city ? 'border-danger' : 'border-line focus:border-accent'
                     }`}
                     placeholder="Zürich"

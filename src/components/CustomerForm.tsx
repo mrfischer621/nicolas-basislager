@@ -163,7 +163,7 @@ export default function CustomerForm({ onSubmit, editingCustomer, onCancelEdit }
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
                 placeholder="z.B. Musterfirma AG"
               />
             </div>
@@ -177,7 +177,7 @@ export default function CustomerForm({ onSubmit, editingCustomer, onCancelEdit }
                 id="contactPerson"
                 value={contactPerson}
                 onChange={(e) => setContactPerson(e.target.value)}
-                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
                 placeholder="z.B. Max Mustermann"
               />
             </div>
@@ -191,7 +191,7 @@ export default function CustomerForm({ onSubmit, editingCustomer, onCancelEdit }
                 id="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
                 placeholder="kunde@example.com"
               />
             </div>
@@ -205,7 +205,7 @@ export default function CustomerForm({ onSubmit, editingCustomer, onCancelEdit }
                 id="phone"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
                 placeholder="+41 79 123 45 67"
               />
             </div>
@@ -221,7 +221,7 @@ export default function CustomerForm({ onSubmit, editingCustomer, onCancelEdit }
                 onChange={(e) => setHourlyRate(e.target.value)}
                 step="0.01"
                 min="0"
-                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
                 placeholder="z.B. 120.00"
               />
             </div>
@@ -242,7 +242,7 @@ export default function CustomerForm({ onSubmit, editingCustomer, onCancelEdit }
                     id="street"
                     value={street}
                     onChange={(e) => setStreet(e.target.value)}
-                    className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                    className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
                     placeholder="z.B. Musterstrasse"
                   />
                 </div>
@@ -252,7 +252,7 @@ export default function CustomerForm({ onSubmit, editingCustomer, onCancelEdit }
                     id="houseNumber"
                     value={houseNumber}
                     onChange={(e) => setHouseNumber(e.target.value)}
-                    className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                    className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
                     placeholder="123"
                   />
                 </div>
@@ -269,7 +269,7 @@ export default function CustomerForm({ onSubmit, editingCustomer, onCancelEdit }
                   id="zipCode"
                   value={zipCode}
                   onChange={(e) => setZipCode(e.target.value)}
-                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
                   placeholder="8000"
                 />
               </div>
@@ -283,7 +283,7 @@ export default function CustomerForm({ onSubmit, editingCustomer, onCancelEdit }
                   id="city"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
-                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
                   placeholder="Zürich"
                 />
               </div>
@@ -298,7 +298,7 @@ export default function CustomerForm({ onSubmit, editingCustomer, onCancelEdit }
                 id="country"
                 value={country}
                 onChange={(e) => setCountry(e.target.value)}
-                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
                 placeholder="Schweiz"
               />
             </div>
@@ -312,7 +312,7 @@ export default function CustomerForm({ onSubmit, editingCustomer, onCancelEdit }
                 value={alternateBillingAddress}
                 onChange={(e) => setAlternateBillingAddress(e.target.value)}
                 rows={4}
-                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition resize-none"
+                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition resize-none"
                 placeholder="Falls abweichend von der Hauptadresse..."
               />
             </div>
@@ -331,7 +331,7 @@ export default function CustomerForm({ onSubmit, editingCustomer, onCancelEdit }
                 id="co"
                 value={co}
                 onChange={(e) => setCo(e.target.value)}
-                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
                 placeholder="z.B. c/o Muster GmbH"
               />
             </div>
@@ -345,7 +345,7 @@ export default function CustomerForm({ onSubmit, editingCustomer, onCancelEdit }
                 id="department"
                 value={department}
                 onChange={(e) => setDepartment(e.target.value)}
-                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
                 placeholder="z.B. Buchhaltung"
               />
             </div>
@@ -359,7 +359,7 @@ export default function CustomerForm({ onSubmit, editingCustomer, onCancelEdit }
                 id="website"
                 value={website}
                 onChange={(e) => setWebsite(e.target.value)}
-                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
                 placeholder="https://www.example.com"
               />
             </div>
@@ -373,7 +373,7 @@ export default function CustomerForm({ onSubmit, editingCustomer, onCancelEdit }
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={4}
-                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition resize-none"
+                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition resize-none"
                 placeholder="Interne Notizen zu diesem Kunden..."
               />
             </div>

@@ -834,7 +834,7 @@ export default function Settings() {
                 id="name"
                 value={companyFormData.name}
                 onChange={(e) => handleCompanyFieldChange('name', e.target.value)}
-                className={`w-full px-4 py-2 border rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition ${
+                className={`w-full px-4 py-2 border rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition ${
                   errors.name ? 'border-danger' : 'border-line'
                 }`}
                 placeholder="z.B. Muster AG"
@@ -852,7 +852,7 @@ export default function Settings() {
                 id="alternativ_name"
                 value={companyFormData.alternativ_name}
                 onChange={(e) => handleCompanyFieldChange('alternativ_name', e.target.value)}
-                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
                 placeholder="z.B. Handelsname oder Doing Business As"
               />
               <p className="text-xs text-fg-muted mt-1">
@@ -870,7 +870,7 @@ export default function Settings() {
                 id="rechnungsname"
                 value={companyFormData.rechnungsname}
                 onChange={(e) => handleCompanyFieldChange('rechnungsname', e.target.value)}
-                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
                 placeholder="z.B. spezieller Name für Rechnungen"
               />
               <p className="text-xs text-fg-muted mt-1">
@@ -929,7 +929,7 @@ export default function Settings() {
                 id="sender_contact_name"
                 value={companyFormData.sender_contact_name}
                 onChange={(e) => handleCompanyFieldChange('sender_contact_name', e.target.value)}
-                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
                 placeholder="z.B. c/o Hans Muster oder Inhaber: Maria Müller"
               />
               <p className="text-xs text-fg-muted mt-1">
@@ -948,7 +948,7 @@ export default function Settings() {
                   id="street"
                   value={companyFormData.street}
                   onChange={(e) => handleCompanyFieldChange('street', e.target.value)}
-                  className={`w-full px-4 py-2 border rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition ${
+                  className={`w-full px-4 py-2 border rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition ${
                     errors.street ? 'border-danger' : 'border-line'
                   }`}
                   placeholder="Musterstrasse"
@@ -965,7 +965,7 @@ export default function Settings() {
                   id="house_number"
                   value={companyFormData.house_number}
                   onChange={(e) => handleCompanyFieldChange('house_number', e.target.value)}
-                  className={`w-full px-4 py-2 border rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition ${
+                  className={`w-full px-4 py-2 border rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition ${
                     errors.house_number ? 'border-danger' : 'border-line'
                   }`}
                   placeholder="123"
@@ -986,7 +986,7 @@ export default function Settings() {
                   id="zip_code"
                   value={companyFormData.zip_code}
                   onChange={(e) => handleCompanyFieldChange('zip_code', e.target.value)}
-                  className={`w-full px-4 py-2 border rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition ${
+                  className={`w-full px-4 py-2 border rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition ${
                     errors.zip_code ? 'border-danger' : 'border-line'
                   }`}
                   placeholder="8000"
@@ -1003,7 +1003,7 @@ export default function Settings() {
                   id="city"
                   value={companyFormData.city}
                   onChange={(e) => handleCompanyFieldChange('city', e.target.value)}
-                  className={`w-full px-4 py-2 border rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition ${
+                  className={`w-full px-4 py-2 border rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition ${
                     errors.city ? 'border-danger' : 'border-line'
                   }`}
                   placeholder="Zürich"
@@ -1023,7 +1023,7 @@ export default function Settings() {
                   id="company_phone"
                   value={companyFormData.phone}
                   onChange={(e) => handleCompanyFieldChange('phone', e.target.value)}
-                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
                   placeholder="+41 44 123 45 67"
                 />
               </div>
@@ -1036,7 +1036,7 @@ export default function Settings() {
                   id="company_email"
                   value={companyFormData.email}
                   onChange={(e) => handleCompanyFieldChange('email', e.target.value)}
-                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
                   placeholder="info@firma.ch"
                 />
               </div>
@@ -1051,7 +1051,7 @@ export default function Settings() {
                 id="company_website"
                 value={companyFormData.website}
                 onChange={(e) => handleCompanyFieldChange('website', e.target.value)}
-                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
                 placeholder="www.firma.ch"
               />
             </div>
@@ -1067,7 +1067,7 @@ export default function Settings() {
                   id="iban"
                   value={companyFormData.iban}
                   onChange={(e) => handleCompanyFieldChange('iban', e.target.value)}
-                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
                   placeholder="CH93 0000 0000 0000 0000 0"
                 />
               </div>
@@ -1081,7 +1081,7 @@ export default function Settings() {
                   id="qr_iban"
                   value={companyFormData.qr_iban}
                   onChange={(e) => handleCompanyFieldChange('qr_iban', e.target.value)}
-                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
                   placeholder="CH44 3000 0000 0000 0000 0"
                 />
               </div>
@@ -1100,7 +1100,7 @@ export default function Settings() {
                 id="bank_name"
                 value={companyFormData.bank_name}
                 onChange={(e) => handleCompanyFieldChange('bank_name', e.target.value)}
-                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
                 placeholder="z.B. UBS AG"
               />
             </div>
@@ -1115,7 +1115,7 @@ export default function Settings() {
                 id="qr_creditor_name"
                 value={companyFormData.qr_creditor_name}
                 onChange={(e) => handleCompanyFieldChange('qr_creditor_name', e.target.value)}
-                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
                 placeholder="z.B. Nicolas Fischer"
               />
               <p className="text-xs text-fg-muted mt-1">
@@ -1134,7 +1134,7 @@ export default function Settings() {
                   id="uid_number"
                   value={companyFormData.uid_number}
                   onChange={(e) => handleCompanyFieldChange('uid_number', e.target.value)}
-                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
                   placeholder="CHE-123.456.789"
                 />
               </div>
@@ -1148,7 +1148,7 @@ export default function Settings() {
                   id="vat_number"
                   value={companyFormData.vat_number}
                   onChange={(e) => handleCompanyFieldChange('vat_number', e.target.value)}
-                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
                   placeholder="CHE-123.456.789 MWST"
                 />
               </div>
@@ -1193,7 +1193,7 @@ export default function Settings() {
                     max="100"
                     value={companyFormData.default_vat_rate}
                     onChange={(e) => handleCompanyFieldChange('default_vat_rate', e.target.value)}
-                    className="w-32 px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                    className="w-32 px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
                     placeholder="8.1"
                   />
                   <p className="text-xs text-fg-muted mt-1">
@@ -1239,7 +1239,7 @@ export default function Settings() {
                 id="full_name"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
                 placeholder="Ihr vollständiger Name"
               />
             </div>
@@ -1275,7 +1275,7 @@ export default function Settings() {
                     id="new_password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                    className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
                     placeholder="Mindestens 6 Zeichen"
                   />
                 </div>
@@ -1289,7 +1289,7 @@ export default function Settings() {
                     id="confirm_password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                    className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
                     placeholder="Passwort bestätigen"
                   />
                 </div>
@@ -1335,7 +1335,7 @@ export default function Settings() {
                   value={invoiceIntro}
                   onChange={(e) => setInvoiceIntro(e.target.value)}
                   rows={3}
-                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition font-mono text-sm"
+                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition font-mono text-sm"
                   placeholder="Besten Dank für Ihren Auftrag. **Fett**, *kursiv*, - Listen..."
                 />
                 <p className="text-xs text-fg-muted mt-1">Erscheint oberhalb der Rechnungspo sitionen</p>
@@ -1350,7 +1350,7 @@ export default function Settings() {
                   value={invoiceFooter}
                   onChange={(e) => setInvoiceFooter(e.target.value)}
                   rows={3}
-                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition font-mono text-sm"
+                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition font-mono text-sm"
                   placeholder="Zahlbar innert 30 Tagen..."
                 />
                 <p className="text-xs text-fg-muted mt-1">Erscheint unterhalb der Rechnungspositionen</p>
@@ -1370,7 +1370,7 @@ export default function Settings() {
                   value={quoteIntro}
                   onChange={(e) => setQuoteIntro(e.target.value)}
                   rows={3}
-                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition font-mono text-sm"
+                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition font-mono text-sm"
                   placeholder="Vielen Dank für Ihre Anfrage..."
                 />
                 <p className="text-xs text-fg-muted mt-1">Erscheint oberhalb der Offertenpositionen</p>
@@ -1385,7 +1385,7 @@ export default function Settings() {
                   value={quoteFooter}
                   onChange={(e) => setQuoteFooter(e.target.value)}
                   rows={3}
-                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition font-mono text-sm"
+                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition font-mono text-sm"
                   placeholder="Wir freuen uns auf Ihre Antwort..."
                 />
                 <p className="text-xs text-fg-muted mt-1">Erscheint unterhalb der Offertenpositionen</p>
@@ -1430,7 +1430,7 @@ export default function Settings() {
                 }
               }}
               placeholder="Neue Produktkategorie..."
-              className="flex-1 px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition bg-surface"
+              className="flex-1 px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition bg-surface"
             />
             <button
               onClick={handleAddProductCategory}
@@ -1470,7 +1470,7 @@ export default function Settings() {
                             cancelEditProductCategory();
                           }
                         }}
-                        className="flex-1 px-3 py-1 border border-line-strong rounded focus:border-brand focus:ring-1 focus:ring-brand/20 outline-none"
+                        className="flex-1 px-3 py-1 border border-line-strong rounded focus:border-brand focus:ring-1 focus:ring-brand/20 "
                         autoFocus
                       />
                       <div className="flex items-center gap-1 ml-2">
@@ -1557,7 +1557,7 @@ export default function Settings() {
                     <select
                       value={editStageColor}
                       onChange={(e) => setEditStageColor(e.target.value)}
-                      className="px-3 py-2 border border-line-strong rounded-lg focus:border-brand focus:ring-1 focus:ring-brand outline-none"
+                      className="px-3 py-2 border border-line-strong rounded-lg focus:border-brand focus:ring-1 focus:ring-brand "
                     >
                       {colorOptions.map((color) => (
                         <option key={color.value} value={color.value}>
@@ -1583,7 +1583,7 @@ export default function Settings() {
                         if (e.key === 'Enter') handleSaveStage(stage.id);
                         if (e.key === 'Escape') handleCancelEdit();
                       }}
-                      className="flex-1 px-3 py-2 border border-line-strong rounded-lg focus:border-brand focus:ring-1 focus:ring-brand outline-none"
+                      className="flex-1 px-3 py-2 border border-line-strong rounded-lg focus:border-brand focus:ring-1 focus:ring-brand "
                       autoFocus
                     />
                   ) : (
@@ -1707,12 +1707,12 @@ export default function Settings() {
                 }
               }}
               placeholder="Neue Kategorie..."
-              className="flex-1 min-w-[200px] px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition bg-surface"
+              className="flex-1 min-w-[200px] px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition bg-surface"
             />
             <select
               value={newCategoryType}
               onChange={(e) => setNewCategoryType(e.target.value as CategoryType)}
-              className="px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition bg-surface"
+              className="px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition bg-surface"
             >
               <option value="expense">Ausgabe</option>
               <option value="income">Einnahme</option>
@@ -1724,7 +1724,7 @@ export default function Settings() {
               onChange={(e) => setNewCategoryAccount(e.target.value)}
               placeholder="Konto (z.B. 6570)"
               aria-label="Kontonummer nach KMU-Kontenrahmen"
-              className="w-40 px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition bg-surface"
+              className="w-40 px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition bg-surface"
             />
             <input
               type="color"
@@ -1790,7 +1790,7 @@ export default function Settings() {
                               cancelEditCategory();
                             }
                           }}
-                          className="flex-1 px-3 py-1 border border-line-strong rounded focus:border-brand focus:ring-1 focus:ring-brand/20 outline-none"
+                          className="flex-1 px-3 py-1 border border-line-strong rounded focus:border-brand focus:ring-1 focus:ring-brand/20 "
                           autoFocus
                         />
                         <input
@@ -1800,7 +1800,7 @@ export default function Settings() {
                           onChange={(e) => setEditCategoryAccount(e.target.value)}
                           placeholder="Konto"
                           aria-label={`Kontonummer für ${category.name}`}
-                          className="w-24 px-3 py-1 border border-line-strong rounded focus:border-brand focus:ring-1 focus:ring-brand/20 outline-none tabular-nums"
+                          className="w-24 px-3 py-1 border border-line-strong rounded focus:border-brand focus:ring-1 focus:ring-brand/20 tabular-nums"
                         />
                         <label className="flex items-center gap-2 px-2 cursor-pointer">
                           <input

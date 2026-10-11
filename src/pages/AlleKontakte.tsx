@@ -207,7 +207,7 @@ export default function AlleKontakte() {
           placeholder="Kontakt, Firma oder E-Mail suchen..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 border border-surface-border rounded-lg focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
+          className="w-full pl-10 pr-4 py-2 border border-surface-border rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
         />
       </div>
 
@@ -326,7 +326,7 @@ export default function AlleKontakte() {
                         setIsCustomerDropdownOpen(true);
                       }}
                       onClick={(e) => e.stopPropagation()}
-                      className="flex-1 outline-none bg-transparent"
+                      className="flex-1 bg-transparent"
                     />
                     <ChevronDown size={18} className="text-content-tertiary" />
                   </div>
@@ -367,7 +367,7 @@ export default function AlleKontakte() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-surface-border rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-surface-border rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
               placeholder="z.B. Max Mustermann"
             />
           </div>
@@ -382,7 +382,7 @@ export default function AlleKontakte() {
               id="contactRole"
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              className="w-full px-4 py-2 border border-surface-border rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-surface-border rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
               placeholder="z.B. Geschäftsführer"
             />
           </div>
@@ -397,7 +397,7 @@ export default function AlleKontakte() {
               id="contactEmail"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 border border-surface-border rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-surface-border rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
               placeholder="kontakt@example.com"
             />
           </div>
@@ -412,7 +412,7 @@ export default function AlleKontakte() {
               id="contactPhone"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              className="w-full px-4 py-2 border border-surface-border rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-surface-border rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
               placeholder="+41 79 123 45 67"
             />
           </div>

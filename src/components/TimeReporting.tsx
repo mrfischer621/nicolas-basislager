@@ -203,7 +203,7 @@ export default function TimeReporting({ entries, projects }: TimeReportingProps)
               type="date"
               value={dateFrom}
               onChange={(e) => setDateFrom(e.target.value)}
-              className="px-3 py-1.5 border border-line rounded-lg text-sm focus:border-brand focus:ring-1 focus:ring-brand/20 outline-none"
+              className="px-3 py-1.5 border border-line rounded-lg text-sm focus:border-brand focus:ring-1 focus:ring-brand/20 "
             />
           </div>
           <div>
@@ -212,7 +212,7 @@ export default function TimeReporting({ entries, projects }: TimeReportingProps)
               type="date"
               value={dateTo}
               onChange={(e) => setDateTo(e.target.value)}
-              className="px-3 py-1.5 border border-line rounded-lg text-sm focus:border-brand focus:ring-1 focus:ring-brand/20 outline-none"
+              className="px-3 py-1.5 border border-line rounded-lg text-sm focus:border-brand focus:ring-1 focus:ring-brand/20 "
             />
           </div>
 
@@ -222,7 +222,7 @@ export default function TimeReporting({ entries, projects }: TimeReportingProps)
             <select
               value={selectedCustomerId}
               onChange={(e) => setSelectedCustomerId(e.target.value)}
-              className="px-3 py-1.5 border border-line rounded-lg text-sm focus:border-brand focus:ring-1 focus:ring-brand/20 outline-none min-w-[140px]"
+              className="px-3 py-1.5 border border-line rounded-lg text-sm focus:border-brand focus:ring-1 focus:ring-brand/20 min-w-[140px]"
             >
               <option value="">Alle Kunden</option>
               {customers.map(customer => (
@@ -237,7 +237,7 @@ export default function TimeReporting({ entries, projects }: TimeReportingProps)
             <select
               value={selectedProjectId}
               onChange={(e) => setSelectedProjectId(e.target.value)}
-              className="px-3 py-1.5 border border-line rounded-lg text-sm focus:border-brand focus:ring-1 focus:ring-brand/20 outline-none min-w-[140px]"
+              className="px-3 py-1.5 border border-line rounded-lg text-sm focus:border-brand focus:ring-1 focus:ring-brand/20 min-w-[140px]"
             >
               <option value="">Alle Projekte</option>
               {projects.map(project => (

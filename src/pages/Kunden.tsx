@@ -286,7 +286,7 @@ export default function Kunden() {
             placeholder="Kunde suchen..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2 border border-line rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
           />
         </div>
 

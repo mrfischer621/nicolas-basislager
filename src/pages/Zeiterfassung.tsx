@@ -531,7 +531,7 @@ export default function Zeiterfassung() {
               <select
                 value={quickAddData.projectId}
                 onChange={(e) => setQuickAddData(prev => ({ ...prev, projectId: e.target.value }))}
-                className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm"
+                className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition text-sm"
                 required
               >
                 <option value="">Projekt wählen</option>
@@ -548,7 +548,7 @@ export default function Zeiterfassung() {
                 type="date"
                 value={quickAddData.date}
                 onChange={(e) => setQuickAddData(prev => ({ ...prev, date: e.target.value }))}
-                className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm"
+                className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition text-sm"
                 required
               />
             </div>
@@ -561,7 +561,7 @@ export default function Zeiterfassung() {
                 value={quickAddData.hours}
                 onChange={(e) => setQuickAddData(prev => ({ ...prev, hours: e.target.value }))}
                 placeholder="0.00"
-                className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm"
+                className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition text-sm"
                 required
               />
             </div>
@@ -584,7 +584,7 @@ export default function Zeiterfassung() {
                 min="0"
                 value={quickAddData.rate}
                 onChange={(e) => setQuickAddData(prev => ({ ...prev, rate: e.target.value, rateSource: 'manual' }))}
-                className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm"
+                className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition text-sm"
                 required
               />
             </div>
@@ -595,7 +595,7 @@ export default function Zeiterfassung() {
                 value={quickAddData.description}
                 onChange={(e) => setQuickAddData(prev => ({ ...prev, description: e.target.value }))}
                 placeholder="Tätigkeit..."
-                className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm"
+                className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition text-sm"
               />
             </div>
             <div className="w-28">

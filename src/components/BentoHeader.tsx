@@ -202,20 +202,9 @@ export function BentoHeader({ onMenuClick }: { onMenuClick?: () => void }) {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => setIsSearchFocused(true)}
-            placeholder="Suchen... (Ctrl+K)"
-            className="
-              w-full
-              pl-9 pr-8 py-2
-              text-sm
-              bg-raised
-              border border-transparent
-              rounded-lg
-              placeholder:text-text-secondary
-              focus:outline-none
-              focus:border-brand
-              focus:bg-surface
-              transition-all duration-150
-            "
+            placeholder="Suchen … (Ctrl+K)"
+            aria-label="Kunden, Projekte, Produkte, Rechnungen und Buchungen durchsuchen"
+            className="w-full rounded-lg border border-line-strong bg-canvas py-2 pl-9 pr-8 text-sm transition-colors duration-150 placeholder:text-fg-subtle focus:bg-surface"
           />
           {searchQuery && (
             <button

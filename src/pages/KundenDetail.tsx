@@ -643,7 +643,7 @@ export default function KundenDetail() {
               value={contactName}
               onChange={(e) => setContactName(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-surface-border rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-surface-border rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
             />
           </div>
           <div>
@@ -652,7 +652,7 @@ export default function KundenDetail() {
               type="text"
               value={contactRole}
               onChange={(e) => setContactRole(e.target.value)}
-              className="w-full px-4 py-2 border border-surface-border rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-surface-border rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
             />
           </div>
           <div>
@@ -661,7 +661,7 @@ export default function KundenDetail() {
               type="email"
               value={contactEmail}
               onChange={(e) => setContactEmail(e.target.value)}
-              className="w-full px-4 py-2 border border-surface-border rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-surface-border rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
             />
           </div>
           <div>
@@ -670,7 +670,7 @@ export default function KundenDetail() {
               type="tel"
               value={contactPhone}
               onChange={(e) => setContactPhone(e.target.value)}
-              className="w-full px-4 py-2 border border-surface-border rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-surface-border rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
             />
           </div>
           <div className="flex items-center gap-2">

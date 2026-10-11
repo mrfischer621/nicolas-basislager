@@ -130,7 +130,7 @@ export default function TimeEntryForm({ onSubmit, editingEntry, onCancelEdit, pr
               value={projectId}
               onChange={(e) => setProjectId(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
             >
               <option value="">Projekt auswählen</option>
               {projects.map((project) => (
@@ -151,7 +151,7 @@ export default function TimeEntryForm({ onSubmit, editingEntry, onCancelEdit, pr
               value={date}
               onChange={(e) => setDate(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
             />
           </div>
         </div>
@@ -169,7 +169,7 @@ export default function TimeEntryForm({ onSubmit, editingEntry, onCancelEdit, pr
               required
               step="0.25"
               min="0"
-              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
               placeholder="0.00"
             />
           </div>
@@ -204,7 +204,7 @@ export default function TimeEntryForm({ onSubmit, editingEntry, onCancelEdit, pr
               required
               step="0.01"
               min="0"
-              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
               placeholder="160.00"
             />
           </div>
@@ -228,7 +228,7 @@ export default function TimeEntryForm({ onSubmit, editingEntry, onCancelEdit, pr
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={2}
-            className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition resize-none"
+            className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition resize-none"
             placeholder="Tätigkeitsbeschreibung..."
           />
         </div>
