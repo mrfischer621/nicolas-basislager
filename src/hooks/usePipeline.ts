@@ -2,6 +2,8 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import type { LeadStatus, Opportunity, PipelineStage } from '../lib/supabase';
 import { useCompany } from '../context/CompanyContext';
+import { useCustomers } from './queries';
+import type { Customer } from '../lib/supabase';
 import { orSearch, pageRange, parseSort, type ListState } from '../components/list';
 import { firstDealStage, opportunityCompany, opportunityPerson, type OpportunityRow } from '../utils/pipeline';
 
@@ -27,24 +29,36 @@ export function usePipelineStages() {
   });
 }
 
+/**
+ * opportunities hat keinen Fremdschluessel auf customers; ein eingebetteter
+ * Join (customers(name)) schlaegt in PostgREST fehl. Der Firmenname kommt
+ * deshalb aus der Firmenliste.
+ */
+function withCustomerNames(rows: Opportunity[], customers: Customer[]): OpportunityRow[] {
+  const names = new Map(customers.map((c) => [c.id, c.name]));
+  return rows.map((o) => ({ ...o, customers: o.existing_customer_id && names.has(o.existing_customer_id) ? { name: names.get(o.existing_customer_id)! } : null }));
+}
+
 /** Alle Deals (ohne Leads) fuer Board, Tabelle und Cockpit. */
 export function useDeals() {
   const { selectedCompany } = useCompany();
   const companyId = selectedCompany?.id ?? '';
-  return useQuery({
+  const { data: customers = [] } = useCustomers();
+  const query = useQuery({
     queryKey: pipelineKeys.deals(companyId),
     enabled: !!companyId,
-    queryFn: async (): Promise<OpportunityRow[]> => {
+    queryFn: async (): Promise<Opportunity[]> => {
       const { data, error } = await supabase
         .from('opportunities')
-        .select('*, customers(name)')
+        .select('*')
         .eq('company_id', companyId)
         .eq('kind', 'deal')
         .order('next_action_date', { ascending: true, nullsFirst: false });
       if (error) throw error;
-      return (data ?? []) as OpportunityRow[];
+      return data ?? [];
     },
   });
+  return { ...query, data: query.data ? withCustomerNames(query.data, customers) : undefined };
 }
 
 /** Status aller Leads (schlank) fuer Tab-Zahlen, Navigation und Cockpit. */
@@ -66,15 +80,16 @@ export function useLeadStatuses() {
 export function useLeadList(state: ListState) {
   const { selectedCompany } = useCompany();
   const companyId = selectedCompany?.id ?? '';
-  return useQuery({
+  const { data: customers = [] } = useCustomers();
+  const query = useQuery({
     queryKey: pipelineKeys.leads(companyId, state),
     enabled: !!companyId,
     placeholderData: (prev) => prev,
-    queryFn: async (): Promise<{ rows: OpportunityRow[]; total: number }> => {
+    queryFn: async (): Promise<{ rows: Opportunity[]; total: number }> => {
       const view = state.ansicht ?? 'neu';
       const sort = parseSort(state.sort, 'next_action_date');
       const [from, to] = pageRange(Number(state.seite ?? 1));
-      let q = supabase.from('opportunities').select('*, customers(name)', { count: 'exact' }).eq('company_id', companyId).eq('kind', 'lead');
+      let q = supabase.from('opportunities').select('*', { count: 'exact' }).eq('company_id', companyId).eq('kind', 'lead');
       if (view === 'neu') q = q.or('lead_status.is.null,lead_status.eq.neu');
       else if (view !== 'alle') q = q.eq('lead_status', view);
       if (state.quelle) q = q.eq('source', state.quelle);
@@ -82,9 +97,10 @@ export function useLeadList(state: ListState) {
       q = q.order(sort.column, { ascending: sort.ascending, nullsFirst: false }).order('created_at', { ascending: false }).range(from, to);
       const { data, error, count } = await q;
       if (error) throw error;
-      return { rows: (data ?? []) as OpportunityRow[], total: count ?? 0 };
+      return { rows: data ?? [], total: count ?? 0 };
     },
   });
+  return { ...query, data: query.data ? { rows: withCustomerNames(query.data.rows, customers), total: query.data.total } : undefined };
 }
 
 export function useInvalidatePipeline() {
