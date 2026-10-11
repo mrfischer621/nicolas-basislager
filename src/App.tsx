@@ -3,7 +3,7 @@ import BentoLayout from './components/BentoLayout';
 import Cockpit from './pages/Cockpit';
 import Pipeline from './pages/Pipeline';
 import Leads from './pages/Leads';
-import KundenDetail from './pages/KundenDetail';
+import FirmaDetail from './pages/FirmaDetail';
 import Kontakte from './pages/Kontakte';
 import Projekte from './pages/Projekte';
 import ProjektDetail from './pages/ProjektDetail';
@@ -52,7 +52,7 @@ function App() {
         >
           <Route index element={<Cockpit />} />
           <Route path="kontakte" element={<Kontakte />} />
-          <Route path="kontakte/firmen/:id" element={<KundenDetail />} />
+          <Route path="kontakte/firmen/:id" element={<FirmaDetail />} />
           <Route path="leads" element={<Leads />} />
           <Route path="pipeline" element={<Pipeline />} />
           <Route path="offerten" element={<Offerten />} />

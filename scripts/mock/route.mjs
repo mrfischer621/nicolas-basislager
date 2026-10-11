@@ -39,6 +39,6 @@ export async function installMock(context) {
     if ((req.headers()['accept'] ?? '').includes('vnd.pgrst.object')) {
       return rows.length ? json(rows[0]) : json({ code: 'PGRST116', message: 'no rows' }, 406);
     }
-    return route.fulfill({ status: 200, contentType: 'application/json', headers: { 'content-range': `0-${rows.length}/${rows.length}` }, body: JSON.stringify(rows) });
+    return route.fulfill({ status: 200, contentType: 'application/json', headers: { 'content-range': `0-${Math.max(0, rows.length - 1)}/${rows.length}`, 'access-control-expose-headers': 'content-range' }, body: JSON.stringify(rows) });
   });
 }

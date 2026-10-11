@@ -168,19 +168,23 @@ export default function CustomerForm({ onSubmit, editingCustomer, onCancelEdit }
               />
             </div>
 
-            <div>
-              <label htmlFor="contactPerson" className="block text-sm font-medium text-fg mb-1">
-                Name des Kontaktes
-              </label>
-              <input
-                type="text"
-                id="contactPerson"
-                value={contactPerson}
-                onChange={(e) => setContactPerson(e.target.value)}
-                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
-                placeholder="z.B. Max Mustermann"
-              />
-            </div>
+            {/* Nur beim Anlegen: daraus entsteht die Hauptperson. Personen pflegst
+                du danach auf der Firmenseite (Altfeld contact_person bleibt erhalten). */}
+            {!editingCustomer && (
+              <div>
+                <label htmlFor="contactPerson" className="block text-sm font-medium text-fg mb-1">
+                  Hauptperson
+                </label>
+                <input
+                  type="text"
+                  id="contactPerson"
+                  value={contactPerson}
+                  onChange={(e) => setContactPerson(e.target.value)}
+                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
+                  placeholder="z. B. Anna Muster"
+                />
+              </div>
+            )}
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-fg mb-1">

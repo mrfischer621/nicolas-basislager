@@ -17,7 +17,7 @@ import { asError } from '../../utils/errors';
 
 export type DrawerTarget =
   | { mode: 'edit'; opportunity: OpportunityRow }
-  | { mode: 'new'; kind: 'lead' | 'deal'; stageId?: string };
+  | { mode: 'new'; kind: 'lead' | 'deal'; stageId?: string; customerId?: string };
 
 /**
  * Lead oder Deal im Seitenpanel: anlegen, bearbeiten, Phase wechseln (Pfad),
@@ -44,8 +44,9 @@ function Form({ target, stages, onClose }: { target: DrawerTarget; stages: Pipel
   const today = zurichDay(new Date());
 
   const [title, setTitle] = useState(existing?.title ?? '');
-  const [linkMode, setLinkMode] = useState<'interessent' | 'firma'>(existing?.existing_customer_id ? 'firma' : 'interessent');
-  const [customerId, setCustomerId] = useState(existing?.existing_customer_id ?? '');
+  const presetCustomer = target.mode === 'new' ? target.customerId : undefined;
+  const [linkMode, setLinkMode] = useState<'interessent' | 'firma'>(existing?.existing_customer_id || presetCustomer ? 'firma' : 'interessent');
+  const [customerId, setCustomerId] = useState(existing?.existing_customer_id ?? presetCustomer ?? '');
   // Alte Eintraege haben teils nur "name" (Firma oder Person); dann gilt er als Firma
   const [prospect, setProspect] = useState<ProspectInfo>(() => {
     const p = existing?.prospect_info ?? {};
