@@ -91,18 +91,22 @@ const timeEntries = [
   te(8, '2026-08-18', 2.5, 2, 'Consent Banner', invoices[2].id, 'bezahlt'),
   te(9, '2026-08-05', 1.5, 1, 'Fehleranalyse Kasse'),
 ];
-const stageNames = ['Recherche', 'Kontaktaufnahme', 'Bedarfsanalyse', 'Angebot', 'Verhandlung', 'Gewonnen'];
-const stages = stageNames.map((name, i) => ({ id: id('s', i + 1), company_id: C1, name, position: i, color: null, created_at: '2026-01-01T00:00:00Z', updated_at: '2026-01-01T00:00:00Z' }));
-const opp = (i, stage, title, company, value, last, next, lost = false) => ({
+const stageNames = ['Recherche', 'Erstgespräch', 'Analyse', 'Offerte', 'Verhandlung', 'Gewonnen'];
+const probabilities = [null, 10, 30, 50, 70, 100];
+const stages = stageNames.map((name, i) => ({ id: id('s', i + 1), company_id: C1, name, position: i, color: null, probability: probabilities[i], is_won: name === 'Gewonnen', is_lead_stage: i === 0, created_at: '2026-01-01T00:00:00Z', updated_at: '2026-01-01T00:00:00Z' }));
+const opp = (i, stage, title, company, value, last, next, lost = false, kind = stage === 0 ? 'lead' : 'deal') => ({
   id: id('o', i), company_id: C1, existing_customer_id: null, stage_id: stages[stage].id, title, expected_value: value,
   prospect_info: { company, name: company, contact_person: 'Vorname Nachname', email: null, phone: null },
   last_contact_at: last ? `${last}T09:00:00Z` : null, next_action_date: next, notes: null, is_lost: lost,
   created_at: '2026-09-01T00:00:00Z', updated_at: '2026-09-01T00:00:00Z',
+  kind, lead_status: kind === 'lead' ? 'neu' : null, source: kind === 'lead' ? 'Recherche' : null, customers: null,
 });
 const opportunities = [
   ...Array.from({ length: 12 }, (_, k) => opp(k + 1, 0, 'Erstkontakt', `Muster Betrieb ${k + 1}`, null, '2026-09-23', '2026-10-15')),
   opp(20, 1, 'Website Neuauftritt', 'Beispiel Schreinerei', 4490, '2026-10-01', '2026-10-10'),
   opp(21, 2, 'Analyse Online-Shop', 'Muster Velo AG', 490, '2026-09-15', '2026-10-20', true),
+  opp(22, 3, 'Startprojekt Shop', 'Beispiel Bäckerei', 4490, '2026-10-05', '2026-10-09'),
+  opp(23, 2, 'Gemeinsame Analyse', 'Muster Garage', 490, '2026-10-08', '2026-10-16'),
 ];
 const quotes = [
   { id: id('q', 1), company_id: C1, quote_number: 'OF-2026-001', customer_id: customers[0].id, project_id: projects[0].id, opportunity_id: null, issue_date: '2026-01-20', valid_until: '2026-02-19', subtotal: 8000, vat_rate: 0, vat_amount: 0, total: 8000, status: 'bestaetigt', converted_to_invoice_id: invoices[0].id, converted_at: '2026-02-02T00:00:00Z', created_at: '2026-01-20T00:00:00Z', updated_at: '2026-02-02T00:00:00Z', discount_type: 'none', discount_value: 0, intro_text: null, outro_text: null, customers: customers[0] },

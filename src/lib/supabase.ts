@@ -391,6 +391,8 @@ export interface PipelineStage {
   /** Abschlusswahrscheinlichkeit in Prozent (gewichtete Pipeline) */
   probability?: number | null;
   is_won?: boolean;
+  /** nimmt Leads auf, erscheint nicht im Board (Migration 20261011180000) */
+  is_lead_stage?: boolean;
 }
 
 export type OpportunityKind = 'lead' | 'deal';

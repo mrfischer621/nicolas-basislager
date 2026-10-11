@@ -10,6 +10,7 @@ import {
   Receipt,
   BarChart,
   Settings,
+  Inbox,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { useCompany } from '../context/CompanyContext';
@@ -31,6 +32,7 @@ const navigationGroups: { title: string | null; items: NavItem[] }[] = [
   {
     title: 'Verkauf',
     items: [
+      { name: 'Leads', path: '/leads', icon: Inbox },
       { name: 'Pipeline', path: '/pipeline', icon: TrendingUp },
       { name: 'Offerten', path: '/offerten', icon: FileSpreadsheet },
     ],

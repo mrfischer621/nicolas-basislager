@@ -1,7 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import BentoLayout from './components/BentoLayout';
 import Dashboard from './pages/Dashboard';
-import Sales from './pages/Sales';
+import Pipeline from './pages/Pipeline';
+import Leads from './pages/Leads';
 import KundenDetail from './pages/KundenDetail';
 import Kontakte from './pages/Kontakte';
 import Projekte from './pages/Projekte';
@@ -51,7 +52,8 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path="kontakte" element={<Kontakte />} />
           <Route path="kontakte/firmen/:id" element={<KundenDetail />} />
-          <Route path="pipeline" element={<Sales />} />
+          <Route path="leads" element={<Leads />} />
+          <Route path="pipeline" element={<Pipeline />} />
           <Route path="offerten" element={<Angebote />} />
           <Route path="projekte" element={<Projekte />} />
           <Route path="zeiterfassung" element={<Zeiterfassung />} />
