@@ -220,13 +220,13 @@ export default function TimeReporting({ entries, projects }: TimeReportingProps)
 
           {/* Customer Filter */}
           <div>
-            <label className="block text-xs font-medium text-fg-muted mb-1">Kunde</label>
+            <label className="block text-xs font-medium text-fg-muted mb-1">Firma</label>
             <select
               value={selectedCustomerId}
               onChange={(e) => setSelectedCustomerId(e.target.value)}
               className="px-3 py-1.5 border border-line rounded-lg text-sm focus:border-brand focus:ring-1 focus:ring-brand/20 min-w-[140px]"
             >
-              <option value="">Alle Kunden</option>
+              <option value="">Alle Firmen</option>
               {customers.map(customer => (
                 <option key={customer.id} value={customer.id}>{customer.name}</option>
               ))}

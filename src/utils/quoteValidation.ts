@@ -44,15 +44,15 @@ export function validateQuoteData(
   }
 
   if (!company.street?.trim()) {
-    errors.push('Strasse fehlt im Firmenprofil. Bitte ergänzen Sie die Adresse in den Einstellungen.');
+    errors.push('Strasse fehlt im Firmenprofil. Ergänze die Adresse unter Einstellungen › Unternehmen.');
   }
 
   if (!company.zip_code?.trim()) {
-    errors.push('PLZ fehlt im Firmenprofil. Bitte ergänzen Sie die Adresse in den Einstellungen.');
+    errors.push('PLZ fehlt im Firmenprofil. Ergänze die Adresse unter Einstellungen › Unternehmen.');
   }
 
   if (!company.city?.trim()) {
-    errors.push('Ort fehlt im Firmenprofil. Bitte ergänzen Sie die Adresse in den Einstellungen.');
+    errors.push('Ort fehlt im Firmenprofil. Ergänze die Adresse unter Einstellungen › Unternehmen.');
   }
 
   // ============================================================================
@@ -60,19 +60,19 @@ export function validateQuoteData(
   // ============================================================================
 
   if (!customer.name?.trim()) {
-    errors.push('Kundenname fehlt. Bitte ergänzen Sie die Kundendaten.');
+    errors.push('Name der Firma fehlt.');
   }
 
   if (!customer.street?.trim()) {
-    errors.push('Kundenadresse unvollständig: Strasse fehlt. Bitte ergänzen Sie die Kundenadresse.');
+    errors.push('Adresse der Firma unvollständig: Strasse fehlt.');
   }
 
   if (!customer.zip_code?.trim()) {
-    errors.push('Kundenadresse unvollständig: PLZ fehlt. Bitte ergänzen Sie die Kundenadresse.');
+    errors.push('Adresse der Firma unvollständig: PLZ fehlt.');
   }
 
   if (!customer.city?.trim()) {
-    errors.push('Kundenadresse unvollständig: Ort fehlt. Bitte ergänzen Sie die Kundenadresse.');
+    errors.push('Adresse der Firma unvollständig: Ort fehlt.');
   }
 
   // ============================================================================
@@ -82,7 +82,7 @@ export function validateQuoteData(
   const items = 'items' in quote ? quote.items : [];
 
   if (!items || items.length === 0) {
-    errors.push('Keine Angebotspositionen vorhanden. Bitte fügen Sie mindestens eine Position hinzu.');
+    errors.push('Die Offerte hat keine Positionen.');
   } else {
     // Check for empty descriptions
     const hasEmptyDescription = items.some(
@@ -90,7 +90,7 @@ export function validateQuoteData(
     );
 
     if (hasEmptyDescription) {
-      errors.push('Eine oder mehrere Angebotspositionen haben keine Beschreibung. Bitte ergänzen Sie alle Positionen.');
+      errors.push('Mindestens eine Position hat keine Beschreibung.');
     }
   }
 
@@ -129,7 +129,7 @@ export function validateCompanyProfileForQuote(company: Company): ValidationResu
   return {
     valid: errors.length === 0,
     errors: errors.length > 0
-      ? [`Fehlende Pflichtfelder für Angebotserstellung: ${errors.join(', ')}`]
+      ? [`Fehlende Pflichtfelder für die Offerte: ${errors.join(', ')}`]
       : [],
   };
 }

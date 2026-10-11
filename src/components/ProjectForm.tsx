@@ -96,7 +96,7 @@ export default function ProjectForm({ onSubmit, editingProject, onCancelEdit, cu
 
           <div>
             <label htmlFor="customer" className="block text-sm font-medium text-fg mb-1">
-              Kunde <span className="text-danger">*</span>
+              Firma <span className="text-danger">*</span>
             </label>
             <select
               id="customer"
@@ -105,7 +105,7 @@ export default function ProjectForm({ onSubmit, editingProject, onCancelEdit, cu
               required
               className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
             >
-              <option value="">Kunde auswählen</option>
+              <option value="">Firma wählen</option>
               {customers.map((customer) => (
                 <option key={customer.id} value={customer.id}>
                   {customer.name}
@@ -176,10 +176,10 @@ export default function ProjectForm({ onSubmit, editingProject, onCancelEdit, cu
               step="0.01"
               min="0"
               className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
-              placeholder="Kunde/Standard"
+              placeholder="Firma oder Standard"
             />
             <p className="mt-1 text-xs text-fg-muted">
-              Optional. Falls leer: Kunde → Standard (160 CHF)
+              Optional. Leer: Satz der Firma, sonst Standardsatz aus den Einstellungen.
             </p>
           </div>
         </div>

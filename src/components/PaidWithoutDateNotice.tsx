@@ -21,7 +21,7 @@ export default function PaidWithoutDateNotice({ invoices }: { invoices: FinanceI
       <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-warning-solid" aria-hidden="true" />
       <p>
         <strong>Hinweis:</strong> {invoices.length} bezahlte {invoices.length === 1 ? 'Rechnung hat' : 'Rechnungen haben'} kein
-        Zahlungsdatum ({formatChfDisplay(total)}). Sie sind in den Einnahmen nicht enthalten.{' '}
+        Zahlungsdatum ({formatChfDisplay(total)}). Ohne Datum fehlen sie in den Einnahmen.{' '}
         <Link to="/rechnungen?ansicht=bezahlt&ohne-zahlungsdatum=1" className="font-semibold text-warning-on-subtle underline">
           Zahlungsdatum nachtragen
         </Link>

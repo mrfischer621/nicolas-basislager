@@ -3,56 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthProvider';
 import { useCompany } from '../context/CompanyContext';
 import { supabase } from '../lib/supabase';
-import { User, Menu, ChevronDown, Building2, Settings, LogOut, Check, Plus, Search, Users, FolderKanban, Package, FileText, Receipt, Loader2, X } from 'lucide-react';
+import { User, Menu, ChevronDown, Building2, Settings, LogOut, Check, Plus, Search } from 'lucide-react';
 import { CreateCompanyModal } from './CreateCompanyModal';
-import { useGlobalSearch, type SearchResult } from '../hooks/useGlobalSearch';
+import { openCommandPalette } from '../utils/palette';
 import { TimerButton } from './TimerButton';
 import { companyDisplayName } from '../utils/companyDisplay';
-
-/**
- * SearchResultGroup - Renders a group of search results
- */
-interface SearchResultGroupProps {
-  title: string;
-  icon: React.ReactNode;
-  results: SearchResult[];
-  onSelect: (result: SearchResult) => void;
-}
-
-function SearchResultGroup({ title, icon, results, onSelect }: SearchResultGroupProps) {
-  if (results.length === 0) return null;
-
-  return (
-    <div className="border-b border-surface-border last:border-b-0">
-      <div className="px-3 py-2 bg-canvas flex items-center gap-2 text-xs font-medium text-text-secondary uppercase tracking-wide">
-        {icon}
-        {title}
-      </div>
-      {results.map((result) => (
-        <button
-          key={result.id}
-          onClick={() => onSelect(result)}
-          className="
-            w-full px-3 py-2.5
-            flex flex-col items-start
-            text-left
-            hover:bg-canvas
-            transition-colors
-          "
-        >
-          <span className="text-sm font-medium text-text-primary truncate w-full">
-            {result.title}
-          </span>
-          {result.subtitle && (
-            <span className="text-xs text-text-secondary truncate w-full">
-              {result.subtitle}
-            </span>
-          )}
-        </button>
-      ))}
-    </div>
-  );
-}
 
 /**
  * BentoHeader - Swiss Modern Top Bar 2026
@@ -70,13 +25,8 @@ export function BentoHeader({ onMenuClick }: { onMenuClick?: () => void }) {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isCompanySwitcherOpen, setIsCompanySwitcherOpen] = useState(false);
   const [isCreateCompanyModalOpen, setIsCreateCompanyModalOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
-  const searchRef = useRef<HTMLDivElement>(null);
-  const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const { results, isLoading: isSearching, hasResults } = useGlobalSearch(searchQuery);
 
 
   // Close dropdown when clicking outside
@@ -86,43 +36,11 @@ export function BentoHeader({ onMenuClick }: { onMenuClick?: () => void }) {
         setIsUserMenuOpen(false);
         setIsCompanySwitcherOpen(false);
       }
-      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setIsSearchFocused(false);
-      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  // Keyboard shortcut: Cmd/Ctrl + K to focus search
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
-        event.preventDefault();
-        searchInputRef.current?.focus();
-      }
-      if (event.key === 'Escape' && isSearchFocused) {
-        setIsSearchFocused(false);
-        setSearchQuery('');
-        searchInputRef.current?.blur();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isSearchFocused]);
-
-  const handleSearchResultClick = (result: SearchResult) => {
-    setSearchQuery('');
-    setIsSearchFocused(false);
-    navigate(result.route);
-  };
-
-  const clearSearch = () => {
-    setSearchQuery('');
-    searchInputRef.current?.focus();
-  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -189,97 +107,17 @@ export function BentoHeader({ onMenuClick }: { onMenuClick?: () => void }) {
         {/* Breadcrumb area reserved for future use */}
       </div>
 
-      {/* Center - Global Search */}
-      <div className="flex-1 max-w-md mx-4 hidden md:block relative" ref={searchRef}>
-        <div className="relative">
-          <Search
-            size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none"
-          />
-          <input
-            ref={searchInputRef}
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onFocus={() => setIsSearchFocused(true)}
-            placeholder="Suchen … (Ctrl+K)"
-            aria-label="Kunden, Projekte, Produkte, Rechnungen und Buchungen durchsuchen"
-            className="w-full rounded-lg border border-line-strong bg-canvas py-2 pl-9 pr-8 text-sm transition-colors duration-150 placeholder:text-fg-muted focus:bg-surface"
-          />
-          {searchQuery && (
-            <button
-              onClick={clearSearch}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-text-primary"
-            >
-              <X size={14} />
-            </button>
-          )}
-          {isSearching && (
-            <Loader2
-              size={14}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary animate-spin"
-            />
-          )}
-        </div>
-
-        {/* Search Results Dropdown */}
-        {isSearchFocused && searchQuery.length >= 2 && (
-          <div
-            className="
-              absolute top-full left-0 right-0 mt-2
-              bg-surface
-              rounded-xl
-              shadow-floating
-              border border-surface-border
-              overflow-hidden
-              z-50
-              animate-fade-in
-              max-h-[400px]
-              overflow-y-auto
-            "
-          >
-            {!hasResults && !isSearching && (
-              <div className="px-4 py-6 text-center text-text-secondary text-sm">
-                Keine Ergebnisse gefunden
-              </div>
-            )}
-
-            {hasResults && (
-              <>
-                <SearchResultGroup
-                  title="Kunden"
-                  icon={<Users size={14} />}
-                  results={results.customers}
-                  onSelect={handleSearchResultClick}
-                />
-                <SearchResultGroup
-                  title="Projekte"
-                  icon={<FolderKanban size={14} />}
-                  results={results.projects}
-                  onSelect={handleSearchResultClick}
-                />
-                <SearchResultGroup
-                  title="Produkte"
-                  icon={<Package size={14} />}
-                  results={results.products}
-                  onSelect={handleSearchResultClick}
-                />
-                <SearchResultGroup
-                  title="Rechnungen"
-                  icon={<FileText size={14} />}
-                  results={results.invoices}
-                  onSelect={handleSearchResultClick}
-                />
-                <SearchResultGroup
-                  title="Buchungen"
-                  icon={<Receipt size={14} />}
-                  results={results.transactions}
-                  onSelect={handleSearchResultClick}
-                />
-              </>
-            )}
-          </div>
-        )}
+      {/* Mitte: oeffnet die Befehlspalette (Suche und Schnellaktionen) */}
+      <div className="mx-4 hidden max-w-md flex-1 md:block">
+        <button
+          type="button"
+          onClick={openCommandPalette}
+          className="flex w-full items-center gap-2 rounded-lg border border-line-strong bg-canvas py-2 pl-3 pr-2 text-left text-sm text-fg-muted transition-colors hover:bg-surface"
+        >
+          <Search size={16} aria-hidden="true" />
+          <span className="flex-1">Suchen oder Aktion …</span>
+          <kbd className="rounded border border-line px-1.5 text-xs">Ctrl K</kbd>
+        </button>
       </div>
 
       {/* Right Side - Actions */}

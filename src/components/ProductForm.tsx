@@ -45,7 +45,7 @@ export default function ProductForm({ onSubmit, editingProduct, onCancel }: Prod
 
     const price = parseFloat(formData.price);
     if (!formData.price || isNaN(price) || price < 0) {
-      newErrors.price = 'Bitte geben Sie einen gültigen Preis ein (≥ 0)';
+      newErrors.price = 'Gib einen gültigen Preis ein (ab 0)';
     }
 
     if (!formData.unit.trim()) {
@@ -140,7 +140,7 @@ export default function ProductForm({ onSubmit, editingProduct, onCancel }: Prod
           </select>
           {(!selectedCompany?.product_categories || selectedCompany.product_categories.length === 0) && (
             <p className="text-xs text-fg-muted mt-1">
-              Keine Kategorien verfügbar. Definieren Sie Kategorien in den Einstellungen.
+              Noch keine Kategorien. Leg sie unten unter «Produktkategorien» an.
             </p>
           )}
         </div>

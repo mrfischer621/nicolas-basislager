@@ -112,17 +112,17 @@ export function CreateCompanyModal({ isOpen, onClose, onSuccess }: CreateCompany
 
         // Provide user-friendly error messages
         if (rpcError.message?.includes('not authenticated')) {
-          throw new Error('Sie sind nicht angemeldet. Bitte melden Sie sich erneut an.');
+          throw new Error('Du bist nicht angemeldet. Melde dich erneut an.');
         } else if (rpcError.message?.includes('required')) {
           throw new Error('Alle Pflichtfelder müssen ausgefüllt sein.');
         } else if (rpcError.code === '42883') {
           // Function does not exist
           throw new Error(
-            'Die Funktion existiert nicht in der Datenbank. Bitte führen Sie die Migration aus: DIAGNOSE_CREATE_COMPANY_ERROR.sql'
+            'Die Funktion existiert nicht in der Datenbank. Migration fehlt: DIAGNOSE_CREATE_COMPANY_ERROR.sql'
           );
         } else if (rpcError.code === '42501') {
           // Insufficient privilege
-          throw new Error('Keine Berechtigung. Sie sind möglicherweise nicht angemeldet.');
+          throw new Error('Keine Berechtigung. Eventuell bist du nicht mehr angemeldet.');
         } else {
           // Show detailed error in development
           const detailedError = `Fehler beim Erstellen der Firma: ${rpcError.message || 'Unbekannter Fehler'}`;
@@ -184,7 +184,7 @@ export function CreateCompanyModal({ isOpen, onClose, onSuccess }: CreateCompany
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-fg">Neue Firma erstellen</h2>
-                <p className="text-sm text-fg-muted">Firma zu Ihrem Account hinzufügen</p>
+                <p className="text-sm text-fg-muted">Weiteres Unternehmen hinzufügen</p>
               </div>
             </div>
             <button
@@ -311,7 +311,7 @@ export function CreateCompanyModal({ isOpen, onClose, onSuccess }: CreateCompany
               <div className="p-3 bg-accent-subtle border border-accent-border rounded-lg flex items-start gap-2">
                 <CheckCircle className="text-accent flex-shrink-0 mt-0.5" size={18} />
                 <p className="text-sm text-accent">
-                  Weitere Details (IBAN, MwSt, etc.) können Sie nach der Erstellung in den
+                  Weitere Details (IBAN, MwSt, etc.) kannst du nach dem Anlegen in den
                   Einstellungen ergänzen.
                 </p>
               </div>

@@ -186,7 +186,7 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
       // Validate file type
       const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
       if (!allowedTypes.includes(file.type)) {
-        toast.error('Bitte wählen Sie eine PDF- oder Bilddatei (JPG, PNG, WebP).');
+        toast.error('Wähl eine PDF- oder Bilddatei (JPG, PNG, WebP).');
         return;
       }
       // Validate file size (max 10MB)
@@ -357,7 +357,7 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
             value={counterparty}
             onChange={(e) => setCounterparty(e.target.value)}
             className="input"
-            placeholder={activeTab === 'ausgabe' ? 'z.B. Infomaniak' : 'z.B. Kunde AG'}
+            placeholder={activeTab === 'ausgabe' ? 'z.B. Infomaniak' : 'z. B. Muster AG'}
           />
           <datalist id="transaction-counterparty-suggestions">
             {counterpartySuggestions.map((name) => (
@@ -472,7 +472,7 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
         onToggle={(e) => setMoreOpen((e.currentTarget as HTMLDetailsElement).open)}
         className="group rounded-lg border border-line px-4 py-2 [&_summary::-webkit-details-marker]:hidden">
         <summary className="cursor-pointer list-none py-1 text-sm font-semibold text-fg">
-          Weitere Angaben <span className="font-normal text-fg-muted">(Beleg-Nr, Kunde, Projekt, Tags)</span>
+          Weitere Angaben <span className="font-normal text-fg-muted">(Beleg-Nr, Firma, Projekt, Tags)</span>
         </summary>
         <div className="mt-3 grid grid-cols-1 gap-4 pb-2 sm:grid-cols-2">
           <div>

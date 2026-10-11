@@ -14,7 +14,7 @@ import { RATE_SOURCE_LABEL, useResolvedRate } from './useResolvedRate';
  * Projekt, mit Herkunft als Text; "aendern" erlaubt einen eigenen Satz.
  * Projekt und Beschreibung lassen sich direkt als Timer starten.
  */
-export function QuickTimeEntry({ projects, onSaved }: { projects: Project[]; onSaved: () => void }) {
+export function QuickTimeEntry({ projects, onSaved, autoFocus = false }: { projects: Project[]; onSaved: () => void; autoFocus?: boolean }) {
   const { selectedCompany } = useCompany();
   const timer = useTimer();
   const [projectId, setProjectId] = useState(() => localStorage.getItem('zeit_letztes_projekt') ?? '');
@@ -83,6 +83,7 @@ export function QuickTimeEntry({ projects, onSaved }: { projects: Project[]; onS
           }}
           className="input"
           required
+          autoFocus={autoFocus}
         >
           <option value="">Projekt wählen</option>
           {projects.map((p) => (

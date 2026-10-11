@@ -32,7 +32,7 @@ export function shouldWarnOnEdit(status: QuoteStatus): boolean {
  */
 export function getEditBlockedReason(status: QuoteStatus): string {
   if (status === 'bestaetigt') {
-    return 'Bestätigte Angebote können nicht mehr bearbeitet werden (bereits als Rechnung erstellt).';
+    return 'Umgewandelte Offerten lassen sich nicht mehr bearbeiten (Rechnung erstellt).';
   }
   return '';
 }
@@ -45,16 +45,16 @@ export function getEditBlockedReason(status: QuoteStatus): string {
  */
 export function getEditWarningMessage(status: QuoteStatus): string {
   if (status === 'versendet') {
-    return 'Achtung: Dieses Angebot wurde bereits an den Kunden versendet!';
+    return 'Diese Offerte ist bereits versendet.';
   }
   if (status === 'akzeptiert') {
-    return 'Achtung: Dieses Angebot wurde vom Kunden akzeptiert!';
+    return 'Diese Offerte ist bereits akzeptiert.';
   }
   if (status === 'abgelehnt') {
-    return 'Achtung: Dieses Angebot wurde vom Kunden abgelehnt.';
+    return 'Diese Offerte wurde abgelehnt.';
   }
   if (status === 'ueberfallig') {
-    return 'Achtung: Dieses Angebot ist überfällig!';
+    return 'Diese Offerte ist abgelaufen.';
   }
   return '';
 }

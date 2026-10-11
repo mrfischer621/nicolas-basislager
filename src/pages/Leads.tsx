@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import { Clock, Plus, Search } from 'lucide-react';
 import {
@@ -63,6 +63,10 @@ export default function Leads() {
   const [drawer, setDrawer] = useState<DrawerTarget | null>(() => (state.neu === '1' ? { mode: 'new', kind: 'lead' } : null));
   const counts = useMemo(() => leadCounts(statuses.data ?? []), [statuses.data]);
   const dueToday = (statuses.data ?? []).filter((l) => (l.lead_status ?? 'neu') !== 'kein_interesse' && l.next_action_date && l.next_action_date <= today).length;
+
+  useEffect(() => {
+    if (state.neu) set({ neu: null });
+  }, [state.neu, set]);
 
   if (!selectedCompany) return null;
 

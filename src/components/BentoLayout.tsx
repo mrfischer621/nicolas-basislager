@@ -4,6 +4,8 @@ import { BentoSidebar } from './BentoSidebar';
 import { BentoHeader } from './BentoHeader';
 import { useCompany } from '../context/CompanyContext';
 import ErrorBoundary from './ErrorBoundary';
+import { CommandPalette } from './CommandPalette';
+import { MobileBar } from './MobileBar';
 
 /**
  * BentoLayout - Swiss Modern App Shell 2026
@@ -54,7 +56,7 @@ export default function BentoLayout() {
 
         {/* Main Content - Fills remaining height */}
         <main className="flex-1 min-h-0 overflow-hidden">
-          <div className="h-full overflow-auto px-4 py-5 md:px-8 md:py-7">
+          <div className="h-full overflow-auto px-4 pb-24 pt-5 md:px-8 md:py-7">
             {/* Faengt Render-Fehler einer Seite ab, statt die ganze App
                 durch eine weisse Seite zu ersetzen. Der resetKey loest den
                 Fehler beim Navigieren auf eine andere Seite wieder auf. */}
@@ -65,6 +67,8 @@ export default function BentoLayout() {
           </div>
         </main>
       </div>
+      <MobileBar />
+      <CommandPalette />
     </div>
   );
 }

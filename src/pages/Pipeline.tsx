@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import { DndContext, DragOverlay, PointerSensor, KeyboardSensor, useDraggable, useDroppable, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { Clock, Plus, Hourglass } from 'lucide-react';
@@ -46,6 +46,10 @@ export default function Pipeline() {
   const total = weightedPipeline(stages, allDeals, today);
   const dueCount = allDeals.filter((d) => !d.is_lost && isDueAction(d, today)).length;
   const table = state.darstellung === 'tabelle';
+
+  useEffect(() => {
+    if (state.neu) set({ neu: null });
+  }, [state.neu, set]);
 
   if (!selectedCompany) return null;
 

@@ -266,7 +266,7 @@ export default function QuoteForm({
   return (
     <div className="card p-6">
       <h2 className="text-xl font-semibold text-fg mb-4">
-        {isEditMode ? 'Angebot bearbeiten' : 'Neues Angebot'}
+        {isEditMode ? 'Offerte bearbeiten' : 'Neue Offerte'}
       </h2>
 
       {/* Warning for editing sent/accepted/rejected quotes */}
@@ -276,7 +276,7 @@ export default function QuoteForm({
           <div>
             <p className="text-warning font-medium">{editWarningMessage}</p>
             <p className="text-warning text-sm mt-1">
-              Änderungen werden gespeichert, stellen Sie sicher, dass der Kunde über die Korrektur informiert wird.
+              Änderungen werden gespeichert. Informiere die Firma über die Korrektur.
             </p>
           </div>
         </div>
@@ -286,7 +286,7 @@ export default function QuoteForm({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label htmlFor="customer" className="block text-sm font-medium text-fg mb-1">
-              Kunde <span className="text-danger">*</span>
+              Firma <span className="text-danger">*</span>
             </label>
             <select
               id="customer"
@@ -295,7 +295,7 @@ export default function QuoteForm({
               required
               className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
             >
-              <option value="">Kunde auswählen</option>
+              <option value="">Firma wählen</option>
               {customers.map((customer) => (
                 <option key={customer.id} value={customer.id}>
                   {customer.name}
@@ -326,7 +326,7 @@ export default function QuoteForm({
 
           <div>
             <label htmlFor="quoteNumber" className="block text-sm font-medium text-fg mb-1">
-              Angebotsnummer
+              Offertnummer
             </label>
             <input
               type="text"
@@ -343,7 +343,7 @@ export default function QuoteForm({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label htmlFor="issueDate" className="block text-sm font-medium text-fg mb-1">
-              Angebotsdatum <span className="text-danger">*</span>
+              Datum <span className="text-danger">*</span>
             </label>
             <input
               type="date"
@@ -390,7 +390,7 @@ export default function QuoteForm({
         {/* Intro Text — shown above items in PDF */}
         <div>
           <label className="block text-sm font-medium text-fg mb-1">
-            Einleitungstext <span className="text-xs font-normal text-fg-muted">(optional — überschreibt die Firmenvorlage für dieses Angebot)</span>
+            Einleitungstext <span className="text-xs font-normal text-fg-muted">(optional — überschreibt die Vorlage für diese Offerte)</span>
           </label>
           <textarea
             value={introText}
@@ -400,7 +400,7 @@ export default function QuoteForm({
               el.style.height = 'auto';
               el.style.height = `${el.scrollHeight}px`;
             }}
-            placeholder={selectedCompany?.quote_intro_text || 'Einleitungstext für dieses Angebot…'}
+            placeholder={selectedCompany?.quote_intro_text || 'Einleitungstext für diese Offerte …'}
             rows={3}
             className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition text-sm resize-none overflow-hidden"
             style={{ minHeight: '72px' }}
@@ -635,7 +635,7 @@ export default function QuoteForm({
         {/* Outro Text — shown below items/totals in PDF */}
         <div>
           <label className="block text-sm font-medium text-fg mb-1">
-            Schlusstext <span className="text-xs font-normal text-fg-muted">(optional — überschreibt die Firmenvorlage für dieses Angebot)</span>
+            Schlusstext <span className="text-xs font-normal text-fg-muted">(optional — überschreibt die Vorlage für diese Offerte)</span>
           </label>
           <textarea
             value={outroText}
@@ -645,7 +645,7 @@ export default function QuoteForm({
               el.style.height = 'auto';
               el.style.height = `${el.scrollHeight}px`;
             }}
-            placeholder={selectedCompany?.quote_footer_text || 'Schlusstext / Dank für dieses Angebot…'}
+            placeholder={selectedCompany?.quote_footer_text || 'Schlusstext / Dank für diese Offerte …'}
             rows={3}
             className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition text-sm resize-none overflow-hidden"
             style={{ minHeight: '72px' }}
@@ -658,7 +658,7 @@ export default function QuoteForm({
             disabled={isSubmitting || items.length === 0}
             className="rounded-lg px-4 py-2 font-medium bg-brand text-accent-fg hover:bg-brand-dark transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isSubmitting ? 'Speichert...' : isEditMode ? 'Änderungen speichern' : 'Angebot speichern'}
+            {isSubmitting ? 'Speichert...' : isEditMode ? 'Änderungen speichern' : 'Offerte speichern'}
           </button>
         </div>
       </form>

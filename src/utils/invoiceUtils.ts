@@ -48,10 +48,10 @@ export function getEditBlockedReason(status: InvoiceStatus): string {
  */
 export function getEditWarningMessage(status: InvoiceStatus): string {
   if (status === 'versendet') {
-    return 'Achtung: Diese Rechnung wurde bereits an den Kunden versendet!';
+    return 'Diese Rechnung ist bereits versendet.';
   }
   if (status === 'überfällig') {
-    return 'Achtung: Diese Rechnung wurde bereits an den Kunden versendet und ist überfällig!';
+    return 'Diese Rechnung ist bereits versendet und überfällig.';
   }
   return '';
 }

@@ -1,186 +1,66 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import { useCompany } from '../context/CompanyContext';
+import { orSearch } from '../components/list';
+import { formatChfDisplay } from '../utils/money';
+import { formatDate } from '../utils/format';
 
 export interface SearchResult {
   id: string;
-  type: 'customer' | 'project' | 'product' | 'invoice' | 'transaction';
+  group: string;
   title: string;
   subtitle?: string;
   route: string;
 }
 
-export interface GroupedResults {
-  customers: SearchResult[];
-  projects: SearchResult[];
-  products: SearchResult[];
-  invoices: SearchResult[];
-  transactions: SearchResult[];
-}
-
-const DEBOUNCE_MS = 300;
 const MIN_QUERY_LENGTH = 2;
 
+/**
+ * Suche der Befehlspalette: Firmen, Personen, Leads und Deals, Offerten,
+ * Rechnungen, Projekte, Buchungen und Leistungen, je hoechstens 5 Treffer.
+ * Status erscheinen als Wort, nicht als Rohwert.
+ */
 export function useGlobalSearch(query: string) {
   const { selectedCompany } = useCompany();
-  const [results, setResults] = useState<GroupedResults>({
-    customers: [],
-    projects: [],
-    products: [],
-    invoices: [],
-    transactions: [],
-  });
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const abortControllerRef = useRef<AbortController | null>(null);
-
+  const companyId = selectedCompany?.id ?? '';
+  const [debounced, setDebounced] = useState(query);
   useEffect(() => {
-    // Reset if query is too short
-    if (!query || query.length < MIN_QUERY_LENGTH || !selectedCompany?.id) {
-      setResults({
-        customers: [],
-        projects: [],
-        products: [],
-        invoices: [],
-        transactions: [],
-      });
-      setIsLoading(false);
-      return;
-    }
+    const t = setTimeout(() => setDebounced(query.trim()), 250);
+    return () => clearTimeout(t);
+  }, [query]);
 
-    // Cancel previous request
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-    abortControllerRef.current = new AbortController();
+  const result = useQuery({
+    queryKey: ['search', companyId, debounced],
+    enabled: !!companyId && debounced.length >= MIN_QUERY_LENGTH,
+    staleTime: 30_000,
+    queryFn: async (): Promise<SearchResult[]> => {
+      const q = debounced;
+      const [customers, contacts, opps, quotes, invoices, projects, transactions, products] = await Promise.all([
+        supabase.from('customers').select('id, name, city').eq('company_id', companyId).or(orSearch(['name', 'city', 'email'], q)).limit(5),
+        supabase.from('customer_contacts').select('id, name, role, customer_id, customer:customers!inner(name, company_id)').eq('customer.company_id', companyId).or(orSearch(['name', 'email'], q)).limit(5),
+        supabase.from('opportunities').select('id, title, kind, prospect_info').eq('company_id', companyId).or(orSearch(['title', 'prospect_info->>company', 'prospect_info->>name'], q)).limit(5),
+        supabase.from('quotes').select('id, quote_number, total').eq('company_id', companyId).ilike('quote_number', `%${q}%`).limit(5),
+        supabase.from('invoices').select('id, invoice_number, total, title').eq('company_id', companyId).or(orSearch(['invoice_number', 'title'], q)).limit(5),
+        supabase.from('projects').select('id, name').eq('company_id', companyId).ilike('name', `%${q}%`).limit(5),
+        supabase.from('transactions').select('id, description, counterparty, amount, date').eq('company_id', companyId).or(orSearch(['description', 'counterparty', 'transaction_number'], q)).limit(5),
+        supabase.from('products').select('id, name, price').eq('company_id', companyId).ilike('name', `%${q}%`).limit(5),
+      ]);
+      const out: SearchResult[] = [];
+      for (const c of customers.data ?? []) out.push({ id: `c-${c.id}`, group: 'Firmen', title: c.name, subtitle: c.city ?? undefined, route: `/kontakte/firmen/${c.id}` });
+      for (const p of (contacts.data ?? []) as unknown as { id: string; name: string; role: string | null; customer_id: string; customer: { name: string } }[])
+        out.push({ id: `p-${p.id}`, group: 'Personen', title: p.name, subtitle: [p.role, p.customer?.name].filter(Boolean).join(', '), route: `/kontakte/firmen/${p.customer_id}` });
+      for (const o of (opps.data ?? []) as { id: string; title: string; kind: string; prospect_info: { company?: string; name?: string } | null }[])
+        out.push({ id: `o-${o.id}`, group: o.kind === 'lead' ? 'Leads' : 'Deals', title: o.prospect_info?.company ?? o.prospect_info?.name ?? o.title, subtitle: o.title, route: o.kind === 'lead' ? `/leads?ansicht=alle&q=${encodeURIComponent(q)}` : '/pipeline?darstellung=tabelle' });
+      for (const x of quotes.data ?? []) out.push({ id: `q-${x.id}`, group: 'Offerten', title: x.quote_number, subtitle: formatChfDisplay(Number(x.total)), route: `/offerten/${x.id}` });
+      for (const i of invoices.data ?? []) out.push({ id: `i-${i.id}`, group: 'Rechnungen', title: i.invoice_number, subtitle: [formatChfDisplay(Number(i.total)), i.title].filter(Boolean).join(', '), route: `/rechnungen/${i.id}` });
+      for (const p of projects.data ?? []) out.push({ id: `pr-${p.id}`, group: 'Projekte', title: p.name, route: `/projekte/${p.id}` });
+      for (const t of transactions.data ?? [])
+        out.push({ id: `t-${t.id}`, group: 'Buchungen', title: t.counterparty ?? t.description ?? 'Buchung', subtitle: `${formatDate(t.date)}, ${formatChfDisplay(Number(t.amount))}`, route: `/buchungen?id=${t.id}&zeitraum=alle` });
+      for (const p of products.data ?? []) out.push({ id: `l-${p.id}`, group: 'Leistungen', title: p.name, subtitle: formatChfDisplay(Number(p.price)), route: `/einstellungen/leistungen?id=${p.id}` });
+      return out;
+    },
+  });
 
-    const timeoutId = setTimeout(async () => {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const companyId = selectedCompany.id;
-        const searchTerm = `%${query}%`;
-
-        // Run parallel queries for all entity types
-        const [
-          customersResult,
-          projectsResult,
-          productsResult,
-          invoicesResult,
-          transactionsResult,
-        ] = await Promise.all([
-          // Customers: search name, contact_person
-          supabase
-            .from('customers')
-            .select('id, name, contact_person, email')
-            .eq('company_id', companyId)
-            .or(`name.ilike.${searchTerm},contact_person.ilike.${searchTerm}`)
-            .limit(5),
-
-          // Projects: search name
-          supabase
-            .from('projects')
-            .select('id, name, status')
-            .eq('company_id', companyId)
-            .ilike('name', searchTerm)
-            .limit(5),
-
-          // Products: search name
-          supabase
-            .from('products')
-            .select('id, name, price')
-            .eq('company_id', companyId)
-            .ilike('name', searchTerm)
-            .limit(5),
-
-          // Invoices: search invoice_number
-          supabase
-            .from('invoices')
-            .select('id, invoice_number, total, status')
-            .eq('company_id', companyId)
-            .ilike('invoice_number', searchTerm)
-            .limit(5),
-
-          // Transactions: search description
-          supabase
-            .from('transactions')
-            .select('id, description, amount, type, date')
-            .eq('company_id', companyId)
-            .ilike('description', searchTerm)
-            .limit(5),
-        ]);
-
-        // Map results to unified format
-        const grouped: GroupedResults = {
-          customers: (customersResult.data || []).map((c) => ({
-            id: c.id as string,
-            type: 'customer' as const,
-            title: c.name as string,
-            subtitle: (c.contact_person || c.email || undefined) as string | undefined,
-            route: `/kontakte/firmen/${c.id}`,
-          })),
-          projects: (projectsResult.data || []).map((p) => ({
-            id: p.id as string,
-            type: 'project' as const,
-            title: p.name as string,
-            subtitle: p.status as string,
-            route: `/projekte?id=${p.id}`,
-          })),
-          products: (productsResult.data || []).map((p) => ({
-            id: p.id as string,
-            type: 'product' as const,
-            title: p.name as string,
-            subtitle: `CHF ${Number(p.price).toFixed(2)}`,
-            route: `/einstellungen/leistungen?id=${p.id}`,
-          })),
-          invoices: (invoicesResult.data || []).map((i) => ({
-            id: i.id as string,
-            type: 'invoice' as const,
-            title: i.invoice_number as string,
-            subtitle: `CHF ${Number(i.total).toFixed(2)} - ${i.status}`,
-            route: `/rechnungen?id=${i.id}`,
-          })),
-          transactions: (transactionsResult.data || []).map((t) => ({
-            id: t.id as string,
-            type: 'transaction' as const,
-            title: (t.description || 'Buchung') as string,
-            subtitle: `${t.type === 'einnahme' ? '+' : '-'}CHF ${Number(t.amount).toFixed(2)}`,
-            route: `/buchungen?id=${t.id}`,
-          })),
-        };
-
-        setResults(grouped);
-      } catch (err) {
-        if (err instanceof Error && err.name === 'AbortError') {
-          return;
-        }
-        setError('Suche fehlgeschlagen');
-        console.error('Search error:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    }, DEBOUNCE_MS);
-
-    return () => {
-      clearTimeout(timeoutId);
-    };
-  }, [query, selectedCompany?.id]);
-
-  const totalResults =
-    results.customers.length +
-    results.projects.length +
-    results.products.length +
-    results.invoices.length +
-    results.transactions.length;
-
-  const hasResults = totalResults > 0;
-
-  return {
-    results,
-    isLoading,
-    error,
-    hasResults,
-    totalResults,
-  };
+  return { results: debounced.length >= MIN_QUERY_LENGTH ? result.data ?? [] : [], isLoading: result.isFetching };
 }

@@ -95,7 +95,7 @@ export default function QuoteToInvoiceModal({
         }));
 
       if (validItems.length === 0) {
-        setError('Bitte fügen Sie mindestens eine Position hinzu.');
+        setError('Füg mindestens eine Position hinzu.');
         return;
       }
 

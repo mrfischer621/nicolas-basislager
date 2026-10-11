@@ -92,7 +92,7 @@ export default function Produkte() {
   };
 
   const handleArchive = async (id: string) => {
-    if (!(await confirmDialog({ title: 'Produkt archivieren', confirmLabel: 'Archivieren', message: 'Möchten Sie dieses Produkt wirklich archivieren?', destructive: true }))) return;
+    if (!(await confirmDialog({ title: 'Produkt archivieren', confirmLabel: 'Archivieren', message: 'Diese Leistung wirklich archivieren?', destructive: true }))) return;
 
     try {
       const { error: archiveError } = await supabase

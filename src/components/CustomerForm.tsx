@@ -126,7 +126,7 @@ export default function CustomerForm({ onSubmit, editingCustomer, onCancelEdit }
   return (
     <div className="card p-6">
       <h2 className="text-xl font-semibold text-fg mb-6">
-        {editingCustomer ? 'Kunde bearbeiten' : 'Neuer Kunde'}
+        {editingCustomer ? 'Firma bearbeiten' : 'Neue Firma'}
       </h2>
 
       {/* Tab Navigation */}
@@ -378,7 +378,7 @@ export default function CustomerForm({ onSubmit, editingCustomer, onCancelEdit }
                 onChange={(e) => setNotes(e.target.value)}
                 rows={4}
                 className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition resize-none"
-                placeholder="Interne Notizen zu diesem Kunden..."
+                placeholder="Interne Notiz zu dieser Firma …"
               />
             </div>
           </div>

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useMemo, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Clock } from 'lucide-react';
@@ -69,6 +69,11 @@ export default function Zeiterfassung() {
   const invalidate = useInvalidateTime();
   const selection = useSelection(list.rows.map((r) => r.id));
   const [editing, setEditing] = useState<TimeRow | null>(null);
+  // ?neu=1 (Befehlspalette, Handy-Leiste): Schnellerfassung fokussieren
+  const [focusEntry] = useState(() => state.neu === '1');
+  useEffect(() => {
+    if (state.neu) set({ neu: null });
+  }, [state.neu, set]);
   const [editor, setEditor] = useState<InvoiceEditorMode | null>(null);
 
   // Gleiche Filter wie die Datenbankabfrage, fuer Tab-Zahlen und Gruppensummen
@@ -201,7 +206,7 @@ export default function Zeiterfassung() {
               ? 'Alle verrechenbaren Zeiten sind verrechnet.'
               : `${formatHours(unbilled.billableHours)} nicht verrechnet, ${formatChfDisplay(unbilled.amount)}${staleUnbilled ? `, davon ${staleUnbilled} älter als 30 Tage` : ''}.`
         }
-        notices={<QuickTimeEntry projects={activeProjects} onSaved={() => void invalidate()} />}
+        notices={<QuickTimeEntry projects={activeProjects} onSaved={() => void invalidate()} autoFocus={focusEntry} />}
         tabs={
           <ViewTabs
             tabs={TABS.map((t) => ({ ...t, count: t.value === 'auswertung' || summary.isLoading ? undefined : counts[t.value as TimeView] }))}

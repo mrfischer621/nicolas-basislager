@@ -363,7 +363,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
           <div>
             <p className="text-warning font-medium">{editWarningMessage}</p>
             <p className="text-warning text-sm mt-1">
-              Änderungen werden gespeichert, stellen Sie sicher, dass der Kunde über die Korrektur informiert wird.
+              Änderungen werden gespeichert. Informiere die Firma über die Korrektur.
             </p>
           </div>
         </div>
@@ -374,7 +374,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label htmlFor="customer" className="block text-sm font-medium text-fg mb-1">
-              Kunde <span className="text-danger">*</span>
+              Firma <span className="text-danger">*</span>
             </label>
             <select
               id="customer"
@@ -383,7 +383,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
               required
               className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
             >
-              <option value="">Kunde auswählen</option>
+              <option value="">Firma wählen</option>
               {customers.map((customer) => (
                 <option key={customer.id} value={customer.id}>
                   {customer.name}

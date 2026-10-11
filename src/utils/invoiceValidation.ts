@@ -41,24 +41,24 @@ export function validateInvoiceData(
   }
 
   if (!company.street?.trim()) {
-    errors.push('Strasse fehlt im Firmenprofil. Bitte ergänzen Sie die Adresse in den Einstellungen.');
+    errors.push('Strasse fehlt im Firmenprofil. Ergänze die Adresse unter Einstellungen › Unternehmen.');
   }
 
   if (!company.house_number?.trim()) {
-    errors.push('Hausnummer fehlt im Firmenprofil. Bitte ergänzen Sie die Adresse in den Einstellungen.');
+    errors.push('Hausnummer fehlt im Firmenprofil. Ergänze die Adresse unter Einstellungen › Unternehmen.');
   }
 
   if (!company.zip_code?.trim()) {
-    errors.push('PLZ fehlt im Firmenprofil. Bitte ergänzen Sie die Adresse in den Einstellungen.');
+    errors.push('PLZ fehlt im Firmenprofil. Ergänze die Adresse unter Einstellungen › Unternehmen.');
   }
 
   if (!company.city?.trim()) {
-    errors.push('Ort fehlt im Firmenprofil. Bitte ergänzen Sie die Adresse in den Einstellungen.');
+    errors.push('Ort fehlt im Firmenprofil. Ergänze die Adresse unter Einstellungen › Unternehmen.');
   }
 
   // IBAN or QR-IBAN required for Swiss QR-Bill
   if (!company.iban?.trim() && !company.qr_iban?.trim()) {
-    errors.push('IBAN oder QR-IBAN fehlt für die QR-Rechnung. Bitte ergänzen Sie die Bankverbindung in den Einstellungen.');
+    errors.push('IBAN oder QR-IBAN fehlt für die QR-Rechnung. Ergänze die Bankverbindung unter Einstellungen › Unternehmen.');
   }
 
   // ============================================================================
@@ -66,23 +66,23 @@ export function validateInvoiceData(
   // ============================================================================
 
   if (!customer.name?.trim()) {
-    errors.push('Kundenname fehlt. Bitte ergänzen Sie die Kundendaten.');
+    errors.push('Name der Firma fehlt.');
   }
 
   if (!customer.street?.trim()) {
-    errors.push('Kundenadresse unvollständig: Strasse fehlt. Bitte ergänzen Sie die Kundenadresse.');
+    errors.push('Adresse der Firma unvollständig: Strasse fehlt.');
   }
 
   if (!customer.house_number?.trim()) {
-    errors.push('Kundenadresse unvollständig: Hausnummer fehlt. Bitte ergänzen Sie die Kundenadresse.');
+    errors.push('Adresse der Firma unvollständig: Hausnummer fehlt.');
   }
 
   if (!customer.zip_code?.trim()) {
-    errors.push('Kundenadresse unvollständig: PLZ fehlt. Bitte ergänzen Sie die Kundenadresse.');
+    errors.push('Adresse der Firma unvollständig: PLZ fehlt.');
   }
 
   if (!customer.city?.trim()) {
-    errors.push('Kundenadresse unvollständig: Ort fehlt. Bitte ergänzen Sie die Kundenadresse.');
+    errors.push('Adresse der Firma unvollständig: Ort fehlt.');
   }
 
   // ============================================================================
@@ -92,7 +92,7 @@ export function validateInvoiceData(
   const items = 'items' in invoice ? invoice.items : [];
 
   if (!items || items.length === 0) {
-    errors.push('Keine Rechnungspositionen vorhanden. Bitte fügen Sie mindestens eine Position hinzu.');
+    errors.push('Die Rechnung hat keine Positionen.');
   } else {
     // Check for empty descriptions
     const hasEmptyDescription = items.some(
@@ -100,7 +100,7 @@ export function validateInvoiceData(
     );
 
     if (hasEmptyDescription) {
-      errors.push('Eine oder mehrere Rechnungspositionen haben keine Beschreibung. Bitte ergänzen Sie alle Positionen.');
+      errors.push('Mindestens eine Position hat keine Beschreibung.');
     }
   }
 
@@ -163,7 +163,7 @@ export function validateCustomerProfile(customer: Customer): ValidationResult {
   const errors: string[] = [];
 
   if (!customer.name?.trim()) {
-    errors.push('Kundenname');
+    errors.push('Name der Firma');
   }
 
   if (!customer.street?.trim()) {

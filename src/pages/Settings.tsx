@@ -300,7 +300,7 @@ export default function Settings({ section }: { section: TabType }) {
   };
 
   const handleDeleteCategory = async (categoryId: string) => {
-    if (!(await confirmDialog({ title: 'Kategorie deaktivieren', confirmLabel: 'Deaktivieren', message: 'Möchten Sie diese Kategorie wirklich deaktivieren?', destructive: true }))) return;
+    if (!(await confirmDialog({ title: 'Kategorie deaktivieren', confirmLabel: 'Deaktivieren', message: 'Diese Kategorie wirklich deaktivieren?', destructive: true }))) return;
 
     try {
       // Soft delete - set is_active to false
@@ -369,7 +369,7 @@ export default function Settings({ section }: { section: TabType }) {
     e.preventDefault();
 
     if (!validateCompanyForm()) {
-      showToast('error', 'Bitte füllen Sie alle Pflichtfelder aus.');
+      showToast('error', 'Füll alle Pflichtfelder aus.');
       return;
     }
 
@@ -575,7 +575,7 @@ export default function Settings({ section }: { section: TabType }) {
   };
 
   const handleDeleteProductCategory = async (index: number) => {
-    if (!(await confirmDialog({ title: 'Produktkategorie löschen', confirmLabel: 'Löschen', message: 'Möchten Sie diese Produktkategorie wirklich löschen?', destructive: true }))) return;
+    if (!(await confirmDialog({ title: 'Produktkategorie löschen', confirmLabel: 'Löschen', message: 'Diese Produktkategorie wirklich löschen?', destructive: true }))) return;
 
     try {
       const updatedCategories = productCategories.filter((_, i) => i !== index);
@@ -676,7 +676,7 @@ export default function Settings({ section }: { section: TabType }) {
                 placeholder="z.B. Handelsname oder Doing Business As"
               />
               <p className="text-xs text-fg-muted mt-1">
-                Alternative Firmenbezeichnung (z.B. Geschäftsname unter dem Sie auftreten)
+                Alternative Firmenbezeichnung (z. B. Geschäftsname, unter dem du auftrittst)
               </p>
             </div>
 
@@ -1061,7 +1061,7 @@ export default function Settings({ section }: { section: TabType }) {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
-                placeholder="Ihr vollständiger Name"
+                placeholder="Vor- und Nachname"
               />
             </div>
 
@@ -1235,7 +1235,7 @@ export default function Settings({ section }: { section: TabType }) {
           <div className="mb-6">
             <h2 className="text-lg font-semibold text-fg mb-2">Produktkategorien verwalten</h2>
             <p className="text-sm text-fg-muted">
-              Definieren Sie Kategorien für Produkte und Dienstleistungen. Diese erscheinen als Dropdown bei der Produkterfassung.
+              Kategorien für Leistungen und Produkte. Sie erscheinen als Auswahl in der Leistungsmaske.
             </p>
           </div>
 
@@ -1269,7 +1269,7 @@ export default function Settings({ section }: { section: TabType }) {
             <div className="text-center py-8 text-fg-muted">
               <Package size={48} className="mx-auto mb-4 opacity-50" />
               <p>Keine Produktkategorien vorhanden.</p>
-              <p className="text-sm">Fügen Sie oben Ihre erste Kategorie hinzu.</p>
+              <p className="text-sm">Leg oben die erste Kategorie an.</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -1354,7 +1354,7 @@ export default function Settings({ section }: { section: TabType }) {
           <div className="mb-6">
             <h2 className="text-lg font-semibold text-fg mb-2">Buchungskategorien verwalten</h2>
             <p className="text-sm text-fg-muted">
-              Definieren Sie Kategorien für Einnahmen und Ausgaben. Diese erscheinen als Dropdown bei der Buchungserfassung.
+              Kategorien für Einnahmen und Ausgaben, mit Konto nach Kontenrahmen KMU. Sie erscheinen als Auswahl in der Buchungsmaske.
             </p>
           </div>
 
@@ -1438,7 +1438,7 @@ export default function Settings({ section }: { section: TabType }) {
             <div className="text-center py-8 text-fg-muted">
               <Tags size={48} className="mx-auto mb-4 opacity-50" />
               <p>Keine Kategorien gefunden.</p>
-              <p className="text-sm">Fügen Sie oben Ihre erste Kategorie hinzu.</p>
+              <p className="text-sm">Leg oben die erste Kategorie an.</p>
             </div>
           ) : (
             <div className="space-y-2">

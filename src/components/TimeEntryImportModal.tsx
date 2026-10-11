@@ -236,7 +236,7 @@ export default function TimeEntryImportModal({
       <div className="space-y-4">
         {/* Info Text */}
         <p className="text-sm text-fg-muted">
-          Wählen Sie die Zeiteinträge aus, die Sie in diese Rechnung importieren möchten.
+          Wähl die Zeiten, die auf diese Rechnung sollen.
           Nur verrechenbare Einträge ohne zugeordnete Rechnung werden angezeigt.
         </p>
 
@@ -258,7 +258,7 @@ export default function TimeEntryImportModal({
         ) : groupedEntries.length === 0 ? (
           <div className="text-center py-12 text-fg-muted">
             <Clock size={48} className="mx-auto mb-4 opacity-50" />
-            <p>Keine offenen Zeiteinträge für diesen Kunden gefunden.</p>
+            <p>Keine offenen Zeiten für diese Firma.</p>
             <p className="text-sm mt-2">
               Alle verrechenbaren Zeiten wurden bereits einer Rechnung zugeordnet.
             </p>
