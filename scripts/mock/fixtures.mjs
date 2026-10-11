@@ -145,4 +145,12 @@ export const fixtures = {
     locked_at: null, snapshot_hash: null, created_at: '2026-10-01T00:00:00Z', updated_at: '2026-10-01T00:00:00Z',
   }],
   year_end_closing_log: [],
+  company_settings: [{ company_id: C1, weekly_hours_target: 25, ahv_rate: 10, tax_rate: 15, min_reserve: 5000, vat_threshold: 100000, concentration_warn: 50, concentration_alert: 70, default_hourly_rate: 130, payment_terms_days: 30, updated_at: '2026-10-01T00:00:00Z' }],
+  company_revenue_targets: [{ company_id: C1, year: 2026, revenue_target: 30000 }],
+  bank_balances: [{ id: id('b', 1), company_id: C1, date: '2026-09-30', amount: 12450.35, account_label: 'Geschäftskonto', note: null, created_at: '2026-09-30T18:00:00Z' }],
+  deadlines: [
+    { id: id('d', 1), company_id: C1, title: 'AHV-Akontozahlung Q4', due_date: '2026-10-20', recurrence: 'quartalsweise', done_at: null, note: null, created_at: '2026-01-01T00:00:00Z' },
+    { id: id('d', 2), company_id: C1, title: 'Steuererklärung 2026', due_date: '2027-03-31', recurrence: 'jaehrlich', done_at: null, note: null, created_at: '2026-01-01T00:00:00Z' },
+  ],
+  notes: [],
 };

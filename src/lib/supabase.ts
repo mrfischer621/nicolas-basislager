@@ -162,7 +162,14 @@ export interface Invoice {
   // Discount system (Task 3.2)
   discount_type: 'percent' | 'fixed';
   discount_value: number;
+  // UX-Struktur (Migration 20261011170000)
+  is_recurring_revenue?: boolean;
+  sent_at?: string | null;
+  /** 'erfasst' = echtes Datum, 'faelligkeit' = vom Faelligkeitsdatum uebernommen */
+  paid_at_source?: PaidAtSource | null;
 }
+
+export type PaidAtSource = 'erfasst' | 'faelligkeit';
 
 export interface InvoiceItem {
   id: string;
@@ -203,6 +210,7 @@ export interface Quote {
   // Per-quote text overrides (migration: 20260223_quotes_intro_outro.sql)
   intro_text?: string | null;
   outro_text?: string | null;
+  sent_at?: string | null;
 }
 
 export interface QuoteItem {
@@ -234,7 +242,12 @@ export interface Transaction {
   created_at: string;
   /** Lieferant (Ausgabe) bzw. Zahler (Einnahme), Freitext. Migration 20261011120100 */
   counterparty?: string | null;
+  /** Wiederkehrende Ausgabe (Fixkosten). Migration 20261011170000 */
+  is_recurring?: boolean;
+  recurrence_interval?: RecurrenceInterval | null;
 }
+
+export type RecurrenceInterval = 'monatlich' | 'quartalsweise' | 'jaehrlich';
 
 export interface Expense {
   id: string;
@@ -375,7 +388,13 @@ export interface PipelineStage {
   color: string;
   created_at: string;
   updated_at: string;
+  /** Abschlusswahrscheinlichkeit in Prozent (gewichtete Pipeline) */
+  probability?: number | null;
+  is_won?: boolean;
 }
+
+export type OpportunityKind = 'lead' | 'deal';
+export type LeadStatus = 'neu' | 'kontaktiert' | 'kein_interesse';
 
 export interface Opportunity {
   id: string;
@@ -391,6 +410,65 @@ export interface Opportunity {
   is_lost: boolean;
   created_at: string;
   updated_at: string;
+  /** Lead (noch nicht qualifiziert) oder Deal. Migration 20261011170000 */
+  kind?: OpportunityKind;
+  lead_status?: LeadStatus | null;
+  source?: string | null;
+}
+
+// UX-Struktur (Migration 20261011170000)
+export interface CompanySettings {
+  company_id: string;
+  weekly_hours_target: number | null;
+  ahv_rate: number;
+  tax_rate: number | null;
+  min_reserve: number | null;
+  vat_threshold: number;
+  concentration_warn: number;
+  concentration_alert: number;
+  default_hourly_rate: number | null;
+  payment_terms_days: number;
+  updated_at: string;
+}
+
+export interface RevenueTarget {
+  company_id: string;
+  year: number;
+  revenue_target: number;
+}
+
+export interface BankBalance {
+  id: string;
+  company_id: string;
+  date: string;
+  amount: number;
+  account_label: string;
+  note: string | null;
+  created_at: string;
+}
+
+export type DeadlineRecurrence = 'einmalig' | 'monatlich' | 'quartalsweise' | 'jaehrlich';
+
+export interface Deadline {
+  id: string;
+  company_id: string;
+  title: string;
+  due_date: string;
+  recurrence: DeadlineRecurrence;
+  done_at: string | null;
+  note: string | null;
+  created_at: string;
+}
+
+export interface Note {
+  id: string;
+  company_id: string;
+  customer_id: string | null;
+  opportunity_id: string | null;
+  project_id: string | null;
+  body: string;
+  created_by: string | null;
+  created_at: string;
 }
 
 export interface Database {
