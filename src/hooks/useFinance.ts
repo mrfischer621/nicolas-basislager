@@ -52,3 +52,22 @@ export function useInvalidateFinance() {
   const queryClient = useQueryClient();
   return () => queryClient.invalidateQueries({ queryKey: ['finance'] });
 }
+
+/** Abgeschlossene (gesperrte) Geschaeftsjahre der aktiven Firma. */
+export function useLockedYears() {
+  const { selectedCompany } = useCompany();
+  const companyId = selectedCompany?.id;
+  return useQuery({
+    queryKey: ['locked-years', companyId ?? ''],
+    enabled: !!companyId,
+    queryFn: async (): Promise<number[]> => {
+      const { data, error } = await supabase
+        .from('year_end_closings')
+        .select('year')
+        .eq('company_id', companyId!)
+        .eq('status', 'locked');
+      if (error) throw error;
+      return (data ?? []).map((r) => r.year as number);
+    },
+  });
+}

@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import toast from 'react-hot-toast';
 import { useSearchParams } from 'react-router-dom';
 import { Plus, Filter } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -7,7 +8,7 @@ import TransactionForm from '../components/TransactionForm';
 import TransactionTable from '../components/TransactionTable';
 import Modal from '../components/Modal';
 import { useCompany } from '../context/CompanyContext';
-import { useFinanceEntries, useInvalidateFinance } from '../hooks/useFinance';
+import { useFinanceEntries, useInvalidateFinance, useLockedYears } from '../hooks/useFinance';
 import { presetRange, type FinanceEntry } from '../utils/financeAggregation';
 import PaidWithoutDateNotice from '../components/PaidWithoutDateNotice';
 import { distinctCounterparties } from '../utils/transactionCategories';
@@ -59,6 +60,10 @@ export default function Buchungen() {
   // Liste aus derselben Aggregation wie Dashboard, Auswertung und Jahresabschluss
   const finance = useFinanceEntries();
   const invalidateFinance = useInvalidateFinance();
+  const { data: lockedYears = [] } = useLockedYears();
+  const lockedMessage = (date: string) =>
+    `Das Jahr ${date.slice(0, 4)} ist abgeschlossen. Buchungen darin können nicht erfasst, geändert oder gelöscht werden.`;
+  const isLockedDate = (date: string | undefined) => !!date && lockedYears.includes(Number(date.slice(0, 4)));
   const transactions = useMemo<Transaction[]>(
     () =>
       selectedCompany
@@ -146,6 +151,11 @@ export default function Buchungen() {
 
   const handleSubmit = async (data: Partial<Transaction>) => {
     if (!selectedCompany) return;
+    if (isLockedDate(data.date)) {
+      toast.error(lockedMessage(data.date!));
+      // Formular bleibt offen, nichts geht verloren
+      throw new Error('locked');
+    }
 
     try {
       if (editingTransaction) {
@@ -170,7 +180,10 @@ export default function Buchungen() {
       await invalidateFinance();
     } catch (err) {
       console.error('Error saving transaction:', err);
-      setError('Fehler beim Speichern der Buchung');
+      const message = err && typeof err === 'object' && 'message' in err ? String(err.message) : '';
+      toast.error(message.includes('abgeschlossen') ? message : 'Fehler beim Speichern der Buchung');
+      // weiterwerfen, damit das Formular offen bleibt und nichts verloren geht
+      throw err;
     }
   };
 
@@ -178,6 +191,10 @@ export default function Buchungen() {
     // Don't allow editing invoice-based transactions
     if (transaction.id.startsWith('invoice-')) {
       setError('Rechnungen können nicht als Buchung bearbeitet werden. Bitte bearbeiten Sie die Rechnung im Rechnungs-Modul.');
+      return;
+    }
+    if (isLockedDate(transaction.date)) {
+      setError(lockedMessage(transaction.date));
       return;
     }
     setEditingTransaction(transaction);
@@ -189,6 +206,12 @@ export default function Buchungen() {
       // Don't allow deleting invoice-based transactions
       if (id.startsWith('invoice-')) {
         setError('Rechnungen können nicht hier gelöscht werden. Bitte löschen Sie die Rechnung im Rechnungs-Modul.');
+        return;
+      }
+
+      const target = transactions.find((t) => t.id === id);
+      if (target && isLockedDate(target.date)) {
+        setError(lockedMessage(target.date));
         return;
       }
 

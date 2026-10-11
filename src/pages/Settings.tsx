@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import hotToast from 'react-hot-toast';
 import { uploadCompanyLogo, validateLogoFile } from '../utils/logoUpload';
 import { useConfirm } from '../context/ConfirmProvider';
@@ -37,12 +38,17 @@ interface Toast {
 }
 
 type TabType = 'company' | 'profile' | 'templates' | 'pipeline' | 'categories' | 'product_categories';
+const TAB_IDS: TabType[] = ['company', 'profile', 'templates', 'pipeline', 'categories', 'product_categories'];
 
 export default function Settings() {
   const confirmDialog = useConfirm();
   const { selectedCompany, refreshCompanies } = useCompany();
   const { user, profile } = useAuth();
-  const [activeTab, setActiveTab] = useState<TabType>('company');
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState<TabType>(() => {
+    const tab = searchParams.get('tab');
+    return tab && TAB_IDS.includes(tab as TabType) ? (tab as TabType) : 'company';
+  });
 
   // Company settings state
   const [companyFormData, setCompanyFormData] = useState<CompanyFormData>({
@@ -124,6 +130,8 @@ export default function Settings() {
   const [newCategoryType, setNewCategoryType] = useState<CategoryType>('expense');
   const [newCategoryColor, setNewCategoryColor] = useState('#6B7280');
   const [newCategoryTaxRelevant, setNewCategoryTaxRelevant] = useState(true);
+  const [newCategoryAccount, setNewCategoryAccount] = useState('');
+  const [editCategoryAccount, setEditCategoryAccount] = useState('');
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
   const [editCategoryName, setEditCategoryName] = useState('');
   const [editCategoryColor, setEditCategoryColor] = useState('');
@@ -270,6 +278,7 @@ export default function Settings() {
           type: newCategoryType,
           color: newCategoryColor,
           is_tax_relevant: newCategoryTaxRelevant,
+          account_number: newCategoryAccount.trim() || null,
           sort_order: maxSortOrder + 1,
         })
         .select()
@@ -281,6 +290,7 @@ export default function Settings() {
       setNewCategoryName('');
       setNewCategoryColor('#6B7280');
       setNewCategoryTaxRelevant(true);
+      setNewCategoryAccount('');
       showToast('success', 'Kategorie hinzugefügt.');
     } catch (err) {
       console.error('Error adding category:', err);
@@ -300,6 +310,7 @@ export default function Settings() {
           name: editCategoryName.trim(),
           color: editCategoryColor,
           is_tax_relevant: editCategoryTaxRelevant,
+          account_number: editCategoryAccount.trim() || null,
         })
         .eq('id', categoryId);
 
@@ -307,7 +318,7 @@ export default function Settings() {
 
       setCategories(categories.map(c =>
         c.id === categoryId
-          ? { ...c, name: editCategoryName.trim(), color: editCategoryColor, is_tax_relevant: editCategoryTaxRelevant }
+          ? { ...c, name: editCategoryName.trim(), color: editCategoryColor, is_tax_relevant: editCategoryTaxRelevant, account_number: editCategoryAccount.trim() || null }
           : c
       ));
       setEditingCategoryId(null);
@@ -344,6 +355,7 @@ export default function Settings() {
     setEditCategoryName(category.name);
     setEditCategoryColor(category.color);
     setEditCategoryTaxRelevant(category.is_tax_relevant);
+    setEditCategoryAccount(category.account_number ?? '');
   };
 
   const cancelEditCategory = () => {
@@ -1698,6 +1710,15 @@ export default function Settings() {
               <option value="income">Einnahme</option>
             </select>
             <input
+              type="text"
+              inputMode="numeric"
+              value={newCategoryAccount}
+              onChange={(e) => setNewCategoryAccount(e.target.value)}
+              placeholder="Konto (z.B. 6570)"
+              aria-label="Kontonummer nach KMU-Kontenrahmen"
+              className="w-40 px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition bg-white"
+            />
+            <input
               type="color"
               value={newCategoryColor}
               onChange={(e) => setNewCategoryColor(e.target.value)}
@@ -1764,6 +1785,15 @@ export default function Settings() {
                           className="flex-1 px-3 py-1 border border-gray-300 rounded focus:border-brand focus:ring-1 focus:ring-brand/20 outline-none"
                           autoFocus
                         />
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          value={editCategoryAccount}
+                          onChange={(e) => setEditCategoryAccount(e.target.value)}
+                          placeholder="Konto"
+                          aria-label={`Kontonummer für ${category.name}`}
+                          className="w-24 px-3 py-1 border border-gray-300 rounded focus:border-brand focus:ring-1 focus:ring-brand/20 outline-none tabular-nums"
+                        />
                         <label className="flex items-center gap-2 px-2 cursor-pointer">
                           <input
                             type="checkbox"
@@ -1798,6 +1828,9 @@ export default function Settings() {
                           className="w-4 h-4 rounded-full flex-shrink-0"
                           style={{ backgroundColor: category.color }}
                         />
+                        <span className="w-12 text-sm text-gray-600 tabular-nums" title="Konto nach KMU-Kontenrahmen">
+                          {category.account_number || '–'}
+                        </span>
                         <span className="font-medium text-gray-900">{category.name}</span>
                         <span className={`text-xs px-2 py-0.5 rounded-full ${
                           category.type === 'income'

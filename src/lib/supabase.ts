@@ -284,6 +284,8 @@ export interface Category {
   is_tax_relevant: boolean;
   sort_order: number;
   is_active: boolean;
+  /** Konto nach Schweizer Kontenrahmen KMU (Migration 20261011120300) */
+  account_number?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -313,10 +315,33 @@ export interface PrivateShare {
   amount: number;
 }
 
+/** Position der Vermoegenslage (Bank, Kasse, Kreditor), von Hand erfasst */
+export interface BalanceItem {
+  label: string;
+  amount: number;
+}
+
 export interface YearEndClosingData {
   assets: Asset[];
   private_shares: PrivateShare[];
   social_security_provision: number;
+  /** Fluessige Mittel per 31.12. (Bank, Post, Kasse). Erweiterung Okt. 2026 */
+  liquid_assets?: BalanceItem[];
+  /** Kreditoren / offene Schulden per 31.12. Erweiterung Okt. 2026 */
+  creditors?: BalanceItem[];
+}
+
+/** Unveraenderbares Protokoll von Sperren und Entsperren (Migration 20261011120400) */
+export interface YearEndClosingLog {
+  id: string;
+  closing_id: string;
+  company_id: string;
+  year: number;
+  action: 'lock' | 'unlock';
+  hash: string;
+  reason: string | null;
+  user_id: string | null;
+  created_at: string;
 }
 
 export interface YearEndClosing {
@@ -327,6 +352,8 @@ export interface YearEndClosing {
   data: YearEndClosingData;
   final_profit: number;
   locked_at: string | null;
+  /** SHA-256 beim Sperren (Migration 20261011120400) */
+  snapshot_hash?: string | null;
   created_at: string;
   updated_at: string;
 }
