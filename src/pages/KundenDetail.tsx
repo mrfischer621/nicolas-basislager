@@ -320,14 +320,14 @@ export default function KundenDetail() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-content-heading">{customer.name}</h1>
+          <h1 className="page-title">{customer.name}</h1>
           {customer.contact_person && (
-            <p className="text-content-secondary mt-1">{customer.contact_person}</p>
+            <p className="mt-2 text-sm text-fg-muted">{customer.contact_person}</p>
           )}
         </div>
         <button
           onClick={() => setIsEditModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-brand text-accent-fg rounded-lg hover:bg-brand-dark transition"
+          className="btn-cta"
         >
           <Pencil size={18} />
           Bearbeiten
@@ -364,7 +364,7 @@ export default function KundenDetail() {
       {activeTab === 'overview' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Contact Info */}
-          <div className="bg-surface rounded-lg shadow-sm p-6">
+          <div className="card p-6">
             <h3 className="font-semibold text-content-heading mb-4">Kontaktdaten</h3>
             <div className="space-y-3">
               {customer.email && (
@@ -395,7 +395,7 @@ export default function KundenDetail() {
           </div>
 
           {/* Address */}
-          <div className="bg-surface rounded-lg shadow-sm p-6">
+          <div className="card p-6">
             <h3 className="font-semibold text-content-heading mb-4">Adresse</h3>
             <div className="flex items-start gap-3 text-content-secondary">
               <MapPin size={18} className="text-content-tertiary mt-0.5" />
@@ -412,7 +412,7 @@ export default function KundenDetail() {
           </div>
 
           {/* Quick Stats */}
-          <div className="bg-surface rounded-lg shadow-sm p-6">
+          <div className="card p-6">
             <h3 className="font-semibold text-content-heading mb-4">Statistiken</h3>
             <div className="grid grid-cols-3 gap-4">
               <div className="text-center">
@@ -432,7 +432,7 @@ export default function KundenDetail() {
 
           {/* Hourly Rate */}
           {customer.hourly_rate && (
-            <div className="bg-surface rounded-lg shadow-sm p-6">
+            <div className="card p-6">
               <h3 className="font-semibold text-content-heading mb-4">Konditionen</h3>
               <div className="flex items-center gap-3">
                 <Building2 size={18} className="text-content-tertiary" />
@@ -450,7 +450,7 @@ export default function KundenDetail() {
           <div className="flex justify-end">
             <button
               onClick={() => openContactModal()}
-              className="flex items-center gap-2 px-4 py-2 bg-brand text-accent-fg rounded-lg hover:bg-brand-dark transition"
+              className="btn-cta"
             >
               <Plus size={18} />
               Neuer Kontakt
@@ -458,11 +458,11 @@ export default function KundenDetail() {
           </div>
 
           {contacts.length === 0 ? (
-            <div className="bg-surface rounded-lg shadow-sm p-6 text-center text-content-tertiary">
+            <div className="card p-6 text-center text-content-tertiary">
               Noch keine Kontakte vorhanden.
             </div>
           ) : (
-            <div className="bg-surface rounded-lg shadow-sm overflow-hidden">
+            <div className="card overflow-hidden">
               <table className="w-full">
                 <thead className="bg-canvas border-b border-surface-border">
                   <tr>
@@ -520,7 +520,7 @@ export default function KundenDetail() {
           <div className="flex justify-end">
             <Link
               to={`/projekte?customerId=${customer.id}`}
-              className="flex items-center gap-2 px-4 py-2 bg-brand text-accent-fg rounded-lg hover:bg-brand-dark transition"
+              className="btn-cta"
             >
               <Briefcase size={18} />
               Zu Projekte
@@ -528,11 +528,11 @@ export default function KundenDetail() {
           </div>
 
           {projects.length === 0 ? (
-            <div className="bg-surface rounded-lg shadow-sm p-6 text-center text-content-tertiary">
+            <div className="card p-6 text-center text-content-tertiary">
               Noch keine Projekte vorhanden.
             </div>
           ) : (
-            <div className="bg-surface rounded-lg shadow-sm overflow-hidden">
+            <div className="card overflow-hidden">
               <table className="w-full">
                 <thead className="bg-canvas border-b border-surface-border">
                   <tr>
@@ -567,7 +567,7 @@ export default function KundenDetail() {
           <div className="flex justify-end">
             <Link
               to={`/rechnungen?customerId=${customer.id}`}
-              className="flex items-center gap-2 px-4 py-2 bg-brand text-accent-fg rounded-lg hover:bg-brand-dark transition"
+              className="btn-cta"
             >
               <FileText size={18} />
               Zu Rechnungen
@@ -575,11 +575,11 @@ export default function KundenDetail() {
           </div>
 
           {invoices.length === 0 ? (
-            <div className="bg-surface rounded-lg shadow-sm p-6 text-center text-content-tertiary">
+            <div className="card p-6 text-center text-content-tertiary">
               Noch keine Rechnungen vorhanden.
             </div>
           ) : (
-            <div className="bg-surface rounded-lg shadow-sm overflow-hidden">
+            <div className="card overflow-hidden">
               <table className="w-full">
                 <thead className="bg-canvas border-b border-surface-border">
                   <tr>
