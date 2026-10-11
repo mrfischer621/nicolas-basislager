@@ -105,7 +105,7 @@ export default function CustomerTable({ customers, onEdit, onRowClick, onArchive
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-center" onClick={(e) => e.stopPropagation()}>
                     <Link
-                      to={`/kunden/${customer.id}/kontakte`}
+                      to={`/kontakte/firmen/${customer.id}?tab=personen`}
                       className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-sm text-fg-muted hover:bg-raised hover:text-brand transition"
                     >
                       <Users size={16} />

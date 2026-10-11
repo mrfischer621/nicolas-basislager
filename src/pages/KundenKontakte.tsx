@@ -211,7 +211,7 @@ export default function KundenKontakte() {
     return (
       <div className="space-y-6">
         <Link
-          to="/kunden"
+          to="/kontakte"
           className="inline-flex items-center gap-2 text-fg-muted hover:text-brand transition"
         >
           <ArrowLeft size={20} />
@@ -228,7 +228,7 @@ export default function KundenKontakte() {
     <div className="space-y-6">
       {/* Breadcrumb */}
       <Link
-        to="/kunden"
+        to="/kontakte"
         className="inline-flex items-center gap-2 text-fg-muted hover:text-brand transition"
       >
         <ArrowLeft size={20} />

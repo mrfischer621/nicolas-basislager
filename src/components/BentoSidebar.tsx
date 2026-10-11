@@ -1,20 +1,14 @@
-import { useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
   TrendingUp,
   Users,
   Briefcase,
-  Package,
   Clock,
   FileSpreadsheet,
   FileText,
   Receipt,
   BarChart,
-  CalendarCheck,
-  ChevronDown,
-  ChevronRight,
-  Contact,
   Settings,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
@@ -22,19 +16,28 @@ import { useCompany } from '../context/CompanyContext';
 import { useAuth } from '../context/AuthProvider';
 import { companyDisplayName } from '../utils/companyDisplay';
 
-// Navigation structure with groups
-const navigationGroups = [
+type NavItem = { name: string; path: string; icon: LucideIcon };
+
+// Navigation entlang des Geschaeftsablaufs (docs/ux-struktur/konzept.md, Abschnitt 3).
+// Gruppen mit nur einem Eintrag tragen keine Ueberschrift.
+const navigationGroups: { title: string | null; items: NavItem[] }[] = [
   {
-    title: 'Cockpit',
+    title: null,
     items: [
-      { name: 'Dashboard', path: '/', icon: LayoutDashboard },
+      { name: 'Cockpit', path: '/', icon: LayoutDashboard },
+      { name: 'Kontakte', path: '/kontakte', icon: Users },
     ],
   },
   {
-    title: 'Verkauf & Projekte',
+    title: 'Verkauf',
     items: [
-      { name: 'Sales Pipeline', path: '/sales', icon: TrendingUp },
-      { name: 'Offerten', path: '/angebote', icon: FileSpreadsheet },
+      { name: 'Pipeline', path: '/pipeline', icon: TrendingUp },
+      { name: 'Offerten', path: '/offerten', icon: FileSpreadsheet },
+    ],
+  },
+  {
+    title: 'Arbeit',
+    items: [
       { name: 'Projekte', path: '/projekte', icon: Briefcase },
       { name: 'Zeiterfassung', path: '/zeiterfassung', icon: Clock },
     ],
@@ -44,46 +47,15 @@ const navigationGroups = [
     items: [
       { name: 'Rechnungen', path: '/rechnungen', icon: FileText },
       { name: 'Buchungen', path: '/buchungen', icon: Receipt },
-      { name: 'Jahresabschluss', path: '/jahresabschluss', icon: CalendarCheck },
-      { name: 'Auswertungen', path: '/auswertungen', icon: BarChart },
-    ],
-  },
-  {
-    title: 'Stammdaten',
-    items: [
-      // Kunden with submenu handled separately
-      { name: 'Produkte', path: '/produkte', icon: Package },
+      { name: 'Berichte', path: '/berichte', icon: BarChart },
     ],
   },
 ];
 
-// Kunden submenu items
-const kundenSubItems = [
-  { name: 'Alle Kontakte', path: '/kontakte', icon: Contact },
-];
-
-/**
- * BentoSidebar - Swiss Modern Dark Navigation 2026
- *
- * Design:
- * - Dark background (slate-900)
- * - Light text (slate-400)
- * - High contrast active state (blue-600 + white)
- * - Subtle hover states
- * - Mobile: Overlay with backdrop
- */
+/** Seitenleiste: hell, aktive Seite mit hellblauer Linie links. */
 export function BentoSidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () => void }) {
   const { selectedCompany, isLoading } = useCompany();
   const { user } = useAuth();
-  const location = useLocation();
-
-  // Check if current path is in Kunden section
-  const isKundenSection = location.pathname === '/kunden' ||
-    location.pathname.startsWith('/kunden/') ||
-    location.pathname === '/kontakte';
-
-  // Local state for Kunden submenu (auto-expand if in section)
-  const [isKundenOpen, setIsKundenOpen] = useState(isKundenSection);
 
   // Close mobile menu on navigation
   const handleNavClick = () => {
@@ -91,7 +63,7 @@ export function BentoSidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: 
   };
 
   // Render regular nav item
-  const renderNavItem = (item: { name: string; path: string; icon: LucideIcon }) => (
+  const renderNavItem = (item: NavItem) => (
     <NavLink
       key={item.path}
       to={item.path}
@@ -117,98 +89,6 @@ export function BentoSidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: 
       <span>{item.name}</span>
     </NavLink>
   );
-
-  // Render Kunden section with submenu
-  const renderKundenSection = () => {
-    const isKundenActive = location.pathname === '/kunden' || location.pathname.startsWith('/kunden/');
-
-    return (
-      <div className="mb-0.5">
-        {/* Kunden main link with expand toggle */}
-        <div className="flex items-center">
-          <NavLink
-            to="/kunden"
-            end
-            onClick={handleNavClick}
-            className={({ isActive }) =>
-              `
-                flex-1 flex items-center gap-3
-                px-3 py-2.5
-                rounded-l-lg
-                text-sm font-medium
-                transition-colors duration-150
-                ${
-                  isActive
-                    ? 'bg-accent-subtle text-fg font-semibold shadow-[inset_4px_0_0_rgb(var(--bw-cta))]'
-                    : 'text-fg-muted hover:text-fg hover:bg-raised'
-                }
-              `.trim().replace(/\s+/g, ' ')
-            }
-          >
-            <Users size={18} strokeWidth={1.5} aria-hidden="true" />
-            <span>Kunden</span>
-          </NavLink>
-          <button
-            type="button"
-            onClick={() => setIsKundenOpen(!isKundenOpen)}
-            aria-expanded={isKundenOpen}
-            aria-label={isKundenOpen ? 'Untermenü Kunden schliessen' : 'Untermenü Kunden öffnen'}
-            className={`
-              px-2 py-2.5
-              rounded-r-lg
-              transition-colors duration-150
-              ${
-                isKundenActive && !isKundenOpen
-                  ? 'bg-accent-subtle text-fg'
-                  : 'text-fg-muted hover:text-fg hover:bg-raised'
-              }
-            `.trim().replace(/\s+/g, ' ')}
-          >
-            {isKundenOpen ? (
-              <ChevronDown size={16} strokeWidth={1.5} aria-hidden="true" />
-            ) : (
-              <ChevronRight size={16} strokeWidth={1.5} aria-hidden="true" />
-            )}
-          </button>
-        </div>
-
-        {/* Submenu items */}
-        {isKundenOpen && (
-          <div className="ml-4 mt-1 space-y-0.5">
-            {kundenSubItems.map((subItem) => (
-              <NavLink
-                key={subItem.path}
-                to={subItem.path}
-                end
-                onClick={handleNavClick}
-                className={({ isActive }) =>
-                  `
-                    flex items-center gap-2.5
-                    px-3 py-2
-                    rounded-lg
-                    text-sm
-                    transition-colors duration-150
-                    ${
-                      isActive
-                        ? 'bg-accent-subtle text-fg font-semibold shadow-[inset_4px_0_0_rgb(var(--bw-cta))]'
-                        : 'text-fg-muted hover:text-fg hover:bg-raised'
-                    }
-                  `.trim().replace(/\s+/g, ' ')
-                }
-              >
-                {subItem.icon ? (
-                  <subItem.icon size={16} strokeWidth={1.5} aria-hidden="true" />
-                ) : (
-                  <Users size={16} strokeWidth={1.5} aria-hidden="true" />
-                )}
-                <span>{subItem.name}</span>
-              </NavLink>
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  };
 
   return (
     <>
@@ -245,22 +125,16 @@ export function BentoSidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: 
         <nav aria-label="Hauptnavigation" className="px-3 py-4 flex-1 overflow-y-auto">
           {/* Render navigation groups */}
           {navigationGroups.map((group, groupIndex) => (
-            <div key={group.title}>
-              {/* Group Title */}
-              <div className="px-3 mb-2 mt-5 first:mt-0">
-                <h2 className="font-display text-[11px] font-extrabold uppercase tracking-caps text-fg-muted">
-                  {group.title}
-                </h2>
-              </div>
+            <div key={group.title ?? groupIndex}>
+              {group.title && (
+                <div className="px-3 mb-2">
+                  <h2 className="font-display text-[11px] font-extrabold uppercase tracking-caps text-fg-muted">
+                    {group.title}
+                  </h2>
+                </div>
+              )}
 
-              {/* Group Items */}
-              <div className="space-y-0.5">
-                {/* Kunden section in Stammdaten group */}
-                {group.title === 'Stammdaten' && renderKundenSection()}
-
-                {/* Regular items */}
-                {group.items.map(renderNavItem)}
-              </div>
+              <div className="space-y-0.5">{group.items.map(renderNavItem)}</div>
 
               {/* Divider after each group except last */}
               {groupIndex < navigationGroups.length - 1 && (
@@ -272,13 +146,8 @@ export function BentoSidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: 
 
         {/* System Section - Fixed at bottom */}
         <div className="px-3 pb-4 border-t border-line pt-4">
-          <div className="px-3 mb-2">
-            <h2 className="font-display text-[11px] font-extrabold uppercase tracking-caps text-fg-muted">
-              System
-            </h2>
-          </div>
           <NavLink
-            to="/settings"
+            to="/einstellungen"
             onClick={handleNavClick}
             className={({ isActive }) =>
               `

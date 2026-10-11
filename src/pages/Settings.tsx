@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { SETTINGS_TAB_TO_SECTION } from '../routes/legacy';
 import hotToast from 'react-hot-toast';
 import { uploadCompanyLogo, validateLogoFile } from '../utils/logoUpload';
 import { getThemePreference, setThemePreference, type ThemePreference } from '../utils/theme';
@@ -40,18 +41,18 @@ interface Toast {
 }
 
 type TabType = 'company' | 'profile' | 'templates' | 'pipeline' | 'categories' | 'product_categories';
-const TAB_IDS: TabType[] = ['company', 'profile', 'templates', 'pipeline', 'categories', 'product_categories'];
 
 export default function Settings() {
   const confirmDialog = useConfirm();
   const { selectedCompany, refreshCompanies } = useCompany();
   const { user, profile } = useAuth();
-  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { bereich } = useParams();
   const [themePref, setThemePref] = useState<ThemePreference>(getThemePreference);
-  const [activeTab, setActiveTab] = useState<TabType>(() => {
-    const tab = searchParams.get('tab');
-    return tab && TAB_IDS.includes(tab as TabType) ? (tab as TabType) : 'company';
-  });
+  // Bereich steht in der URL (/einstellungen/<bereich>), siehe routes/legacy.ts
+  const activeTab: TabType =
+    (Object.entries(SETTINGS_TAB_TO_SECTION).find(([, section]) => section === bereich)?.[0] as TabType | undefined) ?? 'company';
+  const setActiveTab = (tab: TabType) => navigate(`/einstellungen/${SETTINGS_TAB_TO_SECTION[tab]}`);
 
   // Company settings state
   const [companyFormData, setCompanyFormData] = useState<CompanyFormData>({

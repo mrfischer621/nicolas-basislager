@@ -608,7 +608,7 @@ export default function Jahresabschluss() {
             )}
             {c.categoriesWithoutAccount.length > 0 && (
               <CheckItem level="hint" title={`Kategorien ohne Kontonummer: ${c.categoriesWithoutAccount.join(', ')}`}>
-                <Link className="underline" to="/settings?tab=categories">
+                <Link className="underline" to="/einstellungen/kategorien">
                   In den Einstellungen nachtragen
                 </Link>
               </CheckItem>

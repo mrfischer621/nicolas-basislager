@@ -118,7 +118,7 @@ export function useGlobalSearch(query: string) {
             type: 'customer' as const,
             title: c.name as string,
             subtitle: (c.contact_person || c.email || undefined) as string | undefined,
-            route: `/kunden/${c.id}`,
+            route: `/kontakte/firmen/${c.id}`,
           })),
           projects: (projectsResult.data || []).map((p) => ({
             id: p.id as string,
@@ -132,7 +132,7 @@ export function useGlobalSearch(query: string) {
             type: 'product' as const,
             title: p.name as string,
             subtitle: `CHF ${Number(p.price).toFixed(2)}`,
-            route: `/produkte?id=${p.id}`,
+            route: `/einstellungen/leistungen?id=${p.id}`,
           })),
           invoices: (invoicesResult.data || []).map((i) => ({
             id: i.id as string,

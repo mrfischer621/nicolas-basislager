@@ -291,9 +291,9 @@ export default function KundenDetail() {
   if (!customer) {
     return (
       <div className="space-y-6">
-        <Link to="/kunden" className="inline-flex items-center gap-2 text-content-secondary hover:text-brand transition">
+        <Link to="/kontakte" className="inline-flex items-center gap-2 text-content-secondary hover:text-brand transition">
           <ArrowLeft size={20} />
-          Zurück zu Kunden
+          Zurück zu Kontakte
         </Link>
         <div className="bg-danger-subtle border border-danger-subtle text-danger-on-subtle px-4 py-3 rounded-lg">
           Kunde nicht gefunden.
@@ -312,9 +312,9 @@ export default function KundenDetail() {
   return (
     <div className="space-y-6">
       {/* Breadcrumb */}
-      <Link to="/kunden" className="inline-flex items-center gap-2 text-content-secondary hover:text-brand transition">
+      <Link to="/kontakte" className="inline-flex items-center gap-2 text-content-secondary hover:text-brand transition">
         <ArrowLeft size={20} />
-        Zurück zu Kunden
+        Zurück zu Kontakte
       </Link>
 
       {/* Header */}

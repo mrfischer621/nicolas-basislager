@@ -88,7 +88,7 @@ export default function Rechnungen() {
   }, [searchParams, invoices]);
 
   // Bezahlte Rechnungen ohne Zahlungsdatum: Filter aus dem Hinweis im Dashboard
-  const onlyMissingPaidDate = searchParams.get('filter') === 'ohne-zahlungsdatum';
+  const onlyMissingPaidDate = searchParams.get('ohne-zahlungsdatum') === '1';
   const visibleInvoices = onlyMissingPaidDate
     ? invoices.filter((i) => i.status === 'bezahlt' && !i.paid_at)
     : invoices;

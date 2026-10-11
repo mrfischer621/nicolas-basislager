@@ -138,7 +138,7 @@ export function BentoHeader({ onMenuClick }: { onMenuClick?: () => void }) {
 
   const handleSettingsClick = () => {
     setIsUserMenuOpen(false);
-    navigate('/settings');
+    navigate('/einstellungen');
   };
 
   const handleCreateCompanyClick = () => {

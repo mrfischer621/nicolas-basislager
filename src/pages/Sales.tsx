@@ -205,7 +205,7 @@ export default function Sales() {
   // Navigate to Angebote page to create a quote for this opportunity
   const handleCreateQuote = (opportunity: Opportunity) => {
     if (opportunity.existing_customer_id) {
-      navigate(`/angebote?customerId=${opportunity.existing_customer_id}&opportunityId=${opportunity.id}`);
+      navigate(`/offerten?customerId=${opportunity.existing_customer_id}&opportunityId=${opportunity.id}`);
     }
   };
 

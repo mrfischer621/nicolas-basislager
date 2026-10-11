@@ -190,7 +190,7 @@ export default function Kunden() {
   };
 
   const handleRowClick = (customer: Customer) => {
-    navigate(`/kunden/${customer.id}`);
+    navigate(`/kontakte/firmen/${customer.id}`);
   };
 
   const handleArchive = async (id: string) => {

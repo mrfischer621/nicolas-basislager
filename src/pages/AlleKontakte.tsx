@@ -249,7 +249,7 @@ export default function AlleKontakte() {
 
               {/* Customer link */}
               <Link
-                to={`/kunden/${contact.customer?.id}/kontakte`}
+                to={`/kontakte/firmen/${contact.customer?.id}?tab=personen`}
                 className="inline-flex items-center gap-1.5 text-sm text-brand hover:underline mb-3"
               >
                 <Building2 size={14} />
