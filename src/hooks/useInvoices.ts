@@ -32,7 +32,7 @@ export function useInvoiceSummary() {
     queryFn: async (): Promise<InvoiceSummaryRow[]> => {
       const { data, error } = await supabase
         .from('invoices')
-        .select('id, invoice_number, status, total, due_date, issue_date, paid_at, paid_at_source, customer_id')
+        .select('id, invoice_number, status, total, due_date, issue_date, paid_at, paid_at_source, customer_id, is_recurring_revenue')
         .eq('company_id', companyId);
       if (error) throw error;
       return (data ?? []) as InvoiceSummaryRow[];
