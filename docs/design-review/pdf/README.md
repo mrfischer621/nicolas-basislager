@@ -36,7 +36,7 @@ Geprüft gegen die **Implementation Guidelines QR-Rechnung 2.3** (gültig ab 21.
 - **Swiss QR Code:**
   - Vektorgrafik, exakt 46 × 46 mm bei x 67 / y 209 mm.
   - Fehlerkorrekturstufe M.
-  - Schweizerkreuz 7 × 7 mm mittig auf weisser Grundfläche.
+  - Schweizerkreuz 7 × 7 mm exakt mittig auf dem QR-Code. Die Form entspricht genau der offiziellen SIX-Logo-Datei, wie in der Referenzbibliothek SwissQRBill (Balken senkrecht x 8.3 / y 4, waagrecht x 4.4 / y 7.9 im Raster 19.8).
   - Ein automatischer Test misst die Lage im erzeugten PDF nach (`src/utils/qrBillLayout.test.ts`).
 - **Schrift nach Style Guide Seite 15:** nur Helvetica in Schwarz.
 

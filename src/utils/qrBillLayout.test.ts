@@ -52,19 +52,24 @@ describe('QR-Rechnung: Abmessungen im PDF', () => {
     expect(minY).toBeCloseTo(209, 1);
     expect(maxX - minX).toBeCloseTo(46, 1);
     expect(maxY - minY).toBeCloseTo(46, 1);
-    // Schweizerkreuz: weisse Balken exakt in der Mitte des QR-Codes (90 / 232 mm)
-    const cross = rects
-      .map(([x, y, w, h]) => {
-        const top = h < 0 ? y + h : y;
-        const height = Math.abs(h);
-        return { cx: (x + w / 2) / PT_PER_MM, cy: (pageH - (top + height / 2)) / PT_PER_MM, w: w / PT_PER_MM, h: height / PT_PER_MM };
-      })
-      .filter((r) => Math.abs(r.cx - 90) < 1 && Math.abs(r.cy - 232) < 1 && (r.w < 1.3 || r.h < 1.3) && Math.max(r.w, r.h) > 3.5);
-    expect(cross).toHaveLength(2);
-    for (const bar of cross) {
-      expect(bar.cx).toBeCloseTo(90, 3);
-      expect(bar.cy).toBeCloseTo(232, 3);
-    }
+    // Schweizerkreuz: Logo 7 x 7 mm exakt mittig auf dem QR-Code (90 / 232 mm),
+    // weisses Kreuz nach der offiziellen SIX-Datei (Raster 19.8 = 7 mm)
+    const u = 7 / 19.8;
+    const boxes = rects.map(([x, y, w, h]) => {
+      const top = h < 0 ? y + h : y;
+      const height = Math.abs(h);
+      return { x1: x / PT_PER_MM, y1: (pageH - (top + height)) / PT_PER_MM, w: w / PT_PER_MM, h: height / PT_PER_MM };
+    });
+    const logo = boxes.find((b) => Math.abs(b.w - 7) < 0.001 && Math.abs(b.h - 7) < 0.001);
+    expect(logo).toBeDefined();
+    expect(logo!.x1 + 3.5).toBeCloseTo(90, 3);
+    expect(logo!.y1 + 3.5).toBeCloseTo(232, 3);
+    const vertical = boxes.find((b) => Math.abs(b.w - 3.3 * u) < 0.001 && Math.abs(b.h - 11 * u) < 0.001);
+    const horizontal = boxes.find((b) => Math.abs(b.w - 11 * u) < 0.001 && Math.abs(b.h - 3.3 * u) < 0.001);
+    expect(vertical!.x1 - logo!.x1).toBeCloseTo(8.3 * u, 3);
+    expect(vertical!.y1 - logo!.y1).toBeCloseTo(4 * u, 3);
+    expect(horizontal!.x1 - logo!.x1).toBeCloseTo(4.4 * u, 3);
+    expect(horizontal!.y1 - logo!.y1).toBeCloseTo(7.9 * u, 3);
     // gedruckt wird nur, was im QR-Code steht: Faelligkeit in der Mitteilung
     expect(pdf).not.toContain('Fällig:');
   });
