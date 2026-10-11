@@ -19,7 +19,7 @@ import { MobileBar } from './MobileBar';
  * - Main content fills available height for Kanban-style pages
  */
 export default function BentoLayout() {
-  const { selectedCompany } = useCompany();
+  const { selectedCompany, isLoading: companyLoading } = useCompany();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -72,7 +72,14 @@ export default function BentoLayout() {
               {/* CRITICAL FIX: Key prop forces complete remount when company changes */}
               {/* Seiten werden erst bei Bedarf geladen (kleineres Haupt-Bundle) */}
               <Suspense fallback={<div className="skeleton h-64 w-full" aria-label="Seite wird geladen" />}>
-                <Outlet key={selectedCompany?.id || 'no-company'} />
+                {/* Erst nach dem Laden des Unternehmens rendern. Sonst baut der
+                    Wechsel des key die Seite gleich wieder neu auf, und einmalige
+                    URL-Parameter wie ?neu=1 sind dann schon verbraucht. */}
+                {companyLoading ? (
+                  <div className="skeleton h-64 w-full" role="status" aria-label="Seite wird geladen" />
+                ) : (
+                  <Outlet key={selectedCompany?.id || 'no-company'} />
+                )}
               </Suspense>
             </ErrorBoundary>
           </div>
