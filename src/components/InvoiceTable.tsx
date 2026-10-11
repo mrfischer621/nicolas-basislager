@@ -1,6 +1,10 @@
 import { useState } from 'react';
 import { Download, Trash2, Pencil, Eye } from 'lucide-react';
 import { zurichDay } from '../utils/financeAggregation';
+import { formatChfDisplay } from '../utils/money';
+import { EmptyState } from './ui';
+
+const dmy = (day: string) => `${day.slice(8, 10)}.${day.slice(5, 7)}.${day.slice(0, 4)}`;
 import { useConfirm } from '../context/ConfirmProvider';
 import type { Invoice, Customer } from '../lib/supabase';
 import { canEditInvoice, getEditBlockedReason } from '../utils/invoiceUtils';
@@ -49,10 +53,10 @@ function PaidDateInput({ invoice, onSave }: { invoice: Invoice; onSave: (invoice
 }
 
 const statusColors = {
-  entwurf: 'bg-raised text-fg',
-  versendet: 'bg-brand-light text-brand-darker',
-  bezahlt: 'bg-success-light text-success-dark',
-  überfällig: 'bg-danger-light text-danger-dark',
+  entwurf: 'badge-neutral',
+  versendet: 'badge-accent',
+  bezahlt: 'badge-success',
+  überfällig: 'badge-danger',
 };
 
 const statusLabels = {
@@ -77,67 +81,67 @@ export default function InvoiceTable({ invoices, customers, onDelete, onDownload
 
   if (invoices.length === 0) {
     return (
-      <div className="bg-surface rounded-lg shadow-sm p-6">
-        <p className="text-content-tertiary text-center">Keine Rechnungen vorhanden. Erstellen Sie die erste Rechnung.</p>
+      <div className="card">
+        <EmptyState title="Keine Rechnungen" text="Erstelle die erste Rechnung mit «Neue Rechnung»." />
       </div>
     );
   }
 
   return (
-    <div className="bg-surface rounded-lg shadow-sm overflow-hidden">
+    <div className="card overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-canvas border-b border-surface-border">
+        <table className="w-full text-sm">
+          <thead className="border-b border-line">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-content-tertiary uppercase tracking-wider">
+              <th scope="col" className="caps-sm whitespace-nowrap px-4 py-3 text-left">
                 Rechnungsnummer
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-content-tertiary uppercase tracking-wider">
+              <th scope="col" className="caps-sm whitespace-nowrap px-4 py-3 text-left">
                 Kunde
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-content-tertiary uppercase tracking-wider">
+              <th scope="col" className="caps-sm whitespace-nowrap px-4 py-3 text-left">
                 Rechnungsdatum
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-content-tertiary uppercase tracking-wider">
+              <th scope="col" className="caps-sm whitespace-nowrap px-4 py-3 text-left">
                 Fällig am
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-content-tertiary uppercase tracking-wider">
+              <th scope="col" className="caps-sm whitespace-nowrap px-4 py-3 text-right">
                 Gesamttotal
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-content-tertiary uppercase tracking-wider">
+              <th scope="col" className="caps-sm whitespace-nowrap px-4 py-3 text-center">
                 Status
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-content-tertiary uppercase tracking-wider">
+              <th scope="col" className="caps-sm whitespace-nowrap px-4 py-3 text-right">
                 Aktionen
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-line">
+          <tbody>
             {invoices.map((invoice) => (
-              <tr key={invoice.id} className="hover:bg-canvas transition">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-content-heading">{invoice.invoice_number}</div>
+              <tr key={invoice.id} className="border-b border-line last:border-b-0 hover:bg-canvas">
+                <td className="px-4 py-3 whitespace-nowrap">
+                  <div className="text-sm font-medium text-fg">{invoice.invoice_number}</div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-content-secondary">{getCustomerName(invoice.customer_id)}</div>
+                <td className="px-4 py-3 whitespace-nowrap">
+                  <div className="text-sm text-fg-muted">{getCustomerName(invoice.customer_id)}</div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-content-secondary">
-                    {new Date(invoice.issue_date).toLocaleDateString('de-CH')}
+                <td className="px-4 py-3 whitespace-nowrap">
+                  <div className="text-sm text-fg-muted">
+                    {dmy(invoice.issue_date)}
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-content-secondary">
-                    {invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('de-CH') : '-'}
+                <td className="px-4 py-3 whitespace-nowrap">
+                  <div className="text-sm text-fg-muted">
+                    {invoice.due_date ? dmy(invoice.due_date) : '–'}
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right">
-                  <div className="text-sm font-medium text-content-heading">
-                    CHF {invoice.total.toFixed(2)}
+                <td className="px-4 py-3 whitespace-nowrap text-right">
+                  <div className="text-sm font-medium text-fg">
+                    {formatChfDisplay(invoice.total)}
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-center">
-                  <span className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${statusColors[invoice.status]}`}>
+                <td className="px-4 py-3 whitespace-nowrap text-center">
+                  <span className={statusColors[invoice.status]}>
                     {statusLabels[invoice.status]}
                   </span>
                   {invoice.status === 'bezahlt' && !invoice.paid_at && (
@@ -147,12 +151,12 @@ export default function InvoiceTable({ invoices, customers, onDelete, onDownload
                     </>
                   )}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right">
-                  <div className="flex justify-end gap-2">
+                <td className="px-4 py-3 whitespace-nowrap text-right">
+                  <div className="flex justify-end gap-1">
                     <button
                       onClick={() => onEdit(invoice)}
                       disabled={!canEditInvoice(invoice.status)}
-                      className="p-2 text-content-secondary hover:bg-raised rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed"
+                      className="rounded-lg p-1.5 text-fg-muted transition hover:bg-raised hover:text-fg disabled:cursor-not-allowed disabled:opacity-30"
                       title={canEditInvoice(invoice.status) ? 'Bearbeiten' : getEditBlockedReason(invoice.status)}
                       aria-label={canEditInvoice(invoice.status) ? 'Bearbeiten' : getEditBlockedReason(invoice.status)}
                     >
@@ -160,7 +164,7 @@ export default function InvoiceTable({ invoices, customers, onDelete, onDownload
                     </button>
                     <button
                       onClick={() => onPreviewPDF(invoice)}
-                      className="p-2 text-brand hover:bg-brand-light rounded-lg transition"
+                      className="rounded-lg p-1.5 text-fg-muted transition hover:bg-raised hover:text-fg"
                       title="PDF Vorschau"
                       aria-label="PDF Vorschau"
                     >
@@ -168,7 +172,7 @@ export default function InvoiceTable({ invoices, customers, onDelete, onDownload
                     </button>
                     <button
                       onClick={() => onDownloadPDF(invoice)}
-                      className="p-2 text-brand hover:bg-canvas rounded-lg transition"
+                      className="rounded-lg p-1.5 text-fg-muted transition hover:bg-raised hover:text-fg"
                       title="PDF herunterladen"
                       aria-label="PDF herunterladen"
                     >
@@ -176,7 +180,7 @@ export default function InvoiceTable({ invoices, customers, onDelete, onDownload
                     </button>
                     <button
                       onClick={() => handleDelete(invoice.id, invoice.invoice_number)}
-                      className="p-2 text-danger hover:bg-danger-subtle rounded-lg transition"
+                      className="rounded-lg p-1.5 text-fg-muted transition hover:bg-danger-subtle hover:text-danger"
                       title="Löschen"
                       aria-label="Löschen"
                     >

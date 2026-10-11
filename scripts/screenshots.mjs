@@ -20,7 +20,17 @@ const routes = {
   auswertungen: '/auswertungen',
   einstellungen: '/settings',
   kategorien: '/settings?tab=categories',
+  'rechnung-maske': '/rechnungen',
+  kunden: '/kunden',
+  projekte: '/projekte',
+  produkte: '/produkte',
+  zeiterfassung: '/zeiterfassung',
+  offerten: '/angebote',
+  sales: '/sales',
+  kontakte: '/kontakte',
+  registrieren: '/register',
 };
+const openers = { 'buchung-maske': /Neue Buchung/i, 'rechnung-maske': /Neue Rechnung/i };
 fs.mkdirSync(dir, { recursive: true });
 const hasState = mock || fs.existsSync('.auth/state.json');
 const browser = await chromium.launch();
@@ -41,8 +51,8 @@ for (const name of pages) {
   const page = await context.newPage();
   await page.goto(base + routes[name], { waitUntil: 'networkidle' });
   await page.waitForTimeout(1200);
-  if (name === 'buchung-maske') {
-    await page.getByRole('button', { name: /Neue Buchung/i }).first().click();
+  if (openers[name]) {
+    await page.getByRole('button', { name: openers[name] }).first().click();
     await page.waitForTimeout(600);
   }
   const file = `${dir}/${name}-${theme}-${width}.png`;

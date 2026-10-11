@@ -331,10 +331,8 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
   };
 
   return (
-    <div className="bg-surface rounded-lg shadow-sm p-6">
-      <h2 className="text-xl font-semibold text-fg mb-4">
-        {isEditMode ? 'Rechnung bearbeiten' : 'Neue Rechnung'}
-      </h2>
+    <div>
+      {/* Titel steht im Modal der Seite (vorher doppelt) */}
 
       {/* Warning for editing sent/overdue invoices */}
       {showEditWarning && (
