@@ -18,9 +18,11 @@ interface TransactionFormProps {
   onCancel: () => void;
   customers: Customer[];
   projects: Project[];
+  /** Bereits erfasste Lieferanten/Zahler der Firma (fuer Vorschlaege) */
+  counterpartySuggestions?: string[];
 }
 
-export default function TransactionForm({ transaction, onSubmit, onCancel, customers, projects }: TransactionFormProps) {
+export default function TransactionForm({ transaction, onSubmit, onCancel, customers, projects, counterpartySuggestions = [] }: TransactionFormProps) {
   const { selectedCompany } = useCompany();
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -35,6 +37,7 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
   // zeigte das Feld eine falsche Kategorie und beim Speichern wurde NULL geschrieben.)
   const [categoryName, setCategoryName] = useState(transaction?.category || '');
   const [description, setDescription] = useState(transaction?.description || '');
+  const [counterparty, setCounterparty] = useState(transaction?.counterparty || '');
   const [customerId, setCustomerId] = useState(transaction?.customer_id || '');
   const [projectId, setProjectId] = useState(transaction?.project_id || '');
   const [tags, setTags] = useState<string[]>(transaction?.tags || []);
@@ -124,6 +127,7 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
         amount: parseFloat(amount),
         category: emptyToNull(categoryName),
         description: emptyToNull(description),
+        counterparty: emptyToNull(counterparty),
         customer_id: customerId || null,
         project_id: projectId || null,
         tags: tags.length > 0 ? tags : null,
@@ -135,6 +139,7 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
         setTransactionNumber('');
         setAmount('');
         setDescription('');
+        setCounterparty('');
         setCategoryName(defaultCategoryName(categories, activeTab));
         setCustomerId('');
         setProjectId('');
@@ -346,6 +351,28 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
                   )}
                 </select>
               </div>
+            </div>
+
+            {/* Lieferant (Ausgabe) bzw. Zahler (Einnahme) */}
+            <div>
+              <label htmlFor="transaction-counterparty" className="block text-sm font-medium text-gray-700 mb-1">
+                {activeTab === 'ausgabe' ? 'Lieferant' : 'Zahler'}
+              </label>
+              <input
+                id="transaction-counterparty"
+                type="text"
+                list="transaction-counterparty-suggestions"
+                autoComplete="off"
+                value={counterparty}
+                onChange={(e) => setCounterparty(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
+                placeholder={activeTab === 'ausgabe' ? 'z.B. Infomaniak' : 'z.B. Kunde AG'}
+              />
+              <datalist id="transaction-counterparty-suggestions">
+                {counterpartySuggestions.map((name) => (
+                  <option key={name} value={name} />
+                ))}
+              </datalist>
             </div>
 
             {/* Description */}

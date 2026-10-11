@@ -68,3 +68,33 @@ export function emptyToNull(value: string | null | undefined): string | null {
   const trimmed = (value ?? '').trim();
   return trimmed === '' ? null : trimmed;
 }
+
+/**
+ * Vorschlagsliste fuer Lieferant/Zahler: jeder Name nur einmal, Gross- und
+ * Kleinschreibung egal. Bei verschiedenen Schreibweisen gewinnt die
+ * haeufigste (bei Gleichstand die zuerst gesehene). Alphabetisch sortiert.
+ */
+export function distinctCounterparties(values: Array<string | null | undefined>): string[] {
+  const byKey = new Map<string, Map<string, number>>();
+  for (const raw of values) {
+    const value = (raw ?? '').trim();
+    if (!value) continue;
+    const key = value.toLocaleLowerCase('de-CH');
+    const spellings = byKey.get(key) ?? new Map<string, number>();
+    spellings.set(value, (spellings.get(value) ?? 0) + 1);
+    byKey.set(key, spellings);
+  }
+  return Array.from(byKey.values())
+    .map((spellings) => {
+      let best = '';
+      let bestCount = 0;
+      for (const [spelling, count] of spellings) {
+        if (count > bestCount) {
+          best = spelling;
+          bestCount = count;
+        }
+      }
+      return best;
+    })
+    .sort((a, b) => a.localeCompare(b, 'de-CH'));
+}

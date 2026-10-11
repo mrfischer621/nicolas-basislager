@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { Category } from '../lib/supabase';
-import { buildCategoryOptions, defaultCategoryName, emptyToNull } from './transactionCategories';
+import { buildCategoryOptions, defaultCategoryName, distinctCounterparties, emptyToNull } from './transactionCategories';
 
 const cat = (name: string, type: 'income' | 'expense', is_active = true, sort_order = 0): Category => ({
   id: `id-${name}`,
@@ -59,5 +59,13 @@ describe('emptyToNull', () => {
     expect(emptyToNull('   ')).toBeNull();
     expect(emptyToNull(undefined)).toBeNull();
     expect(emptyToNull(' Anthropic ')).toBe('Anthropic');
+  });
+});
+
+describe('distinctCounterparties', () => {
+  it('fasst Schreibweisen ohne Ruecksicht auf Gross/Klein zusammen', () => {
+    expect(
+      distinctCounterparties(['Anthropic', 'anthropic', 'Anthropic', ' Infomaniak ', null, '', 'Superflex'])
+    ).toEqual(['Anthropic', 'Infomaniak', 'Superflex']);
   });
 });

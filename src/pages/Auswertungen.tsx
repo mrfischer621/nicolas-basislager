@@ -136,6 +136,7 @@ export default function Auswertungen() {
       'Datum',
       'Beleg-Nr',
       'Kategorie',
+      'Lieferant / Zahler',
       'Steuerrelevant',
       'Beschreibung',
       'Betrag',
@@ -148,6 +149,7 @@ export default function Auswertungen() {
       `${t.date.slice(8, 10)}.${t.date.slice(5, 7)}.${t.date.slice(0, 4)}`,
       t.number || '',
       t.category || NO_CATEGORY,
+      (t.counterparty || '').replace(/"/g, '""'),
       (t.category ? categoryByName.get(t.category)?.is_tax_relevant ?? true : true) ? 'Ja' : 'Nein',
       (t.description || '').replace(/"/g, '""'), // Escape quotes
       t.amount.toFixed(2),

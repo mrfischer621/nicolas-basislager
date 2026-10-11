@@ -232,6 +232,8 @@ export interface Transaction {
   billable: boolean;
   transaction_number: string | null;
   created_at: string;
+  /** Lieferant (Ausgabe) bzw. Zahler (Einnahme), Freitext. Migration 20261011120100 */
+  counterparty?: string | null;
 }
 
 export interface Expense {

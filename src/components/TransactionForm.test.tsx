@@ -120,3 +120,28 @@ describe('TransactionForm Kategorie', () => {
     expect(select.value).toBe('');
   });
 });
+
+describe('TransactionForm Lieferant / Zahler', () => {
+  it('heisst bei Ausgaben "Lieferant", bei Einnahmen "Zahler" und wird gespeichert', async () => {
+    const { onSubmit } = renderForm({ ...a021, counterparty: 'Anthropic' });
+    await categorySelect();
+    const input = screen.getByLabelText('Lieferant') as HTMLInputElement;
+    expect(input.value).toBe('Anthropic');
+
+    fireEvent.change(input, { target: { value: '  Anthropic PBC ' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Speichern' }));
+    await waitFor(() => expect(onSubmit).toHaveBeenCalled());
+    expect(onSubmit.mock.calls[0][0].counterparty).toBe('Anthropic PBC');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Einnahme' }));
+    expect(screen.getByLabelText('Zahler')).toBeTruthy();
+  });
+
+  it('speichert ein leeres Feld als NULL', async () => {
+    const { onSubmit } = renderForm(a021);
+    await categorySelect();
+    fireEvent.click(screen.getByRole('button', { name: 'Speichern' }));
+    await waitFor(() => expect(onSubmit).toHaveBeenCalled());
+    expect(onSubmit.mock.calls[0][0].counterparty).toBeNull();
+  });
+});

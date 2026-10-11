@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { ChevronLeft, ChevronRight, Eye, MoreVertical, Paperclip } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import type { Transaction, Customer, Project } from '../lib/supabase';
+import { formatChfDisplay } from '../utils/money';
 
 const ITEMS_PER_PAGE = 10;
 
@@ -175,9 +176,12 @@ export default function TransactionTable({ transactions, customers, projects, on
   };
 
   const calculateTotal = () => {
-    return transactions.reduce((sum, t) => {
-      return t.type === 'einnahme' ? sum + t.amount : sum - t.amount;
+    // in Rappen summieren (wie die zentrale Aggregation), sonst Gleitkommafehler
+    const rappen = transactions.reduce((sum, t) => {
+      const r = Math.round(t.amount * 100);
+      return t.type === 'einnahme' ? sum + r : sum - r;
     }, 0);
+    return rappen / 100;
   };
 
   if (transactions.length === 0) {
@@ -208,6 +212,9 @@ export default function TransactionTable({ transactions, customers, projects, on
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Kategorie
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Lieferant / Zahler
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Kunde
@@ -265,6 +272,9 @@ export default function TransactionTable({ transactions, customers, projects, on
                         {transaction.category}
                       </span>
                     )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {transaction.counterparty || '-'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {getCustomerName(transaction.customer_id)}
@@ -358,10 +368,10 @@ export default function TransactionTable({ transactions, customers, projects, on
           {/* Total Summary */}
           <div className="flex justify-between items-center">
             <span className="text-sm font-medium text-gray-700">
-              Summe aller Buchungen:
+              Saldo der angezeigten Buchungen:
             </span>
             <span className={`text-lg font-bold ${calculateTotal() >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              CHF {calculateTotal().toFixed(2)}
+              {formatChfDisplay(calculateTotal())}
             </span>
           </div>
         </div>

@@ -10,6 +10,7 @@ import { useCompany } from '../context/CompanyContext';
 import { useFinanceEntries, useInvalidateFinance } from '../hooks/useFinance';
 import { presetRange, type FinanceEntry } from '../utils/financeAggregation';
 import PaidWithoutDateNotice from '../components/PaidWithoutDateNotice';
+import { distinctCounterparties } from '../utils/transactionCategories';
 
 /** Eintrag der zentralen Aggregation in die Zeilenform der Tabelle bringen. */
 function entryToTransaction(e: FinanceEntry, companyId: string): Transaction {
@@ -30,6 +31,7 @@ function entryToTransaction(e: FinanceEntry, companyId: string): Transaction {
     billable: e.source === 'invoice',
     transaction_number: e.number,
     created_at: '',
+    counterparty: e.counterparty,
   };
 }
 
@@ -46,6 +48,7 @@ export default function Buchungen() {
   // Filter states
   const [filterType, setFilterType] = useState<'all' | 'einnahme' | 'ausgabe'>('all');
   const [filterPeriod, setFilterPeriod] = useState<'30' | '90' | '365' | 'all'>('30');
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     if (selectedCompany) {
@@ -76,8 +79,24 @@ export default function Buchungen() {
       const range = presetRange(preset);
       filtered = filtered.filter((t) => t.date >= range.from && t.date <= range.to);
     }
+    const query = search.trim().toLocaleLowerCase('de-CH');
+    if (query) {
+      filtered = filtered.filter((t) =>
+        [t.description, t.counterparty, t.transaction_number, t.category]
+          .some((v) => v?.toLocaleLowerCase('de-CH').includes(query))
+      );
+    }
     return filtered;
-  }, [transactions, filterType, filterPeriod]);
+  }, [transactions, filterType, filterPeriod, search]);
+
+  // Vorschlaege fuer Lieferant/Zahler: nur echte Buchungen, keine Rechnungen
+  const counterpartySuggestions = useMemo(
+    () =>
+      distinctCounterparties(
+        (finance.data?.entries ?? []).filter((e) => e.source === 'transaction').map((e) => e.counterparty)
+      ),
+    [finance.data]
+  );
 
   // Handle query parameter for opening specific transaction
   useEffect(() => {
@@ -223,7 +242,7 @@ export default function Buchungen() {
 
       {/* Filters */}
       <div className="bg-white rounded-lg shadow-sm p-4">
-        <div className="flex gap-4 items-center">
+        <div className="flex flex-wrap gap-4 items-center">
           {/* Account Filter (Tabs) */}
           <div className="flex gap-2">
             <button
@@ -258,8 +277,21 @@ export default function Buchungen() {
             </button>
           </div>
 
+          {/* Suche: Text, Lieferant/Zahler, Beleg-Nr, Kategorie */}
+          <div className="ml-auto">
+            <label htmlFor="buchungen-suche" className="sr-only">Buchungen durchsuchen</label>
+            <input
+              id="buchungen-suche"
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Suchen (Text, Lieferant, Nr)"
+              className="w-64 px-3 py-2 border border-surface-border rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+            />
+          </div>
+
           {/* Period Filter */}
-          <div className="flex items-center gap-2 ml-auto">
+          <div className="flex items-center gap-2">
             <Filter className="w-4 h-4 text-content-tertiary" />
             <select
               value={filterPeriod}
@@ -304,6 +336,7 @@ export default function Buchungen() {
           onCancel={handleCloseModal}
           customers={customers}
           projects={projects}
+          counterpartySuggestions={counterpartySuggestions}
         />
       </Modal>
     </div>
