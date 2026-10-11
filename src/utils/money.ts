@@ -32,3 +32,17 @@ export function sumRappen(values: number[]): number {
 export function formatChf(value: number): string {
   return roundRappen(value).toFixed(2);
 }
+
+/**
+ * Betrag fuer die Anzeige im Schweizer Format: "CHF 1'234.50".
+ * (Intl 'de-CH' liefert je nach Browser einen typografischen Apostroph,
+ * darum wird hier fest formatiert.)
+ */
+export function formatChfDisplay(value: number, options: { decimals?: 0 | 2 } = {}): string {
+  const decimals = options.decimals ?? 2;
+  const rounded = decimals === 0 ? Math.round(value) : roundRappen(value);
+  const negative = rounded < 0;
+  const [int, frac] = Math.abs(rounded).toFixed(decimals).split('.');
+  const grouped = int.replace(/\B(?=(\d{3})+(?!\d))/g, "'");
+  return `CHF ${negative ? '-' : ''}${grouped}${frac ? `.${frac}` : ''}`;
+}

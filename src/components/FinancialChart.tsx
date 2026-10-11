@@ -8,6 +8,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
+import { formatChfDisplay } from '../utils/money';
 
 interface FinancialChartData {
   period: string;
@@ -21,14 +22,7 @@ interface FinancialChartProps {
   showLegend?: boolean;
 }
 
-const formatCurrency = (value: number): string => {
-  return new Intl.NumberFormat('de-CH', {
-    style: 'currency',
-    currency: 'CHF',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(value);
-};
+const formatCurrency = (value: number): string => formatChfDisplay(value, { decimals: 0 });
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {

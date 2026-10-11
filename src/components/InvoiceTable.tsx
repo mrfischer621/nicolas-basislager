@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { Download, Trash2, Pencil, Eye } from 'lucide-react';
+import { zurichDay } from '../utils/financeAggregation';
 import { useConfirm } from '../context/ConfirmProvider';
 import type { Invoice, Customer } from '../lib/supabase';
 import { canEditInvoice, getEditBlockedReason } from '../utils/invoiceUtils';
@@ -10,7 +12,41 @@ type InvoiceTableProps = {
   onDownloadPDF: (invoice: Invoice) => Promise<void>;
   onPreviewPDF: (invoice: Invoice) => Promise<void>;
   onEdit: (invoice: Invoice) => void;
+  /** Zahlungsdatum einer bereits bezahlten Rechnung nachtragen (nur paid_at). */
+  onSetPaidDate?: (invoice: Invoice, day: string) => Promise<void>;
 };
+
+/** Inline-Erfassung fuer bezahlte Rechnungen ohne Zahlungsdatum. */
+function PaidDateInput({ invoice, onSave }: { invoice: Invoice; onSave: (invoice: Invoice, day: string) => Promise<void> }) {
+  const [day, setDay] = useState(zurichDay(new Date()));
+  const [saving, setSaving] = useState(false);
+  return (
+    <form
+      className="mt-2 flex items-center justify-center gap-1"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        setSaving(true);
+        try {
+          await onSave(invoice, day);
+        } finally {
+          setSaving(false);
+        }
+      }}
+    >
+      <input
+        type="date"
+        required
+        value={day}
+        onChange={(e) => setDay(e.target.value)}
+        aria-label={`Zahlungsdatum für ${invoice.invoice_number}`}
+        className="rounded border border-gray-300 px-1.5 py-0.5 text-xs"
+      />
+      <button type="submit" disabled={saving} className="rounded px-1.5 py-0.5 text-xs font-medium underline disabled:opacity-50">
+        {saving ? '…' : 'Speichern'}
+      </button>
+    </form>
+  );
+}
 
 const statusColors = {
   entwurf: 'bg-sage-100 text-sage-800',
@@ -26,7 +62,7 @@ const statusLabels = {
   überfällig: 'Überfällig',
 };
 
-export default function InvoiceTable({ invoices, customers, onDelete, onDownloadPDF, onPreviewPDF, onEdit }: InvoiceTableProps) {
+export default function InvoiceTable({ invoices, customers, onDelete, onDownloadPDF, onPreviewPDF, onEdit, onSetPaidDate }: InvoiceTableProps) {
   const confirmDialog = useConfirm();
   const getCustomerName = (customerId: string) => {
     const customer = customers.find((c) => c.id === customerId);
@@ -104,6 +140,12 @@ export default function InvoiceTable({ invoices, customers, onDelete, onDownload
                   <span className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${statusColors[invoice.status]}`}>
                     {statusLabels[invoice.status]}
                   </span>
+                  {invoice.status === 'bezahlt' && !invoice.paid_at && (
+                    <>
+                      <div className="mt-1 text-xs font-medium text-amber-800">Zahlungsdatum fehlt</div>
+                      {onSetPaidDate && <PaidDateInput invoice={invoice} onSave={onSetPaidDate} />}
+                    </>
+                  )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right">
                   <div className="flex justify-end gap-2">

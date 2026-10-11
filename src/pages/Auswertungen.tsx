@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo } from 'react';
 import toast from 'react-hot-toast';
 import { Calendar, BarChart3, FileText, Download, AlertCircle } from 'lucide-react';
 import {
@@ -16,10 +16,11 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import { useAnalytics, getPresetRange, type DateRange } from '../hooks/useAnalytics';
+import { useAnalytics } from '../hooks/useAnalytics';
+import { useCategories } from '../hooks/queries';
 import { supabase } from '../lib/supabase';
-import { useCompany } from '../context/CompanyContext';
-import type { Transaction, Category } from '../lib/supabase';
+import { presetRange, byCategory as groupByCategory, NO_CATEGORY, type DayRange, type RangePreset } from '../utils/financeAggregation';
+import PaidWithoutDateNotice from '../components/PaidWithoutDateNotice';
 
 // Type for financial bookkeeping data
 interface CategorySummary {
@@ -36,11 +37,6 @@ interface FinancialBookkeepingData {
   totalEinnahmen: number;
   totalAusgaben: number;
   gewinnVerlust: number;
-}
-
-// Type for CSV export
-interface TransactionWithCategory extends Transaction {
-  category_details?: Category | null;
 }
 
 // Format CHF currency
@@ -66,178 +62,65 @@ const PIE_COLORS = ['#6b8a5e', '#8aa67c', '#aec2a3', '#547047', '#435839', '#ced
 type ViewMode = 'charts' | 'bookkeeping';
 
 export default function Auswertungen() {
-  const { selectedCompany } = useCompany();
-
   // View mode toggle
   const [viewMode, setViewMode] = useState<ViewMode>('bookkeeping');
 
   // Default to last 90 days (Roadmap 1.2)
   const [selectedPreset, setSelectedPreset] = useState<string>('last_90_days');
-  const [customRange, setCustomRange] = useState<DateRange | null>(null);
+  const [customRange, setCustomRange] = useState<DayRange | null>(null);
   const [showCustomPicker, setShowCustomPicker] = useState(false);
 
-  // Financial bookkeeping data state
-  const [bookkeepingData, setBookkeepingData] = useState<FinancialBookkeepingData | null>(null);
-  const [bookkeepingLoading, setBookkeepingLoading] = useState(false);
-  const [rawTransactions, setRawTransactions] = useState<TransactionWithCategory[]>([]);
-
-  // Determine active date range - memoized to prevent infinite loop
-  const dateRange = useMemo(() => {
-    return customRange || getPresetRange(selectedPreset);
+  // Aktiver Zeitraum als Kalendertage (YYYY-MM-DD)
+  const dateRange = useMemo<DayRange>(() => {
+    return customRange || presetRange(selectedPreset as RangePreset);
   }, [customRange, selectedPreset]);
 
-  // Fetch analytics data
-  const { loading, error, kpi, timeline, byCustomer, byCategory, byTags } = useAnalytics(dateRange);
+  // Beide Modi ("Buchungen" und "Charts") beruhen auf derselben Aggregation
+  const { loading, error, kpi, timeline, byCustomer, byCategory, byTags, entries, paidWithoutDate } =
+    useAnalytics(dateRange);
+  const { data: categories = [] } = useCategories();
 
-  // Fetch financial bookkeeping data when dateRange changes
-  const fetchBookkeepingData = useCallback(async () => {
-    if (!selectedCompany || !dateRange) return;
-
-    try {
-      setBookkeepingLoading(true);
-      const fromDate = dateRange.from.toISOString().split('T')[0];
-      const toDate = dateRange.to.toISOString().split('T')[0];
-
-      // Fetch invoices, transactions, and categories in parallel (same logic as useAnalytics)
-      const [invoicesResult, transactionsResult, categoriesResult] = await Promise.all([
-        // Fetch paid invoices with customer data
-        supabase
-          .from('invoices')
-          .select('*, customers(*)')
-          .eq('company_id', selectedCompany.id)
-          .eq('status', 'bezahlt')
-          .or(`and(paid_at.gte.${fromDate},paid_at.lte.${toDate}),and(paid_at.is.null,issue_date.gte.${fromDate},issue_date.lte.${toDate})`),
-
-        // Fetch transactions
-        supabase
-          .from('transactions')
-          .select('*')
-          .eq('company_id', selectedCompany.id)
-          .gte('date', fromDate)
-          .lte('date', toDate)
-          .order('date', { ascending: true }),
-
-        // Fetch categories
-        supabase
-          .from('categories')
-          .select('*')
-          .eq('company_id', selectedCompany.id)
-          .eq('is_active', true)
-      ]);
-
-      if (invoicesResult.error) throw invoicesResult.error;
-      if (transactionsResult.error) throw transactionsResult.error;
-      if (categoriesResult.error) throw categoriesResult.error;
-
-      // Convert paid invoices to transaction format
-      const invoiceTransactions: Transaction[] = (invoicesResult.data || [])
-        .map((invoice: any) => {
-          const transactionDate = invoice.paid_at || invoice.issue_date;
+  const bookkeepingData = useMemo<FinancialBookkeepingData>(() => {
+    const categoryByName = new Map(categories.map((c) => [c.name, c]));
+    const toSummary = (type: 'einnahme' | 'ausgabe') =>
+      groupByCategory(entries)
+        .filter((g) => g.type === type)
+        .map((g) => {
+          const details = categoryByName.get(g.key);
           return {
-            id: `invoice-${invoice.id}`,
-            company_id: selectedCompany.id,
-            type: 'einnahme' as const,
-            date: transactionDate,
-            amount: invoice.total,
-            description: `Rechnung ${invoice.invoice_number} - ${invoice.customers?.name || 'Unbekannt'}`,
-            category: 'Umsatz',
-            project_id: invoice.project_id,
-            customer_id: invoice.customer_id,
-            invoice_id: invoice.id,
-            document_url: null,
-            receipt_url: null,
-            tags: null,
-            billable: true,
-            transaction_number: invoice.invoice_number,
-            created_at: invoice.created_at,
+            categoryName: g.key,
+            categoryColor: details?.color || '#6B7280',
+            isTaxRelevant: details?.is_tax_relevant ?? true,
+            total: g.amount,
+            count: g.count,
           };
-        })
-        .filter((t) => t.date >= fromDate && t.date <= toDate);
-
-      const regularTransactions = transactionsResult.data || [];
-      const cats = categoriesResult.data || [];
-
-      // Combine invoices and transactions
-      const allTransactions = [...invoiceTransactions, ...regularTransactions];
-
-      // Create a lookup map for categories by name
-      const categoryByName = new Map<string, Category>();
-      cats.forEach(cat => categoryByName.set(cat.name, cat));
-
-      // Attach category details to ALL transactions (for CSV export)
-      const transactionsWithCategories: TransactionWithCategory[] = allTransactions.map(t => ({
-        ...t,
-        category_details: t.category ? categoryByName.get(t.category) || null : null
-      }));
-      setRawTransactions(transactionsWithCategories);
-
-      // Group by category and type
-      const einnahmenMap = new Map<string, CategorySummary>();
-      const ausgabenMap = new Map<string, CategorySummary>();
-
-      allTransactions.forEach(t => {
-        const categoryName = t.category || 'Ohne Kategorie';
-        const categoryDetails = categoryByName.get(categoryName);
-        const map = t.type === 'einnahme' ? einnahmenMap : ausgabenMap;
-
-        if (!map.has(categoryName)) {
-          map.set(categoryName, {
-            categoryName,
-            categoryColor: categoryDetails?.color || '#6B7280',
-            isTaxRelevant: categoryDetails?.is_tax_relevant ?? true,
-            total: 0,
-            count: 0
-          });
-        }
-
-        const summary = map.get(categoryName)!;
-        summary.total += t.amount;
-        summary.count += 1;
-      });
-
-      // Convert to arrays and sort by total
-      const einnahmen = Array.from(einnahmenMap.values()).sort((a, b) => b.total - a.total);
-      const ausgaben = Array.from(ausgabenMap.values()).sort((a, b) => b.total - a.total);
-
-      const totalEinnahmen = einnahmen.reduce((sum, e) => sum + e.total, 0);
-      const totalAusgaben = ausgaben.reduce((sum, a) => sum + a.total, 0);
-
-      setBookkeepingData({
-        einnahmen,
-        ausgaben,
-        totalEinnahmen,
-        totalAusgaben,
-        gewinnVerlust: totalEinnahmen - totalAusgaben
-      });
-    } catch (err) {
-      console.error('Error fetching financial bookkeeping data:', err);
-    } finally {
-      setBookkeepingLoading(false);
-    }
-  }, [selectedCompany, dateRange]);
-
-  useEffect(() => {
-    if (viewMode === 'bookkeeping') {
-      fetchBookkeepingData();
-    }
-  }, [viewMode, fetchBookkeepingData]);
+        });
+    return {
+      einnahmen: toSummary('einnahme'),
+      ausgaben: toSummary('ausgabe'),
+      totalEinnahmen: kpi.income,
+      totalAusgaben: kpi.expense,
+      gewinnVerlust: kpi.profit,
+    };
+  }, [entries, categories, kpi]);
+  const bookkeepingLoading = loading;
 
   // CSV Export function
   const handleExportCSV = async () => {
-    if (!rawTransactions.length) {
+    if (!entries.length) {
       toast.error('Keine Daten zum Exportieren vorhanden.');
       return;
     }
 
     // Generate signed URLs for receipts
     const transactionsWithUrls = await Promise.all(
-      rawTransactions.map(async (t) => {
+      entries.map(async (t) => {
         let receiptUrl = '';
-        if (t.receipt_url) {
+        if (t.receiptUrl) {
           try {
             const { data } = await supabase.storage
               .from('receipts')
-              .createSignedUrl(t.receipt_url, 86400); // 24h valid
+              .createSignedUrl(t.receiptUrl, 86400); // 24h valid
             receiptUrl = data?.signedUrl || '';
           } catch {
             receiptUrl = '';
@@ -248,8 +131,10 @@ export default function Auswertungen() {
     );
 
     // CSV headers
+    const categoryByName = new Map(categories.map((c) => [c.name, c]));
     const headers = [
       'Datum',
+      'Beleg-Nr',
       'Kategorie',
       'Steuerrelevant',
       'Beschreibung',
@@ -260,9 +145,10 @@ export default function Auswertungen() {
 
     // CSV rows
     const rows = transactionsWithUrls.map(t => [
-      new Date(t.date).toLocaleDateString('de-CH'),
-      t.category || 'Ohne Kategorie',
-      t.category_details?.is_tax_relevant ? 'Ja' : 'Nein',
+      `${t.date.slice(8, 10)}.${t.date.slice(5, 7)}.${t.date.slice(0, 4)}`,
+      t.number || '',
+      t.category || NO_CATEGORY,
+      (t.category ? categoryByName.get(t.category)?.is_tax_relevant ?? true : true) ? 'Ja' : 'Nein',
       (t.description || '').replace(/"/g, '""'), // Escape quotes
       t.amount.toFixed(2),
       t.type === 'einnahme' ? 'Einnahme' : 'Ausgabe',
@@ -280,9 +166,7 @@ export default function Auswertungen() {
     const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8;' });
 
     // Trigger download
-    const fromStr = dateRange.from.toISOString().split('T')[0];
-    const toStr = dateRange.to.toISOString().split('T')[0];
-    const filename = `buchungen_${fromStr}_bis_${toStr}.csv`;
+    const filename = `buchungen_${dateRange.from}_bis_${dateRange.to}.csv`;
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = filename;
@@ -300,20 +184,12 @@ export default function Auswertungen() {
     setShowCustomPicker(true);
     // Initialize custom range with last 30 days as sensible default
     // This prevents getPresetRange('custom') from being called with null customRange
-    const today = new Date();
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(today.getDate() - 30);
-    thirtyDaysAgo.setHours(0, 0, 0, 0);
-    today.setHours(23, 59, 59, 999);
-    setCustomRange({ from: thirtyDaysAgo, to: today });
+    setCustomRange(presetRange('last_30_days'));
     setSelectedPreset('custom');
   };
 
   const applyCustomRange = (from: string, to: string) => {
-    setCustomRange({
-      from: new Date(from),
-      to: new Date(to),
-    });
+    setCustomRange({ from, to });
   };
 
   if (loading) {
@@ -453,11 +329,11 @@ export default function Auswertungen() {
                 <label className="text-sm font-medium text-content-secondary">Von:</label>
                 <input
                   type="date"
-                  value={customRange.from.toISOString().split('T')[0]}
+                  value={customRange.from}
                   onChange={(e) => {
                     e.preventDefault();
                     if (e.target.value) {
-                      applyCustomRange(e.target.value, customRange.to.toISOString().split('T')[0]);
+                      applyCustomRange(e.target.value, customRange.to);
                     }
                   }}
                   className="px-3 py-2 border border-surface-border rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
@@ -467,11 +343,11 @@ export default function Auswertungen() {
                 <label className="text-sm font-medium text-content-secondary">Bis:</label>
                 <input
                   type="date"
-                  value={customRange.to.toISOString().split('T')[0]}
+                  value={customRange.to}
                   onChange={(e) => {
                     e.preventDefault();
                     if (e.target.value) {
-                      applyCustomRange(customRange.from.toISOString().split('T')[0], e.target.value);
+                      applyCustomRange(customRange.from, e.target.value);
                     }
                   }}
                   className="px-3 py-2 border border-surface-border rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
@@ -481,6 +357,8 @@ export default function Auswertungen() {
           )}
         </div>
       </div>
+
+      <PaidWithoutDateNotice invoices={paidWithoutDate} />
 
       {/* Error Message */}
       {error && (

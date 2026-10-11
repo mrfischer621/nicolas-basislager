@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { useFinanceEntries } from './useFinance';
+import { filterRange, summarize, yearRange } from '../utils/financeAggregation';
 import { supabase } from '../lib/supabase';
 import type { YearEndClosing, YearEndClosingData } from '../lib/supabase';
 import { useCompany } from '../context/CompanyContext';
@@ -51,11 +53,15 @@ export function useYearEnd(year: number): UseYearEndReturn {
     taxableProfit: 0,
   });
 
+  // Einnahmen/Ausgaben aus der zentralen Aggregation (nicht mehr aus der
+  // leeren Tabelle `expenses`, die Ausgaben fehlten deshalb ganz)
+  const finance = useFinanceEntries();
+
   useEffect(() => {
-    if (selectedCompany && year) {
+    if (selectedCompany && year && finance.data) {
       fetchAndCalculate();
     }
-  }, [selectedCompany, year]);
+  }, [selectedCompany, year, finance.data]);
 
   /**
    * Fetches financial data for the year and existing closing record
@@ -67,53 +73,19 @@ export function useYearEnd(year: number): UseYearEndReturn {
       setLoading(true);
       setError(null);
 
-      // Define date range for the entire year
-      const fromDate = `${year}-01-01`;
-      const toDate = `${year}-12-31`;
+      const closingResult = await supabase
+        .from('year_end_closings')
+        .select('*')
+        .eq('company_id', selectedCompany.id)
+        .eq('year', year)
+        .maybeSingle();
 
-      // Fetch paid invoices, expenses, and existing closing in parallel
-      const [invoicesResult, expensesResult, closingResult] = await Promise.all([
-        // Fetch paid invoices for the year
-        supabase
-          .from('invoices')
-          .select('total, paid_at, issue_date, status')
-          .eq('company_id', selectedCompany.id)
-          .eq('status', 'bezahlt'),
-
-        // Fetch all expenses for the year
-        supabase
-          .from('expenses')
-          .select('amount, date')
-          .eq('company_id', selectedCompany.id)
-          .gte('date', fromDate)
-          .lte('date', toDate),
-
-        // Fetch existing year-end closing record
-        supabase
-          .from('year_end_closings')
-          .select('*')
-          .eq('company_id', selectedCompany.id)
-          .eq('year', year)
-          .maybeSingle(),
-      ]);
-
-      if (invoicesResult.error) throw invoicesResult.error;
-      if (expensesResult.error) throw expensesResult.error;
       if (closingResult.error) throw closingResult.error;
 
-      // Filter invoices by year (using paid_at or issue_date)
-      const invoices = (invoicesResult.data || []).filter((invoice) => {
-        const transactionDate = invoice.paid_at || invoice.issue_date;
-        return transactionDate >= fromDate && transactionDate <= toDate;
-      });
-
-      // Calculate raw financials
-      const rawIncome = invoices.reduce((sum, inv) => sum + inv.total, 0);
-      const rawExpense = (expensesResult.data || []).reduce(
-        (sum, exp) => sum + exp.amount,
-        0
-      );
-      const rawProfit = rawIncome - rawExpense;
+      const totals = summarize(filterRange(finance.data?.entries ?? [], yearRange(year)));
+      const rawIncome = totals.income;
+      const rawExpense = totals.expense;
+      const rawProfit = totals.profit;
 
       // Extract adjustment data from closing record
       const closingData = closingResult.data;
@@ -281,7 +253,7 @@ export function useYearEnd(year: number): UseYearEndReturn {
   };
 
   return {
-    loading,
+    loading: loading || finance.isLoading,
     error,
     closing,
     calculation,

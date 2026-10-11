@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Plus, Filter } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -7,12 +7,35 @@ import TransactionForm from '../components/TransactionForm';
 import TransactionTable from '../components/TransactionTable';
 import Modal from '../components/Modal';
 import { useCompany } from '../context/CompanyContext';
+import { useFinanceEntries, useInvalidateFinance } from '../hooks/useFinance';
+import { presetRange, type FinanceEntry } from '../utils/financeAggregation';
+import PaidWithoutDateNotice from '../components/PaidWithoutDateNotice';
+
+/** Eintrag der zentralen Aggregation in die Zeilenform der Tabelle bringen. */
+function entryToTransaction(e: FinanceEntry, companyId: string): Transaction {
+  return {
+    id: e.id,
+    company_id: companyId,
+    type: e.type,
+    date: e.date,
+    amount: e.amount,
+    description: e.description,
+    category: e.category,
+    project_id: e.projectId,
+    customer_id: e.customerId,
+    invoice_id: e.invoiceId,
+    document_url: null,
+    receipt_url: e.receiptUrl,
+    tags: e.tags.length > 0 ? e.tags : null,
+    billable: e.source === 'invoice',
+    transaction_number: e.number,
+    created_at: '',
+  };
+}
 
 export default function Buchungen() {
   const { selectedCompany } = useCompany();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,8 +53,30 @@ export default function Buchungen() {
     }
   }, [selectedCompany]);
 
-  useEffect(() => {
-    applyFilters();
+  // Liste aus derselben Aggregation wie Dashboard, Auswertung und Jahresabschluss
+  const finance = useFinanceEntries();
+  const invalidateFinance = useInvalidateFinance();
+  const transactions = useMemo<Transaction[]>(
+    () =>
+      selectedCompany
+        ? [...(finance.data?.entries ?? [])]
+            .reverse()
+            .map((e) => entryToTransaction(e, selectedCompany.id))
+        : [],
+    [finance.data, selectedCompany]
+  );
+
+  const filteredTransactions = useMemo(() => {
+    let filtered = transactions;
+    if (filterType !== 'all') {
+      filtered = filtered.filter((t) => t.type === filterType);
+    }
+    if (filterPeriod !== 'all') {
+      const preset = filterPeriod === '30' ? 'last_30_days' : filterPeriod === '90' ? 'last_90_days' : 'last_365_days';
+      const range = presetRange(preset);
+      filtered = filtered.filter((t) => t.date >= range.from && t.date <= range.to);
+    }
+    return filtered;
   }, [transactions, filterType, filterPeriod]);
 
   // Handle query parameter for opening specific transaction
@@ -52,52 +97,6 @@ export default function Buchungen() {
     try {
       setLoading(true);
 
-      // Clear existing data to force React re-render
-      setTransactions([]);
-
-      // Fetch transactions for this company
-      const { data: transactionsData, error: transactionsError } = await supabase
-        .from('transactions')
-        .select('*')
-        .eq('company_id', selectedCompany.id)
-        .order('date', { ascending: false });
-
-      if (transactionsError) throw transactionsError;
-
-      // Fetch paid invoices for this company and convert them to transaction format
-      const { data: paidInvoices, error: invoicesError } = await supabase
-        .from('invoices')
-        .select('*, customers(*)')
-        .eq('company_id', selectedCompany.id)
-        .eq('status', 'bezahlt')
-        .order('issue_date', { ascending: false });
-
-      if (invoicesError) throw invoicesError;
-
-      // Convert paid invoices to transactions
-      const invoiceTransactions: Transaction[] = (paidInvoices || []).map((invoice: any) => ({
-        id: `invoice-${invoice.id}`,
-        company_id: selectedCompany.id,
-        type: 'einnahme' as const,
-        date: invoice.paid_at || invoice.issue_date,
-        amount: invoice.total,
-        description: `Rechnung ${invoice.invoice_number} - ${invoice.customers?.name || 'Unbekannt'}`,
-        category: 'Rechnung',
-        project_id: invoice.project_id,
-        customer_id: invoice.customer_id,
-        invoice_id: invoice.id,
-        document_url: null,
-        receipt_url: null,
-        tags: null,
-        billable: true,
-        transaction_number: invoice.invoice_number,
-        created_at: invoice.created_at,
-      }));
-
-      // Combine transactions and invoice transactions
-      const allTransactions = [...(transactionsData || []), ...invoiceTransactions];
-      allTransactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
       // Fetch customers for this company
       const { data: customersData, error: customersError } = await supabase
         .from('customers')
@@ -116,7 +115,6 @@ export default function Buchungen() {
 
       if (projectsError) throw projectsError;
 
-      setTransactions(allTransactions);
       setCustomers(customersData || []);
       setProjects(projectsData || []);
     } catch (err) {
@@ -125,26 +123,6 @@ export default function Buchungen() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const applyFilters = () => {
-    let filtered = [...transactions];
-
-    // Filter by type
-    if (filterType !== 'all') {
-      filtered = filtered.filter((t) => t.type === filterType);
-    }
-
-    // Filter by period
-    if (filterPeriod !== 'all') {
-      const daysAgo = parseInt(filterPeriod);
-      const cutoffDate = new Date();
-      cutoffDate.setDate(cutoffDate.getDate() - daysAgo);
-
-      filtered = filtered.filter((t) => new Date(t.date) >= cutoffDate);
-    }
-
-    setFilteredTransactions(filtered);
   };
 
   const handleSubmit = async (data: Partial<Transaction>) => {
@@ -170,7 +148,7 @@ export default function Buchungen() {
 
       setIsModalOpen(false);
       setEditingTransaction(undefined);
-      await fetchData();
+      await invalidateFinance();
     } catch (err) {
       console.error('Error saving transaction:', err);
       setError('Fehler beim Speichern der Buchung');
@@ -199,7 +177,7 @@ export default function Buchungen() {
 
       if (error) throw error;
 
-      await fetchData();
+      await invalidateFinance();
     } catch (err) {
       console.error('Error deleting transaction:', err);
       setError('Fehler beim Löschen der Buchung');
@@ -216,7 +194,7 @@ export default function Buchungen() {
     setEditingTransaction(undefined);
   };
 
-  if (!selectedCompany || loading) {
+  if (!selectedCompany || loading || finance.isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-xl text-content-secondary">Lädt...</div>
@@ -240,6 +218,8 @@ export default function Buchungen() {
           Neue Buchung
         </button>
       </div>
+
+      <PaidWithoutDateNotice invoices={finance.data?.paidWithoutDate ?? []} />
 
       {/* Filters */}
       <div className="bg-white rounded-lg shadow-sm p-4">

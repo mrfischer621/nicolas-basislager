@@ -51,3 +51,15 @@ describe('formatChf', () => {
     expect(formatChf(15.456)).toBe('15.46');
   });
 });
+
+import { formatChfDisplay } from './money';
+
+describe('formatChfDisplay', () => {
+  it('formatiert im Schweizer Format CHF 1\'234.50', () => {
+    expect(formatChfDisplay(1234.5)).toBe("CHF 1'234.50");
+    expect(formatChfDisplay(334.74)).toBe('CHF 334.74');
+    expect(formatChfDisplay(1234567.891)).toBe("CHF 1'234'567.89");
+    expect(formatChfDisplay(-80.65)).toBe('CHF -80.65');
+    expect(formatChfDisplay(27004, { decimals: 0 })).toBe("CHF 27'004");
+  });
+});

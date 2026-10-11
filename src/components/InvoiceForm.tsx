@@ -1,6 +1,7 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { Trash2, Plus, AlertTriangle, ChevronDown, ChevronUp, Clock } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { toDay, zurichDay, paidDateToTimestamp } from '../utils/financeAggregation';
 import type { Invoice, InvoiceItem, Customer, Project, Product } from '../lib/supabase';
 import { useCompany } from '../context/CompanyContext';
 import { shouldWarnOnEdit, getEditWarningMessage } from '../utils/invoiceUtils';
@@ -51,6 +52,10 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
   );
   const [dueDate, setDueDate] = useState(existingInvoice?.due_date || '');
   const [status, setStatus] = useState<Invoice['status']>(existingInvoice?.status || 'entwurf');
+  // Zahlungsdatum (Zahlungsprinzip): Pflicht, sobald die Rechnung bezahlt ist
+  const [paidDate, setPaidDate] = useState(
+    existingInvoice?.paid_at ? toDay(existingInvoice.paid_at) : ''
+  );
 
   // New fields for Phase 3.3
   const [title, setTitle] = useState(existingInvoice?.title || '');
@@ -285,7 +290,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
           due_date: dueDate || null,
           vat_rate: selectedCompany?.default_vat_rate || 0,
           status,
-          paid_at: null,
+          paid_at: status === 'bezahlt' && paidDate ? paidDateToTimestamp(paidDate) : null,
           title: title || null,
           introduction_text: introText || null,
           footer_text: footerText || null,
@@ -454,7 +459,11 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
             <select
               id="status"
               value={status}
-              onChange={(e) => setStatus(e.target.value as Invoice['status'])}
+              onChange={(e) => {
+                const next = e.target.value as Invoice['status'];
+                setStatus(next);
+                if (next === 'bezahlt' && !paidDate) setPaidDate(zurichDay(new Date()));
+              }}
               className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
             >
               <option value="entwurf">Entwurf</option>
@@ -463,6 +472,22 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
               <option value="überfällig">Überfällig</option>
             </select>
           </div>
+
+          {status === 'bezahlt' && (
+            <div>
+              <label htmlFor="paid_at" className="block text-sm font-medium text-gray-700 mb-1">
+                Zahlungsdatum
+              </label>
+              <input
+                id="paid_at"
+                type="date"
+                required
+                value={paidDate}
+                onChange={(e) => setPaidDate(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              />
+            </div>
+          )}
         </div>
 
         {/* Introduction Text (new) */}

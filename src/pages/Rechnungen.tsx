@@ -11,6 +11,8 @@ import { downloadInvoicePDF, getInvoicePdfBlobUrl } from '../utils/pdfLazy';
 import { validateInvoiceData } from '../utils/invoiceValidation';
 import { canEditInvoice, getEditBlockedReason } from '../utils/invoiceUtils';
 import { useCompany } from '../context/CompanyContext';
+import { useInvalidateFinance } from '../hooks/useFinance';
+import { paidDateToTimestamp } from '../utils/financeAggregation';
 import { Plus, AlertCircle } from 'lucide-react';
 
 type InvoiceFormData = {
@@ -26,6 +28,7 @@ interface Toast {
 export default function Rechnungen() {
   const confirmDialog = useConfirm();
   const { selectedCompany } = useCompany();
+  const invalidateFinance = useInvalidateFinance();
   const [searchParams, setSearchParams] = useSearchParams();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -83,6 +86,28 @@ export default function Rechnungen() {
     }
   }, [searchParams, invoices]);
 
+  // Bezahlte Rechnungen ohne Zahlungsdatum: Filter aus dem Hinweis im Dashboard
+  const onlyMissingPaidDate = searchParams.get('filter') === 'ohne-zahlungsdatum';
+  const visibleInvoices = onlyMissingPaidDate
+    ? invoices.filter((i) => i.status === 'bezahlt' && !i.paid_at)
+    : invoices;
+
+  // Nur das Zahlungsdatum nachtragen, die Rechnung selbst bleibt unveraendert
+  const handleSetPaidDate = async (invoice: Invoice, day: string) => {
+    const { error: updateError } = await supabase
+      .from('invoices')
+      .update({ paid_at: paidDateToTimestamp(day) })
+      .eq('id', invoice.id)
+      .eq('company_id', selectedCompany!.id);
+    if (updateError) {
+      setToast({ type: 'error', message: 'Zahlungsdatum konnte nicht gespeichert werden.' });
+      return;
+    }
+    setInvoices((prev) => prev.map((i) => (i.id === invoice.id ? { ...i, paid_at: paidDateToTimestamp(day) } : i)));
+    await invalidateFinance();
+    setToast({ type: 'success', message: `Zahlungsdatum für ${invoice.invoice_number} gespeichert.` });
+  };
+
   // Early return if no company selected
   if (!selectedCompany) {
     return (
@@ -95,6 +120,9 @@ export default function Rechnungen() {
   const fetchData = async () => {
     console.log('[Rechnungen] fetchData called for company:', selectedCompany?.name);
     if (!selectedCompany) return;
+
+    // Finanzzahlen (Dashboard, Auswertung) nach Aenderungen neu laden
+    void invalidateFinance();
 
     // Prevent concurrent fetches
     if (isFetchingRef.current) {
@@ -578,6 +606,18 @@ export default function Rechnungen() {
         </div>
       )}
 
+      {onlyMissingPaidDate && (
+        <div className="flex items-center justify-between rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          <span>
+            Gefiltert: {visibleInvoices.length} bezahlte {visibleInvoices.length === 1 ? 'Rechnung' : 'Rechnungen'} ohne Zahlungsdatum.
+            Ohne Datum zählen sie in keiner Auswertung.
+          </span>
+          <button type="button" className="font-medium underline" onClick={() => setSearchParams({})}>
+            Alle Rechnungen anzeigen
+          </button>
+        </div>
+      )}
+
       {/* Warning if no customers */}
       {customers.length === 0 && !isLoading && (
         <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-lg">
@@ -592,7 +632,8 @@ export default function Rechnungen() {
         </div>
       ) : (
         <InvoiceTable
-          invoices={invoices}
+          invoices={visibleInvoices}
+          onSetPaidDate={handleSetPaidDate}
           customers={customers}
           onDelete={handleDelete}
           onDownloadPDF={handleDownloadPDF}
