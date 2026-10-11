@@ -112,7 +112,7 @@ export default function Zeiterfassung() {
   if (!selectedCompany) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-gray-500">Firma wird geladen...</p>
+        <p className="text-fg-muted">Firma wird geladen...</p>
       </div>
     );
   }
@@ -363,19 +363,19 @@ export default function Zeiterfassung() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Zeiterfassung</h1>
-          <p className="text-gray-600 mt-1">Erfassen und analysieren Sie Ihre Arbeitszeiten</p>
+          <h1 className="text-2xl font-bold text-fg">Zeiterfassung</h1>
+          <p className="text-fg-muted mt-1">Erfassen und analysieren Sie Ihre Arbeitszeiten</p>
         </div>
         {activeTab === 'erfassung' && (
           <div className="flex items-center gap-3">
             {/* Grouping Toggle */}
-            <div className="flex bg-gray-100 rounded-lg p-1">
+            <div className="flex bg-raised rounded-lg p-1">
               <button
                 onClick={() => setGroupingMode('date')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition ${
                   groupingMode === 'date'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-surface text-fg shadow-sm'
+                    : 'text-fg-muted hover:text-fg'
                 }`}
               >
                 <Calendar size={16} />
@@ -385,8 +385,8 @@ export default function Zeiterfassung() {
                 onClick={() => setGroupingMode('week')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition ${
                   groupingMode === 'week'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-surface text-fg shadow-sm'
+                    : 'text-fg-muted hover:text-fg'
                 }`}
               >
                 <Layers size={16} />
@@ -400,29 +400,29 @@ export default function Zeiterfassung() {
                 onClick={() => setIsFilterOpen(!isFilterOpen)}
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition ${
                   selectedProjectId
-                    ? 'bg-brand text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    ? 'bg-brand text-accent-fg'
+                    : 'bg-raised text-fg-muted hover:bg-sunken'
                 }`}
                 title="Nach Projekt filtern"
               >
                 <Filter size={16} />
                 {selectedProjectId && (
-                  <span className="bg-white/20 px-1.5 py-0.5 rounded text-xs">1</span>
+                  <span className="bg-surface/20 px-1.5 py-0.5 rounded text-xs">1</span>
                 )}
               </button>
 
               {isFilterOpen && (
-                <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-                  <div className="p-3 border-b border-gray-100">
+                <div className="absolute right-0 top-full mt-2 w-64 bg-surface rounded-lg shadow-lg border border-line z-50">
+                  <div className="p-3 border-b border-line">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-700">Nach Projekt filtern</span>
+                      <span className="text-sm font-medium text-fg">Nach Projekt filtern</span>
                       {selectedProjectId && (
                         <button
                           onClick={() => {
                             setSelectedProjectId('');
                             setIsFilterOpen(false);
                           }}
-                          className="text-xs text-gray-500 hover:text-gray-700 flex items-center gap-1"
+                          className="text-xs text-fg-muted hover:text-fg flex items-center gap-1"
                         >
                           <X size={12} />
                           Zurücksetzen
@@ -439,7 +439,7 @@ export default function Zeiterfassung() {
                       className={`w-full text-left px-3 py-2 rounded-md text-sm transition ${
                         !selectedProjectId
                           ? 'bg-brand/10 text-brand font-medium'
-                          : 'text-gray-600 hover:bg-gray-100'
+                          : 'text-fg-muted hover:bg-raised'
                       }`}
                     >
                       Alle Projekte
@@ -454,7 +454,7 @@ export default function Zeiterfassung() {
                         className={`w-full text-left px-3 py-2 rounded-md text-sm transition ${
                           selectedProjectId === project.id
                             ? 'bg-brand/10 text-brand font-medium'
-                            : 'text-gray-600 hover:bg-gray-100'
+                            : 'text-fg-muted hover:bg-raised'
                         }`}
                       >
                         {project.name}
@@ -467,7 +467,7 @@ export default function Zeiterfassung() {
 
             <button
               onClick={handleAddNew}
-              className="flex items-center gap-2 px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand-dark transition"
+              className="flex items-center gap-2 px-4 py-2 bg-brand text-accent-fg rounded-lg hover:bg-brand-dark transition"
             >
               <Plus size={20} />
               Detailliert
@@ -477,14 +477,14 @@ export default function Zeiterfassung() {
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200">
+      <div className="border-b border-line">
         <nav className="flex space-x-8">
           <button
             onClick={() => setActiveTab('erfassung')}
             className={`pb-3 px-1 border-b-2 font-medium text-sm transition flex items-center gap-2 ${
               activeTab === 'erfassung'
                 ? 'border-brand text-brand'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                : 'border-transparent text-fg-muted hover:text-fg hover:border-line-strong'
             }`}
           >
             <ClipboardList size={18} />
@@ -495,7 +495,7 @@ export default function Zeiterfassung() {
             className={`pb-3 px-1 border-b-2 font-medium text-sm transition flex items-center gap-2 ${
               activeTab === 'reporting'
                 ? 'border-brand text-brand'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                : 'border-transparent text-fg-muted hover:text-fg hover:border-line-strong'
             }`}
           >
             <BarChart3 size={18} />
@@ -506,14 +506,14 @@ export default function Zeiterfassung() {
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+        <div className="bg-danger-subtle border border-danger-subtle text-danger px-4 py-3 rounded-lg">
           {error}
         </div>
       )}
 
       {/* Warning if no projects */}
       {projects.length === 0 && !isLoading && activeTab === 'erfassung' && (
-        <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-lg">
+        <div className="bg-warning-subtle border border-warning-subtle text-warning px-4 py-3 rounded-lg">
           Bitte erstellen Sie zuerst Projekte, bevor Sie Zeiteinträge erfassen.
         </div>
       )}
@@ -523,14 +523,14 @@ export default function Zeiterfassung() {
         <>
           {/* Quick-Add Inline Form */}
       {projects.length > 0 && (
-        <div className="bg-white rounded-lg shadow-sm p-4">
+        <div className="bg-surface rounded-lg shadow-sm p-4">
           <form onSubmit={handleQuickAdd} className="flex flex-wrap gap-3 items-end">
             <div className="flex-1 min-w-[140px]">
-              <label className="block text-xs font-medium text-gray-500 mb-1">Projekt</label>
+              <label className="block text-xs font-medium text-fg-muted mb-1">Projekt</label>
               <select
                 value={quickAddData.projectId}
                 onChange={(e) => setQuickAddData(prev => ({ ...prev, projectId: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm"
+                className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm"
                 required
               >
                 <option value="">Projekt wählen</option>
@@ -542,17 +542,17 @@ export default function Zeiterfassung() {
               </select>
             </div>
             <div className="w-32">
-              <label className="block text-xs font-medium text-gray-500 mb-1">Datum</label>
+              <label className="block text-xs font-medium text-fg-muted mb-1">Datum</label>
               <input
                 type="date"
                 value={quickAddData.date}
                 onChange={(e) => setQuickAddData(prev => ({ ...prev, date: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm"
+                className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm"
                 required
               />
             </div>
             <div className="w-20">
-              <label className="block text-xs font-medium text-gray-500 mb-1">Stunden</label>
+              <label className="block text-xs font-medium text-fg-muted mb-1">Stunden</label>
               <input
                 type="number"
                 step="0.25"
@@ -560,21 +560,21 @@ export default function Zeiterfassung() {
                 value={quickAddData.hours}
                 onChange={(e) => setQuickAddData(prev => ({ ...prev, hours: e.target.value }))}
                 placeholder="0.00"
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm"
+                className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm"
                 required
               />
             </div>
             <div className="w-24">
-              <label className="block text-xs font-medium text-gray-500 mb-1">
+              <label className="block text-xs font-medium text-fg-muted mb-1">
                 Satz CHF
                 {quickAddData.rateSource === 'project' && (
-                  <span className="ml-1 text-xs bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded">P</span>
+                  <span className="ml-1 text-xs bg-accent-subtle text-accent px-1.5 py-0.5 rounded">P</span>
                 )}
                 {quickAddData.rateSource === 'customer' && (
-                  <span className="ml-1 text-xs bg-green-100 text-green-800 px-1.5 py-0.5 rounded">K</span>
+                  <span className="ml-1 text-xs bg-success-subtle text-success px-1.5 py-0.5 rounded">K</span>
                 )}
                 {quickAddData.rateSource === 'default' && (
-                  <span className="ml-1 text-xs bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded">S</span>
+                  <span className="ml-1 text-xs bg-raised text-fg px-1.5 py-0.5 rounded">S</span>
                 )}
               </label>
               <input
@@ -583,22 +583,22 @@ export default function Zeiterfassung() {
                 min="0"
                 value={quickAddData.rate}
                 onChange={(e) => setQuickAddData(prev => ({ ...prev, rate: e.target.value, rateSource: 'manual' }))}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm"
+                className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm"
                 required
               />
             </div>
             <div className="flex-1 min-w-[160px]">
-              <label className="block text-xs font-medium text-gray-500 mb-1">Beschreibung</label>
+              <label className="block text-xs font-medium text-fg-muted mb-1">Beschreibung</label>
               <input
                 type="text"
                 value={quickAddData.description}
                 onChange={(e) => setQuickAddData(prev => ({ ...prev, description: e.target.value }))}
                 placeholder="Tätigkeit..."
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm"
+                className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm"
               />
             </div>
             <div className="w-28">
-              <label className="block text-xs font-medium text-gray-500 mb-1">Verrechenbar</label>
+              <label className="block text-xs font-medium text-fg-muted mb-1">Verrechenbar</label>
               <div className="flex gap-3 py-2">
                 <label className="flex items-center gap-1 cursor-pointer">
                   <input
@@ -625,7 +625,7 @@ export default function Zeiterfassung() {
             <button
               type="submit"
               disabled={isQuickAdding || !quickAddData.projectId || !quickAddData.hours}
-              className="px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand-dark transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+              className="px-4 py-2 bg-brand text-accent-fg rounded-lg hover:bg-brand-dark transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
             >
               <Plus size={18} />
               {isQuickAdding ? 'Speichert...' : 'Hinzufügen'}
@@ -636,8 +636,8 @@ export default function Zeiterfassung() {
 
           {/* Table */}
           {isLoading ? (
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <p className="text-gray-500 text-center">Lädt Zeiteinträge...</p>
+            <div className="bg-surface rounded-lg shadow-sm p-6">
+              <p className="text-fg-muted text-center">Lädt Zeiteinträge...</p>
             </div>
           ) : (
             <TimeEntryTable
@@ -656,8 +656,8 @@ export default function Zeiterfassung() {
       {/* Tab Content: Reporting */}
       {activeTab === 'reporting' && (
         <Suspense fallback={
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <p className="text-gray-500 text-center">Auswertung wird geladen…</p>
+          <div className="bg-surface rounded-lg shadow-sm p-6">
+            <p className="text-fg-muted text-center">Auswertung wird geladen…</p>
           </div>
         }>
           <TimeReporting entries={entries} projects={projects} />

@@ -211,12 +211,12 @@ export default function Auswertungen() {
 
           {/* View Mode Toggle & Export */}
           <div className="flex items-center gap-3">
-            <div className="flex bg-sage-100 rounded-lg p-1">
+            <div className="flex bg-raised rounded-lg p-1">
               <button
                 onClick={() => setViewMode('bookkeeping')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
                   viewMode === 'bookkeeping'
-                    ? 'bg-white text-content-heading shadow-sm'
+                    ? 'bg-surface text-content-heading shadow-sm'
                     : 'text-content-secondary hover:text-content-heading'
                 }`}
               >
@@ -227,7 +227,7 @@ export default function Auswertungen() {
                 onClick={() => setViewMode('charts')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
                   viewMode === 'charts'
-                    ? 'bg-white text-content-heading shadow-sm'
+                    ? 'bg-surface text-content-heading shadow-sm'
                     : 'text-content-secondary hover:text-content-heading'
                 }`}
               >
@@ -239,7 +239,7 @@ export default function Auswertungen() {
             {viewMode === 'bookkeeping' && (
               <button
                 onClick={handleExportCSV}
-                className="flex items-center gap-2 px-4 py-2 bg-brand text-white rounded-lg font-medium hover:bg-brand-dark transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-brand text-accent-fg rounded-lg font-medium hover:bg-brand-dark transition-colors"
               >
                 <Download className="w-4 h-4" />
                 Export für Treuhänder (CSV)
@@ -249,14 +249,14 @@ export default function Auswertungen() {
         </div>
 
         {/* Filter Bar */}
-        <div className="bg-white rounded-lg shadow p-4">
+        <div className="bg-surface rounded-lg shadow p-4">
           <div className="flex gap-3 items-center flex-wrap">
             <button
               onClick={() => handlePresetChange('current_month')}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 selectedPreset === 'current_month'
-                  ? 'bg-brand text-white'
-                  : 'bg-sage-100 text-content-body hover:bg-sage-200'
+                  ? 'bg-brand text-accent-fg'
+                  : 'bg-raised text-content-body hover:bg-sunken'
               }`}
             >
               Aktueller Monat
@@ -265,8 +265,8 @@ export default function Auswertungen() {
               onClick={() => handlePresetChange('last_month')}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 selectedPreset === 'last_month'
-                  ? 'bg-brand text-white'
-                  : 'bg-sage-100 text-content-body hover:bg-sage-200'
+                  ? 'bg-brand text-accent-fg'
+                  : 'bg-raised text-content-body hover:bg-sunken'
               }`}
             >
               Letzter Monat
@@ -275,8 +275,8 @@ export default function Auswertungen() {
               onClick={() => handlePresetChange('current_year')}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 selectedPreset === 'current_year'
-                  ? 'bg-brand text-white'
-                  : 'bg-sage-100 text-content-body hover:bg-sage-200'
+                  ? 'bg-brand text-accent-fg'
+                  : 'bg-raised text-content-body hover:bg-sunken'
               }`}
             >
               Dieses Jahr
@@ -285,8 +285,8 @@ export default function Auswertungen() {
               onClick={() => handlePresetChange('last_year')}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 selectedPreset === 'last_year'
-                  ? 'bg-brand text-white'
-                  : 'bg-sage-100 text-content-body hover:bg-sage-200'
+                  ? 'bg-brand text-accent-fg'
+                  : 'bg-raised text-content-body hover:bg-sunken'
               }`}
             >
               Letztes Jahr
@@ -295,8 +295,8 @@ export default function Auswertungen() {
               onClick={() => handlePresetChange('last_30_days')}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 selectedPreset === 'last_30_days'
-                  ? 'bg-brand text-white'
-                  : 'bg-sage-100 text-content-body hover:bg-sage-200'
+                  ? 'bg-brand text-accent-fg'
+                  : 'bg-raised text-content-body hover:bg-sunken'
               }`}
             >
               Letzte 30 Tage
@@ -305,8 +305,8 @@ export default function Auswertungen() {
               onClick={() => handlePresetChange('last_90_days')}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 selectedPreset === 'last_90_days'
-                  ? 'bg-brand text-white'
-                  : 'bg-sage-100 text-content-body hover:bg-sage-200'
+                  ? 'bg-brand text-accent-fg'
+                  : 'bg-raised text-content-body hover:bg-sunken'
               }`}
             >
               Letzte 90 Tage
@@ -315,8 +315,8 @@ export default function Auswertungen() {
               onClick={handleCustomRange}
               className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
                 selectedPreset === 'custom'
-                  ? 'bg-brand text-white'
-                  : 'bg-sage-100 text-content-body hover:bg-sage-200'
+                  ? 'bg-brand text-accent-fg'
+                  : 'bg-raised text-content-body hover:bg-sunken'
               }`}
             >
               <Calendar className="w-4 h-4" />
@@ -364,7 +364,7 @@ export default function Auswertungen() {
 
       {/* Error Message */}
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+        <div className="mb-6 p-4 bg-danger-subtle border border-danger-subtle rounded-lg text-danger">
           {error}
         </div>
       )}
@@ -380,17 +380,17 @@ export default function Auswertungen() {
             <div className="space-y-6">
               {/* Summary KPI Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white rounded-lg shadow p-6">
+                <div className="bg-surface rounded-lg shadow p-6">
                   <div className="text-sm font-medium text-content-secondary mb-2">Total Einnahmen</div>
                   <div className="text-3xl font-bold text-success-dark">{formatCHF(bookkeepingData.totalEinnahmen)}</div>
                   <div className="text-sm text-content-tertiary mt-1">{bookkeepingData.einnahmen.reduce((s, e) => s + e.count, 0)} Buchungen</div>
                 </div>
-                <div className="bg-white rounded-lg shadow p-6">
+                <div className="bg-surface rounded-lg shadow p-6">
                   <div className="text-sm font-medium text-content-secondary mb-2">Total Ausgaben</div>
                   <div className="text-3xl font-bold text-danger-dark">{formatCHF(bookkeepingData.totalAusgaben)}</div>
                   <div className="text-sm text-content-tertiary mt-1">{bookkeepingData.ausgaben.reduce((s, a) => s + a.count, 0)} Buchungen</div>
                 </div>
-                <div className="bg-white rounded-lg shadow p-6 border-2 border-surface-border">
+                <div className="bg-surface rounded-lg shadow p-6 border-2 border-surface-border">
                   <div className="text-sm font-medium text-content-secondary mb-2">Gewinn / Verlust</div>
                   <div className={`text-3xl font-bold ${bookkeepingData.gewinnVerlust >= 0 ? 'text-success-dark' : 'text-danger-dark'}`}>
                     {formatCHF(bookkeepingData.gewinnVerlust)}
@@ -401,21 +401,21 @@ export default function Auswertungen() {
               {/* Two-Column Layout: Einnahmen / Ausgaben */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Einnahmen Section */}
-                <div className="bg-white rounded-lg shadow overflow-hidden">
-                  <div className="bg-green-50 px-6 py-4 border-b border-green-100">
-                    <h2 className="text-lg font-semibold text-green-800 flex items-center gap-2">
-                      <div className="w-3 h-3 bg-green-500 rounded-full" />
+                <div className="bg-surface rounded-lg shadow overflow-hidden">
+                  <div className="bg-success-subtle px-6 py-4 border-b border-success-subtle">
+                    <h2 className="text-lg font-semibold text-success flex items-center gap-2">
+                      <div className="w-3 h-3 bg-success rounded-full" />
                       Einnahmen
                     </h2>
                   </div>
-                  <div className="divide-y divide-gray-100">
+                  <div className="divide-y divide-line">
                     {bookkeepingData.einnahmen.length === 0 ? (
                       <div className="px-6 py-8 text-center text-content-tertiary">
                         Keine Einnahmen im gewählten Zeitraum
                       </div>
                     ) : (
                       bookkeepingData.einnahmen.map((cat) => (
-                        <div key={cat.categoryName} className="px-6 py-4 flex items-center justify-between hover:bg-sage-50">
+                        <div key={cat.categoryName} className="px-6 py-4 flex items-center justify-between hover:bg-canvas">
                           <div className="flex items-center gap-3">
                             <div
                               className="w-3 h-3 rounded-full flex-shrink-0"
@@ -425,7 +425,7 @@ export default function Auswertungen() {
                               <div className="font-medium text-content-heading flex items-center gap-2">
                                 {cat.categoryName}
                                 {cat.isTaxRelevant && (
-                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-warning-subtle text-warning">
                                     <AlertCircle className="w-3 h-3 mr-0.5" />
                                     Steuer
                                   </span>
@@ -442,29 +442,29 @@ export default function Auswertungen() {
                     )}
                   </div>
                   {bookkeepingData.einnahmen.length > 0 && (
-                    <div className="bg-green-50 px-6 py-4 border-t border-green-100 flex justify-between items-center">
-                      <span className="font-medium text-green-800">Total Einnahmen</span>
-                      <span className="font-bold text-green-700 text-lg">{formatCHF(bookkeepingData.totalEinnahmen)}</span>
+                    <div className="bg-success-subtle px-6 py-4 border-t border-success-subtle flex justify-between items-center">
+                      <span className="font-medium text-success">Total Einnahmen</span>
+                      <span className="font-bold text-success text-lg">{formatCHF(bookkeepingData.totalEinnahmen)}</span>
                     </div>
                   )}
                 </div>
 
                 {/* Ausgaben Section */}
-                <div className="bg-white rounded-lg shadow overflow-hidden">
-                  <div className="bg-red-50 px-6 py-4 border-b border-red-100">
-                    <h2 className="text-lg font-semibold text-red-800 flex items-center gap-2">
-                      <div className="w-3 h-3 bg-red-500 rounded-full" />
+                <div className="bg-surface rounded-lg shadow overflow-hidden">
+                  <div className="bg-danger-subtle px-6 py-4 border-b border-danger-subtle">
+                    <h2 className="text-lg font-semibold text-danger flex items-center gap-2">
+                      <div className="w-3 h-3 bg-danger rounded-full" />
                       Ausgaben
                     </h2>
                   </div>
-                  <div className="divide-y divide-gray-100">
+                  <div className="divide-y divide-line">
                     {bookkeepingData.ausgaben.length === 0 ? (
                       <div className="px-6 py-8 text-center text-content-tertiary">
                         Keine Ausgaben im gewählten Zeitraum
                       </div>
                     ) : (
                       bookkeepingData.ausgaben.map((cat) => (
-                        <div key={cat.categoryName} className="px-6 py-4 flex items-center justify-between hover:bg-sage-50">
+                        <div key={cat.categoryName} className="px-6 py-4 flex items-center justify-between hover:bg-canvas">
                           <div className="flex items-center gap-3">
                             <div
                               className="w-3 h-3 rounded-full flex-shrink-0"
@@ -474,7 +474,7 @@ export default function Auswertungen() {
                               <div className="font-medium text-content-heading flex items-center gap-2">
                                 {cat.categoryName}
                                 {cat.isTaxRelevant && (
-                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-warning-subtle text-warning">
                                     <AlertCircle className="w-3 h-3 mr-0.5" />
                                     Steuer
                                   </span>
@@ -491,19 +491,19 @@ export default function Auswertungen() {
                     )}
                   </div>
                   {bookkeepingData.ausgaben.length > 0 && (
-                    <div className="bg-red-50 px-6 py-4 border-t border-red-100 flex justify-between items-center">
-                      <span className="font-medium text-red-800">Total Ausgaben</span>
-                      <span className="font-bold text-red-700 text-lg">{formatCHF(bookkeepingData.totalAusgaben)}</span>
+                    <div className="bg-danger-subtle px-6 py-4 border-t border-danger-subtle flex justify-between items-center">
+                      <span className="font-medium text-danger">Total Ausgaben</span>
+                      <span className="font-bold text-danger text-lg">{formatCHF(bookkeepingData.totalAusgaben)}</span>
                     </div>
                   )}
                 </div>
               </div>
 
               {/* Result Banner */}
-              <div className={`rounded-lg shadow p-6 ${bookkeepingData.gewinnVerlust >= 0 ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
+              <div className={`rounded-lg shadow p-6 ${bookkeepingData.gewinnVerlust >= 0 ? 'bg-success-subtle border border-success-subtle' : 'bg-danger-subtle border border-danger-subtle'}`}>
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className={`text-lg font-semibold ${bookkeepingData.gewinnVerlust >= 0 ? 'text-green-800' : 'text-red-800'}`}>
+                    <h3 className={`text-lg font-semibold ${bookkeepingData.gewinnVerlust >= 0 ? 'text-success' : 'text-danger'}`}>
                       {bookkeepingData.gewinnVerlust >= 0 ? 'Gewinn' : 'Verlust'}
                     </h3>
                     <p className="text-sm text-content-secondary mt-1">
@@ -530,19 +530,19 @@ export default function Auswertungen() {
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {/* Total Income */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-surface rounded-lg shadow p-6">
           <div className="text-sm font-medium text-content-secondary mb-2">Gesamteinnahmen</div>
           <div className="text-3xl font-bold text-success-dark">{formatCHF(kpi.income)}</div>
         </div>
 
         {/* Total Expenses */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-surface rounded-lg shadow p-6">
           <div className="text-sm font-medium text-content-secondary mb-2">Gesamtausgaben</div>
           <div className="text-3xl font-bold text-danger-dark">{formatCHF(kpi.expense)}</div>
         </div>
 
         {/* Net Profit */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-surface rounded-lg shadow p-6">
           <div className="text-sm font-medium text-content-secondary mb-2">Nettogewinn</div>
           <div
             className={`text-3xl font-bold ${
@@ -555,7 +555,7 @@ export default function Auswertungen() {
       </div>
 
       {/* Main Timeline Chart */}
-      <div className="bg-white rounded-lg shadow p-6 mb-8">
+      <div className="bg-surface rounded-lg shadow p-6 mb-8">
         <h2 className="text-xl font-bold text-content-heading mb-6">Zeitverlauf</h2>
         <ResponsiveContainer width="100%" height={400}>
           <LineChart data={timeline}>
@@ -619,7 +619,7 @@ export default function Auswertungen() {
       {/* Breakdown Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* By Customer */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-surface rounded-lg shadow p-6">
           <h2 className="text-xl font-bold text-content-heading mb-6">Pro Kunde</h2>
           {byCustomer.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
@@ -662,7 +662,7 @@ export default function Auswertungen() {
         </div>
 
         {/* By Category */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-surface rounded-lg shadow p-6">
           <h2 className="text-xl font-bold text-content-heading mb-6">Nach Konto (Kategorie)</h2>
           {byCategory.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
@@ -697,7 +697,7 @@ export default function Auswertungen() {
         </div>
 
         {/* By Tags */}
-        <div className="bg-white rounded-lg shadow p-6 lg:col-span-2">
+        <div className="bg-surface rounded-lg shadow p-6 lg:col-span-2">
           <h2 className="text-xl font-bold text-content-heading mb-6">Nach Tags</h2>
           {byTags.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>

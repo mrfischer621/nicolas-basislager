@@ -26,48 +26,48 @@ export default function CustomerTable({ customers, onEdit, onRowClick, onArchive
 
   if (customers.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <p className="text-gray-500 text-center">Keine Kunden vorhanden. Erstellen Sie den ersten Kunden.</p>
+      <div className="bg-surface rounded-lg shadow-sm p-6">
+        <p className="text-fg-muted text-center">Keine Kunden vorhanden. Erstellen Sie den ersten Kunden.</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+    <div className="bg-surface rounded-lg shadow-sm overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-gray-50 border-b border-gray-200">
+          <thead className="bg-canvas border-b border-line">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-fg-muted uppercase tracking-wider">
                 Firma
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-fg-muted uppercase tracking-wider">
                 Kontaktperson
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-fg-muted uppercase tracking-wider">
                 E-Mail
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-fg-muted uppercase tracking-wider">
                 Ort
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-fg-muted uppercase tracking-wider">
                 Telefon
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-right text-xs font-medium text-fg-muted uppercase tracking-wider">
                 Offene Rechnungen
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-center text-xs font-medium text-fg-muted uppercase tracking-wider">
                 Kontakte
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-fg-muted uppercase tracking-wider">
                 Status
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-right text-xs font-medium text-fg-muted uppercase tracking-wider">
                 Aktionen
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody className="divide-y divide-line">
             {customers.map((customer) => {
               const location = [customer.zip_code, customer.city].filter(Boolean).join(' ') || '-';
 
@@ -75,38 +75,38 @@ export default function CustomerTable({ customers, onEdit, onRowClick, onArchive
                 <tr
                   key={customer.id}
                   onClick={() => onRowClick(customer)}
-                  className="hover:bg-gray-50 transition cursor-pointer"
+                  className="hover:bg-canvas transition cursor-pointer"
                 >
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm font-medium text-gray-900">
+                    <span className="text-sm font-medium text-fg">
                       {customer.name}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-600">{getCustomerDisplayName(customer)}</div>
+                    <div className="text-sm text-fg-muted">{getCustomerDisplayName(customer)}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-600">{customer.email || '-'}</div>
+                    <div className="text-sm text-fg-muted">{customer.email || '-'}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-600">{location}</div>
+                    <div className="text-sm text-fg-muted">{location}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-600">{customer.phone || '-'}</div>
+                    <div className="text-sm text-fg-muted">{customer.phone || '-'}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right">
                     {customer.open_invoice_amount > 0 ? (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-warning-subtle text-warning">
                         {formatCurrency(customer.open_invoice_amount)}
                       </span>
                     ) : (
-                      <span className="text-sm text-gray-400">-</span>
+                      <span className="text-sm text-fg-subtle">-</span>
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-center" onClick={(e) => e.stopPropagation()}>
                     <Link
                       to={`/kunden/${customer.id}/kontakte`}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-sm text-gray-600 hover:bg-gray-100 hover:text-brand transition"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-sm text-fg-muted hover:bg-raised hover:text-brand transition"
                     >
                       <Users size={16} />
                       <span>{customer.contacts_count}</span>
@@ -115,8 +115,8 @@ export default function CustomerTable({ customers, onEdit, onRowClick, onArchive
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                       customer.is_active
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-gray-100 text-gray-600'
+                        ? 'bg-success-subtle text-success'
+                        : 'bg-raised text-fg-muted'
                     }`}>
                       {customer.is_active ? 'Aktiv' : 'Archiviert'}
                     </span>
@@ -125,7 +125,7 @@ export default function CustomerTable({ customers, onEdit, onRowClick, onArchive
                     <div className="flex justify-end gap-2">
                       <button
                         onClick={() => onEdit(customer)}
-                        className="p-2 text-brand hover:bg-sage-50 rounded-lg transition"
+                        className="p-2 text-brand hover:bg-canvas rounded-lg transition"
                         title="Bearbeiten"
                       >
                         <Pencil size={18} />
@@ -133,7 +133,7 @@ export default function CustomerTable({ customers, onEdit, onRowClick, onArchive
                       {customer.is_active ? (
                         <button
                           onClick={() => onArchive(customer.id)}
-                          className="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition"
+                          className="p-2 text-warning hover:bg-warning-subtle rounded-lg transition"
                           title="Archivieren"
                         >
                           <Archive size={18} />
@@ -141,7 +141,7 @@ export default function CustomerTable({ customers, onEdit, onRowClick, onArchive
                       ) : (
                         <button
                           onClick={() => onRestore(customer.id)}
-                          className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition"
+                          className="p-2 text-success hover:bg-success-subtle rounded-lg transition"
                           title="Wiederherstellen"
                         >
                           <RotateCcw size={18} />
@@ -149,7 +149,7 @@ export default function CustomerTable({ customers, onEdit, onRowClick, onArchive
                       )}
                       <button
                         onClick={() => onDelete(customer.id)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                        className="p-2 text-danger hover:bg-danger-subtle rounded-lg transition"
                         title="Löschen"
                       >
                         <Trash2 size={18} />

@@ -41,7 +41,7 @@ export default function BentoLayout() {
       {/* Main Content Area - Light Background */}
       <div className="flex-1 flex flex-col min-w-0 bg-app-bg">
         {/* Header - Sticky Top */}
-        <header className="h-16 flex-shrink-0 bg-white border-b border-surface-border px-6 flex items-center justify-between">
+        <header className="h-16 flex-shrink-0 bg-surface border-b border-surface-border px-6 flex items-center justify-between">
           <BentoHeader onMenuClick={() => setIsMobileMenuOpen(true)} />
         </header>
 

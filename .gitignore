@@ -34,3 +34,5 @@ supabase/.temp
 *.njsproj
 *.sln
 *.sw?
+# --- Playwright (Sitzungszustand fuer Screenshots, enthaelt Login-Token) ---
+.auth/

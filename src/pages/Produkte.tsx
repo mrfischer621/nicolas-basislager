@@ -164,7 +164,7 @@ export default function Produkte() {
   if (!selectedCompany) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-gray-500">Firma wird geladen...</p>
+        <p className="text-fg-muted">Firma wird geladen...</p>
       </div>
     );
   }
@@ -174,12 +174,12 @@ export default function Produkte() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Produkte</h1>
-          <p className="text-gray-600 mt-1">Verwalten Sie Ihre Produkte und Dienstleistungen</p>
+          <h1 className="text-2xl font-bold text-fg">Produkte</h1>
+          <p className="text-fg-muted mt-1">Verwalten Sie Ihre Produkte und Dienstleistungen</p>
         </div>
         <button
           onClick={handleAddNew}
-          className="flex items-center gap-2 px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand-dark transition"
+          className="flex items-center gap-2 px-4 py-2 bg-brand text-accent-fg rounded-lg hover:bg-brand-dark transition"
         >
           <Plus size={20} />
           Neues Produkt
@@ -193,8 +193,8 @@ export default function Produkte() {
             onClick={() => setFilter('alle')}
             className={`px-4 py-2 rounded-lg font-medium transition ${
               filter === 'alle'
-                ? 'bg-brand text-white'
-                : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+                ? 'bg-brand text-accent-fg'
+                : 'bg-surface text-fg-muted hover:bg-raised border border-line'
             }`}
           >
             Alle
@@ -203,8 +203,8 @@ export default function Produkte() {
             onClick={() => setFilter('aktiv')}
             className={`px-4 py-2 rounded-lg font-medium transition ${
               filter === 'aktiv'
-                ? 'bg-brand text-white'
-                : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+                ? 'bg-brand text-accent-fg'
+                : 'bg-surface text-fg-muted hover:bg-raised border border-line'
             }`}
           >
             Aktiv
@@ -213,8 +213,8 @@ export default function Produkte() {
             onClick={() => setFilter('archiviert')}
             className={`px-4 py-2 rounded-lg font-medium transition ${
               filter === 'archiviert'
-                ? 'bg-brand text-white'
-                : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+                ? 'bg-brand text-accent-fg'
+                : 'bg-surface text-fg-muted hover:bg-raised border border-line'
             }`}
           >
             Archiviert
@@ -226,8 +226,8 @@ export default function Produkte() {
           onClick={() => setGroupByCategory(!groupByCategory)}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition ${
             groupByCategory
-              ? 'bg-brand text-white'
-              : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+              ? 'bg-brand text-accent-fg'
+              : 'bg-surface text-fg-muted hover:bg-raised border border-line'
           }`}
         >
           <Layers size={18} />
@@ -237,15 +237,15 @@ export default function Produkte() {
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+        <div className="bg-danger-subtle border border-danger-subtle text-danger px-4 py-3 rounded-lg">
           {error}
         </div>
       )}
 
       {/* Table */}
       {loading ? (
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <p className="text-gray-500 text-center">Lädt Produkte...</p>
+        <div className="bg-surface rounded-lg shadow-sm p-6">
+          <p className="text-fg-muted text-center">Lädt Produkte...</p>
         </div>
       ) : groupByCategory && groupedProducts ? (
         /* Grouped View */
@@ -253,8 +253,8 @@ export default function Produkte() {
           {Array.from(groupedProducts.entries()).map(([category, categoryProducts]) => (
             <div key={category} className="space-y-3">
               <div className="flex items-center gap-2">
-                <h2 className="text-lg font-semibold text-gray-900">{category}</h2>
-                <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-sm rounded-full">
+                <h2 className="text-lg font-semibold text-fg">{category}</h2>
+                <span className="px-2 py-0.5 bg-raised text-fg-muted text-sm rounded-full">
                   {categoryProducts.length}
                 </span>
               </div>

@@ -1,629 +1,330 @@
+/* Blauwasser Design System fuer das CRM.
+   Tokens: src/styles/tokens.css (generiert aus design-system/blauwasser/project/tokens.json).
+   Hier stehen nur Schriften, Grundstile und die gemeinsamen Bausteine.
+   Keine Farbwerte: Farben ausschliesslich ueber die Tokens. */
+
+@import './styles/fonts.css';
+@import './styles/tokens.css';
+
 @tailwind base;
-
 @tailwind components;
-
 @tailwind utilities;
 
-
-
-/* ==========================================
-
-Swiss Spatial 2026 Design System - "Freiluftchuchi Sage"
-
-Organic Modernism • Micro-Depth • Color-Tinted Shadows
-
-========================================== */
-
-
-
 @layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
 
-/* CSS Custom Properties - Swiss Spatial 2026 */
+  /* Die App nutzt ein festes Viewport-Layout mit eigenem Scrollbereich */
+  html,
+  body {
+    @apply h-screen overflow-hidden;
+  }
 
-:root {
+  body {
+    @apply bg-canvas font-sans text-fg antialiased;
+    font-size: 15px;
+    line-height: 1.55;
+  }
 
-/* Sage Brand Palette */
+  /* Titel, Zahlen, Etiketten, Knoepfe: Albert Sans */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  button,
+  .font-display {
+    font-family: var(--bw-font-display);
+  }
 
---sage-500: #6b8a5e;
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-bold text-fg;
+    letter-spacing: -0.01em;
+  }
 
---sage-600: #547047;
+  /* Betraege und Zahlen: gleich breite Ziffern */
+  table,
+  .tabular-nums,
+  input[type='number'] {
+    font-variant-numeric: tabular-nums;
+  }
 
---sage-700: #435839;
+  /* Fokus: 2 px solid Tinte, 2 px Abstand (Token focus) */
+  :focus-visible {
+    outline: 2px solid rgb(var(--bw-focus));
+    outline-offset: 2px;
+  }
+  .bg-ink :focus-visible {
+    outline-color: rgb(var(--bw-focus-inverted));
+  }
 
+  ::placeholder {
+    color: rgb(var(--bw-fg-subtle));
+    opacity: 1;
+  }
 
+  ::selection {
+    background: rgb(var(--bw-accent-subtle));
+    color: rgb(var(--bw-fg));
+  }
 
-/* Sidebar (Dark with sage undertone) */
-
---sidebar-bg: #1a1f1c;
-
---sidebar-hover: #252b26;
-
---sidebar-text: #9ca3a0;
-
---sidebar-text-active: #ffffff;
-
-
-
-/* Surfaces */
-
---surface-base: #f7f8f6;
-
---surface-card: #ffffff;
-
---surface-border: #e2e5df;
-
-
-
-/* Brand */
-
---brand: #6b8a5e;
-
---brand-dark: #547047;
-
-
-
-/* Content Text */
-
---content-heading: #1a1f1c;
-
---content-body: #374038;
-
---content-secondary: #5c665e;
-
---content-tertiary: #8a948c;
-
-
-
-/* Legacy mappings */
-
---text-primary: #1a1f1c;
-
---text-secondary: #5c665e;
-
---text-tertiary: #8a948c;
-
---app-bg: #f7f8f6;
-
-
-
-/* Spatial Shadows (Sage-Tinted) */
-
---shadow-sm: 0 1px 2px 0 rgba(47, 58, 40, 0.05);
-
---shadow-rest: 0 1px 3px 0 rgba(47, 58, 40, 0.06), 0 1px 2px 0 rgba(47, 58, 40, 0.04);
-
---shadow-hover: 0 4px 8px -2px rgba(47, 58, 40, 0.08), 0 2px 4px -1px rgba(47, 58, 40, 0.04);
-
---shadow-elevated: 0 12px 20px -4px rgba(47, 58, 40, 0.10), 0 4px 8px -2px rgba(47, 58, 40, 0.05);
-
---shadow-spatial-1: 0 2px 8px -2px rgba(107, 138, 94, 0.15), 0 1px 3px 0 rgba(47, 58, 40, 0.06);
-
---shadow-spatial-2: 0 8px 24px -4px rgba(107, 138, 94, 0.18), 0 4px 8px -2px rgba(47, 58, 40, 0.08);
-
+  /* Bewegung sparsam, unter reduced motion nur noch kurzes Ueberblenden */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
-
-
-
-/* Dark Mode Variables */
-
-.dark {
-
---surface-base: #1a1f1c;
-
---surface-card: #252b26;
-
---surface-border: #374038;
-
---app-bg: #1a1f1c;
-
---content-heading: #f7f8f6;
-
---content-body: #e6ebe3;
-
---content-secondary: #aec2a3;
-
---content-tertiary: #8a948c;
-
---text-primary: #f7f8f6;
-
---text-secondary: #aec2a3;
-
---text-tertiary: #8a948c;
-
-}
-
-
-
-/* Global Typography Settings - Optimized Rendering */
-
-html {
-
-font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
-
--webkit-font-smoothing: antialiased;
-
--moz-osx-font-smoothing: grayscale;
-
-text-rendering: optimizeLegibility;
-
-}
-
-
-
-/* Prevent body/html scroll - app uses fixed viewport layout */
-
-html, body {
-
-@apply overflow-hidden h-screen;
-
-}
-
-
-
-/* Swiss Spatial: Base body styling */
-
-body {
-
-@apply bg-surface-base text-content-body antialiased;
-
-}
-
-
-
-/* Heading Typography (Neo-Grotesk) */
-
-h1, h2, h3, h4, h5, h6 {
-
-@apply tracking-tight font-semibold text-content-heading;
-
-}
-
-
-
-/* Focus Visible (Accessibility) */
-
-*:focus-visible {
-
-@apply outline-none ring-2 ring-sage-400 ring-offset-2;
-
-}
-
-
-
-/* Reduced Motion Preference */
-
-@media (prefers-reduced-motion: reduce) {
-
-*, *::before, *::after {
-
-animation-duration: 0.01ms !important;
-
-animation-iteration-count: 1 !important;
-
-transition-duration: 0.01ms !important;
-
-}
-
-}
-
-}
-
-
 
 @layer components {
+  /* Seitentitel: Versalien, Albert Sans 900, eng */
+  .page-title {
+    font-family: var(--bw-font-display);
+    @apply text-2xl font-black uppercase leading-none text-fg md:text-[2rem];
+    letter-spacing: -0.015em;
+  }
 
-/* ==========================================
+  /* Kleine Etikette (caps-sm): Versalien, 800, Sperrung 0.12em, gedaempft */
+  .caps-sm {
+    font-family: var(--bw-font-display);
+    @apply text-[12px] font-extrabold uppercase text-fg-muted;
+    letter-spacing: 0.12em;
+  }
 
-Swiss Spatial: Card Component
+  /* Marker: hellblauer Balken hinter der Pointe, hoechstens einmal pro Seite */
+  .bw-marker {
+    background-image: linear-gradient(
+      transparent 58%,
+      rgb(var(--bw-cta)) 58%,
+      rgb(var(--bw-cta)) 92%,
+      transparent 92%
+    );
+    padding-inline: 0.06em;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) .bw-marker {
+      background-image: none;
+      color: rgb(var(--bw-cta));
+    }
+  }
+  :root[data-theme='dark'] .bw-marker {
+    background-image: none;
+    color: rgb(var(--bw-cta));
+  }
 
-========================================== */
+  /* Karte: Papier, radius-card, shadow-card */
+  .card {
+    @apply rounded-card bg-surface shadow-card;
+  }
+  .card-hover:hover,
+  .card-interactive:hover {
+    @apply shadow-md;
+  }
+  .card-interactive {
+    @apply card cursor-pointer transition-shadow duration-fast;
+  }
 
-.card {
+  .bento-grid {
+    @apply grid gap-bento;
+  }
+  .bento-grid-lg {
+    @apply grid gap-bento-lg;
+  }
 
-@apply bg-surface-card border border-surface-border rounded-xl shadow-rest;
+  /* Knoepfe. Eine Pill (btn-cta) pro Ansicht fuer die Hauptaktion. */
+  .btn {
+    @apply inline-flex min-h-[40px] items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-bold transition-colors duration-fast;
+    font-family: var(--bw-font-display);
+  }
+  .btn:disabled {
+    @apply cursor-not-allowed opacity-50;
+  }
+  .btn-cta {
+    @apply btn rounded-full bg-cta px-5 uppercase text-cta-fg shadow-cta hover:bg-cta-hover;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+  }
+  .btn-primary {
+    @apply btn bg-accent text-accent-fg hover:bg-accent-hover;
+  }
+  .btn-secondary {
+    @apply btn border border-line-strong bg-surface text-fg hover:bg-raised;
+  }
+  .btn-ghost {
+    @apply btn text-fg-muted hover:bg-raised hover:text-fg;
+  }
+  .btn-danger {
+    @apply btn border border-danger bg-surface text-danger hover:bg-danger-subtle;
+  }
 
-@apply transition-all duration-normal ease-swiss;
+  /* Textlink: Tinte, hellblau unterstrichen */
+  .bw-textlink {
+    @apply font-medium text-fg underline decoration-cta decoration-2 underline-offset-4 hover:decoration-fg;
+  }
 
+  /* Eingabefelder: radius-lg, Rand border-strong (3.9:1, WCAG 1.4.11) */
+  .input {
+    @apply w-full rounded-lg border border-line-strong bg-surface px-3 py-2 text-fg transition-colors duration-fast;
+  }
+  .input:disabled {
+    @apply bg-raised text-fg-muted;
+  }
+  .input-error {
+    @apply border-danger;
+  }
+  .label {
+    @apply mb-1 block text-sm font-semibold text-fg;
+  }
+
+  /* Kennzahl */
+  .kpi-card {
+    @apply card p-6;
+  }
+  .kpi-label {
+    @apply caps-sm mb-2;
+  }
+  .kpi-value {
+    font-family: var(--bw-font-display);
+    @apply text-3xl font-black tabular-nums text-fg;
+    letter-spacing: -0.02em;
+  }
+  .kpi-positive,
+  .kpi-negative,
+  .kpi-neutral {
+    @apply text-fg;
+  }
+
+  /* Tabelle */
+  .table-container {
+    @apply overflow-x-auto;
+  }
+  .table {
+    @apply w-full text-sm;
+  }
+  .table th {
+    @apply caps-sm border-b border-line px-4 py-3 text-left;
+  }
+  .table td {
+    @apply border-b border-line px-4 py-3 text-fg;
+  }
+  .table tbody tr {
+    @apply transition-colors duration-fast hover:bg-canvas;
+  }
+
+  /* Badge: radius-badge, Status immer mit Wort */
+  .badge {
+    @apply inline-flex items-center rounded-badge px-2 py-0.5 text-xs font-semibold;
+  }
+  .badge-success {
+    @apply badge bg-success-subtle text-success;
+  }
+  .badge-warning {
+    @apply badge bg-warning-subtle text-warning;
+  }
+  .badge-danger {
+    @apply badge bg-danger-subtle text-danger;
+  }
+  .badge-neutral {
+    @apply badge bg-raised text-fg;
+  }
+  .badge-accent {
+    @apply badge bg-accent-subtle text-fg;
+  }
+
+  /* Skeleton (Ladezustand) */
+  .skeleton {
+    @apply animate-pulse rounded-lg bg-sunken;
+  }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--bw-sunken)) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: rgb(var(--bw-sunken));
+    border-radius: 3px;
+  }
+  .scrollbar-hidden {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scrollbar-hidden::-webkit-scrollbar {
+    display: none;
+  }
 }
 
-
-
-.card-hover:hover {
-
-@apply shadow-spatial-1;
-
-}
-
-
-
-.card-interactive {
-
-@apply card cursor-pointer;
-
-@apply hover:shadow-spatial-1 hover:border-sage-200;
-
-}
-
-
-
-/* ==========================================
-
-Swiss Modern: Bento Grid
-
-========================================== */
-
-.bento-grid {
-
-@apply grid gap-bento;
-
-}
-
-
-
-.bento-grid-lg {
-
-@apply grid gap-bento-lg;
-
-}
-
-
-
-/* ==========================================
-
-Swiss Spatial: Button Components
-
-========================================== */
-
-.btn {
-
-@apply inline-flex items-center justify-center gap-2;
-
-@apply px-5 py-2.5 rounded-button font-medium text-sm;
-
-@apply transition-all duration-fast ease-swiss;
-
-@apply focus-visible:ring-2 focus-visible:ring-offset-2;
-
-}
-
-
-
-.btn-primary {
-
-@apply btn bg-brand text-white shadow-rest;
-
-@apply hover:bg-brand-dark hover:shadow-spatial-1;
-
-@apply focus-visible:ring-brand;
-
-}
-
-
-
-.btn-secondary {
-
-@apply btn bg-surface-card text-content-body border border-surface-border;
-
-@apply hover:bg-sage-50 hover:border-sage-200;
-
-@apply focus-visible:ring-brand;
-
-}
-
-
-
-.btn-ghost {
-
-@apply btn text-content-secondary;
-
-@apply hover:bg-sage-50 hover:text-content-body;
-
-@apply focus-visible:ring-brand;
-
-}
-
-
-
-.btn-danger {
-
-@apply btn bg-danger text-white shadow-rest;
-
-@apply hover:bg-danger-dark hover:shadow-spatial-1;
-
-@apply focus-visible:ring-danger;
-
-}
-
-
-
-/* ==========================================
-
-Swiss Spatial: Form Inputs
-
-========================================== */
-
-.input {
-
-@apply w-full px-4 py-2.5 rounded-input;
-
-@apply bg-surface-card border border-surface-border;
-
-@apply text-content-body placeholder:text-content-tertiary;
-
-@apply transition-colors duration-fast ease-swiss;
-
-@apply hover:border-sage-300;
-
-@apply focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand;
-
-}
-
-
-
-.input-error {
-
-@apply border-danger focus:border-danger focus:ring-danger;
-
-}
-
-
-
-/* ==========================================
-
-Swiss Spatial: KPI Card (Dashboard)
-
-========================================== */
-
-.kpi-card {
-
-@apply card p-7;
-
-@apply hover:shadow-spatial-1;
-
-}
-
-
-
-.kpi-label {
-
-@apply text-sm font-medium text-content-secondary mb-1;
-
-}
-
-
-
-.kpi-value {
-
-@apply text-3xl font-bold tracking-tight text-content-heading;
-
-}
-
-
-
-.kpi-positive {
-
-@apply text-success-dark;
-
-}
-
-
-
-.kpi-negative {
-
-@apply text-danger-dark;
-
-}
-
-
-
-.kpi-neutral {
-
-@apply text-brand;
-
-}
-
-
-
-/* ==========================================
-
-Swiss Spatial: Table
-
-========================================== */
-
-.table-container {
-
-@apply overflow-x-auto;
-
-}
-
-
-
-.table {
-
-@apply w-full;
-
-}
-
-
-
-.table th {
-
-@apply text-left py-4 px-5 font-medium text-content-secondary text-sm;
-
-@apply border-b border-surface-border;
-
-}
-
-
-
-.table td {
-
-@apply py-4 px-5 text-content-body;
-
-@apply border-b border-surface-border;
-
-}
-
-
-
-.table tbody tr {
-
-@apply transition-colors duration-fast;
-
-@apply hover:bg-sage-50;
-
-}
-
-
-
-/* ==========================================
-
-Swiss Modern: Badge / Status
-
-========================================== */
-
-.badge {
-
-@apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
-
-}
-
-
-
-.badge-success {
-
-@apply badge bg-success-light text-success-dark;
-
-}
-
-
-
-.badge-warning {
-
-@apply badge bg-warning-light text-warning-dark;
-
-}
-
-
-
-.badge-danger {
-
-@apply badge bg-danger-light text-danger-dark;
-
-}
-
-
-
-.badge-neutral {
-
-@apply badge bg-sage-100 text-sage-700;
-
-}
-
-
-
-/* ==========================================
-
-Swiss Spatial: Scrollbar Utilities
-
-========================================== */
-
-.scrollbar-thin {
-
-scrollbar-width: thin;
-
-scrollbar-color: #ced9c7 transparent; /* sage-200 */
-
-}
-
-
-
-.scrollbar-thin::-webkit-scrollbar {
-
-width: 6px;
-
-height: 6px;
-
-}
-
-
-
-.scrollbar-thin::-webkit-scrollbar-track {
-
-background: transparent;
-
-}
-
-
-
-.scrollbar-thin::-webkit-scrollbar-thumb {
-
-background-color: #ced9c7; /* sage-200 */
-
-border-radius: 3px;
-
-}
-
-
-
-.scrollbar-thin::-webkit-scrollbar-thumb:hover {
-
-background-color: #aec2a3; /* sage-300 */
-
-}
-
-
-
-.scrollbar-hidden {
-
-scrollbar-width: none;
-
--ms-overflow-style: none;
-
-}
-
-
-
-.scrollbar-hidden::-webkit-scrollbar {
-
-display: none;
-
-}
-
-}
-
-/* ==========================================
-   Rich Text Editor – Tiptap
-   ========================================== */
-
+/* Rich Text Editor (Tiptap) */
 .rich-editor {
   min-height: 2rem;
   font-size: 0.875rem;
-  color: #374038;
+  color: rgb(var(--bw-fg));
   line-height: 1.5;
   outline: none;
 }
-
-.rich-editor p { margin: 0; }
-.rich-editor p + p { margin-top: 0.125rem; }
-
+.rich-editor p {
+  margin: 0;
+}
+.rich-editor p + p {
+  margin-top: 0.125rem;
+}
 .rich-editor ul,
 .rich-editor ol {
   padding-left: 1.25rem;
   margin: 0.125rem 0;
 }
-
-.rich-editor ul { list-style-type: disc; }
-.rich-editor ol { list-style-type: decimal; }
-.rich-editor li { margin: 0; }
-.rich-editor strong { font-weight: 600; }
-.rich-editor em { font-style: italic; }
-
-/* Read-only rich text display */
-.rich-text-display p { margin: 0; }
-.rich-text-display p + p { margin-top: 0.125rem; }
-.rich-text-display ul { list-style-type: disc; padding-left: 1.25rem; margin: 0.125rem 0; }
-.rich-text-display ol { list-style-type: decimal; padding-left: 1.25rem; margin: 0.125rem 0; }
-.rich-text-display li { margin: 0; }
-.rich-text-display strong { font-weight: 600; }
-.rich-text-display em { font-style: italic; }
+.rich-editor ul {
+  list-style-type: disc;
+}
+.rich-editor ol {
+  list-style-type: decimal;
+}
+.rich-editor li {
+  margin: 0;
+}
+.rich-editor strong {
+  font-weight: 600;
+}
+.rich-editor em {
+  font-style: italic;
+}
+.rich-text-display p {
+  margin: 0;
+}
+.rich-text-display p + p {
+  margin-top: 0.125rem;
+}
+.rich-text-display ul {
+  list-style-type: disc;
+  padding-left: 1.25rem;
+  margin: 0.125rem 0;
+}
+.rich-text-display ol {
+  list-style-type: decimal;
+  padding-left: 1.25rem;
+  margin: 0.125rem 0;
+}
+.rich-text-display li {
+  margin: 0;
+}
+.rich-text-display strong {
+  font-weight: 600;
+}

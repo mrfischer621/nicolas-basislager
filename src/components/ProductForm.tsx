@@ -98,38 +98,38 @@ export default function ProductForm({ onSubmit, editingProduct, onCancel }: Prod
   const unitOptions = ['Stück', 'Stunden', 'kg', 'Liter', 'm', 'm²', 'm³', 'Paket', 'Set'];
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm p-6 space-y-4">
-      <h2 className="text-xl font-semibold text-gray-900">
+    <form onSubmit={handleSubmit} className="bg-surface rounded-lg shadow-sm p-6 space-y-4">
+      <h2 className="text-xl font-semibold text-fg">
         {editingProduct ? 'Produkt bearbeiten' : 'Neues Produkt'}
       </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Name */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Name <span className="text-red-500">*</span>
+          <label className="block text-sm font-medium text-fg mb-1">
+            Name <span className="text-danger">*</span>
           </label>
           <input
             type="text"
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent ${
-              errors.name ? 'border-red-500' : 'border-gray-300'
+              errors.name ? 'border-danger' : 'border-line-strong'
             }`}
             placeholder="Produktname"
           />
-          {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+          {errors.name && <p className="text-danger text-sm mt-1">{errors.name}</p>}
         </div>
 
         {/* Category - Dropdown (Phase 3.2) */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-fg mb-1">
             Kategorie
           </label>
           <select
             value={formData.category}
             onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
+            className="w-full px-3 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
           >
             <option value="">Keine Kategorie</option>
             {selectedCompany?.product_categories?.map((cat) => (
@@ -139,7 +139,7 @@ export default function ProductForm({ onSubmit, editingProduct, onCancel }: Prod
             ))}
           </select>
           {(!selectedCompany?.product_categories || selectedCompany.product_categories.length === 0) && (
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-fg-muted mt-1">
               Keine Kategorien verfügbar. Definieren Sie Kategorien in den Einstellungen.
             </p>
           )}
@@ -147,8 +147,8 @@ export default function ProductForm({ onSubmit, editingProduct, onCancel }: Prod
 
         {/* Price */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Preis (CHF) <span className="text-red-500">*</span>
+          <label className="block text-sm font-medium text-fg mb-1">
+            Preis (CHF) <span className="text-danger">*</span>
           </label>
           <input
             type="number"
@@ -157,17 +157,17 @@ export default function ProductForm({ onSubmit, editingProduct, onCancel }: Prod
             value={formData.price}
             onChange={(e) => setFormData({ ...formData, price: e.target.value })}
             className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent ${
-              errors.price ? 'border-red-500' : 'border-gray-300'
+              errors.price ? 'border-danger' : 'border-line-strong'
             }`}
             placeholder="0.00"
           />
-          {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price}</p>}
+          {errors.price && <p className="text-danger text-sm mt-1">{errors.price}</p>}
         </div>
 
         {/* VAT Rate - only show if company.vat_enabled */}
         {selectedCompany?.vat_enabled && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-fg mb-1">
               MWST-Satz (%)
             </label>
             <input
@@ -177,10 +177,10 @@ export default function ProductForm({ onSubmit, editingProduct, onCancel }: Prod
               max="100"
               value={formData.vat_rate}
               onChange={(e) => setFormData({ ...formData, vat_rate: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
+              className="w-full px-3 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
               placeholder={`Standard (${selectedCompany.default_vat_rate}%)`}
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-fg-muted mt-1">
               Leer lassen für Standard ({selectedCompany.default_vat_rate}%)
             </p>
           </div>
@@ -188,14 +188,14 @@ export default function ProductForm({ onSubmit, editingProduct, onCancel }: Prod
 
         {/* Unit */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Einheit <span className="text-red-500">*</span>
+          <label className="block text-sm font-medium text-fg mb-1">
+            Einheit <span className="text-danger">*</span>
           </label>
           <select
             value={formData.unit}
             onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
             className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent ${
-              errors.unit ? 'border-red-500' : 'border-gray-300'
+              errors.unit ? 'border-danger' : 'border-line-strong'
             }`}
           >
             {unitOptions.map((unit) => (
@@ -204,7 +204,7 @@ export default function ProductForm({ onSubmit, editingProduct, onCancel }: Prod
               </option>
             ))}
           </select>
-          {errors.unit && <p className="text-red-500 text-sm mt-1">{errors.unit}</p>}
+          {errors.unit && <p className="text-danger text-sm mt-1">{errors.unit}</p>}
         </div>
 
         {/* Active Status */}
@@ -214,21 +214,21 @@ export default function ProductForm({ onSubmit, editingProduct, onCancel }: Prod
               type="checkbox"
               checked={formData.is_active}
               onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-              className="w-4 h-4 text-brand border-gray-300 rounded focus:ring-brand"
+              className="w-4 h-4 text-brand border-line-strong rounded focus:ring-brand"
             />
-            <span className="ml-2 text-sm text-gray-700">Produkt aktiv</span>
+            <span className="ml-2 text-sm text-fg">Produkt aktiv</span>
           </label>
         </div>
       </div>
 
       {/* Description */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Beschreibung</label>
+        <label className="block text-sm font-medium text-fg mb-1">Beschreibung</label>
         <textarea
           value={formData.description}
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
           rows={3}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
+          className="w-full px-3 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
           placeholder="Optionale Produktbeschreibung"
         />
       </div>
@@ -238,7 +238,7 @@ export default function ProductForm({ onSubmit, editingProduct, onCancel }: Prod
         <button
           type="submit"
           disabled={isSubmitting}
-          className="px-6 py-2 bg-brand text-white rounded-lg hover:bg-opacity-90 transition disabled:opacity-50"
+          className="px-6 py-2 bg-brand text-accent-fg rounded-lg hover:bg-opacity-90 transition disabled:opacity-50"
         >
           {isSubmitting ? 'Speichern...' : editingProduct ? 'Aktualisieren' : 'Hinzufügen'}
         </button>
@@ -246,7 +246,7 @@ export default function ProductForm({ onSubmit, editingProduct, onCancel }: Prod
           <button
             type="button"
             onClick={onCancel}
-            className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
+            className="px-6 py-2 bg-sunken text-fg rounded-lg hover:bg-sunken transition"
           >
             Abbrechen
           </button>

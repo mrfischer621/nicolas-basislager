@@ -112,7 +112,7 @@ export default function Rechnungen() {
   if (!selectedCompany) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-gray-500">Firma wird geladen...</p>
+        <p className="text-fg-muted">Firma wird geladen...</p>
       </div>
     );
   }
@@ -587,12 +587,12 @@ export default function Rechnungen() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Rechnungen</h1>
-          <p className="text-gray-600 mt-1">Erstellen und verwalten Sie Ihre Rechnungen</p>
+          <h1 className="text-2xl font-bold text-fg">Rechnungen</h1>
+          <p className="text-fg-muted mt-1">Erstellen und verwalten Sie Ihre Rechnungen</p>
         </div>
         <button
           onClick={handleAddNew}
-          className="flex items-center gap-2 px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand-dark transition"
+          className="flex items-center gap-2 px-4 py-2 bg-brand text-accent-fg rounded-lg hover:bg-brand-dark transition"
         >
           <Plus size={20} />
           Neue Rechnung
@@ -601,13 +601,13 @@ export default function Rechnungen() {
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+        <div className="bg-danger-subtle border border-danger-subtle text-danger px-4 py-3 rounded-lg">
           {error}
         </div>
       )}
 
       {onlyMissingPaidDate && (
-        <div className="flex items-center justify-between rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+        <div className="flex items-center justify-between rounded-lg border border-warning bg-warning-subtle px-4 py-3 text-sm text-warning">
           <span>
             Gefiltert: {visibleInvoices.length} bezahlte {visibleInvoices.length === 1 ? 'Rechnung' : 'Rechnungen'} ohne Zahlungsdatum.
             Ohne Datum zählen sie in keiner Auswertung.
@@ -620,15 +620,15 @@ export default function Rechnungen() {
 
       {/* Warning if no customers */}
       {customers.length === 0 && !isLoading && (
-        <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-lg">
+        <div className="bg-warning-subtle border border-warning-subtle text-warning px-4 py-3 rounded-lg">
           Bitte erstellen Sie zuerst Kunden, bevor Sie Rechnungen erstellen.
         </div>
       )}
 
       {/* Table */}
       {isLoading ? (
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <p className="text-gray-500 text-center">Lädt Rechnungen...</p>
+        <div className="bg-surface rounded-lg shadow-sm p-6">
+          <p className="text-fg-muted text-center">Lädt Rechnungen...</p>
         </div>
       ) : (
         <InvoiceTable
@@ -675,12 +675,12 @@ export default function Rechnungen() {
           <div
             className={`flex items-start gap-3 rounded-lg px-4 py-3 shadow-lg ${
               toast.type === 'success'
-                ? 'bg-green-50 border border-green-200'
-                : 'bg-red-50 border border-red-200'
+                ? 'bg-success-subtle border border-success-subtle'
+                : 'bg-danger-subtle border border-danger-subtle'
             }`}
           >
             {toast.type === 'success' ? (
-              <div className="flex-shrink-0 w-5 h-5 text-green-600">
+              <div className="flex-shrink-0 w-5 h-5 text-success">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 20 20"
@@ -695,12 +695,12 @@ export default function Rechnungen() {
               </div>
             ) : (
               <AlertCircle
-                className={`flex-shrink-0 ${toast.type === 'error' ? 'text-red-600' : 'text-green-600'}`}
+                className={`flex-shrink-0 ${toast.type === 'error' ? 'text-danger' : 'text-success'}`}
                 size={20}
               />
             )}
             <div className="flex-1">
-              <p className={toast.type === 'success' ? 'text-green-800' : 'text-red-800'}>
+              <p className={toast.type === 'success' ? 'text-success' : 'text-danger'}>
                 {toast.message}
               </p>
             </div>
@@ -708,8 +708,8 @@ export default function Rechnungen() {
               onClick={() => setToast(null)}
               className={`flex-shrink-0 ${
                 toast.type === 'success'
-                  ? 'text-green-600 hover:text-green-800'
-                  : 'text-red-600 hover:text-red-800'
+                  ? 'text-success hover:text-success'
+                  : 'text-danger hover:text-danger'
               }`}
             >
               <svg

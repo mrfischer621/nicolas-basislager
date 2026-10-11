@@ -258,18 +258,18 @@ export default function QuoteForm({
   const totals = calculateTotals();
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6">
-      <h2 className="text-xl font-semibold text-gray-900 mb-4">
+    <div className="bg-surface rounded-lg shadow-sm p-6">
+      <h2 className="text-xl font-semibold text-fg mb-4">
         {isEditMode ? 'Angebot bearbeiten' : 'Neues Angebot'}
       </h2>
 
       {/* Warning for editing sent/accepted/rejected quotes */}
       {showEditWarning && (
-        <div className="mb-4 flex items-start gap-3 rounded-lg bg-amber-50 border border-amber-200 px-4 py-3">
-          <AlertTriangle className="flex-shrink-0 text-amber-600 mt-0.5" size={20} />
+        <div className="mb-4 flex items-start gap-3 rounded-lg bg-warning-subtle border border-warning-subtle px-4 py-3">
+          <AlertTriangle className="flex-shrink-0 text-warning mt-0.5" size={20} />
           <div>
-            <p className="text-amber-800 font-medium">{editWarningMessage}</p>
-            <p className="text-amber-700 text-sm mt-1">
+            <p className="text-warning font-medium">{editWarningMessage}</p>
+            <p className="text-warning text-sm mt-1">
               Änderungen werden gespeichert, stellen Sie sicher, dass der Kunde über die Korrektur informiert wird.
             </p>
           </div>
@@ -279,15 +279,15 @@ export default function QuoteForm({
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label htmlFor="customer" className="block text-sm font-medium text-gray-700 mb-1">
-              Kunde <span className="text-red-500">*</span>
+            <label htmlFor="customer" className="block text-sm font-medium text-fg mb-1">
+              Kunde <span className="text-danger">*</span>
             </label>
             <select
               id="customer"
               value={customerId}
               onChange={(e) => setCustomerId(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
             >
               <option value="">Kunde auswählen</option>
               {customers.map((customer) => (
@@ -299,7 +299,7 @@ export default function QuoteForm({
           </div>
 
           <div>
-            <label htmlFor="project" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="project" className="block text-sm font-medium text-fg mb-1">
               Projekt (optional)
             </label>
             <select
@@ -307,7 +307,7 @@ export default function QuoteForm({
               value={projectId}
               onChange={(e) => setProjectId(e.target.value)}
               disabled={!customerId}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition disabled:bg-gray-50"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition disabled:bg-canvas"
             >
               <option value="">Kein Projekt</option>
               {customerProjects.map((project) => (
@@ -319,7 +319,7 @@ export default function QuoteForm({
           </div>
 
           <div>
-            <label htmlFor="quoteNumber" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="quoteNumber" className="block text-sm font-medium text-fg mb-1">
               Angebotsnummer
             </label>
             <input
@@ -328,7 +328,7 @@ export default function QuoteForm({
               value={quoteNumber}
               onChange={(e) => setQuoteNumber(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 font-medium text-gray-900"
+              className="w-full px-4 py-2 border border-line rounded-lg bg-canvas font-medium text-fg"
               readOnly
             />
           </div>
@@ -336,8 +336,8 @@ export default function QuoteForm({
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label htmlFor="issueDate" className="block text-sm font-medium text-gray-700 mb-1">
-              Angebotsdatum <span className="text-red-500">*</span>
+            <label htmlFor="issueDate" className="block text-sm font-medium text-fg mb-1">
+              Angebotsdatum <span className="text-danger">*</span>
             </label>
             <input
               type="date"
@@ -345,13 +345,13 @@ export default function QuoteForm({
               value={issueDate}
               onChange={(e) => setIssueDate(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
             />
           </div>
 
           <div>
-            <label htmlFor="validUntil" className="block text-sm font-medium text-gray-700 mb-1">
-              Gültig bis <span className="text-red-500">*</span>
+            <label htmlFor="validUntil" className="block text-sm font-medium text-fg mb-1">
+              Gültig bis <span className="text-danger">*</span>
             </label>
             <input
               type="date"
@@ -359,19 +359,19 @@ export default function QuoteForm({
               value={validUntil}
               onChange={(e) => setValidUntil(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
             />
           </div>
 
           <div>
-            <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="status" className="block text-sm font-medium text-fg mb-1">
               Status
             </label>
             <select
               id="status"
               value={status}
               onChange={(e) => setStatus(e.target.value as Quote['status'])}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
             >
               <option value="offen">Offen</option>
               <option value="versendet">Versendet</option>
@@ -383,8 +383,8 @@ export default function QuoteForm({
 
         {/* Intro Text — shown above items in PDF */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Einleitungstext <span className="text-xs font-normal text-gray-400">(optional — überschreibt die Firmenvorlage für dieses Angebot)</span>
+          <label className="block text-sm font-medium text-fg mb-1">
+            Einleitungstext <span className="text-xs font-normal text-fg-subtle">(optional — überschreibt die Firmenvorlage für dieses Angebot)</span>
           </label>
           <textarea
             value={introText}
@@ -396,19 +396,19 @@ export default function QuoteForm({
             }}
             placeholder={selectedCompany?.quote_intro_text || 'Einleitungstext für dieses Angebot…'}
             rows={3}
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm resize-none overflow-hidden"
+            className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm resize-none overflow-hidden"
             style={{ minHeight: '72px' }}
           />
         </div>
 
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-lg font-semibold text-gray-900">Positionen</h3>
+            <h3 className="text-lg font-semibold text-fg">Positionen</h3>
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={() => setShowDiscounts(!showDiscounts)}
-                className="rounded-lg px-3 py-1.5 text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition flex items-center gap-2"
+                className="rounded-lg px-3 py-1.5 text-sm font-medium bg-raised text-fg hover:bg-sunken transition flex items-center gap-2"
               >
                 {showDiscounts ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                 Rabatte
@@ -416,7 +416,7 @@ export default function QuoteForm({
               <button
                 type="button"
                 onClick={handleAddItem}
-                className="rounded-lg px-3 py-1.5 text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition flex items-center gap-2"
+                className="rounded-lg px-3 py-1.5 text-sm font-medium bg-raised text-fg hover:bg-sunken transition flex items-center gap-2"
               >
                 <Plus size={16} />
                 Position hinzufügen
@@ -426,18 +426,18 @@ export default function QuoteForm({
 
           <div className="space-y-3">
             {items.map((item, index) => (
-              <div key={index} className="border border-gray-100 rounded-lg p-3 bg-gray-50/50">
+              <div key={index} className="border border-line rounded-lg p-3 bg-canvas/50">
                 {/* Row 1: Product selector */}
                 <div className="mb-2">
                   {index === 0 && (
-                    <label className="block text-xs font-medium text-gray-600 mb-1">
+                    <label className="block text-xs font-medium text-fg-muted mb-1">
                       Produkt (optional)
                     </label>
                   )}
                   <select
                     value={item.product_id || ''}
                     onChange={(e) => handleProductSelect(index, e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm bg-white"
+                    className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm bg-surface"
                   >
                     <option value="">Freie Eingabe</option>
                     {products.map((product) => (
@@ -451,8 +451,8 @@ export default function QuoteForm({
                 {/* Row 2: Description textarea */}
                 <div className="mb-2">
                   {index === 0 && (
-                    <label className="block text-xs font-medium text-gray-600 mb-1">
-                      Beschreibung <span className="font-normal text-gray-400">(1. Zeile = Titel fett im PDF)</span>
+                    <label className="block text-xs font-medium text-fg-muted mb-1">
+                      Beschreibung <span className="font-normal text-fg-subtle">(1. Zeile = Titel fett im PDF)</span>
                     </label>
                   )}
                   <textarea
@@ -466,7 +466,7 @@ export default function QuoteForm({
                     placeholder={"Titel (wird fett im PDF)\nZusätzliche Beschreibung (optional)"}
                     rows={2}
                     required
-                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm resize-none overflow-hidden bg-white"
+                    className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm resize-none overflow-hidden bg-surface"
                     style={{ minHeight: '56px' }}
                   />
                 </div>
@@ -475,7 +475,7 @@ export default function QuoteForm({
                 <div className="grid grid-cols-12 gap-2 items-center">
                   <div className="col-span-3">
                     {index === 0 && (
-                      <label className="block text-xs font-medium text-gray-600 mb-1">Menge</label>
+                      <label className="block text-xs font-medium text-fg-muted mb-1">Menge</label>
                     )}
                     <input
                       type="number"
@@ -485,13 +485,13 @@ export default function QuoteForm({
                       step="0.01"
                       min="0"
                       required
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm bg-white"
+                      className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm bg-surface"
                     />
                   </div>
 
                   <div className="col-span-3">
                     {index === 0 && (
-                      <label className="block text-xs font-medium text-gray-600 mb-1">Einzelpreis (CHF)</label>
+                      <label className="block text-xs font-medium text-fg-muted mb-1">Einzelpreis (CHF)</label>
                     )}
                     <input
                       type="number"
@@ -501,13 +501,13 @@ export default function QuoteForm({
                       step="0.01"
                       min="0"
                       required
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm bg-white"
+                      className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm bg-surface"
                     />
                   </div>
 
                   <div className="col-span-5 flex items-center justify-end">
-                    <span className="text-sm text-gray-500 mr-1">Total:</span>
-                    <span className="font-semibold text-gray-900 text-sm">
+                    <span className="text-sm text-fg-muted mr-1">Total:</span>
+                    <span className="font-semibold text-fg text-sm">
                       CHF {formatChf((parseFloat(item.quantity) || 0) * (parseFloat(item.unit_price) || 0))}
                     </span>
                   </div>
@@ -517,7 +517,7 @@ export default function QuoteForm({
                       type="button"
                       onClick={() => handleRemoveItem(index)}
                       disabled={items.length === 1}
-                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed"
+                      className="p-2 text-danger hover:bg-danger-subtle rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed"
                     >
                       <Trash2 size={16} />
                     </button>
@@ -534,16 +534,16 @@ export default function QuoteForm({
             {/* Discount input controls (collapsible) */}
             {showDiscounts && (
               <div className="flex justify-between text-sm items-center gap-4 pb-1">
-                <span className="text-gray-600">Rabatt:</span>
+                <span className="text-fg-muted">Rabatt:</span>
                 <div className="flex items-center gap-2">
-                  <div className="flex rounded-lg border border-gray-300 overflow-hidden">
+                  <div className="flex rounded-lg border border-line-strong overflow-hidden">
                     <button
                       type="button"
                       onClick={() => setDiscountType('percent')}
                       className={`px-2 py-1 text-xs font-medium transition ${
                         discountType === 'percent'
-                          ? 'bg-brand text-white'
-                          : 'bg-white text-gray-700 hover:bg-gray-50'
+                          ? 'bg-brand text-accent-fg'
+                          : 'bg-surface text-fg hover:bg-canvas'
                       }`}
                     >
                       %
@@ -553,8 +553,8 @@ export default function QuoteForm({
                       onClick={() => setDiscountType('fixed')}
                       className={`px-2 py-1 text-xs font-medium transition ${
                         discountType === 'fixed'
-                          ? 'bg-brand text-white'
-                          : 'bg-white text-gray-700 hover:bg-gray-50'
+                          ? 'bg-brand text-accent-fg'
+                          : 'bg-surface text-fg hover:bg-canvas'
                       }`}
                     >
                       CHF
@@ -572,7 +572,7 @@ export default function QuoteForm({
                     step={discountType === 'percent' ? '0.1' : '0.01'}
                     min="0"
                     max={discountType === 'percent' ? '100' : totals.subtotal.toFixed(2)}
-                    className="w-20 px-2 py-1 border border-gray-200 rounded text-sm text-right"
+                    className="w-20 px-2 py-1 border border-line rounded text-sm text-right"
                     placeholder="0"
                   />
                 </div>
@@ -581,17 +581,17 @@ export default function QuoteForm({
 
             {/* Zwischensumme */}
             <div className="flex justify-between text-sm">
-              <span className="text-gray-500">Zwischensumme</span>
+              <span className="text-fg-muted">Zwischensumme</span>
               <span className="font-medium tabular-nums">CHF {formatChf(totals.subtotal)}</span>
             </div>
 
             {/* Rabatt display row (shown whenever discount > 0) */}
             {totals.discountAmount > 0 && (
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500">
+                <span className="text-fg-muted">
                   Rabatt{discountType === 'percent' ? ` (${discountValue}%)` : ''}
                 </span>
-                <span className="font-medium text-green-600 tabular-nums">
+                <span className="font-medium text-success tabular-nums">
                   - CHF {formatChf(totals.discountAmount)}
                 </span>
               </div>
@@ -600,7 +600,7 @@ export default function QuoteForm({
             {/* VAT - only show if VAT enabled */}
             {selectedCompany?.vat_enabled && (
               <div className="flex justify-between text-sm items-center gap-4">
-                <span className="text-gray-500">MwSt ({vatRate}%):</span>
+                <span className="text-fg-muted">MwSt ({vatRate}%):</span>
                 <div className="flex items-center gap-2">
                   <input
                     type="number"
@@ -609,7 +609,7 @@ export default function QuoteForm({
                     step="0.1"
                     min="0"
                     max="100"
-                    className="w-20 px-2 py-1 border border-gray-200 rounded text-sm text-right"
+                    className="w-20 px-2 py-1 border border-line rounded text-sm text-right"
                   />
                   <span className="font-medium tabular-nums">CHF {formatChf(totals.vat_amount)}</span>
                 </div>
@@ -617,9 +617,9 @@ export default function QuoteForm({
             )}
 
             {/* Total — Swiss-rounded */}
-            <div className="flex justify-between items-baseline border-t-2 border-gray-300 pt-2 mt-1">
-              <span className="text-base font-bold text-gray-900">Total</span>
-              <span className="text-lg font-bold text-gray-900 tabular-nums">
+            <div className="flex justify-between items-baseline border-t-2 border-line-strong pt-2 mt-1">
+              <span className="text-base font-bold text-fg">Total</span>
+              <span className="text-lg font-bold text-fg tabular-nums">
                 CHF {formatChf(swissRound(totals.total))}
               </span>
             </div>
@@ -628,8 +628,8 @@ export default function QuoteForm({
 
         {/* Outro Text — shown below items/totals in PDF */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Schlusstext <span className="text-xs font-normal text-gray-400">(optional — überschreibt die Firmenvorlage für dieses Angebot)</span>
+          <label className="block text-sm font-medium text-fg mb-1">
+            Schlusstext <span className="text-xs font-normal text-fg-subtle">(optional — überschreibt die Firmenvorlage für dieses Angebot)</span>
           </label>
           <textarea
             value={outroText}
@@ -641,7 +641,7 @@ export default function QuoteForm({
             }}
             placeholder={selectedCompany?.quote_footer_text || 'Schlusstext / Dank für dieses Angebot…'}
             rows={3}
-            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm resize-none overflow-hidden"
+            className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm resize-none overflow-hidden"
             style={{ minHeight: '72px' }}
           />
         </div>
@@ -650,7 +650,7 @@ export default function QuoteForm({
           <button
             type="submit"
             disabled={isSubmitting || items.length === 0}
-            className="rounded-lg px-4 py-2 font-medium bg-brand text-white hover:bg-brand-dark transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-lg px-4 py-2 font-medium bg-brand text-accent-fg hover:bg-brand-dark transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? 'Speichert...' : isEditMode ? 'Änderungen speichern' : 'Angebot speichern'}
           </button>

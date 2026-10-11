@@ -213,7 +213,7 @@ export default function Settings() {
   if (!selectedCompany || !profile) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-gray-500">Lädt...</p>
+        <p className="text-fg-muted">Lädt...</p>
       </div>
     );
   }
@@ -775,8 +775,8 @@ export default function Settings() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Einstellungen</h1>
-        <p className="text-gray-600 mt-1">Verwalten Sie Ihre Firmen- und Benutzereinstellungen</p>
+        <h1 className="text-2xl font-bold text-fg">Einstellungen</h1>
+        <p className="text-fg-muted mt-1">Verwalten Sie Ihre Firmen- und Benutzereinstellungen</p>
       </div>
 
       {/* Toast Notification */}
@@ -784,23 +784,23 @@ export default function Settings() {
         <div
           className={`flex items-center gap-3 p-4 rounded-lg ${
             toast.type === 'success'
-              ? 'bg-green-50 border border-green-200'
-              : 'bg-red-50 border border-red-200'
+              ? 'bg-success-subtle border border-success-subtle'
+              : 'bg-danger-subtle border border-danger-subtle'
           }`}
         >
           {toast.type === 'success' ? (
-            <CheckCircle className="text-green-600 flex-shrink-0" size={20} />
+            <CheckCircle className="text-success flex-shrink-0" size={20} />
           ) : (
-            <AlertCircle className="text-red-600 flex-shrink-0" size={20} />
+            <AlertCircle className="text-danger flex-shrink-0" size={20} />
           )}
-          <p className={toast.type === 'success' ? 'text-green-800' : 'text-red-800'}>
+          <p className={toast.type === 'success' ? 'text-success' : 'text-danger'}>
             {toast.message}
           </p>
         </div>
       )}
 
       {/* Tabs */}
-      <div className="border-b border-gray-200">
+      <div className="border-b border-line">
         <nav className="flex space-x-8">
           {tabs.map((tab) => (
             <button
@@ -810,7 +810,7 @@ export default function Settings() {
               className={`pb-3 px-1 border-b-2 font-medium text-sm transition flex items-center gap-2 ${
                 activeTab === tab.id
                   ? 'border-brand text-brand'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  : 'border-transparent text-fg-muted hover:text-fg hover:border-line-strong'
               }`}
             >
               <tab.icon size={18} />
@@ -822,12 +822,12 @@ export default function Settings() {
 
       {/* Tab Content: Company Profile */}
       {activeTab === 'company' && (
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="bg-surface rounded-lg shadow-sm p-6">
           <form onSubmit={handleCompanySubmit} className="space-y-6">
             {/* Company Name */}
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                Firmenname <span className="text-red-500">*</span>
+              <label htmlFor="name" className="block text-sm font-medium text-fg mb-1">
+                Firmenname <span className="text-danger">*</span>
               </label>
               <input
                 type="text"
@@ -835,56 +835,56 @@ export default function Settings() {
                 value={companyFormData.name}
                 onChange={(e) => handleCompanyFieldChange('name', e.target.value)}
                 className={`w-full px-4 py-2 border rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition ${
-                  errors.name ? 'border-red-500' : 'border-gray-200'
+                  errors.name ? 'border-danger' : 'border-line'
                 }`}
                 placeholder="z.B. Muster AG"
               />
-              {errors.name && <p className="text-sm text-red-600 mt-1">{errors.name}</p>}
+              {errors.name && <p className="text-sm text-danger mt-1">{errors.name}</p>}
             </div>
 
             {/* Alternative Company Name */}
             <div>
-              <label htmlFor="alternativ_name" className="block text-sm font-medium text-gray-700 mb-1">
-                Alternativer Firmenname <span className="text-xs font-normal text-gray-500">(optional)</span>
+              <label htmlFor="alternativ_name" className="block text-sm font-medium text-fg mb-1">
+                Alternativer Firmenname <span className="text-xs font-normal text-fg-muted">(optional)</span>
               </label>
               <input
                 type="text"
                 id="alternativ_name"
                 value={companyFormData.alternativ_name}
                 onChange={(e) => handleCompanyFieldChange('alternativ_name', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
                 placeholder="z.B. Handelsname oder Doing Business As"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-fg-muted mt-1">
                 Alternative Firmenbezeichnung (z.B. Geschäftsname unter dem Sie auftreten)
               </p>
             </div>
 
             {/* Invoice Display Name */}
             <div>
-              <label htmlFor="rechnungsname" className="block text-sm font-medium text-gray-700 mb-1">
-                Rechnungsname <span className="text-xs font-normal text-gray-500">(optional)</span>
+              <label htmlFor="rechnungsname" className="block text-sm font-medium text-fg mb-1">
+                Rechnungsname <span className="text-xs font-normal text-fg-muted">(optional)</span>
               </label>
               <input
                 type="text"
                 id="rechnungsname"
                 value={companyFormData.rechnungsname}
                 onChange={(e) => handleCompanyFieldChange('rechnungsname', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
                 placeholder="z.B. spezieller Name für Rechnungen"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-fg-muted mt-1">
                 Name, der auf Rechnungen und Offerten erscheint (falls abweichend vom offiziellen Firmennamen)
               </p>
             </div>
 
             {/* Firmenlogo: Upload in Supabase Storage (company-assets) */}
             <div>
-              <span id="logo-label" className="block text-sm font-medium text-gray-700 mb-1">
-                Firmenlogo <span className="text-xs font-normal text-gray-500">(optional, erscheint oben rechts auf Rechnungen und Offerten)</span>
+              <span id="logo-label" className="block text-sm font-medium text-fg mb-1">
+                Firmenlogo <span className="text-xs font-normal text-fg-muted">(optional, erscheint oben rechts auf Rechnungen und Offerten)</span>
               </span>
               <div className="flex flex-wrap items-center gap-4">
-                <div className="flex h-16 w-48 items-center justify-center rounded border border-gray-200 bg-white p-2">
+                <div className="flex h-16 w-48 items-center justify-center rounded border border-line bg-surface p-2">
                   {companyFormData.logo_url ? (
                     <img
                       src={companyFormData.logo_url}
@@ -892,7 +892,7 @@ export default function Settings() {
                       className="max-h-12 max-w-full object-contain"
                     />
                   ) : (
-                    <span className="text-xs text-gray-500">Kein Logo</span>
+                    <span className="text-xs text-fg-muted">Kein Logo</span>
                   )}
                 </div>
                 <input
@@ -908,12 +908,12 @@ export default function Settings() {
                   type="button"
                   onClick={() => logoInputRef.current?.click()}
                   disabled={logoUploading}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                  className="px-4 py-2 border border-line-strong rounded-lg text-sm font-medium text-fg hover:bg-canvas disabled:opacity-50"
                 >
                   {logoUploading ? 'Wird hochgeladen…' : companyFormData.logo_url ? 'Logo ersetzen' : 'Logo hochladen'}
                 </button>
               </div>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-fg-muted mt-1">
                 PNG, JPG oder SVG, höchstens 2 MB. Im PDF höchstens 18 mm hoch und 60 mm breit, das Seitenverhältnis bleibt erhalten.
                 SVG wird beim Hochladen in PNG umgewandelt.
               </p>
@@ -921,18 +921,18 @@ export default function Settings() {
 
             {/* Sender Contact Name (Phase 3.3) */}
             <div>
-              <label htmlFor="sender_contact_name" className="block text-sm font-medium text-gray-700 mb-1">
-                Kontaktperson / Inhaber <span className="text-xs font-normal text-gray-500">(optional, erscheint auf Rechnungen)</span>
+              <label htmlFor="sender_contact_name" className="block text-sm font-medium text-fg mb-1">
+                Kontaktperson / Inhaber <span className="text-xs font-normal text-fg-muted">(optional, erscheint auf Rechnungen)</span>
               </label>
               <input
                 type="text"
                 id="sender_contact_name"
                 value={companyFormData.sender_contact_name}
                 onChange={(e) => handleCompanyFieldChange('sender_contact_name', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
                 placeholder="z.B. c/o Hans Muster oder Inhaber: Maria Müller"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-fg-muted mt-1">
                 Wenn ausgefüllt, erscheint dieser Name oberhalb des Firmennamens auf PDF-Rechnungen und Offerten.
               </p>
             </div>
@@ -940,8 +940,8 @@ export default function Settings() {
             {/* Address */}
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2 sm:col-span-1">
-                <label htmlFor="street" className="block text-sm font-medium text-gray-700 mb-1">
-                  Strasse <span className="text-red-500">*</span>
+                <label htmlFor="street" className="block text-sm font-medium text-fg mb-1">
+                  Strasse <span className="text-danger">*</span>
                 </label>
                 <input
                   type="text"
@@ -949,16 +949,16 @@ export default function Settings() {
                   value={companyFormData.street}
                   onChange={(e) => handleCompanyFieldChange('street', e.target.value)}
                   className={`w-full px-4 py-2 border rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition ${
-                    errors.street ? 'border-red-500' : 'border-gray-200'
+                    errors.street ? 'border-danger' : 'border-line'
                   }`}
                   placeholder="Musterstrasse"
                 />
-                {errors.street && <p className="text-sm text-red-600 mt-1">{errors.street}</p>}
+                {errors.street && <p className="text-sm text-danger mt-1">{errors.street}</p>}
               </div>
 
               <div className="col-span-2 sm:col-span-1">
-                <label htmlFor="house_number" className="block text-sm font-medium text-gray-700 mb-1">
-                  Hausnummer <span className="text-red-500">*</span>
+                <label htmlFor="house_number" className="block text-sm font-medium text-fg mb-1">
+                  Hausnummer <span className="text-danger">*</span>
                 </label>
                 <input
                   type="text"
@@ -966,20 +966,20 @@ export default function Settings() {
                   value={companyFormData.house_number}
                   onChange={(e) => handleCompanyFieldChange('house_number', e.target.value)}
                   className={`w-full px-4 py-2 border rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition ${
-                    errors.house_number ? 'border-red-500' : 'border-gray-200'
+                    errors.house_number ? 'border-danger' : 'border-line'
                   }`}
                   placeholder="123"
                 />
                 {errors.house_number && (
-                  <p className="text-sm text-red-600 mt-1">{errors.house_number}</p>
+                  <p className="text-sm text-danger mt-1">{errors.house_number}</p>
                 )}
               </div>
             </div>
 
             <div className="grid grid-cols-3 gap-4">
               <div>
-                <label htmlFor="zip_code" className="block text-sm font-medium text-gray-700 mb-1">
-                  PLZ <span className="text-red-500">*</span>
+                <label htmlFor="zip_code" className="block text-sm font-medium text-fg mb-1">
+                  PLZ <span className="text-danger">*</span>
                 </label>
                 <input
                   type="text"
@@ -987,16 +987,16 @@ export default function Settings() {
                   value={companyFormData.zip_code}
                   onChange={(e) => handleCompanyFieldChange('zip_code', e.target.value)}
                   className={`w-full px-4 py-2 border rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition ${
-                    errors.zip_code ? 'border-red-500' : 'border-gray-200'
+                    errors.zip_code ? 'border-danger' : 'border-line'
                   }`}
                   placeholder="8000"
                 />
-                {errors.zip_code && <p className="text-sm text-red-600 mt-1">{errors.zip_code}</p>}
+                {errors.zip_code && <p className="text-sm text-danger mt-1">{errors.zip_code}</p>}
               </div>
 
               <div className="col-span-2">
-                <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
-                  Ort <span className="text-red-500">*</span>
+                <label htmlFor="city" className="block text-sm font-medium text-fg mb-1">
+                  Ort <span className="text-danger">*</span>
                 </label>
                 <input
                   type="text"
@@ -1004,54 +1004,54 @@ export default function Settings() {
                   value={companyFormData.city}
                   onChange={(e) => handleCompanyFieldChange('city', e.target.value)}
                   className={`w-full px-4 py-2 border rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition ${
-                    errors.city ? 'border-red-500' : 'border-gray-200'
+                    errors.city ? 'border-danger' : 'border-line'
                   }`}
                   placeholder="Zürich"
                 />
-                {errors.city && <p className="text-sm text-red-600 mt-1">{errors.city}</p>}
+                {errors.city && <p className="text-sm text-danger mt-1">{errors.city}</p>}
               </div>
             </div>
 
             {/* Contact Info (PDF footer) */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="company_phone" className="block text-sm font-medium text-gray-700 mb-1">
-                  Telefon <span className="text-xs font-normal text-gray-500">(optional, erscheint im PDF-Footer)</span>
+                <label htmlFor="company_phone" className="block text-sm font-medium text-fg mb-1">
+                  Telefon <span className="text-xs font-normal text-fg-muted">(optional, erscheint im PDF-Footer)</span>
                 </label>
                 <input
                   type="tel"
                   id="company_phone"
                   value={companyFormData.phone}
                   onChange={(e) => handleCompanyFieldChange('phone', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
                   placeholder="+41 44 123 45 67"
                 />
               </div>
               <div>
-                <label htmlFor="company_email" className="block text-sm font-medium text-gray-700 mb-1">
-                  E-Mail <span className="text-xs font-normal text-gray-500">(optional, erscheint im PDF-Footer)</span>
+                <label htmlFor="company_email" className="block text-sm font-medium text-fg mb-1">
+                  E-Mail <span className="text-xs font-normal text-fg-muted">(optional, erscheint im PDF-Footer)</span>
                 </label>
                 <input
                   type="email"
                   id="company_email"
                   value={companyFormData.email}
                   onChange={(e) => handleCompanyFieldChange('email', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
                   placeholder="info@firma.ch"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="company_website" className="block text-sm font-medium text-gray-700 mb-1">
-                Website <span className="text-xs font-normal text-gray-500">(optional, erscheint im PDF-Footer)</span>
+              <label htmlFor="company_website" className="block text-sm font-medium text-fg mb-1">
+                Website <span className="text-xs font-normal text-fg-muted">(optional, erscheint im PDF-Footer)</span>
               </label>
               <input
                 type="text"
                 id="company_website"
                 value={companyFormData.website}
                 onChange={(e) => handleCompanyFieldChange('website', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
                 placeholder="www.firma.ch"
               />
             </div>
@@ -1059,7 +1059,7 @@ export default function Settings() {
             {/* Banking */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="iban" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="iban" className="block text-sm font-medium text-fg mb-1">
                   IBAN
                 </label>
                 <input
@@ -1067,32 +1067,32 @@ export default function Settings() {
                   id="iban"
                   value={companyFormData.iban}
                   onChange={(e) => handleCompanyFieldChange('iban', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
                   placeholder="CH93 0000 0000 0000 0000 0"
                 />
               </div>
 
               <div>
-                <label htmlFor="qr_iban" className="block text-sm font-medium text-gray-700 mb-1">
-                  QR-IBAN <span className="text-xs font-normal text-blue-600">(empfohlen)</span>
+                <label htmlFor="qr_iban" className="block text-sm font-medium text-fg mb-1">
+                  QR-IBAN <span className="text-xs font-normal text-accent">(empfohlen)</span>
                 </label>
                 <input
                   type="text"
                   id="qr_iban"
                   value={companyFormData.qr_iban}
                   onChange={(e) => handleCompanyFieldChange('qr_iban', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
                   placeholder="CH44 3000 0000 0000 0000 0"
                 />
               </div>
             </div>
-            <p className="text-xs text-gray-500 -mt-2">
+            <p className="text-xs text-fg-muted -mt-2">
               QR-IBAN (beginnt mit CH..30xxx-31xxx) ermöglicht automatische Zahlungszuordnung via Referenznummer.
               Mindestens IBAN oder QR-IBAN ist für QR-Rechnungen erforderlich.
             </p>
 
             <div>
-              <label htmlFor="bank_name" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="bank_name" className="block text-sm font-medium text-fg mb-1">
                 Bankname
               </label>
               <input
@@ -1100,14 +1100,14 @@ export default function Settings() {
                 id="bank_name"
                 value={companyFormData.bank_name}
                 onChange={(e) => handleCompanyFieldChange('bank_name', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
                 placeholder="z.B. UBS AG"
               />
             </div>
 
             {/* QR-Bill Creditor Name */}
             <div>
-              <label htmlFor="qr_creditor_name" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="qr_creditor_name" className="block text-sm font-medium text-fg mb-1">
                 QR-Rechnung Empfänger
               </label>
               <input
@@ -1115,10 +1115,10 @@ export default function Settings() {
                 id="qr_creditor_name"
                 value={companyFormData.qr_creditor_name}
                 onChange={(e) => handleCompanyFieldChange('qr_creditor_name', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
                 placeholder="z.B. Nicolas Fischer"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-fg-muted mt-1">
                 Persönlicher Name für den QR-Code (Zahlungsempfänger). Leer lassen um Firmennamen zu verwenden.
               </p>
             </div>
@@ -1126,7 +1126,7 @@ export default function Settings() {
             {/* Tax */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="uid_number" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="uid_number" className="block text-sm font-medium text-fg mb-1">
                   UID-Nummer
                 </label>
                 <input
@@ -1134,13 +1134,13 @@ export default function Settings() {
                   id="uid_number"
                   value={companyFormData.uid_number}
                   onChange={(e) => handleCompanyFieldChange('uid_number', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
                   placeholder="CHE-123.456.789"
                 />
               </div>
 
               <div>
-                <label htmlFor="vat_number" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="vat_number" className="block text-sm font-medium text-fg mb-1">
                   MWST-Nummer
                 </label>
                 <input
@@ -1148,15 +1148,15 @@ export default function Settings() {
                   id="vat_number"
                   value={companyFormData.vat_number}
                   onChange={(e) => handleCompanyFieldChange('vat_number', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
                   placeholder="CHE-123.456.789 MWST"
                 />
               </div>
             </div>
 
             {/* VAT Configuration */}
-            <div className="border-t border-gray-200 pt-6 mt-6">
-              <h3 className="text-base font-semibold text-gray-900 mb-4">
+            <div className="border-t border-line pt-6 mt-6">
+              <h3 className="text-base font-semibold text-fg mb-4">
                 MWST-Konfiguration
               </h3>
 
@@ -1167,13 +1167,13 @@ export default function Settings() {
                   id="vat_enabled"
                   checked={companyFormData.vat_enabled}
                   onChange={(e) => handleCompanyFieldChange('vat_enabled', e.target.checked)}
-                  className="w-4 h-4 text-brand border-gray-300 rounded focus:ring-brand mt-1"
+                  className="w-4 h-4 text-brand border-line-strong rounded focus:ring-brand mt-1"
                 />
                 <div className="ml-3">
-                  <label htmlFor="vat_enabled" className="text-sm font-medium text-gray-700">
+                  <label htmlFor="vat_enabled" className="text-sm font-medium text-fg">
                     MWST auf Rechnungen aktivieren
                   </label>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-fg-muted mt-1">
                     Wenn aktiviert, werden auf Rechnungen MWST-Beträge ausgewiesen und berechnet.
                   </p>
                 </div>
@@ -1182,7 +1182,7 @@ export default function Settings() {
               {/* Default VAT Rate Input (conditional) */}
               {companyFormData.vat_enabled && (
                 <div>
-                  <label htmlFor="default_vat_rate" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="default_vat_rate" className="block text-sm font-medium text-fg mb-1">
                     Standard MWST-Satz (%)
                   </label>
                   <input
@@ -1193,10 +1193,10 @@ export default function Settings() {
                     max="100"
                     value={companyFormData.default_vat_rate}
                     onChange={(e) => handleCompanyFieldChange('default_vat_rate', e.target.value)}
-                    className="w-32 px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                    className="w-32 px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
                     placeholder="8.1"
                   />
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-fg-muted mt-1">
                     Schweiz: 8.1% (Normal), 2.6% (Reduziert), 3.8% (Beherbergung)
                   </p>
                 </div>
@@ -1204,11 +1204,11 @@ export default function Settings() {
             </div>
 
             {/* Submit Button */}
-            <div className="flex gap-3 pt-4 border-t border-gray-200">
+            <div className="flex gap-3 pt-4 border-t border-line">
               <button
                 type="submit"
                 disabled={isSaving}
-                className="flex items-center gap-2 px-6 py-2 bg-brand text-white rounded-lg hover:bg-brand-dark transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-6 py-2 bg-brand text-accent-fg rounded-lg hover:bg-brand-dark transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Save size={18} />
                 {isSaving ? 'Speichert...' : 'Speichern'}
@@ -1220,10 +1220,10 @@ export default function Settings() {
 
       {/* Tab Content: User Profile */}
       {activeTab === 'profile' && (
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="bg-surface rounded-lg shadow-sm p-6">
           <div className="mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">Benutzerprofil</h2>
-            <p className="text-sm text-gray-600">
+            <h2 className="text-lg font-semibold text-fg mb-2">Benutzerprofil</h2>
+            <p className="text-sm text-fg-muted">
               Diese Einstellungen gelten global für alle Firmen
             </p>
           </div>
@@ -1231,7 +1231,7 @@ export default function Settings() {
           <form onSubmit={handleProfileSubmit} className="space-y-6">
             {/* Full Name */}
             <div>
-              <label htmlFor="full_name" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="full_name" className="block text-sm font-medium text-fg mb-1">
                 Name
               </label>
               <input
@@ -1239,14 +1239,14 @@ export default function Settings() {
                 id="full_name"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
                 placeholder="Ihr vollständiger Name"
               />
             </div>
 
             {/* Email (read-only) */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="email" className="block text-sm font-medium text-fg mb-1">
                 E-Mail
               </label>
               <input
@@ -1254,20 +1254,20 @@ export default function Settings() {
                 id="email"
                 value={user?.email || ''}
                 disabled
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
+                className="w-full px-4 py-2 border border-line rounded-lg bg-canvas text-fg-muted cursor-not-allowed"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-fg-muted mt-1">
                 E-Mail-Adresse kann nicht geändert werden
               </p>
             </div>
 
             {/* Password Change */}
-            <div className="border-t border-gray-200 pt-6">
-              <h3 className="text-base font-semibold text-gray-900 mb-4">Passwort ändern</h3>
+            <div className="border-t border-line pt-6">
+              <h3 className="text-base font-semibold text-fg mb-4">Passwort ändern</h3>
 
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="new_password" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="new_password" className="block text-sm font-medium text-fg mb-1">
                     Neues Passwort
                   </label>
                   <input
@@ -1275,13 +1275,13 @@ export default function Settings() {
                     id="new_password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                    className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
                     placeholder="Mindestens 6 Zeichen"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="confirm_password" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="confirm_password" className="block text-sm font-medium text-fg mb-1">
                     Passwort wiederholen
                   </label>
                   <input
@@ -1289,7 +1289,7 @@ export default function Settings() {
                     id="confirm_password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                    className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
                     placeholder="Passwort bestätigen"
                   />
                 </div>
@@ -1297,11 +1297,11 @@ export default function Settings() {
             </div>
 
             {/* Submit Button */}
-            <div className="flex gap-3 pt-4 border-t border-gray-200">
+            <div className="flex gap-3 pt-4 border-t border-line">
               <button
                 type="submit"
                 disabled={isSaving}
-                className="flex items-center gap-2 px-6 py-2 bg-brand text-white rounded-lg hover:bg-brand-dark transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-6 py-2 bg-brand text-accent-fg rounded-lg hover:bg-brand-dark transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Save size={18} />
                 {isSaving ? 'Speichert...' : 'Speichern'}
@@ -1313,10 +1313,10 @@ export default function Settings() {
 
       {/* Tab Content: Text Templates */}
       {activeTab === 'templates' && (
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="bg-surface rounded-lg shadow-sm p-6">
           <div className="mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">Textvorlagen</h2>
-            <p className="text-sm text-gray-600">
+            <h2 className="text-lg font-semibold text-fg mb-2">Textvorlagen</h2>
+            <p className="text-sm text-fg-muted">
               Standard-Texte für Offerten und Rechnungen (Markdown wird unterstützt)
             </p>
           </div>
@@ -1324,10 +1324,10 @@ export default function Settings() {
           <form onSubmit={handleTemplatesSubmit} className="space-y-6">
             {/* Invoice Templates */}
             <div className="space-y-4">
-              <h3 className="text-base font-semibold text-gray-900">Rechnungen</h3>
+              <h3 className="text-base font-semibold text-fg">Rechnungen</h3>
 
               <div>
-                <label htmlFor="invoice_intro" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="invoice_intro" className="block text-sm font-medium text-fg mb-1">
                   Einleitungstext
                 </label>
                 <textarea
@@ -1335,14 +1335,14 @@ export default function Settings() {
                   value={invoiceIntro}
                   onChange={(e) => setInvoiceIntro(e.target.value)}
                   rows={3}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition font-mono text-sm"
+                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition font-mono text-sm"
                   placeholder="Besten Dank für Ihren Auftrag. **Fett**, *kursiv*, - Listen..."
                 />
-                <p className="text-xs text-gray-500 mt-1">Erscheint oberhalb der Rechnungspo sitionen</p>
+                <p className="text-xs text-fg-muted mt-1">Erscheint oberhalb der Rechnungspo sitionen</p>
               </div>
 
               <div>
-                <label htmlFor="invoice_footer" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="invoice_footer" className="block text-sm font-medium text-fg mb-1">
                   Fusstext / Bemerkungen
                 </label>
                 <textarea
@@ -1350,19 +1350,19 @@ export default function Settings() {
                   value={invoiceFooter}
                   onChange={(e) => setInvoiceFooter(e.target.value)}
                   rows={3}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition font-mono text-sm"
+                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition font-mono text-sm"
                   placeholder="Zahlbar innert 30 Tagen..."
                 />
-                <p className="text-xs text-gray-500 mt-1">Erscheint unterhalb der Rechnungspositionen</p>
+                <p className="text-xs text-fg-muted mt-1">Erscheint unterhalb der Rechnungspositionen</p>
               </div>
             </div>
 
             {/* Quote Templates */}
-            <div className="space-y-4 border-t border-gray-200 pt-6">
-              <h3 className="text-base font-semibold text-gray-900">Offerten</h3>
+            <div className="space-y-4 border-t border-line pt-6">
+              <h3 className="text-base font-semibold text-fg">Offerten</h3>
 
               <div>
-                <label htmlFor="quote_intro" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="quote_intro" className="block text-sm font-medium text-fg mb-1">
                   Einleitungstext
                 </label>
                 <textarea
@@ -1370,14 +1370,14 @@ export default function Settings() {
                   value={quoteIntro}
                   onChange={(e) => setQuoteIntro(e.target.value)}
                   rows={3}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition font-mono text-sm"
+                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition font-mono text-sm"
                   placeholder="Vielen Dank für Ihre Anfrage..."
                 />
-                <p className="text-xs text-gray-500 mt-1">Erscheint oberhalb der Offertenpositionen</p>
+                <p className="text-xs text-fg-muted mt-1">Erscheint oberhalb der Offertenpositionen</p>
               </div>
 
               <div>
-                <label htmlFor="quote_footer" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="quote_footer" className="block text-sm font-medium text-fg mb-1">
                   Fusstext / Bemerkungen
                 </label>
                 <textarea
@@ -1385,19 +1385,19 @@ export default function Settings() {
                   value={quoteFooter}
                   onChange={(e) => setQuoteFooter(e.target.value)}
                   rows={3}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition font-mono text-sm"
+                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition font-mono text-sm"
                   placeholder="Wir freuen uns auf Ihre Antwort..."
                 />
-                <p className="text-xs text-gray-500 mt-1">Erscheint unterhalb der Offertenpositionen</p>
+                <p className="text-xs text-fg-muted mt-1">Erscheint unterhalb der Offertenpositionen</p>
               </div>
             </div>
 
             {/* Submit Button */}
-            <div className="flex gap-3 pt-4 border-t border-gray-200">
+            <div className="flex gap-3 pt-4 border-t border-line">
               <button
                 type="submit"
                 disabled={isSaving}
-                className="flex items-center gap-2 px-6 py-2 bg-brand text-white rounded-lg hover:bg-brand-dark transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-6 py-2 bg-brand text-accent-fg rounded-lg hover:bg-brand-dark transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Save size={18} />
                 {isSaving ? 'Speichert...' : 'Alle speichern'}
@@ -1409,16 +1409,16 @@ export default function Settings() {
 
       {/* Tab Content: Product Categories (Phase 3.2) */}
       {activeTab === 'product_categories' && (
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="bg-surface rounded-lg shadow-sm p-6">
           <div className="mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">Produktkategorien verwalten</h2>
-            <p className="text-sm text-gray-600">
+            <h2 className="text-lg font-semibold text-fg mb-2">Produktkategorien verwalten</h2>
+            <p className="text-sm text-fg-muted">
               Definieren Sie Kategorien für Produkte und Dienstleistungen. Diese erscheinen als Dropdown bei der Produkterfassung.
             </p>
           </div>
 
           {/* Add New Product Category */}
-          <div className="flex gap-2 mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+          <div className="flex gap-2 mb-6 p-4 bg-canvas rounded-lg border border-line">
             <input
               type="text"
               value={newProductCategory}
@@ -1430,12 +1430,12 @@ export default function Settings() {
                 }
               }}
               placeholder="Neue Produktkategorie..."
-              className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition bg-white"
+              className="flex-1 px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition bg-surface"
             />
             <button
               onClick={handleAddProductCategory}
               disabled={!newProductCategory.trim()}
-              className="px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand-dark transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-4 py-2 bg-brand text-accent-fg rounded-lg hover:bg-brand-dark transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               <Plus size={18} />
               Hinzufügen
@@ -1444,7 +1444,7 @@ export default function Settings() {
 
           {/* Product Categories List */}
           {productCategories.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-fg-muted">
               <Package size={48} className="mx-auto mb-4 opacity-50" />
               <p>Keine Produktkategorien vorhanden.</p>
               <p className="text-sm">Fügen Sie oben Ihre erste Kategorie hinzu.</p>
@@ -1454,7 +1454,7 @@ export default function Settings() {
               {productCategories.map((category, index) => (
                 <div
                   key={index}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200"
+                  className="flex items-center justify-between p-3 bg-canvas rounded-lg border border-line"
                 >
                   {editingProductCategoryIndex === index ? (
                     <>
@@ -1470,43 +1470,43 @@ export default function Settings() {
                             cancelEditProductCategory();
                           }
                         }}
-                        className="flex-1 px-3 py-1 border border-gray-300 rounded focus:border-brand focus:ring-1 focus:ring-brand/20 outline-none"
+                        className="flex-1 px-3 py-1 border border-line-strong rounded focus:border-brand focus:ring-1 focus:ring-brand/20 outline-none"
                         autoFocus
                       />
                       <div className="flex items-center gap-1 ml-2">
                         <button
                           onClick={() => handleUpdateProductCategory(index)}
-                          className="p-2 hover:bg-green-100 rounded transition"
+                          className="p-2 hover:bg-success-subtle rounded transition"
                           title="Speichern"
                         >
-                          <Check size={18} className="text-green-600" />
+                          <Check size={18} className="text-success" />
                         </button>
                         <button
                           onClick={cancelEditProductCategory}
-                          className="p-2 hover:bg-red-100 rounded transition"
+                          className="p-2 hover:bg-danger-subtle rounded transition"
                           title="Abbrechen"
                         >
-                          <X size={18} className="text-red-600" />
+                          <X size={18} className="text-danger" />
                         </button>
                       </div>
                     </>
                   ) : (
                     <>
-                      <span className="font-medium text-gray-900">{category}</span>
+                      <span className="font-medium text-fg">{category}</span>
                       <div className="flex items-center gap-1">
                         <button
                           onClick={() => startEditProductCategory(index)}
-                          className="p-2 hover:bg-gray-200 rounded transition"
+                          className="p-2 hover:bg-sunken rounded transition"
                           title="Bearbeiten"
                         >
-                          <Edit2 size={18} className="text-gray-600" />
+                          <Edit2 size={18} className="text-fg-muted" />
                         </button>
                         <button
                           onClick={() => handleDeleteProductCategory(index)}
-                          className="p-2 hover:bg-red-100 rounded transition"
+                          className="p-2 hover:bg-danger-subtle rounded transition"
                           title="Löschen"
                         >
-                          <Trash2 size={18} className="text-red-600" />
+                          <Trash2 size={18} className="text-danger" />
                         </button>
                       </div>
                     </>
@@ -1516,7 +1516,7 @@ export default function Settings() {
             </div>
           )}
 
-          <p className="text-xs text-gray-500 mt-4">
+          <p className="text-xs text-fg-muted mt-4">
             Hinweis: Produktkategorien dienen zur Gruppierung im Produktkatalog und erscheinen als Dropdown bei der Produkterfassung.
           </p>
         </div>
@@ -1524,27 +1524,27 @@ export default function Settings() {
 
       {/* Tab Content: Pipeline Settings */}
       {activeTab === 'pipeline' && (
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="bg-surface rounded-lg shadow-sm p-6">
           <div className="mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">Pipeline-Phasen verwalten</h2>
-            <p className="text-sm text-gray-600">
+            <h2 className="text-lg font-semibold text-fg mb-2">Pipeline-Phasen verwalten</h2>
+            <p className="text-sm text-fg-muted">
               Definieren Sie die Phasen Ihrer Sales Pipeline. Diese werden im Kanban-Board angezeigt.
             </p>
           </div>
 
           {isLoadingStages ? (
             <div className="flex items-center justify-center h-32">
-              <p className="text-gray-500">Lädt...</p>
+              <p className="text-fg-muted">Lädt...</p>
             </div>
           ) : (
             <div className="space-y-3">
               {stages.map((stage, index) => (
                 <div
                   key={stage.id}
-                  className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition"
+                  className="flex items-center gap-4 p-4 border border-line rounded-lg hover:border-line-strong transition"
                 >
                   {/* Position */}
-                  <div className="w-8 text-center text-sm font-medium text-gray-500">
+                  <div className="w-8 text-center text-sm font-medium text-fg-muted">
                     {index + 1}
                   </div>
 
@@ -1553,7 +1553,7 @@ export default function Settings() {
                     <select
                       value={editStageColor}
                       onChange={(e) => setEditStageColor(e.target.value)}
-                      className="px-3 py-2 border border-gray-300 rounded-lg focus:border-brand focus:ring-1 focus:ring-brand outline-none"
+                      className="px-3 py-2 border border-line-strong rounded-lg focus:border-brand focus:ring-1 focus:ring-brand outline-none"
                     >
                       {colorOptions.map((color) => (
                         <option key={color.value} value={color.value}>
@@ -1563,7 +1563,7 @@ export default function Settings() {
                     </select>
                   ) : (
                     <div
-                      className="w-6 h-6 rounded-full border-2 border-gray-200 flex-shrink-0"
+                      className="w-6 h-6 rounded-full border-2 border-line flex-shrink-0"
                       style={{ backgroundColor: stage.color }}
                       title={stage.color}
                     />
@@ -1579,11 +1579,11 @@ export default function Settings() {
                         if (e.key === 'Enter') handleSaveStage(stage.id);
                         if (e.key === 'Escape') handleCancelEdit();
                       }}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:border-brand focus:ring-1 focus:ring-brand outline-none"
+                      className="flex-1 px-3 py-2 border border-line-strong rounded-lg focus:border-brand focus:ring-1 focus:ring-brand outline-none"
                       autoFocus
                     />
                   ) : (
-                    <div className="flex-1 font-medium text-gray-900">{stage.name}</div>
+                    <div className="flex-1 font-medium text-fg">{stage.name}</div>
                   )}
 
                   {/* Actions */}
@@ -1592,34 +1592,34 @@ export default function Settings() {
                       <>
                         <button
                           onClick={() => handleSaveStage(stage.id)}
-                          className="p-2 hover:bg-green-100 rounded transition"
+                          className="p-2 hover:bg-success-subtle rounded transition"
                           title="Speichern"
                         >
-                          <Check size={18} className="text-green-600" />
+                          <Check size={18} className="text-success" />
                         </button>
                         <button
                           onClick={handleCancelEdit}
-                          className="p-2 hover:bg-red-100 rounded transition"
+                          className="p-2 hover:bg-danger-subtle rounded transition"
                           title="Abbrechen"
                         >
-                          <X size={18} className="text-red-600" />
+                          <X size={18} className="text-danger" />
                         </button>
                       </>
                     ) : (
                       <>
                         <button
                           onClick={() => handleEditStage(stage)}
-                          className="p-2 hover:bg-gray-100 rounded transition"
+                          className="p-2 hover:bg-raised rounded transition"
                           title="Bearbeiten"
                         >
-                          <Edit2 size={18} className="text-gray-600" />
+                          <Edit2 size={18} className="text-fg-muted" />
                         </button>
                         <button
                           onClick={() => handleDeleteStage(stage)}
-                          className="p-2 hover:bg-red-100 rounded transition"
+                          className="p-2 hover:bg-danger-subtle rounded transition"
                           title="Löschen"
                         >
-                          <Trash2 size={18} className="text-red-600" />
+                          <Trash2 size={18} className="text-danger" />
                         </button>
                       </>
                     )}
@@ -1630,7 +1630,7 @@ export default function Settings() {
               {/* Add New Stage Button */}
               <button
                 onClick={handleAddStage}
-                className="w-full p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-gray-400 hover:bg-gray-50 transition flex items-center justify-center gap-2 text-gray-600 hover:text-gray-900"
+                className="w-full p-4 border-2 border-dashed border-line-strong rounded-lg hover:border-line-strong hover:bg-canvas transition flex items-center justify-center gap-2 text-fg-muted hover:text-fg"
               >
                 <Plus size={20} />
                 <span className="font-medium">Neue Phase hinzufügen</span>
@@ -1642,10 +1642,10 @@ export default function Settings() {
 
       {/* Tab Content: Buchungskategorien */}
       {activeTab === 'categories' && (
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="bg-surface rounded-lg shadow-sm p-6">
           <div className="mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">Buchungskategorien verwalten</h2>
-            <p className="text-sm text-gray-600">
+            <h2 className="text-lg font-semibold text-fg mb-2">Buchungskategorien verwalten</h2>
+            <p className="text-sm text-fg-muted">
               Definieren Sie Kategorien für Einnahmen und Ausgaben. Diese erscheinen als Dropdown bei der Buchungserfassung.
             </p>
           </div>
@@ -1656,8 +1656,8 @@ export default function Settings() {
               onClick={() => setCategoryTypeFilter('all')}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
                 categoryTypeFilter === 'all'
-                  ? 'bg-gray-900 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-ink text-white'
+                  : 'bg-raised text-fg hover:bg-sunken'
               }`}
             >
               Alle
@@ -1666,8 +1666,8 @@ export default function Settings() {
               onClick={() => setCategoryTypeFilter('income')}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 ${
                 categoryTypeFilter === 'income'
-                  ? 'bg-green-600 text-white'
-                  : 'bg-green-50 text-green-700 hover:bg-green-100'
+                  ? 'bg-success text-white'
+                  : 'bg-success-subtle text-success hover:bg-success-subtle'
               }`}
             >
               <ArrowDownCircle size={16} />
@@ -1677,8 +1677,8 @@ export default function Settings() {
               onClick={() => setCategoryTypeFilter('expense')}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 ${
                 categoryTypeFilter === 'expense'
-                  ? 'bg-red-600 text-white'
-                  : 'bg-red-50 text-red-700 hover:bg-red-100'
+                  ? 'bg-danger text-white'
+                  : 'bg-danger-subtle text-danger hover:bg-danger-subtle'
               }`}
             >
               <ArrowUpCircle size={16} />
@@ -1687,7 +1687,7 @@ export default function Settings() {
           </div>
 
           {/* Add New Category */}
-          <div className="flex flex-wrap gap-2 mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+          <div className="flex flex-wrap gap-2 mb-6 p-4 bg-canvas rounded-lg border border-line">
             <input
               type="text"
               value={newCategoryName}
@@ -1699,12 +1699,12 @@ export default function Settings() {
                 }
               }}
               placeholder="Neue Kategorie..."
-              className="flex-1 min-w-[200px] px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition bg-white"
+              className="flex-1 min-w-[200px] px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition bg-surface"
             />
             <select
               value={newCategoryType}
               onChange={(e) => setNewCategoryType(e.target.value as CategoryType)}
-              className="px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition bg-white"
+              className="px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition bg-surface"
             >
               <option value="expense">Ausgabe</option>
               <option value="income">Einnahme</option>
@@ -1716,28 +1716,28 @@ export default function Settings() {
               onChange={(e) => setNewCategoryAccount(e.target.value)}
               placeholder="Konto (z.B. 6570)"
               aria-label="Kontonummer nach KMU-Kontenrahmen"
-              className="w-40 px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition bg-white"
+              className="w-40 px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition bg-surface"
             />
             <input
               type="color"
               value={newCategoryColor}
               onChange={(e) => setNewCategoryColor(e.target.value)}
-              className="w-12 h-10 rounded-lg border border-gray-200 cursor-pointer"
+              className="w-12 h-10 rounded-lg border border-line cursor-pointer"
               title="Farbe wählen"
             />
-            <label className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+            <label className="flex items-center gap-2 px-3 py-2 bg-surface border border-line rounded-lg cursor-pointer hover:bg-canvas">
               <input
                 type="checkbox"
                 checked={newCategoryTaxRelevant}
                 onChange={(e) => setNewCategoryTaxRelevant(e.target.checked)}
-                className="w-4 h-4 text-brand border-gray-300 rounded focus:ring-brand"
+                className="w-4 h-4 text-brand border-line-strong rounded focus:ring-brand"
               />
-              <span className="text-sm text-gray-700">Steuerrelevant</span>
+              <span className="text-sm text-fg">Steuerrelevant</span>
             </label>
             <button
               onClick={handleAddCategory}
               disabled={!newCategoryName.trim() || isLoadingCategories}
-              className="px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand-dark transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-4 py-2 bg-brand text-accent-fg rounded-lg hover:bg-brand-dark transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               <Plus size={18} />
               Hinzufügen
@@ -1746,10 +1746,10 @@ export default function Settings() {
 
           {isLoadingCategories ? (
             <div className="flex items-center justify-center h-32">
-              <p className="text-gray-500">Lädt...</p>
+              <p className="text-fg-muted">Lädt...</p>
             </div>
           ) : filteredCategories.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-fg-muted">
               <Tags size={48} className="mx-auto mb-4 opacity-50" />
               <p>Keine Kategorien gefunden.</p>
               <p className="text-sm">Fügen Sie oben Ihre erste Kategorie hinzu.</p>
@@ -1759,7 +1759,7 @@ export default function Settings() {
               {filteredCategories.map((category) => (
                 <div
                   key={category.id}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200"
+                  className="flex items-center justify-between p-3 bg-canvas rounded-lg border border-line"
                 >
                   {editingCategoryId === category.id ? (
                     <>
@@ -1768,7 +1768,7 @@ export default function Settings() {
                           type="color"
                           value={editCategoryColor}
                           onChange={(e) => setEditCategoryColor(e.target.value)}
-                          className="w-8 h-8 rounded border border-gray-200 cursor-pointer"
+                          className="w-8 h-8 rounded border border-line cursor-pointer"
                         />
                         <input
                           type="text"
@@ -1782,7 +1782,7 @@ export default function Settings() {
                               cancelEditCategory();
                             }
                           }}
-                          className="flex-1 px-3 py-1 border border-gray-300 rounded focus:border-brand focus:ring-1 focus:ring-brand/20 outline-none"
+                          className="flex-1 px-3 py-1 border border-line-strong rounded focus:border-brand focus:ring-1 focus:ring-brand/20 outline-none"
                           autoFocus
                         />
                         <input
@@ -1792,32 +1792,32 @@ export default function Settings() {
                           onChange={(e) => setEditCategoryAccount(e.target.value)}
                           placeholder="Konto"
                           aria-label={`Kontonummer für ${category.name}`}
-                          className="w-24 px-3 py-1 border border-gray-300 rounded focus:border-brand focus:ring-1 focus:ring-brand/20 outline-none tabular-nums"
+                          className="w-24 px-3 py-1 border border-line-strong rounded focus:border-brand focus:ring-1 focus:ring-brand/20 outline-none tabular-nums"
                         />
                         <label className="flex items-center gap-2 px-2 cursor-pointer">
                           <input
                             type="checkbox"
                             checked={editCategoryTaxRelevant}
                             onChange={(e) => setEditCategoryTaxRelevant(e.target.checked)}
-                            className="w-4 h-4 text-brand border-gray-300 rounded focus:ring-brand"
+                            className="w-4 h-4 text-brand border-line-strong rounded focus:ring-brand"
                           />
-                          <span className="text-xs text-gray-600">Steuer</span>
+                          <span className="text-xs text-fg-muted">Steuer</span>
                         </label>
                       </div>
                       <div className="flex items-center gap-1 ml-2">
                         <button
                           onClick={() => handleUpdateCategory(category.id)}
-                          className="p-2 hover:bg-green-100 rounded transition"
+                          className="p-2 hover:bg-success-subtle rounded transition"
                           title="Speichern"
                         >
-                          <Check size={18} className="text-green-600" />
+                          <Check size={18} className="text-success" />
                         </button>
                         <button
                           onClick={cancelEditCategory}
-                          className="p-2 hover:bg-red-100 rounded transition"
+                          className="p-2 hover:bg-danger-subtle rounded transition"
                           title="Abbrechen"
                         >
-                          <X size={18} className="text-red-600" />
+                          <X size={18} className="text-danger" />
                         </button>
                       </div>
                     </>
@@ -1828,19 +1828,19 @@ export default function Settings() {
                           className="w-4 h-4 rounded-full flex-shrink-0"
                           style={{ backgroundColor: category.color }}
                         />
-                        <span className="w-12 text-sm text-gray-600 tabular-nums" title="Konto nach KMU-Kontenrahmen">
+                        <span className="w-12 text-sm text-fg-muted tabular-nums" title="Konto nach KMU-Kontenrahmen">
                           {category.account_number || '–'}
                         </span>
-                        <span className="font-medium text-gray-900">{category.name}</span>
+                        <span className="font-medium text-fg">{category.name}</span>
                         <span className={`text-xs px-2 py-0.5 rounded-full ${
                           category.type === 'income'
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-red-100 text-red-700'
+                            ? 'bg-success-subtle text-success'
+                            : 'bg-danger-subtle text-danger'
                         }`}>
                           {category.type === 'income' ? 'Einnahme' : 'Ausgabe'}
                         </span>
                         {category.is_tax_relevant && (
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-accent-subtle text-accent">
                             Steuerrelevant
                           </span>
                         )}
@@ -1848,17 +1848,17 @@ export default function Settings() {
                       <div className="flex items-center gap-1">
                         <button
                           onClick={() => startEditCategory(category)}
-                          className="p-2 hover:bg-gray-200 rounded transition"
+                          className="p-2 hover:bg-sunken rounded transition"
                           title="Bearbeiten"
                         >
-                          <Edit2 size={18} className="text-gray-600" />
+                          <Edit2 size={18} className="text-fg-muted" />
                         </button>
                         <button
                           onClick={() => handleDeleteCategory(category.id)}
-                          className="p-2 hover:bg-red-100 rounded transition"
+                          className="p-2 hover:bg-danger-subtle rounded transition"
                           title="Deaktivieren"
                         >
-                          <Trash2 size={18} className="text-red-600" />
+                          <Trash2 size={18} className="text-danger" />
                         </button>
                       </div>
                     </>
@@ -1868,7 +1868,7 @@ export default function Settings() {
             </div>
           )}
 
-          <p className="text-xs text-gray-500 mt-4">
+          <p className="text-xs text-fg-muted mt-4">
             Hinweis: Deaktivierte Kategorien werden aus dem Dropdown entfernt, bestehende Buchungen bleiben erhalten.
           </p>
         </div>

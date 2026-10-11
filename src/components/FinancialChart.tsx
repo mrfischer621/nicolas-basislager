@@ -31,8 +31,8 @@ const CustomTooltip = ({ active, payload }: any) => {
     const profit = revenue - expenses;
 
     return (
-      <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-200">
-        <p className="font-semibold text-gray-900 mb-2">{payload[0]?.payload.period}</p>
+      <div className="bg-surface p-4 rounded-lg shadow-lg border border-line">
+        <p className="font-semibold text-fg mb-2">{payload[0]?.payload.period}</p>
         <div className="space-y-1">
           <p className="text-sm text-success-dark font-medium">
             Einnahmen: {formatCurrency(revenue)}
@@ -40,7 +40,7 @@ const CustomTooltip = ({ active, payload }: any) => {
           <p className="text-sm text-danger-dark font-medium">
             Ausgaben: {formatCurrency(expenses)}
           </p>
-          <div className="border-t border-gray-200 pt-1 mt-1">
+          <div className="border-t border-line pt-1 mt-1">
             <p className={`text-sm font-semibold ${profit >= 0 ? 'text-success-dark' : 'text-danger-dark'}`}>
               {profit >= 0 ? 'Gewinn' : 'Verlust'}: {formatCurrency(Math.abs(profit))}
             </p>
@@ -90,7 +90,7 @@ export default function FinancialChart({
             wrapperStyle={{ paddingTop: '20px' }}
             iconType="line"
             formatter={(value) => (
-              <span className="text-sm text-gray-700">
+              <span className="text-sm text-fg">
                 {value === 'revenue' ? 'Einnahmen' : 'Ausgaben'}
               </span>
             )}

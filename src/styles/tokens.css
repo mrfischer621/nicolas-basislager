@@ -1,0 +1,132 @@
+/* GENERIERT aus design-system/blauwasser/project/tokens.json durch scripts/build-tokens.mjs. Nicht von Hand aendern. */
+/* Farben als RGB-Kanaele, damit Tailwind Deckkraft (z.B. bg-ink/50) bilden kann. */
+
+:root {
+  --bw-canvas: 242 244 247; /* background */
+  --bw-surface: 255 255 255; /* surface */
+  --bw-raised: 232 236 241; /* surface-raised */
+  --bw-sunken: 223 228 235; /* surface-sunken */
+  --bw-ink: 11 18 32; /* surface-inverted */
+  --bw-ink-raised: 20 29 48; /* surface-inverted-raised */
+  --bw-fg: 11 18 32; /* foreground */
+  --bw-fg-muted: 75 85 102; /* foreground-muted */
+  --bw-fg-subtle: 107 116 133; /* foreground-subtle */
+  --bw-fg-inverted: 244 247 251; /* foreground-inverted */
+  --bw-fg-inverted-muted: 170 182 201; /* foreground-inverted-muted */
+  --bw-line: 217 222 230; /* border */
+  --bw-line-strong: 116 123 135; /* border-strong */
+  --bw-line-inverted: 38 50 74; /* border-inverted */
+  --bw-accent: 11 18 32; /* accent */
+  --bw-accent-hover: 28 39 64; /* accent-hover */
+  --bw-accent-fg: 255 255 255; /* accent-foreground */
+  --bw-accent-subtle: 228 245 255; /* accent-subtle */
+  --bw-accent-border: 159 220 255; /* accent-border */
+  --bw-cta: 10 149 255; /* cta */
+  --bw-cta-hover: 0 131 230; /* cta-hover */
+  --bw-cta-fg: 255 255 255; /* cta-foreground */
+  --bw-success: 12 105 68; /* success */
+  --bw-success-subtle: 225 246 234; /* success-subtle */
+  --bw-warning: 134 89 1; /* warning */
+  --bw-warning-subtle: 254 241 214; /* warning-subtle */
+  --bw-danger: 169 31 31; /* danger */
+  --bw-danger-subtle: 255 235 233; /* danger-subtle */
+  --bw-focus: 11 18 32; /* focus */
+  --bw-focus-inverted: 159 220 255; /* focus-on-inverted */
+  --bw-radius-none: 0px;
+  --bw-radius-sm: 2px;
+  --bw-radius-badge: 4px;
+  --bw-radius-lg: 12px;
+  --bw-radius-tile: 16px;
+  --bw-radius-card: 24px;
+  --bw-radius-full: 9999px;
+  --bw-shadow-sm: 0 1px 2px 0 rgba(11, 18, 32, 0.05);
+  --bw-shadow-md: 0 1px 3px 0 rgba(11, 18, 32, 0.07), 0 4px 12px -2px rgba(11, 18, 32, 0.05);
+  --bw-shadow-lg: 0 2px 4px -1px rgba(11, 18, 32, 0.06), 0 12px 32px -8px rgba(11, 18, 32, 0.10);
+  --bw-shadow-card: 0 1px 2px 0 rgba(11, 18, 32, 0.05), 0 4px 12px -2px rgba(11, 18, 32, 0.06);
+  --bw-shadow-cta: 0 10px 24px -12px rgba(10, 149, 255, 0.9);
+  --bw-shadow-offer: 0 30px 70px -40px rgba(11, 18, 32, 0.45);
+  --bw-space-1: 4px;
+  --bw-space-2: 8px;
+  --bw-space-3: 12px;
+  --bw-space-stack: 20px;
+  --bw-space-card: 28px;
+  --bw-space-stack-lg: 32px;
+  --bw-space-section-sm: 56px;
+  --bw-space-header: 72px;
+  --bw-space-section: 96px;
+  --bw-space-section-lg: 136px;
+  --bw-button-xl-height: 68px;
+  --bw-font-display: "Albert Sans", ui-sans-serif, system-ui, sans-serif;
+  --bw-font-body: Montserrat, ui-sans-serif, system-ui, sans-serif;
+  color-scheme: light;
+}
+
+/* Thema dark (Tiefsee): folgt dem System, ausser der Benutzer hat "Hell" gewaehlt */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bw-canvas: 11 18 32; /* background */
+    --bw-surface: 20 29 48; /* surface */
+    --bw-raised: 20 29 48; /* surface-raised */
+    --bw-sunken: 11 18 32; /* surface-sunken */
+    --bw-ink: 20 29 48; /* surface-inverted */
+    --bw-ink-raised: 20 29 48; /* surface-inverted-raised */
+    --bw-fg: 244 247 251; /* foreground */
+    --bw-fg-muted: 170 182 201; /* foreground-muted */
+    --bw-fg-subtle: 170 182 201; /* foreground-subtle */
+    --bw-fg-inverted: 244 247 251; /* foreground-inverted */
+    --bw-fg-inverted-muted: 170 182 201; /* foreground-inverted-muted */
+    --bw-line: 38 50 74; /* border */
+    --bw-line-strong: 116 123 135; /* border-strong */
+    --bw-line-inverted: 38 50 74; /* border-inverted */
+    --bw-accent: 244 247 251; /* accent */
+    --bw-accent-hover: 170 182 201; /* accent-hover */
+    --bw-accent-fg: 11 18 32; /* accent-foreground */
+    --bw-accent-subtle: 20 29 48; /* accent-subtle */
+    --bw-accent-border: 159 220 255; /* accent-border */
+    --bw-cta: 10 149 255; /* cta */
+    --bw-cta-hover: 0 131 230; /* cta-hover */
+    --bw-cta-fg: 255 255 255; /* cta-foreground */
+    --bw-success: 12 105 68; /* success */
+    --bw-success-subtle: 225 246 234; /* success-subtle */
+    --bw-warning: 134 89 1; /* warning */
+    --bw-warning-subtle: 254 241 214; /* warning-subtle */
+    --bw-danger: 169 31 31; /* danger */
+    --bw-danger-subtle: 255 235 233; /* danger-subtle */
+    --bw-focus: 159 220 255; /* focus */
+    --bw-focus-inverted: 159 220 255; /* focus-on-inverted */
+    color-scheme: dark;
+  }
+}
+:root[data-theme='dark'] {
+  --bw-canvas: 11 18 32; /* background */
+  --bw-surface: 20 29 48; /* surface */
+  --bw-raised: 20 29 48; /* surface-raised */
+  --bw-sunken: 11 18 32; /* surface-sunken */
+  --bw-ink: 20 29 48; /* surface-inverted */
+  --bw-ink-raised: 20 29 48; /* surface-inverted-raised */
+  --bw-fg: 244 247 251; /* foreground */
+  --bw-fg-muted: 170 182 201; /* foreground-muted */
+  --bw-fg-subtle: 170 182 201; /* foreground-subtle */
+  --bw-fg-inverted: 244 247 251; /* foreground-inverted */
+  --bw-fg-inverted-muted: 170 182 201; /* foreground-inverted-muted */
+  --bw-line: 38 50 74; /* border */
+  --bw-line-strong: 116 123 135; /* border-strong */
+  --bw-line-inverted: 38 50 74; /* border-inverted */
+  --bw-accent: 244 247 251; /* accent */
+  --bw-accent-hover: 170 182 201; /* accent-hover */
+  --bw-accent-fg: 11 18 32; /* accent-foreground */
+  --bw-accent-subtle: 20 29 48; /* accent-subtle */
+  --bw-accent-border: 159 220 255; /* accent-border */
+  --bw-cta: 10 149 255; /* cta */
+  --bw-cta-hover: 0 131 230; /* cta-hover */
+  --bw-cta-fg: 255 255 255; /* cta-foreground */
+  --bw-success: 12 105 68; /* success */
+  --bw-success-subtle: 225 246 234; /* success-subtle */
+  --bw-warning: 134 89 1; /* warning */
+  --bw-warning-subtle: 254 241 214; /* warning-subtle */
+  --bw-danger: 169 31 31; /* danger */
+  --bw-danger-subtle: 255 235 233; /* danger-subtle */
+  --bw-focus: 159 220 255; /* focus */
+  --bw-focus-inverted: 159 220 255; /* focus-on-inverted */
+  color-scheme: dark;
+}

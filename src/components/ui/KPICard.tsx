@@ -52,7 +52,7 @@ export function KPICard({ label, value, trend, trendValue, icon, loading = false
             'text-text-primary'
           }`}>
             {loading ? (
-              <span className="inline-block w-24 h-8 bg-slate-200 rounded animate-pulse" />
+              <span className="inline-block w-24 h-8 bg-sunken rounded animate-pulse" />
             ) : (
               value
             )}

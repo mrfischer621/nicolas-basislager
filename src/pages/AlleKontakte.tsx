@@ -192,7 +192,7 @@ export default function AlleKontakte() {
         </div>
         <button
           onClick={handleOpenModal}
-          className="flex items-center gap-2 px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand-dark transition"
+          className="flex items-center gap-2 px-4 py-2 bg-brand text-accent-fg rounded-lg hover:bg-brand-dark transition"
         >
           <Plus size={20} />
           Neuer Kontakt
@@ -213,11 +213,11 @@ export default function AlleKontakte() {
 
       {/* Contacts Grid */}
       {isLoading ? (
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="bg-surface rounded-lg shadow-sm p-6">
           <p className="text-content-tertiary text-center">Lädt Kontakte...</p>
         </div>
       ) : filteredContacts.length === 0 ? (
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="bg-surface rounded-lg shadow-sm p-6">
           <p className="text-content-tertiary text-center">
             {searchTerm ? 'Keine Kontakte gefunden.' : 'Noch keine Kontakte vorhanden.'}
           </p>
@@ -227,7 +227,7 @@ export default function AlleKontakte() {
           {filteredContacts.map((contact) => (
             <div
               key={contact.id}
-              className="bg-white rounded-lg shadow-sm p-4 hover:shadow-md transition border border-sage-100"
+              className="bg-surface rounded-lg shadow-sm p-4 hover:shadow-md transition border border-line"
             >
               {/* Header with name and primary badge */}
               <div className="flex items-start justify-between mb-3">
@@ -238,7 +238,7 @@ export default function AlleKontakte() {
                   )}
                 </div>
                 {contact.is_primary && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-warning-subtle text-warning">
                     <Star size={10} className="fill-current" />
                     Haupt
                   </span>
@@ -297,11 +297,11 @@ export default function AlleKontakte() {
           {/* Customer Search-Select */}
           <div>
             <label className="block text-sm font-medium text-content-body mb-1">
-              Kunde <span className="text-red-500">*</span>
+              Kunde <span className="text-danger">*</span>
             </label>
             <div ref={dropdownRef} className="relative">
               {selectedCustomer ? (
-                <div className="flex items-center justify-between px-4 py-2 border border-surface-border rounded-lg bg-sage-50">
+                <div className="flex items-center justify-between px-4 py-2 border border-surface-border rounded-lg bg-canvas">
                   <span className="text-content-heading">{selectedCustomer.name}</span>
                   <button
                     type="button"
@@ -332,7 +332,7 @@ export default function AlleKontakte() {
                   </div>
 
                   {isCustomerDropdownOpen && (
-                    <div className="absolute z-10 w-full mt-1 bg-white border border-surface-border rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                    <div className="absolute z-10 w-full mt-1 bg-surface border border-surface-border rounded-lg shadow-lg max-h-60 overflow-y-auto">
                       {filteredCustomers.length === 0 ? (
                         <div className="px-4 py-3 text-sm text-content-tertiary">
                           Keine Kunden gefunden
@@ -343,7 +343,7 @@ export default function AlleKontakte() {
                             key={customer.id}
                             type="button"
                             onClick={() => handleSelectCustomer(customer.id)}
-                            className="w-full px-4 py-2 text-left text-sm hover:bg-sage-50 transition"
+                            className="w-full px-4 py-2 text-left text-sm hover:bg-canvas transition"
                           >
                             {customer.name}
                           </button>
@@ -359,7 +359,7 @@ export default function AlleKontakte() {
           {/* Name */}
           <div>
             <label htmlFor="contactName" className="block text-sm font-medium text-content-body mb-1">
-              Name <span className="text-red-500">*</span>
+              Name <span className="text-danger">*</span>
             </label>
             <input
               type="text"
@@ -424,7 +424,7 @@ export default function AlleKontakte() {
               id="isPrimary"
               checked={isPrimary}
               onChange={(e) => setIsPrimary(e.target.checked)}
-              className="w-4 h-4 text-brand border-sage-300 rounded focus:ring-brand"
+              className="w-4 h-4 text-brand border-line-strong rounded focus:ring-brand"
             />
             <label htmlFor="isPrimary" className="text-sm text-content-body">
               Als Hauptkontakt setzen
@@ -436,14 +436,14 @@ export default function AlleKontakte() {
             <button
               type="submit"
               disabled={isSubmitting || !selectedCustomerId}
-              className="rounded-lg px-6 py-2 font-medium bg-brand text-white hover:bg-brand-dark transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="rounded-lg px-6 py-2 font-medium bg-brand text-accent-fg hover:bg-brand-dark transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? 'Speichert...' : 'Speichern'}
             </button>
             <button
               type="button"
               onClick={handleCloseModal}
-              className="rounded-lg px-6 py-2 font-medium bg-sage-200 text-content-body hover:bg-sage-300 transition"
+              className="rounded-lg px-6 py-2 font-medium bg-sunken text-content-body hover:bg-sunken transition"
             >
               Abbrechen
             </button>

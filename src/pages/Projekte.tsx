@@ -51,7 +51,7 @@ export default function Projekte() {
   if (!selectedCompany) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-gray-500">Firma wird geladen...</p>
+        <p className="text-fg-muted">Firma wird geladen...</p>
       </div>
     );
   }
@@ -229,12 +229,12 @@ export default function Projekte() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Projekte</h1>
-          <p className="text-gray-600 mt-1">Verwalten Sie Ihre Projekte</p>
+          <h1 className="text-2xl font-bold text-fg">Projekte</h1>
+          <p className="text-fg-muted mt-1">Verwalten Sie Ihre Projekte</p>
         </div>
         <button
           onClick={handleAddNew}
-          className="flex items-center gap-2 px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand-dark transition"
+          className="flex items-center gap-2 px-4 py-2 bg-brand text-accent-fg rounded-lg hover:bg-brand-dark transition"
         >
           <Plus size={20} />
           Neues Projekt
@@ -247,8 +247,8 @@ export default function Projekte() {
           onClick={() => setFilter('alle')}
           className={`px-4 py-2 rounded-lg font-medium transition ${
             filter === 'alle'
-              ? 'bg-brand text-white'
-              : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+              ? 'bg-brand text-accent-fg'
+              : 'bg-surface text-fg-muted hover:bg-raised border border-line'
           }`}
         >
           Alle
@@ -257,8 +257,8 @@ export default function Projekte() {
           onClick={() => setFilter('aktiv')}
           className={`px-4 py-2 rounded-lg font-medium transition ${
             filter === 'aktiv'
-              ? 'bg-brand text-white'
-              : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+              ? 'bg-brand text-accent-fg'
+              : 'bg-surface text-fg-muted hover:bg-raised border border-line'
           }`}
         >
           Aktiv
@@ -267,8 +267,8 @@ export default function Projekte() {
           onClick={() => setFilter('archiviert')}
           className={`px-4 py-2 rounded-lg font-medium transition ${
             filter === 'archiviert'
-              ? 'bg-brand text-white'
-              : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+              ? 'bg-brand text-accent-fg'
+              : 'bg-surface text-fg-muted hover:bg-raised border border-line'
           }`}
         >
           Archiviert
@@ -277,22 +277,22 @@ export default function Projekte() {
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+        <div className="bg-danger-subtle border border-danger-subtle text-danger px-4 py-3 rounded-lg">
           {error}
         </div>
       )}
 
       {/* Warning if no customers */}
       {customers.length === 0 && !isLoading && (
-        <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-lg">
+        <div className="bg-warning-subtle border border-warning-subtle text-warning px-4 py-3 rounded-lg">
           Bitte erstellen Sie zuerst Kunden, bevor Sie Projekte anlegen.
         </div>
       )}
 
       {/* Table */}
       {isLoading ? (
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <p className="text-gray-500 text-center">Lädt Projekte...</p>
+        <div className="bg-surface rounded-lg shadow-sm p-6">
+          <p className="text-fg-muted text-center">Lädt Projekte...</p>
         </div>
       ) : (
         <ProjectTable

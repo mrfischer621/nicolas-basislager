@@ -106,13 +106,13 @@ export default function Dashboard() {
         actions={
           <div className="flex items-center gap-4">
             {/* View Mode Toggle */}
-            <div className="flex rounded-lg border border-gray-200 overflow-hidden">
+            <div className="flex rounded-lg border border-line overflow-hidden">
               <button
                 onClick={() => setViewMode('days')}
                 className={`px-3 py-1.5 text-sm font-medium transition ${
                   viewMode === 'days'
-                    ? 'bg-brand text-white'
-                    : 'bg-white text-gray-600 hover:bg-gray-50'
+                    ? 'bg-brand text-accent-fg'
+                    : 'bg-surface text-fg-muted hover:bg-canvas'
                 }`}
               >
                 Tage
@@ -121,8 +121,8 @@ export default function Dashboard() {
                 onClick={() => setViewMode('year')}
                 className={`px-3 py-1.5 text-sm font-medium transition ${
                   viewMode === 'year'
-                    ? 'bg-brand text-white'
-                    : 'bg-white text-gray-600 hover:bg-gray-50'
+                    ? 'bg-brand text-accent-fg'
+                    : 'bg-surface text-fg-muted hover:bg-canvas'
                 }`}
               >
                 Jahr
@@ -132,11 +132,11 @@ export default function Dashboard() {
             {/* Year Dropdown (only shown in year mode) */}
             {viewMode === 'year' && (
               <div className="flex items-center gap-2">
-                <Calendar size={16} className="text-gray-500" />
+                <Calendar size={16} className="text-fg-muted" />
                 <select
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                  className="px-3 py-1.5 text-sm font-medium border border-gray-200 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
+                  className="px-3 py-1.5 text-sm font-medium border border-line rounded-lg bg-surface text-fg focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
                 >
                   {yearOptions.map((year) => (
                     <option key={year} value={year}>

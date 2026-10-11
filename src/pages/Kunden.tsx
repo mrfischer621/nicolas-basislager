@@ -125,7 +125,7 @@ export default function Kunden() {
   if (!selectedCompany) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-gray-500">Firma wird geladen...</p>
+        <p className="text-fg-muted">Firma wird geladen...</p>
       </div>
     );
   }
@@ -264,12 +264,12 @@ export default function Kunden() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Kunden</h1>
-          <p className="text-gray-600 mt-1">Verwalten Sie Ihre Kundendaten</p>
+          <h1 className="text-2xl font-bold text-fg">Kunden</h1>
+          <p className="text-fg-muted mt-1">Verwalten Sie Ihre Kundendaten</p>
         </div>
         <button
           onClick={handleAddNew}
-          className="flex items-center gap-2 px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand-dark transition"
+          className="flex items-center gap-2 px-4 py-2 bg-brand text-accent-fg rounded-lg hover:bg-brand-dark transition"
         >
           <Plus size={20} />
           Neuer Kunde
@@ -280,13 +280,13 @@ export default function Kunden() {
       <div className="flex items-center gap-4">
         {/* Search */}
         <div className="relative flex-1 max-w-md">
-          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-fg-subtle" />
           <input
             type="text"
             placeholder="Kunde suchen..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2 border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
           />
         </div>
 
@@ -296,8 +296,8 @@ export default function Kunden() {
           onClick={() => setFilter('alle')}
           className={`px-4 py-2 rounded-lg font-medium transition ${
             filter === 'alle'
-              ? 'bg-brand text-white'
-              : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+              ? 'bg-brand text-accent-fg'
+              : 'bg-surface text-fg-muted hover:bg-raised border border-line'
           }`}
         >
           Alle
@@ -306,8 +306,8 @@ export default function Kunden() {
           onClick={() => setFilter('aktiv')}
           className={`px-4 py-2 rounded-lg font-medium transition ${
             filter === 'aktiv'
-              ? 'bg-brand text-white'
-              : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+              ? 'bg-brand text-accent-fg'
+              : 'bg-surface text-fg-muted hover:bg-raised border border-line'
           }`}
         >
           Aktiv
@@ -316,8 +316,8 @@ export default function Kunden() {
           onClick={() => setFilter('archiviert')}
           className={`px-4 py-2 rounded-lg font-medium transition ${
             filter === 'archiviert'
-              ? 'bg-brand text-white'
-              : 'bg-white text-gray-600 hover:bg-gray-100 border border-gray-200'
+              ? 'bg-brand text-accent-fg'
+              : 'bg-surface text-fg-muted hover:bg-raised border border-line'
           }`}
         >
           Archiviert
@@ -327,15 +327,15 @@ export default function Kunden() {
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+        <div className="bg-danger-subtle border border-danger-subtle text-danger px-4 py-3 rounded-lg">
           {error}
         </div>
       )}
 
       {/* Table */}
       {isLoading ? (
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <p className="text-gray-500 text-center">Lädt Kunden...</p>
+        <div className="bg-surface rounded-lg shadow-sm p-6">
+          <p className="text-fg-muted text-center">Lädt Kunden...</p>
         </div>
       ) : (
         <CustomerTable

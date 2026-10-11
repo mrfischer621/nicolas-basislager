@@ -38,14 +38,15 @@ createRoot(document.getElementById('root')!).render(
             position="bottom-right"
             toastOptions={{
               duration: 4000,
+              // Farben aus den Tokens (src/styles/tokens.css)
               style: {
-                background: '#0f172a',
-                color: '#f8fafc',
+                background: 'rgb(var(--bw-ink))',
+                color: 'rgb(var(--bw-fg-inverted))',
                 fontSize: '14px',
-                borderRadius: '8px',
+                borderRadius: 'var(--bw-radius-lg)',
               },
-              success: { iconTheme: { primary: '#22c55e', secondary: '#0f172a' } },
-              error: { duration: 6000, iconTheme: { primary: '#ef4444', secondary: '#0f172a' } },
+              success: { iconTheme: { primary: 'rgb(var(--bw-cta))', secondary: 'rgb(var(--bw-ink))' } },
+              error: { duration: 6000, iconTheme: { primary: 'rgb(var(--bw-danger-subtle))', secondary: 'rgb(var(--bw-danger))' } },
             }}
           />
         </TimerProvider>

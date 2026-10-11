@@ -230,14 +230,14 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
   const getFileIcon = () => {
     if (!receiptFile) return null;
     if (receiptFile.type === 'application/pdf') {
-      return <FileText className="w-5 h-5 text-red-500" />;
+      return <FileText className="w-5 h-5 text-danger" />;
     }
-    return <Image className="w-5 h-5 text-blue-500" />;
+    return <Image className="w-5 h-5 text-accent" />;
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-ink/50 flex items-center justify-center z-50">
+      <div className="bg-surface rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           <h2 className="text-2xl font-bold mb-6">{transaction ? 'Buchung bearbeiten' : 'Buchung hinzufügen'}</h2>
 
@@ -248,8 +248,8 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
               onClick={() => handleTabChange('einnahme')}
               className={`px-6 py-2 rounded-lg font-medium transition-colors ${
                 activeTab === 'einnahme'
-                  ? 'bg-green-500 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-success text-white'
+                  : 'bg-raised text-fg hover:bg-sunken'
               }`}
             >
               Einnahme
@@ -259,8 +259,8 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
               onClick={() => handleTabChange('ausgabe')}
               className={`px-6 py-2 rounded-lg font-medium transition-colors ${
                 activeTab === 'ausgabe'
-                  ? 'bg-red-500 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-danger text-white'
+                  : 'bg-raised text-fg hover:bg-sunken'
               }`}
             >
               Ausgabe
@@ -271,27 +271,27 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
             {/* Transaction Number and Date */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Beleg-Nr {!transaction && <span className="text-xs text-gray-500">(wird automatisch generiert)</span>}
+                <label className="block text-sm font-medium text-fg mb-1">
+                  Beleg-Nr {!transaction && <span className="text-xs text-fg-muted">(wird automatisch generiert)</span>}
                 </label>
                 <input
                   type="text"
                   value={transactionNumber}
                   onChange={(e) => setTransactionNumber(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent bg-gray-50"
+                  className="w-full px-3 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent bg-canvas"
                   placeholder="Automatisch"
                   disabled={!transaction}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-fg mb-1">
                   Datum
                 </label>
                 <input
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
+                  className="w-full px-3 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
                   required
                 />
               </div>
@@ -300,7 +300,7 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
             {/* Amount and Category */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-fg mb-1">
                   Betrag (CHF)
                 </label>
                 <input
@@ -308,19 +308,19 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
                   step="0.01"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
+                  className="w-full px-3 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
                   required
                 />
               </div>
               <div>
-                <label htmlFor="transaction-category" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="transaction-category" className="block text-sm font-medium text-fg mb-1">
                   Kategorie
                 </label>
                 <select
                   id="transaction-category"
                   value={categoryName}
                   onChange={(e) => handleCategoryChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
+                  className="w-full px-3 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
                   disabled={isLoadingCategories}
                 >
                   {isLoadingCategories ? (
@@ -355,7 +355,7 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
 
             {/* Lieferant (Ausgabe) bzw. Zahler (Einnahme) */}
             <div>
-              <label htmlFor="transaction-counterparty" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="transaction-counterparty" className="block text-sm font-medium text-fg mb-1">
                 {activeTab === 'ausgabe' ? 'Lieferant' : 'Zahler'}
               </label>
               <input
@@ -365,7 +365,7 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
                 autoComplete="off"
                 value={counterparty}
                 onChange={(e) => setCounterparty(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
+                className="w-full px-3 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
                 placeholder={activeTab === 'ausgabe' ? 'z.B. Infomaniak' : 'z.B. Kunde AG'}
               />
               <datalist id="transaction-counterparty-suggestions">
@@ -377,21 +377,21 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
 
             {/* Description */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-fg mb-1">
                 Beschreibung
               </label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
+                className="w-full px-3 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
                 placeholder="Details zur Buchung..."
               />
             </div>
 
             {/* Receipt Upload */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-fg mb-1">
                 Beleg (optional)
               </label>
               <input
@@ -406,27 +406,27 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
               {!receiptFile && !existingReceiptUrl ? (
                 <label
                   htmlFor="receipt-upload"
-                  className="flex items-center justify-center gap-2 w-full px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-brand hover:bg-gray-50 transition-colors"
+                  className="flex items-center justify-center gap-2 w-full px-4 py-3 border-2 border-dashed border-line-strong rounded-lg cursor-pointer hover:border-brand hover:bg-canvas transition-colors"
                 >
-                  <Upload className="w-5 h-5 text-gray-400" />
-                  <span className="text-sm text-gray-600">PDF oder Bild hochladen (max. 10 MB)</span>
+                  <Upload className="w-5 h-5 text-fg-subtle" />
+                  <span className="text-sm text-fg-muted">PDF oder Bild hochladen (max. 10 MB)</span>
                 </label>
               ) : (
-                <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg">
+                <div className="flex items-center justify-between px-4 py-3 bg-canvas border border-line rounded-lg">
                   <div className="flex items-center gap-3">
                     {receiptFile ? (
                       <>
                         {getFileIcon()}
-                        <span className="text-sm text-gray-700 truncate max-w-[200px]">
+                        <span className="text-sm text-fg truncate max-w-[200px]">
                           {receiptFile.name}
                         </span>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-fg-muted">
                           ({(receiptFile.size / 1024).toFixed(0)} KB)
                         </span>
                       </>
                     ) : existingReceiptUrl ? (
                       <>
-                        <FileText className="w-5 h-5 text-green-500" />
+                        <FileText className="w-5 h-5 text-success" />
                         <button
                           type="button"
                           onClick={async () => {
@@ -452,7 +452,7 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
                   <button
                     type="button"
                     onClick={removeReceipt}
-                    className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                    className="p-1 text-fg-subtle hover:text-danger transition-colors"
                     title="Beleg entfernen"
                   >
                     <X className="w-5 h-5" />
@@ -460,20 +460,20 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
                 </div>
               )}
               {uploadingReceipt && (
-                <p className="mt-1 text-sm text-gray-500">Beleg wird hochgeladen...</p>
+                <p className="mt-1 text-sm text-fg-muted">Beleg wird hochgeladen...</p>
               )}
             </div>
 
             {/* Customer and Project */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-fg mb-1">
                   Kund:in wählen (optional)
                 </label>
                 <select
                   value={customerId}
                   onChange={(e) => setCustomerId(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
+                  className="w-full px-3 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
                 >
                   <option value="">-- Keine Auswahl --</option>
                   {customers.map((customer) => (
@@ -484,13 +484,13 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-fg mb-1">
                   Projekt (optional)
                 </label>
                 <select
                   value={projectId}
                   onChange={(e) => setProjectId(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
+                  className="w-full px-3 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
                 >
                   <option value="">-- Keine Auswahl --</option>
                   {projects.map((project) => (
@@ -504,7 +504,7 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
 
             {/* Tags */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-fg mb-1">
                 Tags (optional)
               </label>
               <div className="flex gap-2 mb-2">
@@ -518,13 +518,13 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
                       addTag();
                     }
                   }}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
+                  className="flex-1 px-3 py-2 border border-line-strong rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
                   placeholder="Tag hinzufügen..."
                 />
                 <button
                   type="button"
                   onClick={addTag}
-                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+                  className="px-4 py-2 bg-raised text-fg rounded-lg hover:bg-sunken"
                 >
                   Hinzufügen
                 </button>
@@ -533,13 +533,13 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
                 {tags.map((tag) => (
                   <span
                     key={tag}
-                    className="inline-flex items-center gap-1 px-3 py-1 bg-brand text-white rounded-full text-sm"
+                    className="inline-flex items-center gap-1 px-3 py-1 bg-brand text-accent-fg rounded-full text-sm"
                   >
                     {tag}
                     <button
                       type="button"
                       onClick={() => removeTag(tag)}
-                      className="hover:text-gray-200"
+                      className="hover:text-fg-subtle"
                     >
                       ×
                     </button>
@@ -553,7 +553,7 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
               <button
                 type="button"
                 onClick={onCancel}
-                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
+                className="px-4 py-2 text-fg hover:bg-raised rounded-lg"
                 disabled={loading}
               >
                 Abbrechen
@@ -561,14 +561,14 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
               <button
                 type="button"
                 onClick={(e) => handleSubmit(e, true)}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                className="px-4 py-2 bg-sunken text-fg rounded-lg hover:bg-sunken"
                 disabled={loading}
               >
                 Speichern & neu
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-brand text-white rounded-lg hover:bg-opacity-90"
+                className="px-4 py-2 bg-brand text-accent-fg rounded-lg hover:bg-opacity-90"
                 disabled={loading}
               >
                 {loading ? 'Speichern...' : 'Speichern'}

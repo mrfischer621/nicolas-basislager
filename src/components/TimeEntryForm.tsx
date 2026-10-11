@@ -115,22 +115,22 @@ export default function TimeEntryForm({ onSubmit, editingEntry, onCancelEdit, pr
   const amount = calculateAmount();
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6">
-      <h2 className="text-xl font-semibold text-gray-900 mb-4">
+    <div className="bg-surface rounded-lg shadow-sm p-6">
+      <h2 className="text-xl font-semibold text-fg mb-4">
         {editingEntry ? 'Zeiteintrag bearbeiten' : 'Neuer Zeiteintrag'}
       </h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="project" className="block text-sm font-medium text-gray-700 mb-1">
-              Projekt <span className="text-red-500">*</span>
+            <label htmlFor="project" className="block text-sm font-medium text-fg mb-1">
+              Projekt <span className="text-danger">*</span>
             </label>
             <select
               id="project"
               value={projectId}
               onChange={(e) => setProjectId(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
             >
               <option value="">Projekt auswählen</option>
               {projects.map((project) => (
@@ -142,8 +142,8 @@ export default function TimeEntryForm({ onSubmit, editingEntry, onCancelEdit, pr
           </div>
 
           <div>
-            <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
-              Datum <span className="text-red-500">*</span>
+            <label htmlFor="date" className="block text-sm font-medium text-fg mb-1">
+              Datum <span className="text-danger">*</span>
             </label>
             <input
               type="date"
@@ -151,15 +151,15 @@ export default function TimeEntryForm({ onSubmit, editingEntry, onCancelEdit, pr
               value={date}
               onChange={(e) => setDate(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
             />
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label htmlFor="hours" className="block text-sm font-medium text-gray-700 mb-1">
-              Stunden <span className="text-red-500">*</span>
+            <label htmlFor="hours" className="block text-sm font-medium text-fg mb-1">
+              Stunden <span className="text-danger">*</span>
             </label>
             <input
               type="number"
@@ -169,26 +169,26 @@ export default function TimeEntryForm({ onSubmit, editingEntry, onCancelEdit, pr
               required
               step="0.25"
               min="0"
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
               placeholder="0.00"
             />
           </div>
 
           <div>
-            <label htmlFor="rate" className="block text-sm font-medium text-gray-700 mb-1">
-              Stundensatz (CHF) <span className="text-red-500">*</span>
+            <label htmlFor="rate" className="block text-sm font-medium text-fg mb-1">
+              Stundensatz (CHF) <span className="text-danger">*</span>
               {rateSource === 'project' && (
-                <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
+                <span className="ml-2 text-xs bg-accent-subtle text-accent px-2 py-0.5 rounded">
                   Projekt
                 </span>
               )}
               {rateSource === 'customer' && (
-                <span className="ml-2 text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">
+                <span className="ml-2 text-xs bg-success-subtle text-success px-2 py-0.5 rounded">
                   Kunde
                 </span>
               )}
               {rateSource === 'default' && (
-                <span className="ml-2 text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded">
+                <span className="ml-2 text-xs bg-raised text-fg px-2 py-0.5 rounded">
                   Standard
                 </span>
               )}
@@ -204,23 +204,23 @@ export default function TimeEntryForm({ onSubmit, editingEntry, onCancelEdit, pr
               required
               step="0.01"
               min="0"
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
               placeholder="160.00"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-fg mb-1">
               Betrag (CHF)
             </label>
-            <div className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-900 font-medium">
+            <div className="w-full px-4 py-2 border border-line rounded-lg bg-canvas text-fg font-medium">
               {amount.toFixed(2)}
             </div>
           </div>
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="description" className="block text-sm font-medium text-fg mb-1">
             Beschreibung
           </label>
           <textarea
@@ -228,14 +228,14 @@ export default function TimeEntryForm({ onSubmit, editingEntry, onCancelEdit, pr
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={2}
-            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition resize-none"
+            className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition resize-none"
             placeholder="Tätigkeitsbeschreibung..."
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Verrechenbar <span className="text-red-500">*</span>
+          <label className="block text-sm font-medium text-fg mb-2">
+            Verrechenbar <span className="text-danger">*</span>
           </label>
           <div className="flex gap-6">
             <label className="flex items-center gap-2 cursor-pointer">
@@ -244,9 +244,9 @@ export default function TimeEntryForm({ onSubmit, editingEntry, onCancelEdit, pr
                 name="billable"
                 checked={billable === true}
                 onChange={() => setBillable(true)}
-                className="w-4 h-4 text-brand border-gray-300 focus:ring-brand"
+                className="w-4 h-4 text-brand border-line-strong focus:ring-brand"
               />
-              <span className="text-sm text-gray-700">Ja</span>
+              <span className="text-sm text-fg">Ja</span>
             </label>
             <label className="flex items-center gap-2 cursor-pointer">
               <input
@@ -254,9 +254,9 @@ export default function TimeEntryForm({ onSubmit, editingEntry, onCancelEdit, pr
                 name="billable"
                 checked={billable === false}
                 onChange={() => setBillable(false)}
-                className="w-4 h-4 text-brand border-gray-300 focus:ring-brand"
+                className="w-4 h-4 text-brand border-line-strong focus:ring-brand"
               />
-              <span className="text-sm text-gray-700">Nein</span>
+              <span className="text-sm text-fg">Nein</span>
             </label>
           </div>
         </div>
@@ -265,7 +265,7 @@ export default function TimeEntryForm({ onSubmit, editingEntry, onCancelEdit, pr
           <button
             type="submit"
             disabled={isSubmitting}
-            className="rounded-lg px-4 py-2 font-medium bg-brand text-white hover:bg-brand-dark transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-lg px-4 py-2 font-medium bg-brand text-accent-fg hover:bg-brand-dark transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? 'Speichert...' : editingEntry ? 'Aktualisieren' : 'Speichern'}
           </button>
@@ -273,7 +273,7 @@ export default function TimeEntryForm({ onSubmit, editingEntry, onCancelEdit, pr
             <button
               type="button"
               onClick={handleCancel}
-              className="rounded-lg px-4 py-2 font-medium bg-gray-200 text-gray-700 hover:bg-gray-300 transition"
+              className="rounded-lg px-4 py-2 font-medium bg-sunken text-fg hover:bg-sunken transition"
             >
               Abbrechen
             </button>

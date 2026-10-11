@@ -95,7 +95,7 @@ export function KanbanColumn({
           </h2>
 
           {/* Count Badge */}
-          <span className="text-xs font-medium text-text-secondary bg-white px-2 py-0.5 rounded-md border border-surface-border flex-shrink-0">
+          <span className="text-xs font-medium text-text-secondary bg-surface px-2 py-0.5 rounded-md border border-surface-border flex-shrink-0">
             {opportunities.length}
           </span>
         </div>
@@ -108,7 +108,7 @@ export function KanbanColumn({
             rounded-lg
             text-text-secondary
             hover:text-brand
-            hover:bg-white
+            hover:bg-surface
             transition-all duration-150
           "
           title="Neuer Deal"

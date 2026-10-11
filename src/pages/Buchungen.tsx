@@ -254,7 +254,7 @@ export default function Buchungen() {
         </div>
         <button
           onClick={handleNewTransaction}
-          className="flex items-center gap-2 px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand-dark transition"
+          className="flex items-center gap-2 px-4 py-2 bg-brand text-accent-fg rounded-lg hover:bg-brand-dark transition"
         >
           <Plus size={20} />
           Neue Buchung
@@ -264,7 +264,7 @@ export default function Buchungen() {
       <PaidWithoutDateNotice invoices={finance.data?.paidWithoutDate ?? []} />
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow-sm p-4">
+      <div className="bg-surface rounded-lg shadow-sm p-4">
         <div className="flex flex-wrap gap-4 items-center">
           {/* Account Filter (Tabs) */}
           <div className="flex gap-2">
@@ -272,8 +272,8 @@ export default function Buchungen() {
               onClick={() => setFilterType('all')}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 filterType === 'all'
-                  ? 'bg-brand text-white'
-                  : 'bg-sage-100 text-content-body hover:bg-sage-200'
+                  ? 'bg-brand text-accent-fg'
+                  : 'bg-raised text-content-body hover:bg-sunken'
               }`}
             >
               Alle Konten
@@ -283,7 +283,7 @@ export default function Buchungen() {
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 filterType === 'einnahme'
                   ? 'bg-success-dark text-white'
-                  : 'bg-sage-100 text-content-body hover:bg-sage-200'
+                  : 'bg-raised text-content-body hover:bg-sunken'
               }`}
             >
               Einnahmen
@@ -293,7 +293,7 @@ export default function Buchungen() {
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 filterType === 'ausgabe'
                   ? 'bg-danger-dark text-white'
-                  : 'bg-sage-100 text-content-body hover:bg-sage-200'
+                  : 'bg-raised text-content-body hover:bg-sunken'
               }`}
             >
               Ausgaben
@@ -332,7 +332,7 @@ export default function Buchungen() {
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+        <div className="bg-danger-subtle border border-danger-subtle text-danger px-4 py-3 rounded-lg">
           {error}
         </div>
       )}

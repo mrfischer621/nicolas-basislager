@@ -77,7 +77,7 @@ const CardBase: FC<CardProps> = ({ children, padding = 'md', hover = false, clas
   return (
     <div
       className={`
-        bg-white
+        bg-surface
         border border-surface-border
         rounded-xl
         shadow-sm

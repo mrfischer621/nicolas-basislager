@@ -263,13 +263,13 @@ export default function KundenDetail() {
     const styles: Record<string, string> = {
       'offen': 'bg-brand-light text-brand-darker',
       'laufend': 'bg-success-light text-success-dark',
-      'abgeschlossen': 'bg-sage-100 text-sage-700',
-      'entwurf': 'bg-sage-100 text-sage-700',
+      'abgeschlossen': 'bg-raised text-fg',
+      'entwurf': 'bg-raised text-fg',
       'versendet': 'bg-brand-light text-brand-darker',
       'bezahlt': 'bg-success-light text-success-dark',
       'überfällig': 'bg-danger-light text-danger-dark'
     };
-    return styles[status] || 'bg-sage-100 text-sage-700';
+    return styles[status] || 'bg-raised text-fg';
   };
 
   if (!selectedCompany) {
@@ -295,7 +295,7 @@ export default function KundenDetail() {
           <ArrowLeft size={20} />
           Zurück zu Kunden
         </Link>
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+        <div className="bg-danger-subtle border border-danger-subtle text-danger px-4 py-3 rounded-lg">
           Kunde nicht gefunden.
         </div>
       </div>
@@ -327,7 +327,7 @@ export default function KundenDetail() {
         </div>
         <button
           onClick={() => setIsEditModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand-dark transition"
+          className="flex items-center gap-2 px-4 py-2 bg-brand text-accent-fg rounded-lg hover:bg-brand-dark transition"
         >
           <Pencil size={18} />
           Bearbeiten
@@ -344,13 +344,13 @@ export default function KundenDetail() {
               className={`pb-3 px-1 border-b-2 font-medium text-sm transition flex items-center gap-2 ${
                 activeTab === tab.id
                   ? 'border-brand text-brand'
-                  : 'border-transparent text-content-tertiary hover:text-content-body hover:border-sage-300'
+                  : 'border-transparent text-content-tertiary hover:text-content-body hover:border-line-strong'
               }`}
             >
               {tab.label}
               {tab.count !== undefined && (
                 <span className={`px-2 py-0.5 rounded-full text-xs ${
-                  activeTab === tab.id ? 'bg-brand/10' : 'bg-sage-100'
+                  activeTab === tab.id ? 'bg-brand/10' : 'bg-raised'
                 }`}>
                   {tab.count}
                 </span>
@@ -364,7 +364,7 @@ export default function KundenDetail() {
       {activeTab === 'overview' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Contact Info */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="bg-surface rounded-lg shadow-sm p-6">
             <h3 className="font-semibold text-content-heading mb-4">Kontaktdaten</h3>
             <div className="space-y-3">
               {customer.email && (
@@ -395,7 +395,7 @@ export default function KundenDetail() {
           </div>
 
           {/* Address */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="bg-surface rounded-lg shadow-sm p-6">
             <h3 className="font-semibold text-content-heading mb-4">Adresse</h3>
             <div className="flex items-start gap-3 text-content-secondary">
               <MapPin size={18} className="text-content-tertiary mt-0.5" />
@@ -412,7 +412,7 @@ export default function KundenDetail() {
           </div>
 
           {/* Quick Stats */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="bg-surface rounded-lg shadow-sm p-6">
             <h3 className="font-semibold text-content-heading mb-4">Statistiken</h3>
             <div className="grid grid-cols-3 gap-4">
               <div className="text-center">
@@ -432,7 +432,7 @@ export default function KundenDetail() {
 
           {/* Hourly Rate */}
           {customer.hourly_rate && (
-            <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="bg-surface rounded-lg shadow-sm p-6">
               <h3 className="font-semibold text-content-heading mb-4">Konditionen</h3>
               <div className="flex items-center gap-3">
                 <Building2 size={18} className="text-content-tertiary" />
@@ -450,7 +450,7 @@ export default function KundenDetail() {
           <div className="flex justify-end">
             <button
               onClick={() => openContactModal()}
-              className="flex items-center gap-2 px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand-dark transition"
+              className="flex items-center gap-2 px-4 py-2 bg-brand text-accent-fg rounded-lg hover:bg-brand-dark transition"
             >
               <Plus size={18} />
               Neuer Kontakt
@@ -458,13 +458,13 @@ export default function KundenDetail() {
           </div>
 
           {contacts.length === 0 ? (
-            <div className="bg-white rounded-lg shadow-sm p-6 text-center text-content-tertiary">
+            <div className="bg-surface rounded-lg shadow-sm p-6 text-center text-content-tertiary">
               Noch keine Kontakte vorhanden.
             </div>
           ) : (
-            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+            <div className="bg-surface rounded-lg shadow-sm overflow-hidden">
               <table className="w-full">
-                <thead className="bg-sage-50 border-b border-surface-border">
+                <thead className="bg-canvas border-b border-surface-border">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-content-tertiary uppercase">Name</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-content-tertiary uppercase">Funktion</th>
@@ -474,9 +474,9 @@ export default function KundenDetail() {
                     <th className="px-6 py-3 text-right text-xs font-medium text-content-tertiary uppercase">Aktionen</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-line">
                   {contacts.map((contact) => (
-                    <tr key={contact.id} className="hover:bg-sage-50">
+                    <tr key={contact.id} className="hover:bg-canvas">
                       <td className="px-6 py-4 text-sm font-medium text-content-heading">{contact.name}</td>
                       <td className="px-6 py-4 text-sm text-content-secondary">{contact.role || '-'}</td>
                       <td className="px-6 py-4 text-sm">
@@ -489,19 +489,19 @@ export default function KundenDetail() {
                       <td className="px-6 py-4 text-sm text-content-secondary">{contact.phone || '-'}</td>
                       <td className="px-6 py-4 text-center">
                         {contact.is_primary ? (
-                          <Star size={16} className="inline text-amber-500 fill-current" />
+                          <Star size={16} className="inline text-warning fill-current" />
                         ) : (
-                          <button onClick={() => handleSetPrimary(contact.id)} className="text-sage-300 hover:text-amber-500">
+                          <button onClick={() => handleSetPrimary(contact.id)} className="text-fg-subtle hover:text-warning">
                             <StarOff size={16} />
                           </button>
                         )}
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex justify-end gap-2">
-                          <button onClick={() => openContactModal(contact)} className="p-1 text-brand hover:bg-sage-50 rounded">
+                          <button onClick={() => openContactModal(contact)} className="p-1 text-brand hover:bg-canvas rounded">
                             <Pencil size={16} />
                           </button>
-                          <button onClick={() => handleDeleteContact(contact.id)} className="p-1 text-red-600 hover:bg-red-50 rounded">
+                          <button onClick={() => handleDeleteContact(contact.id)} className="p-1 text-danger hover:bg-danger-subtle rounded">
                             <Trash2 size={16} />
                           </button>
                         </div>
@@ -520,7 +520,7 @@ export default function KundenDetail() {
           <div className="flex justify-end">
             <Link
               to={`/projekte?customerId=${customer.id}`}
-              className="flex items-center gap-2 px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand-dark transition"
+              className="flex items-center gap-2 px-4 py-2 bg-brand text-accent-fg rounded-lg hover:bg-brand-dark transition"
             >
               <Briefcase size={18} />
               Zu Projekte
@@ -528,22 +528,22 @@ export default function KundenDetail() {
           </div>
 
           {projects.length === 0 ? (
-            <div className="bg-white rounded-lg shadow-sm p-6 text-center text-content-tertiary">
+            <div className="bg-surface rounded-lg shadow-sm p-6 text-center text-content-tertiary">
               Noch keine Projekte vorhanden.
             </div>
           ) : (
-            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+            <div className="bg-surface rounded-lg shadow-sm overflow-hidden">
               <table className="w-full">
-                <thead className="bg-sage-50 border-b border-surface-border">
+                <thead className="bg-canvas border-b border-surface-border">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-content-tertiary uppercase">Name</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-content-tertiary uppercase">Status</th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-content-tertiary uppercase">Budget</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-line">
                   {projects.map((project) => (
-                    <tr key={project.id} className="hover:bg-sage-50">
+                    <tr key={project.id} className="hover:bg-canvas">
                       <td className="px-6 py-4 text-sm font-medium text-content-heading">{project.name}</td>
                       <td className="px-6 py-4">
                         <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadge(project.status)}`}>
@@ -567,7 +567,7 @@ export default function KundenDetail() {
           <div className="flex justify-end">
             <Link
               to={`/rechnungen?customerId=${customer.id}`}
-              className="flex items-center gap-2 px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand-dark transition"
+              className="flex items-center gap-2 px-4 py-2 bg-brand text-accent-fg rounded-lg hover:bg-brand-dark transition"
             >
               <FileText size={18} />
               Zu Rechnungen
@@ -575,13 +575,13 @@ export default function KundenDetail() {
           </div>
 
           {invoices.length === 0 ? (
-            <div className="bg-white rounded-lg shadow-sm p-6 text-center text-content-tertiary">
+            <div className="bg-surface rounded-lg shadow-sm p-6 text-center text-content-tertiary">
               Noch keine Rechnungen vorhanden.
             </div>
           ) : (
-            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+            <div className="bg-surface rounded-lg shadow-sm overflow-hidden">
               <table className="w-full">
-                <thead className="bg-sage-50 border-b border-surface-border">
+                <thead className="bg-canvas border-b border-surface-border">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-content-tertiary uppercase">Nr.</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-content-tertiary uppercase">Datum</th>
@@ -589,9 +589,9 @@ export default function KundenDetail() {
                     <th className="px-6 py-3 text-right text-xs font-medium text-content-tertiary uppercase">Betrag</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-line">
                   {invoices.map((invoice) => (
-                    <tr key={invoice.id} className="hover:bg-sage-50">
+                    <tr key={invoice.id} className="hover:bg-canvas">
                       <td className="px-6 py-4 text-sm font-medium text-content-heading">{invoice.invoice_number}</td>
                       <td className="px-6 py-4 text-sm text-content-secondary">
                         {new Date(invoice.issue_date).toLocaleDateString('de-CH')}
@@ -636,7 +636,7 @@ export default function KundenDetail() {
         <form onSubmit={handleContactSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-content-body mb-1">
-              Name <span className="text-red-500">*</span>
+              Name <span className="text-danger">*</span>
             </label>
             <input
               type="text"
@@ -679,7 +679,7 @@ export default function KundenDetail() {
               id="isPrimary"
               checked={contactIsPrimary}
               onChange={(e) => setContactIsPrimary(e.target.checked)}
-              className="w-4 h-4 text-brand border-gray-300 rounded focus:ring-brand"
+              className="w-4 h-4 text-brand border-line-strong rounded focus:ring-brand"
             />
             <label htmlFor="isPrimary" className="text-sm text-content-body">Als Hauptkontakt setzen</label>
           </div>
@@ -687,14 +687,14 @@ export default function KundenDetail() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="rounded-lg px-6 py-2 font-medium bg-brand text-white hover:bg-brand-dark transition disabled:opacity-50"
+              className="rounded-lg px-6 py-2 font-medium bg-brand text-accent-fg hover:bg-brand-dark transition disabled:opacity-50"
             >
               {isSubmitting ? 'Speichert...' : editingContact ? 'Aktualisieren' : 'Speichern'}
             </button>
             <button
               type="button"
               onClick={() => { setIsContactModalOpen(false); resetContactForm(); }}
-              className="rounded-lg px-6 py-2 font-medium bg-sage-200 text-content-body hover:bg-sage-300 transition"
+              className="rounded-lg px-6 py-2 font-medium bg-sunken text-content-body hover:bg-sunken transition"
             >
               Abbrechen
             </button>

@@ -19,23 +19,23 @@ type View = 'milchbuechli' | 'or';
 const chf = (v: number) => formatChfDisplay(v);
 const dmy = (day: string) => `${day.slice(8, 10)}.${day.slice(5, 7)}.${day.slice(0, 4)}`;
 const inputClass =
-  'w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand disabled:bg-gray-100 disabled:text-gray-500';
+  'w-full px-3 py-2 border border-line-strong rounded-lg focus:outline-none focus:ring-2 focus:ring-brand disabled:bg-raised disabled:text-fg-muted';
 const numberClass = `${inputClass} text-right tabular-nums`;
 
 function SectionTitle({ nr, title, hint }: { nr: string; title: string; hint?: string }) {
   return (
     <div className="mb-4">
-      <h2 className="text-lg font-semibold text-gray-900">
+      <h2 className="text-lg font-semibold text-fg">
         {nr}. {title}
       </h2>
-      {hint && <p className="mt-1 text-sm text-gray-600">{hint}</p>}
+      {hint && <p className="mt-1 text-sm text-fg-muted">{hint}</p>}
     </div>
   );
 }
 
 function AmountRow({ label, amount, strong = false }: { label: string; amount: number; strong?: boolean }) {
   return (
-    <div className={`flex justify-between gap-4 py-1.5 ${strong ? 'border-t border-gray-300 pt-2 font-semibold' : ''}`}>
+    <div className={`flex justify-between gap-4 py-1.5 ${strong ? 'border-t border-line-strong pt-2 font-semibold' : ''}`}>
       <span>{label}</span>
       <span className="tabular-nums">{chf(amount)}</span>
     </div>
@@ -85,7 +85,7 @@ function BalanceItemsEditor({
               type="button"
               aria-label={`${labelPlaceholder} ${i + 1} entfernen`}
               onClick={() => onChange(items.filter((_, j) => j !== i))}
-              className="rounded-lg px-2 text-gray-500 hover:bg-gray-100 hover:text-red-700"
+              className="rounded-lg px-2 text-fg-muted hover:bg-raised hover:text-danger"
             >
               <Trash2 size={16} strokeWidth={1.5} />
             </button>
@@ -96,7 +96,7 @@ function BalanceItemsEditor({
         <button
           type="button"
           onClick={() => onChange([...items, { label: '', amount: 0 }])}
-          className="inline-flex items-center gap-1 text-sm font-medium text-gray-700 underline"
+          className="inline-flex items-center gap-1 text-sm font-medium text-fg underline"
         >
           <Plus size={14} strokeWidth={1.5} /> {addLabel}
         </button>
@@ -107,7 +107,7 @@ function BalanceItemsEditor({
 
 function EntryList({ entries }: { entries: FinanceEntry[] }) {
   return (
-    <ul className="mt-1 space-y-0.5 text-sm text-gray-700">
+    <ul className="mt-1 space-y-0.5 text-sm text-fg">
       {entries.map((e) => (
         <li key={e.id}>
           <Link className="underline" to={`/buchungen?id=${e.id}`}>
@@ -244,7 +244,7 @@ export default function Jahresabschluss() {
     );
 
   if (loading) {
-    return <div className="p-8 text-center text-gray-600">Jahresabschluss wird geladen …</div>;
+    return <div className="p-8 text-center text-fg-muted">Jahresabschluss wird geladen …</div>;
   }
 
   const b = report.balance;
@@ -264,7 +264,7 @@ export default function Jahresabschluss() {
               id="year-select"
               value={selectedYear}
               onChange={(e) => setSelectedYear(Number(e.target.value))}
-              className="rounded-lg border border-gray-300 px-3 py-2"
+              className="rounded-lg border border-line-strong px-3 py-2"
             >
               {yearOptions.map((y) => (
                 <option key={y} value={y}>
@@ -274,7 +274,7 @@ export default function Jahresabschluss() {
             </select>
             <span
               className={`rounded px-2 py-1 text-sm font-semibold ${
-                isLocked ? 'bg-green-100 text-green-900' : 'bg-amber-100 text-amber-900'
+                isLocked ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning'
               }`}
             >
               {isLocked ? 'Abgeschlossen' : 'Entwurf'}
@@ -283,10 +283,10 @@ export default function Jahresabschluss() {
         }
       />
 
-      {error && <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800">{error}</div>}
+      {error && <div className="rounded-lg border border-danger-subtle bg-danger-subtle p-4 text-danger">{error}</div>}
 
       {isLocked && (
-        <div role="status" className="rounded-lg border border-green-300 bg-green-50 p-4 text-sm text-green-900">
+        <div role="status" className="rounded-lg border border-success bg-success-subtle p-4 text-sm text-success">
           <strong>Abgeschlossen</strong>
           {closing?.locked_at && <> am {new Date(closing.locked_at).toLocaleString('de-CH')}</>}. Buchungen mit Datum{' '}
           {selectedYear} sind schreibgeschützt.
@@ -323,14 +323,14 @@ export default function Jahresabschluss() {
         <Button variant="secondary" onClick={handleCsv} disabled={busy} icon={<FileSpreadsheet size={16} strokeWidth={1.5} />}>
           CSV (alle Buchungen)
         </Button>
-        <div role="group" aria-label="Darstellung der Erfolgsrechnung" className="ml-auto flex rounded-lg border border-gray-300 p-0.5">
+        <div role="group" aria-label="Darstellung der Erfolgsrechnung" className="ml-auto flex rounded-lg border border-line-strong p-0.5">
           {(['milchbuechli', 'or'] as View[]).map((v) => (
             <button
               key={v}
               type="button"
               aria-pressed={view === v}
               onClick={() => setView(v)}
-              className={`rounded-md px-3 py-1.5 text-sm font-medium ${view === v ? 'bg-gray-900 text-white' : 'text-gray-700'}`}
+              className={`rounded-md px-3 py-1.5 text-sm font-medium ${view === v ? 'bg-ink text-white' : 'text-fg'}`}
             >
               {v === 'milchbuechli' ? 'Milchbüechli' : 'Gliederung OR'}
             </button>
@@ -353,8 +353,8 @@ export default function Jahresabschluss() {
           <table className="w-full text-sm">
             <tbody>
               {report.orView.map((l) => (
-                <tr key={l.key} className="border-b border-gray-100">
-                  <td className="w-12 py-2 text-gray-600">{l.ziffer}</td>
+                <tr key={l.key} className="border-b border-line">
+                  <td className="w-12 py-2 text-fg-muted">{l.ziffer}</td>
                   <td className="py-2">{l.label}</td>
                   <td className="py-2 text-right tabular-nums">{chf(l.amount)}</td>
                 </tr>
@@ -375,9 +375,9 @@ export default function Jahresabschluss() {
               ] as const
             ).map(([title, lines, total]) => (
               <div key={title}>
-                <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-600">{title}</h3>
+                <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-fg-muted">{title}</h3>
                 {lines.length === 0 ? (
-                  <p className="text-sm text-gray-600">Keine {title} im Jahr {selectedYear}.</p>
+                  <p className="text-sm text-fg-muted">Keine {title} im Jahr {selectedYear}.</p>
                 ) : (
                   <table className="w-full text-sm">
                     <thead className="sr-only">
@@ -389,10 +389,10 @@ export default function Jahresabschluss() {
                     </thead>
                     <tbody>
                       {lines.map((l) => (
-                        <tr key={l.category} className="border-b border-gray-100">
-                          <td className="w-14 py-1.5 text-gray-600 tabular-nums">{l.account ?? '–'}</td>
+                        <tr key={l.category} className="border-b border-line">
+                          <td className="w-14 py-1.5 text-fg-muted tabular-nums">{l.account ?? '–'}</td>
                           <td className="py-1.5">
-                            {l.category} <span className="text-gray-500">({l.count})</span>
+                            {l.category} <span className="text-fg-muted">({l.count})</span>
                           </td>
                           <td className="py-1.5 text-right tabular-nums">{chf(l.amount)}</td>
                         </tr>
@@ -425,7 +425,7 @@ export default function Jahresabschluss() {
         <h3 className="mb-2 font-medium">Abschreibungen</h3>
         <div className="space-y-2">
           {formData.assets.length > 0 && (
-            <div className="hidden grid-cols-[1fr_9rem_6rem_9rem_auto] gap-2 text-xs font-medium text-gray-600 md:grid">
+            <div className="hidden grid-cols-[1fr_9rem_6rem_9rem_auto] gap-2 text-xs font-medium text-fg-muted md:grid">
               <span>Anlage</span>
               <span className="text-right">Buchwert 1.1. / Anschaffung</span>
               <span className="text-right">Satz %</span>
@@ -440,14 +440,14 @@ export default function Jahresabschluss() {
               <input aria-label={`Abschreibungssatz Anlage ${i + 1}`} type="number" step="0.5" className={numberClass} value={a.depreciation_rate || ''} disabled={isLocked} onChange={(e) => updateAsset(i, 'depreciation_rate', Number(e.target.value))} />
               <input aria-label={`Abschreibung Anlage ${i + 1}`} type="number" step="0.01" className={numberClass} value={a.amount || ''} disabled={isLocked} onChange={(e) => updateAsset(i, 'amount', Number(e.target.value))} />
               {!isLocked && (
-                <button type="button" aria-label={`Anlage ${i + 1} entfernen`} className="rounded-lg px-2 text-gray-500 hover:bg-gray-100 hover:text-red-700" onClick={() => setFormData({ ...formData, assets: formData.assets.filter((_, j) => j !== i) })}>
+                <button type="button" aria-label={`Anlage ${i + 1} entfernen`} className="rounded-lg px-2 text-fg-muted hover:bg-raised hover:text-danger" onClick={() => setFormData({ ...formData, assets: formData.assets.filter((_, j) => j !== i) })}>
                   <Trash2 size={16} strokeWidth={1.5} />
                 </button>
               )}
             </div>
           ))}
           {!isLocked && (
-            <button type="button" className="inline-flex items-center gap-1 text-sm font-medium text-gray-700 underline" onClick={() => setFormData({ ...formData, assets: [...formData.assets, { name: '', value: 0, depreciation_rate: 40, amount: 0 }] })}>
+            <button type="button" className="inline-flex items-center gap-1 text-sm font-medium text-fg underline" onClick={() => setFormData({ ...formData, assets: [...formData.assets, { name: '', value: 0, depreciation_rate: 40, amount: 0 }] })}>
               <Plus size={14} strokeWidth={1.5} /> Anlage hinzufügen
             </button>
           )}
@@ -461,14 +461,14 @@ export default function Jahresabschluss() {
               <input aria-label={`Privatanteil ${i + 1} in Prozent`} type="number" className={numberClass} placeholder="%" value={s.percentage || ''} disabled={isLocked} onChange={(e) => updateShare(i, 'percentage', Number(e.target.value))} />
               <input aria-label={`Privatanteil ${i + 1} Betrag`} type="number" step="0.01" className={numberClass} placeholder="CHF" value={s.amount || ''} disabled={isLocked} onChange={(e) => updateShare(i, 'amount', Number(e.target.value))} />
               {!isLocked && (
-                <button type="button" aria-label={`Privatanteil ${i + 1} entfernen`} className="rounded-lg px-2 text-gray-500 hover:bg-gray-100 hover:text-red-700" onClick={() => setFormData({ ...formData, private_shares: formData.private_shares.filter((_, j) => j !== i) })}>
+                <button type="button" aria-label={`Privatanteil ${i + 1} entfernen`} className="rounded-lg px-2 text-fg-muted hover:bg-raised hover:text-danger" onClick={() => setFormData({ ...formData, private_shares: formData.private_shares.filter((_, j) => j !== i) })}>
                   <Trash2 size={16} strokeWidth={1.5} />
                 </button>
               )}
             </div>
           ))}
           {!isLocked && (
-            <button type="button" className="inline-flex items-center gap-1 text-sm font-medium text-gray-700 underline" onClick={() => setFormData({ ...formData, private_shares: [...formData.private_shares, { category: '', percentage: 0, amount: 0 }] })}>
+            <button type="button" className="inline-flex items-center gap-1 text-sm font-medium text-fg underline" onClick={() => setFormData({ ...formData, private_shares: [...formData.private_shares, { category: '', percentage: 0, amount: 0 }] })}>
               <Plus size={14} strokeWidth={1.5} /> Privatanteil hinzufügen
             </button>
           )}
@@ -487,7 +487,7 @@ export default function Jahresabschluss() {
             disabled={isLocked}
             onChange={(e) => setFormData({ ...formData, social_security_provision: Number(e.target.value) })}
           />
-          <p className="col-span-2 text-xs text-gray-600">
+          <p className="col-span-2 text-xs text-fg-muted">
             Beitragssatz 2026: 10,0 % (sinkende Skala unter CHF 60'500, Merkblatt 2.02).
           </p>
         </div>
@@ -518,12 +518,12 @@ export default function Jahresabschluss() {
             <div>
               <h4 className="mb-1 font-medium">Offene Debitoren</h4>
               {b.debtors.length === 0 ? (
-                <p className="text-gray-600">Keine offenen Rechnungen per 31.12.</p>
+                <p className="text-fg-muted">Keine offenen Rechnungen per 31.12.</p>
               ) : (
                 b.debtors.map((d) => (
                   <div key={d.invoiceId} className="flex justify-between py-0.5">
                     <span>
-                      {d.number} {d.customer && <span className="text-gray-600">· {d.customer}</span>}
+                      {d.number} {d.customer && <span className="text-fg-muted">· {d.customer}</span>}
                     </span>
                     <span className="tabular-nums">{chf(d.amount)}</span>
                   </div>
@@ -533,7 +533,7 @@ export default function Jahresabschluss() {
             <div>
               <h4 className="mb-1 font-medium">Anlagevermögen (Buchwert 31.12.)</h4>
               {b.fixedAssets.length === 0 ? (
-                <p className="text-gray-600">Keine Anlagen erfasst (Abschnitt 2).</p>
+                <p className="text-fg-muted">Keine Anlagen erfasst (Abschnitt 2).</p>
               ) : (
                 b.fixedAssets.map((a, i) => (
                   <div key={i} className="flex justify-between py-0.5">
@@ -562,15 +562,15 @@ export default function Jahresabschluss() {
       <Card padding="md">
         <SectionTitle nr="5" title="Kontrollen" hint="Vor dem Abschluss bereinigen. Belegprinzip nach Art. 957a OR: Jede Buchung braucht einen Beleg." />
         {openChecks === 0 ? (
-          <p className="text-sm font-medium text-green-900">Keine offenen Punkte.</p>
+          <p className="text-sm font-medium text-success">Keine offenen Punkte.</p>
         ) : (
           <div className="space-y-4 text-sm">
             {c.paidWithoutDate.length > 0 && (
               <div>
-                <h3 className="font-semibold text-red-800">
+                <h3 className="font-semibold text-danger">
                   Fehler: {c.paidWithoutDate.length} bezahlte Rechnung{c.paidWithoutDate.length === 1 ? '' : 'en'} ohne Zahlungsdatum (nicht gezählt)
                 </h3>
-                <p className="text-gray-700">
+                <p className="text-fg">
                   {c.paidWithoutDate.map((i) => i.invoice_number).join(', ')} ·{' '}
                   <Link className="underline" to="/rechnungen?filter=ohne-zahlungsdatum">
                     Zahlungsdatum nachtragen
@@ -612,15 +612,15 @@ export default function Jahresabschluss() {
       <Card padding="md">
         <SectionTitle nr="6" title="Protokoll" hint="Jedes Sperren und Entsperren mit Zeitpunkt, Benutzer, Grund und Prüfsumme. Unveränderbar." />
         {log.length === 0 ? (
-          <p className="text-sm text-gray-600">Noch keine Einträge.</p>
+          <p className="text-sm text-fg-muted">Noch keine Einträge.</p>
         ) : (
           <ul className="space-y-2 text-sm">
             {log.map((l) => (
-              <li key={l.id} className="border-b border-gray-100 pb-2">
+              <li key={l.id} className="border-b border-line pb-2">
                 <span className="font-medium">{l.action === 'lock' ? 'Abgeschlossen' : 'Entsperrt'}</span> am{' '}
                 {new Date(l.created_at).toLocaleString('de-CH')}
                 {l.reason && <> · Grund: {l.reason}</>}
-                <div className="break-all font-mono text-xs text-gray-600">{l.hash}</div>
+                <div className="break-all font-mono text-xs text-fg-muted">{l.hash}</div>
               </li>
             ))}
           </ul>
@@ -635,7 +635,7 @@ export default function Jahresabschluss() {
           }}
           className="space-y-4"
         >
-          <p className="text-sm text-gray-700">
+          <p className="text-sm text-fg">
             Das Entsperren wird mit Zeitpunkt, Benutzer, Grund und Prüfsumme unveränderbar protokolliert.
           </p>
           <div>

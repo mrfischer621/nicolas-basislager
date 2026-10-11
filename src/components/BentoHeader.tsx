@@ -24,7 +24,7 @@ function SearchResultGroup({ title, icon, results, onSelect }: SearchResultGroup
 
   return (
     <div className="border-b border-surface-border last:border-b-0">
-      <div className="px-3 py-2 bg-slate-50 flex items-center gap-2 text-xs font-medium text-text-secondary uppercase tracking-wide">
+      <div className="px-3 py-2 bg-canvas flex items-center gap-2 text-xs font-medium text-text-secondary uppercase tracking-wide">
         {icon}
         {title}
       </div>
@@ -36,7 +36,7 @@ function SearchResultGroup({ title, icon, results, onSelect }: SearchResultGroup
             w-full px-3 py-2.5
             flex flex-col items-start
             text-left
-            hover:bg-slate-50
+            hover:bg-canvas
             transition-colors
           "
         >
@@ -180,7 +180,7 @@ export function BentoHeader({ onMenuClick }: { onMenuClick?: () => void }) {
         {/* Mobile Menu Button */}
         <button
           onClick={onMenuClick}
-          className="md:hidden p-2 -ml-2 rounded-lg text-text-secondary hover:text-text-primary hover:bg-slate-100 transition-colors"
+          className="md:hidden p-2 -ml-2 rounded-lg text-text-secondary hover:text-text-primary hover:bg-raised transition-colors"
           aria-label="Menu öffnen"
         >
           <Menu size={20} strokeWidth={2} />
@@ -207,13 +207,13 @@ export function BentoHeader({ onMenuClick }: { onMenuClick?: () => void }) {
               w-full
               pl-9 pr-8 py-2
               text-sm
-              bg-slate-100
+              bg-raised
               border border-transparent
               rounded-lg
               placeholder:text-text-secondary
               focus:outline-none
               focus:border-brand
-              focus:bg-white
+              focus:bg-surface
               transition-all duration-150
             "
           />
@@ -238,7 +238,7 @@ export function BentoHeader({ onMenuClick }: { onMenuClick?: () => void }) {
           <div
             className="
               absolute top-full left-0 right-0 mt-2
-              bg-white
+              bg-surface
               rounded-xl
               shadow-floating
               border border-surface-border
@@ -306,9 +306,9 @@ export function BentoHeader({ onMenuClick }: { onMenuClick?: () => void }) {
               flex items-center gap-2
               px-3 py-2
               rounded-lg
-              bg-slate-100
+              bg-raised
               text-text-primary
-              hover:bg-slate-200
+              hover:bg-sunken
               transition-colors duration-150
             "
           >
@@ -330,7 +330,7 @@ export function BentoHeader({ onMenuClick }: { onMenuClick?: () => void }) {
               className="
                 absolute right-0 top-full mt-2
                 w-72
-                bg-white
+                bg-surface
                 rounded-xl
                 shadow-floating
                 border border-surface-border
@@ -364,7 +364,7 @@ export function BentoHeader({ onMenuClick }: { onMenuClick?: () => void }) {
                       px-4 py-3
                       flex items-center justify-between
                       text-left
-                      hover:bg-slate-50
+                      hover:bg-canvas
                       transition-colors
                       group
                     "
@@ -390,7 +390,7 @@ export function BentoHeader({ onMenuClick }: { onMenuClick?: () => void }) {
 
                   {/* Company List */}
                   {isCompanySwitcherOpen && (
-                    <div className="bg-slate-50">
+                    <div className="bg-canvas">
                       <div className="max-h-48 overflow-y-auto">
                         {companies.map((company) => (
                           <button
@@ -403,7 +403,7 @@ export function BentoHeader({ onMenuClick }: { onMenuClick?: () => void }) {
                               pl-12
                               flex items-center justify-between
                               text-left
-                              hover:bg-slate-100
+                              hover:bg-raised
                               transition-colors
                               disabled:opacity-50
                               disabled:cursor-not-allowed
@@ -428,10 +428,10 @@ export function BentoHeader({ onMenuClick }: { onMenuClick?: () => void }) {
                           pl-12
                           flex items-center gap-2
                           text-left
-                          border-t border-slate-200
-                          hover:bg-slate-100
+                          border-t border-line
+                          hover:bg-raised
                           transition-colors
-                          text-blue-600
+                          text-accent
                           font-medium
                         "
                       >
@@ -452,7 +452,7 @@ export function BentoHeader({ onMenuClick }: { onMenuClick?: () => void }) {
                     px-4 py-2.5
                     flex items-center gap-3
                     text-left
-                    hover:bg-slate-50
+                    hover:bg-canvas
                     transition-colors
                   "
                 >
@@ -467,9 +467,9 @@ export function BentoHeader({ onMenuClick }: { onMenuClick?: () => void }) {
                     px-4 py-2.5
                     flex items-center gap-3
                     text-left
-                    hover:bg-red-50
+                    hover:bg-danger-subtle
                     transition-colors
-                    text-red-600
+                    text-danger
                   "
                 >
                   <LogOut size={18} />

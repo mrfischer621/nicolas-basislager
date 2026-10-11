@@ -63,21 +63,21 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
           }}
         >
           <div
-            className="fixed inset-0 bg-black bg-opacity-50"
+            className="fixed inset-0 bg-ink/50"
             onClick={() => close(false)}
           />
-          <div className="relative w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+          <div className="relative w-full max-w-md rounded-lg bg-surface p-6 shadow-xl">
             <div className="mb-3 flex items-start gap-3">
               {options.destructive && (
-                <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600">
+                <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-danger-subtle text-danger">
                   <AlertTriangle size={18} />
                 </span>
               )}
               <div>
-                <h2 id="confirm-title" className="text-lg font-semibold text-gray-900">
+                <h2 id="confirm-title" className="text-lg font-semibold text-fg">
                   {options.title}
                 </h2>
-                <p className="mt-1 whitespace-pre-line text-sm text-gray-600">{options.message}</p>
+                <p className="mt-1 whitespace-pre-line text-sm text-fg-muted">{options.message}</p>
               </div>
             </div>
 
@@ -85,7 +85,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
               <button
                 type="button"
                 onClick={() => close(false)}
-                className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+                className="rounded-lg border border-line px-4 py-2 text-sm font-medium text-fg transition hover:bg-canvas"
               >
                 {options.cancelLabel ?? 'Abbrechen'}
               </button>
@@ -95,7 +95,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
                 onClick={() => close(true)}
                 className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition ${
                   options.destructive
-                    ? 'bg-red-600 hover:bg-red-700'
+                    ? 'bg-danger hover:bg-danger'
                     : 'bg-brand hover:bg-brand-dark'
                 }`}
               >

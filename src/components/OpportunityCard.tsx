@@ -86,11 +86,11 @@ export function OpportunityCard({
         group relative rounded-2xl p-4 mb-3
         border transition-all duration-200 ease-out
         ${opportunity.is_lost
-          ? 'bg-gray-50 border-gray-200 opacity-70'
-          : 'bg-white border-gray-100'
+          ? 'bg-canvas border-line opacity-70'
+          : 'bg-surface border-line'
         }
         ${isSortableDragging
-          ? 'shadow-2xl ring-2 ring-sage-500 ring-offset-2'
+          ? 'shadow-2xl ring-2 ring-focus ring-offset-2'
           : 'shadow-sm hover:shadow-xl'
         }
         ${isDragging ? 'opacity-50' : ''}
@@ -102,8 +102,8 @@ export function OpportunityCard({
         {...listeners}
         className="absolute -left-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
       >
-        <div className="bg-gray-200 rounded-lg p-1.5 shadow-sm hover:bg-gray-300 transition-colors">
-          <GripVertical size={16} className="text-gray-600" />
+        <div className="bg-sunken rounded-lg p-1.5 shadow-sm hover:bg-sunken transition-colors">
+          <GripVertical size={16} className="text-fg-muted" />
         </div>
       </div>
 
@@ -115,14 +115,14 @@ export function OpportunityCard({
               e.stopPropagation();
               setShowMenu(!showMenu);
             }}
-            className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors opacity-0 group-hover:opacity-100"
+            className="p-1.5 rounded-lg text-fg-subtle hover:text-fg-muted hover:bg-raised transition-colors opacity-0 group-hover:opacity-100"
           >
             <MoreVertical size={16} />
           </button>
 
           {/* Dropdown Menu */}
           {showMenu && (
-            <div className="absolute right-0 top-8 bg-white rounded-xl shadow-lg border border-gray-200 py-1 min-w-[160px] z-50">
+            <div className="absolute right-0 top-8 bg-surface rounded-xl shadow-lg border border-line py-1 min-w-[160px] z-50">
               {onToggleLost && (
                 <button
                   onClick={(e) => {
@@ -130,7 +130,7 @@ export function OpportunityCard({
                     onToggleLost(opportunity);
                     setShowMenu(false);
                   }}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-fg hover:bg-canvas transition-colors"
                 >
                   {opportunity.is_lost ? (
                     <>
@@ -152,7 +152,7 @@ export function OpportunityCard({
                     onDelete(opportunity);
                     setShowMenu(false);
                   }}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-danger hover:bg-danger-subtle transition-colors"
                 >
                   <Trash2 size={14} />
                   <span>Löschen</span>
@@ -165,7 +165,7 @@ export function OpportunityCard({
 
       {/* Lost Indicator */}
       {opportunity.is_lost && (
-        <div className="flex items-center gap-1.5 text-xs font-medium text-gray-500 mb-3 px-2 py-1 bg-gray-100 rounded-lg border border-gray-200">
+        <div className="flex items-center gap-1.5 text-xs font-medium text-fg-muted mb-3 px-2 py-1 bg-raised rounded-lg border border-line">
           <XCircle size={14} />
           <span>Verloren</span>
         </div>
@@ -173,26 +173,26 @@ export function OpportunityCard({
 
       {/* Stale Indicator - Electric Red Accent */}
       {isStale && !opportunity.is_lost && (
-        <div className="flex items-center gap-1.5 text-xs font-medium text-red-600 mb-3 px-2 py-1 bg-red-50 rounded-lg border border-red-100">
+        <div className="flex items-center gap-1.5 text-xs font-medium text-danger mb-3 px-2 py-1 bg-danger-subtle rounded-lg border border-danger-subtle">
           <AlertCircle size={14} />
           <span>Letzter Kontakt vor {daysSinceContact} Tagen</span>
         </div>
       )}
 
       {/* Title - Neo-Grotesk Typography */}
-      <h3 className="font-bold text-gray-900 mb-2 tracking-tight leading-tight text-base">
+      <h3 className="font-bold text-fg mb-2 tracking-tight leading-tight text-base">
         {opportunity.title}
       </h3>
 
       {/* Customer/Prospect Name */}
-      <p className="text-sm text-gray-600 mb-3 font-medium">
+      <p className="text-sm text-fg-muted mb-3 font-medium">
         {displayName}
       </p>
 
       {/* Expected Value - Bold & Clean */}
       {opportunity.expected_value && (
-        <div className="inline-block px-3 py-1.5 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl mb-3 border border-gray-200">
-          <p className="text-sm font-bold text-gray-900 tracking-tight">
+        <div className="inline-block px-3 py-1.5 bg-gradient-to-br from-canvas to-raised rounded-xl mb-3 border border-line">
+          <p className="text-sm font-bold text-fg tracking-tight">
             CHF {opportunity.expected_value.toLocaleString('de-CH', { minimumFractionDigits: 2 })}
           </p>
         </div>
@@ -200,14 +200,14 @@ export function OpportunityCard({
 
       {/* Next Action Date */}
       {opportunity.next_action_date && (
-        <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-4 font-medium">
+        <div className="flex items-center gap-1.5 text-xs text-fg-muted mb-4 font-medium">
           <Calendar size={12} />
           <span>{new Date(opportunity.next_action_date).toLocaleDateString('de-CH')}</span>
         </div>
       )}
 
       {/* Actions - Spatial Buttons */}
-      <div className="flex flex-wrap gap-2 pt-3 border-t border-gray-100">
+      <div className="flex flex-wrap gap-2 pt-3 border-t border-line">
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -215,8 +215,8 @@ export function OpportunityCard({
           }}
           className="
             flex-1 text-xs font-semibold px-3 py-2
-            bg-gray-100 text-gray-700 rounded-xl
-            hover:bg-gray-200 active:translate-y-[1px]
+            bg-raised text-fg rounded-xl
+            hover:bg-sunken active:translate-y-[1px]
             transition-all duration-150 tracking-tight
           "
         >
@@ -230,8 +230,8 @@ export function OpportunityCard({
             }}
             className="
               flex-1 text-xs font-semibold px-3 py-2
-              bg-gradient-to-br from-sage-500 to-sage-600 text-white rounded-xl
-              hover:from-sage-600 hover:to-sage-700
+              bg-gradient-to-br from-fg-muted to-fg-muted text-white rounded-xl
+              hover:from-fg-muted hover:to-ink
               active:translate-y-[1px]
               transition-all duration-150 tracking-tight
               shadow-sm hover:shadow-md
@@ -249,8 +249,8 @@ export function OpportunityCard({
             }}
             className="
               flex-1 text-xs font-semibold px-3 py-2
-              bg-gradient-to-br from-emerald-500 to-emerald-600 text-white rounded-xl
-              hover:from-emerald-600 hover:to-emerald-700
+              bg-gradient-to-br from-success to-success text-white rounded-xl
+              hover:from-success hover:to-success
               active:translate-y-[1px]
               transition-all duration-150 tracking-tight
               shadow-sm hover:shadow-md

@@ -106,7 +106,7 @@ export function BentoSidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: 
           transition-all duration-150
           ${
             isActive
-              ? 'bg-brand text-white shadow-glow-brand'
+              ? 'bg-brand text-accent-fg shadow-glow-brand'
               : 'text-sidebar-text hover:text-white hover:bg-sidebar-hover'
           }
         `.trim().replace(/\s+/g, ' ')
@@ -138,7 +138,7 @@ export function BentoSidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: 
                 transition-all duration-150
                 ${
                   isActive
-                    ? 'bg-brand text-white shadow-glow-brand'
+                    ? 'bg-brand text-accent-fg shadow-glow-brand'
                     : 'text-sidebar-text hover:text-white hover:bg-sidebar-hover'
                 }
               `.trim().replace(/\s+/g, ' ')
@@ -155,7 +155,7 @@ export function BentoSidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: 
               transition-all duration-150
               ${
                 isKundenActive && !isKundenOpen
-                  ? 'bg-brand/80 text-white'
+                  ? 'bg-brand/80 text-accent-fg'
                   : 'text-sidebar-text hover:text-white hover:bg-sidebar-hover'
               }
             `.trim().replace(/\s+/g, ' ')}
@@ -186,7 +186,7 @@ export function BentoSidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: 
                     transition-all duration-150
                     ${
                       isActive
-                        ? 'bg-brand text-white shadow-glow-brand'
+                        ? 'bg-brand text-accent-fg shadow-glow-brand'
                         : 'text-sidebar-text hover:text-white hover:bg-sidebar-hover'
                     }
                   `.trim().replace(/\s+/g, ' ')
@@ -211,7 +211,7 @@ export function BentoSidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: 
       {/* Mobile Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          className="fixed inset-0 bg-ink/50 z-40 md:hidden"
           onClick={onClose}
         />
       )}
@@ -285,7 +285,7 @@ export function BentoSidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: 
                 transition-all duration-150
                 ${
                   isActive
-                    ? 'bg-brand text-white shadow-glow-brand'
+                    ? 'bg-brand text-accent-fg shadow-glow-brand'
                     : 'text-sidebar-text hover:text-white hover:bg-sidebar-hover'
                 }
               `.trim().replace(/\s+/g, ' ')

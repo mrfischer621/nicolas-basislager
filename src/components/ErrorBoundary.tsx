@@ -47,22 +47,22 @@ export default class ErrorBoundary extends Component<Props, State> {
 
     return (
       <div className="flex min-h-[60vh] items-center justify-center p-6">
-        <div className="w-full max-w-md rounded-lg border border-red-200 bg-white p-6 shadow-sm">
-          <div className="mb-3 flex items-center gap-2 text-red-600">
+        <div className="w-full max-w-md rounded-lg border border-danger-subtle bg-surface p-6 shadow-sm">
+          <div className="mb-3 flex items-center gap-2 text-danger">
             <AlertTriangle size={20} />
             <h2 className="text-lg font-semibold">Diese Ansicht konnte nicht geladen werden</h2>
           </div>
-          <p className="mb-4 text-sm text-gray-600">
+          <p className="mb-4 text-sm text-fg-muted">
             Deine Daten sind nicht betroffen — es ist nur die Anzeige gescheitert.
             Lade die Seite neu; tritt der Fehler erneut auf, hilft die Meldung unten
             bei der Ursachensuche.
           </p>
-          <pre className="mb-4 max-h-32 overflow-auto rounded bg-gray-50 p-3 text-xs text-gray-700">
+          <pre className="mb-4 max-h-32 overflow-auto rounded bg-canvas p-3 text-xs text-fg">
             {error.message}
           </pre>
           <button
             onClick={this.handleReload}
-            className="flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-white transition hover:bg-brand-dark"
+            className="flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-accent-fg transition hover:bg-brand-dark"
           >
             <RotateCw size={16} />
             Seite neu laden

@@ -79,14 +79,14 @@ function ActionMenu({
       <button
         ref={buttonRef}
         onClick={onToggle}
-        className="text-gray-400 hover:text-brand transition-colors"
+        className="text-fg-subtle hover:text-brand transition-colors"
       >
         <MoreVertical className="w-5 h-5" />
       </button>
       {isOpen && createPortal(
         <div
           ref={menuRef}
-          className="fixed w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
+          className="fixed w-48 bg-surface rounded-lg shadow-lg border border-line z-50"
           style={{ top: menuPosition.top, left: menuPosition.left }}
         >
           <button
@@ -94,7 +94,7 @@ function ActionMenu({
               onEdit(transaction);
               onClose();
             }}
-            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-t-lg"
+            className="block w-full text-left px-4 py-2 text-sm text-fg hover:bg-raised rounded-t-lg"
           >
             Bearbeiten
           </button>
@@ -110,7 +110,7 @@ function ActionMenu({
               }
               onClose();
             }}
-            className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 rounded-b-lg"
+            className="block w-full text-left px-4 py-2 text-sm text-danger hover:bg-raised rounded-b-lg"
           >
             Löschen
           </button>
@@ -150,23 +150,23 @@ export default function TransactionTable({ transactions, customers, projects, on
   };
 
   const getCategoryBadgeColor = (category: string | null) => {
-    if (!category) return 'bg-gray-100 text-gray-800';
+    if (!category) return 'bg-raised text-fg';
 
     const colors: Record<string, string> = {
-      'Materialaufwand': 'bg-blue-100 text-blue-800',
-      'Sonstige': 'bg-gray-100 text-gray-800',
-      'Personalkosten': 'bg-purple-100 text-purple-800',
-      'Miete': 'bg-yellow-100 text-yellow-800',
-      'Marketing': 'bg-pink-100 text-pink-800',
+      'Materialaufwand': 'bg-accent-subtle text-accent',
+      'Sonstige': 'bg-raised text-fg',
+      'Personalkosten': 'bg-accent-subtle text-accent',
+      'Miete': 'bg-warning-subtle text-warning',
+      'Marketing': 'bg-accent-subtle text-accent',
     };
 
-    return colors[category] || 'bg-gray-100 text-gray-800';
+    return colors[category] || 'bg-raised text-fg';
   };
 
   const formatAmount = (amount: number, type: 'einnahme' | 'ausgabe') => {
     const formatted = amount.toFixed(2);
     const prefix = type === 'einnahme' ? '+' : '-';
-    const colorClass = type === 'einnahme' ? 'text-green-600' : 'text-red-600';
+    const colorClass = type === 'einnahme' ? 'text-success' : 'text-danger';
 
     return (
       <span className={`font-semibold ${colorClass}`}>
@@ -186,66 +186,66 @@ export default function TransactionTable({ transactions, customers, projects, on
 
   if (transactions.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <p className="text-gray-500 text-center">Keine Buchungen vorhanden. Erstellen Sie die erste Buchung.</p>
+      <div className="bg-surface rounded-lg shadow-sm p-6">
+        <p className="text-fg-muted text-center">Keine Buchungen vorhanden. Erstellen Sie die erste Buchung.</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+    <div className="bg-surface rounded-lg shadow-sm overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-gray-50 border-b border-gray-200">
+          <thead className="bg-canvas border-b border-line">
             <tr>
-              <th className="sticky left-0 z-10 bg-gray-50 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="sticky left-0 z-10 bg-canvas px-6 py-3 text-left text-xs font-medium text-fg-muted uppercase tracking-wider">
                 Datum ↓
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-fg-muted uppercase tracking-wider">
                 Nr
               </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-right text-xs font-medium text-fg-muted uppercase tracking-wider">
                 Betrag
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-fg-muted uppercase tracking-wider">
                 Text
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-fg-muted uppercase tracking-wider">
                 Kategorie
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-fg-muted uppercase tracking-wider">
                 Lieferant / Zahler
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-fg-muted uppercase tracking-wider">
                 Kunde
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-fg-muted uppercase tracking-wider">
                 Projekt
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-center text-xs font-medium text-fg-muted uppercase tracking-wider">
                 Beleg
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-center text-xs font-medium text-fg-muted uppercase tracking-wider">
                 Aktionen
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody className="divide-y divide-line">
             {paginatedTransactions.map((transaction, index) => (
                 <tr
                   key={transaction.id}
-                  className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-gray-100 transition-colors`}
+                  className={`${index % 2 === 0 ? 'bg-surface' : 'bg-canvas'} hover:bg-raised transition-colors`}
                 >
-                  <td className={`sticky left-0 z-10 px-6 py-4 whitespace-nowrap text-sm text-gray-900 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} group-hover:bg-gray-100`}>
+                  <td className={`sticky left-0 z-10 px-6 py-4 whitespace-nowrap text-sm text-fg ${index % 2 === 0 ? 'bg-surface' : 'bg-canvas'} group-hover:bg-raised`}>
                     {new Date(transaction.date).toLocaleDateString('de-CH')}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-fg">
                     {transaction.transaction_number}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
                     {formatAmount(transaction.amount, transaction.type)}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
+                  <td className="px-6 py-4 text-sm text-fg">
                     <div className="max-w-xs truncate">
                       {transaction.description || '-'}
                     </div>
@@ -254,7 +254,7 @@ export default function TransactionTable({ transactions, customers, projects, on
                         {transaction.tags.map((tag) => (
                           <span
                             key={tag}
-                            className="inline-flex px-2 py-0.5 text-xs rounded-full bg-brand text-white"
+                            className="inline-flex px-2 py-0.5 text-xs rounded-full bg-brand text-accent-fg"
                           >
                             {tag}
                           </span>
@@ -273,13 +273,13 @@ export default function TransactionTable({ transactions, customers, projects, on
                       </span>
                     )}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-fg">
                     {transaction.counterparty || '-'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-fg">
                     {getCustomerName(transaction.customer_id)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-fg">
                     {getProjectName(transaction.project_id)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-center">
@@ -298,20 +298,20 @@ export default function TransactionTable({ transactions, customers, projects, on
                             window.open(data.signedUrl, '_blank');
                           }
                         }}
-                        className="inline-flex items-center justify-center text-gray-400 hover:text-brand transition-colors"
+                        className="inline-flex items-center justify-center text-fg-subtle hover:text-brand transition-colors"
                         title="Beleg anzeigen"
                       >
                         <Paperclip className="w-5 h-5" />
                       </button>
                     ) : (
-                      <span className="text-gray-300">-</span>
+                      <span className="text-fg-subtle">-</span>
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-center">
                     <div className="flex items-center justify-center gap-2">
                       <button
                         onClick={() => onEdit(transaction)}
-                        className="text-gray-400 hover:text-brand transition-colors"
+                        className="text-fg-subtle hover:text-brand transition-colors"
                         title="Details anzeigen"
                       >
                         <Eye className="w-5 h-5" />
@@ -334,29 +334,29 @@ export default function TransactionTable({ transactions, customers, projects, on
 
       {/* Footer: Pagination + Total Summary */}
       {transactions.length > 0 && (
-        <div className="px-6 py-4 bg-gray-50 border-t border-gray-200">
+        <div className="px-6 py-4 bg-canvas border-t border-line">
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex items-center justify-between mb-4">
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-fg-muted">
                 Zeige {startIndex + 1}–{Math.min(startIndex + ITEMS_PER_PAGE, transactions.length)} von {transactions.length}
               </span>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="p-1.5 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="p-1.5 rounded-md border border-line-strong text-fg-muted hover:bg-raised disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   aria-label="Vorherige Seite"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
-                <span className="text-sm font-medium text-gray-700 min-w-[80px] text-center">
+                <span className="text-sm font-medium text-fg min-w-[80px] text-center">
                   Seite {currentPage} / {totalPages}
                 </span>
                 <button
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="p-1.5 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="p-1.5 rounded-md border border-line-strong text-fg-muted hover:bg-raised disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   aria-label="Nächste Seite"
                 >
                   <ChevronRight className="w-4 h-4" />
@@ -367,10 +367,10 @@ export default function TransactionTable({ transactions, customers, projects, on
 
           {/* Total Summary */}
           <div className="flex justify-between items-center">
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-sm font-medium text-fg">
               Saldo der angezeigten Buchungen:
             </span>
-            <span className={`text-lg font-bold ${calculateTotal() >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            <span className={`text-lg font-bold ${calculateTotal() >= 0 ? 'text-success' : 'text-danger'}`}>
               {formatChfDisplay(calculateTotal())}
             </span>
           </div>

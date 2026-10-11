@@ -12,7 +12,7 @@ export default function PaidWithoutDateNotice({ invoices }: { invoices: FinanceI
   const total = invoices.reduce((sum, i) => sum + Number(i.total ?? 0), 0);
 
   return (
-    <div role="status" className="flex items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+    <div role="status" className="flex items-start gap-3 rounded-lg border border-warning bg-warning-subtle px-4 py-3 text-sm text-warning">
       <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" strokeWidth={1.5} aria-hidden="true" />
       <p>
         <strong>Warnung:</strong> {invoices.length} bezahlte {invoices.length === 1 ? 'Rechnung hat' : 'Rechnungen haben'} kein

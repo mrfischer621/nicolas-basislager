@@ -39,7 +39,7 @@ function PaidDateInput({ invoice, onSave }: { invoice: Invoice; onSave: (invoice
         value={day}
         onChange={(e) => setDay(e.target.value)}
         aria-label={`Zahlungsdatum für ${invoice.invoice_number}`}
-        className="rounded border border-gray-300 px-1.5 py-0.5 text-xs"
+        className="rounded border border-line-strong px-1.5 py-0.5 text-xs"
       />
       <button type="submit" disabled={saving} className="rounded px-1.5 py-0.5 text-xs font-medium underline disabled:opacity-50">
         {saving ? '…' : 'Speichern'}
@@ -49,7 +49,7 @@ function PaidDateInput({ invoice, onSave }: { invoice: Invoice; onSave: (invoice
 }
 
 const statusColors = {
-  entwurf: 'bg-sage-100 text-sage-800',
+  entwurf: 'bg-raised text-fg',
   versendet: 'bg-brand-light text-brand-darker',
   bezahlt: 'bg-success-light text-success-dark',
   überfällig: 'bg-danger-light text-danger-dark',
@@ -77,17 +77,17 @@ export default function InvoiceTable({ invoices, customers, onDelete, onDownload
 
   if (invoices.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow-sm p-6">
+      <div className="bg-surface rounded-lg shadow-sm p-6">
         <p className="text-content-tertiary text-center">Keine Rechnungen vorhanden. Erstellen Sie die erste Rechnung.</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+    <div className="bg-surface rounded-lg shadow-sm overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-sage-50 border-b border-surface-border">
+          <thead className="bg-canvas border-b border-surface-border">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-content-tertiary uppercase tracking-wider">
                 Rechnungsnummer
@@ -112,9 +112,9 @@ export default function InvoiceTable({ invoices, customers, onDelete, onDownload
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody className="divide-y divide-line">
             {invoices.map((invoice) => (
-              <tr key={invoice.id} className="hover:bg-sage-50 transition">
+              <tr key={invoice.id} className="hover:bg-canvas transition">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-content-heading">{invoice.invoice_number}</div>
                 </td>
@@ -142,7 +142,7 @@ export default function InvoiceTable({ invoices, customers, onDelete, onDownload
                   </span>
                   {invoice.status === 'bezahlt' && !invoice.paid_at && (
                     <>
-                      <div className="mt-1 text-xs font-medium text-amber-800">Zahlungsdatum fehlt</div>
+                      <div className="mt-1 text-xs font-medium text-warning">Zahlungsdatum fehlt</div>
                       {onSetPaidDate && <PaidDateInput invoice={invoice} onSave={onSetPaidDate} />}
                     </>
                   )}
@@ -152,7 +152,7 @@ export default function InvoiceTable({ invoices, customers, onDelete, onDownload
                     <button
                       onClick={() => onEdit(invoice)}
                       disabled={!canEditInvoice(invoice.status)}
-                      className="p-2 text-content-secondary hover:bg-sage-100 rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed"
+                      className="p-2 text-content-secondary hover:bg-raised rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed"
                       title={canEditInvoice(invoice.status) ? 'Bearbeiten' : getEditBlockedReason(invoice.status)}
                     >
                       <Pencil size={18} />
@@ -166,14 +166,14 @@ export default function InvoiceTable({ invoices, customers, onDelete, onDownload
                     </button>
                     <button
                       onClick={() => onDownloadPDF(invoice)}
-                      className="p-2 text-brand hover:bg-sage-50 rounded-lg transition"
+                      className="p-2 text-brand hover:bg-canvas rounded-lg transition"
                       title="PDF herunterladen"
                     >
                       <Download size={18} />
                     </button>
                     <button
                       onClick={() => handleDelete(invoice.id, invoice.invoice_number)}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                      className="p-2 text-danger hover:bg-danger-subtle rounded-lg transition"
                       title="Löschen"
                     >
                       <Trash2 size={18} />

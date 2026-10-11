@@ -76,15 +76,15 @@ export default function ProjectForm({ onSubmit, editingProject, onCancelEdit, cu
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6">
-      <h2 className="text-xl font-semibold text-gray-900 mb-4">
+    <div className="bg-surface rounded-lg shadow-sm p-6">
+      <h2 className="text-xl font-semibold text-fg mb-4">
         {editingProject ? 'Projekt bearbeiten' : 'Neues Projekt'}
       </h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-              Projektname <span className="text-red-500">*</span>
+            <label htmlFor="name" className="block text-sm font-medium text-fg mb-1">
+              Projektname <span className="text-danger">*</span>
             </label>
             <input
               type="text"
@@ -92,21 +92,21 @@ export default function ProjectForm({ onSubmit, editingProject, onCancelEdit, cu
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
               placeholder="Projektname"
             />
           </div>
 
           <div>
-            <label htmlFor="customer" className="block text-sm font-medium text-gray-700 mb-1">
-              Kunde <span className="text-red-500">*</span>
+            <label htmlFor="customer" className="block text-sm font-medium text-fg mb-1">
+              Kunde <span className="text-danger">*</span>
             </label>
             <select
               id="customer"
               value={customerId}
               onChange={(e) => setCustomerId(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
             >
               <option value="">Kunde auswählen</option>
               {customers.map((customer) => (
@@ -119,7 +119,7 @@ export default function ProjectForm({ onSubmit, editingProject, onCancelEdit, cu
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="description" className="block text-sm font-medium text-fg mb-1">
             Beschreibung
           </label>
           <textarea
@@ -127,21 +127,21 @@ export default function ProjectForm({ onSubmit, editingProject, onCancelEdit, cu
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
-            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition resize-none"
+            className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition resize-none"
             placeholder="Projektbeschreibung..."
           />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="status" className="block text-sm font-medium text-fg mb-1">
               Status
             </label>
             <select
               id="status"
               value={status}
               onChange={(e) => setStatus(e.target.value as Project['status'])}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
             >
               {statusOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -152,7 +152,7 @@ export default function ProjectForm({ onSubmit, editingProject, onCancelEdit, cu
           </div>
 
           <div>
-            <label htmlFor="budget" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="budget" className="block text-sm font-medium text-fg mb-1">
               Budget (CHF)
             </label>
             <input
@@ -162,13 +162,13 @@ export default function ProjectForm({ onSubmit, editingProject, onCancelEdit, cu
               onChange={(e) => setBudget(e.target.value)}
               step="0.01"
               min="0"
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
               placeholder="0.00"
             />
           </div>
 
           <div>
-            <label htmlFor="hourlyRate" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="hourlyRate" className="block text-sm font-medium text-fg mb-1">
               Stundensatz (CHF)
             </label>
             <input
@@ -178,10 +178,10 @@ export default function ProjectForm({ onSubmit, editingProject, onCancelEdit, cu
               onChange={(e) => setHourlyRate(e.target.value)}
               step="0.01"
               min="0"
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
               placeholder="Kunde/Standard"
             />
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-fg-muted">
               Optional. Falls leer: Kunde → Standard (160 CHF)
             </p>
           </div>
@@ -191,7 +191,7 @@ export default function ProjectForm({ onSubmit, editingProject, onCancelEdit, cu
           <button
             type="submit"
             disabled={isSubmitting}
-            className="rounded-lg px-4 py-2 font-medium bg-brand text-white hover:bg-brand-dark transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-lg px-4 py-2 font-medium bg-brand text-accent-fg hover:bg-brand-dark transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? 'Speichert...' : editingProject ? 'Aktualisieren' : 'Speichern'}
           </button>
@@ -199,7 +199,7 @@ export default function ProjectForm({ onSubmit, editingProject, onCancelEdit, cu
             <button
               type="button"
               onClick={handleCancel}
-              className="rounded-lg px-4 py-2 font-medium bg-gray-200 text-gray-700 hover:bg-gray-300 transition"
+              className="rounded-lg px-4 py-2 font-medium bg-sunken text-fg hover:bg-sunken transition"
             >
               Abbrechen
             </button>

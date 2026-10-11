@@ -39,25 +39,25 @@ export default function Modal({ isOpen, onClose, title, children, size = 'lg' }:
     <div className="fixed inset-0 z-50 overflow-y-auto">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+        className="fixed inset-0 bg-ink/50 transition-opacity"
         onClick={onClose}
       />
 
       {/* Modal */}
       <div className="flex min-h-full items-center justify-center p-4">
         <div
-          className={`relative bg-white rounded-lg shadow-xl w-full ${sizeClasses[size]} max-h-[90vh] overflow-y-auto`}
+          className={`relative bg-surface rounded-lg shadow-xl w-full ${sizeClasses[size]} max-h-[90vh] overflow-y-auto`}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between z-10">
-            <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+          <div className="sticky top-0 bg-surface border-b border-line px-6 py-4 flex items-center justify-between z-10">
+            <h2 className="text-xl font-semibold text-fg">{title}</h2>
             <button
               onClick={onClose}
-              className="p-1 hover:bg-gray-100 rounded-lg transition"
+              className="p-1 hover:bg-raised rounded-lg transition"
               title="Schliessen (ESC)"
             >
-              <X size={20} className="text-gray-500" />
+              <X size={20} className="text-fg-muted" />
             </button>
           </div>
 

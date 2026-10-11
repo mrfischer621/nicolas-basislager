@@ -109,7 +109,7 @@ function StopModal({
     <Modal isOpen={isOpen} onClose={onCancel} title="Zeiteintrag speichern" size="sm">
       <div className="space-y-4">
         {/* Editable time */}
-        <div className="bg-slate-50 rounded-lg px-4 py-3">
+        <div className="bg-canvas rounded-lg px-4 py-3">
           <p className="text-xs text-text-secondary mb-2">Erfasste Zeit (anpassbar)</p>
           <div className="flex items-center gap-2">
             <div className="flex-1">
@@ -147,7 +147,7 @@ function StopModal({
         {/* Project */}
         <div>
           <label className="block text-sm font-medium text-text-primary mb-1">
-            Projekt <span className="text-red-500">*</span>
+            Projekt <span className="text-danger">*</span>
           </label>
           <select
             value={projectId}
@@ -201,7 +201,7 @@ function StopModal({
           <span className="text-sm text-text-primary">Verrechenbar</span>
         </label>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-sm text-danger">{error}</p>}
 
         {/* Actions */}
         <div className="flex gap-2 pt-1">
@@ -279,7 +279,7 @@ function PreConfigDropdown({
       ref={dropdownRef}
       className="
         absolute right-0 top-full mt-2
-        w-72 bg-white rounded-xl shadow-floating border border-surface-border
+        w-72 bg-surface rounded-xl shadow-floating border border-surface-border
         z-50 animate-fade-in p-4 space-y-3
       "
     >
@@ -453,7 +453,7 @@ export function TimerButton() {
         <span
           className={`
             text-sm font-mono font-semibold tabular-nums px-2 py-1 rounded-md
-            ${timer.isRunning ? 'text-emerald-700 bg-emerald-50' : 'text-amber-700 bg-amber-50'}
+            ${timer.isRunning ? 'text-success bg-success-subtle' : 'text-warning bg-warning-subtle'}
           `}
         >
           {formatSeconds(displaySeconds)}
@@ -468,10 +468,10 @@ export function TimerButton() {
           p-2 rounded-lg transition-colors duration-150
           ${
             timer.isRunning
-              ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+              ? 'bg-success-subtle text-success hover:bg-success-subtle'
               : timer.isPaused
-              ? 'bg-amber-100 text-amber-700 hover:bg-amber-200'
-              : 'bg-slate-100 text-text-secondary hover:bg-slate-200 hover:text-text-primary'
+              ? 'bg-warning-subtle text-warning hover:bg-warning-subtle'
+              : 'bg-raised text-text-secondary hover:bg-sunken hover:text-text-primary'
           }
         `}
       >
@@ -489,7 +489,7 @@ export function TimerButton() {
         <button
           onClick={handleStopClick}
           title="Timer stoppen & speichern"
-          className="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors duration-150"
+          className="p-2 rounded-lg bg-danger-subtle text-danger hover:bg-danger-subtle transition-colors duration-150"
         >
           <Square size={16} strokeWidth={2} fill="currentColor" />
         </button>
@@ -500,7 +500,7 @@ export function TimerButton() {
         <button
           onClick={handleChevronClick}
           title="Timer vorkonfigurieren"
-          className="p-2 rounded-lg bg-slate-100 text-text-secondary hover:bg-slate-200 hover:text-text-primary transition-colors duration-150"
+          className="p-2 rounded-lg bg-raised text-text-secondary hover:bg-sunken hover:text-text-primary transition-colors duration-150"
         >
           <ChevronDown
             size={14}
@@ -515,7 +515,7 @@ export function TimerButton() {
         <button
           onClick={() => timer.resetTimer()}
           title="Timer zurücksetzen"
-          className="p-2 rounded-lg bg-slate-100 text-text-secondary hover:bg-red-50 hover:text-red-500 transition-colors duration-150"
+          className="p-2 rounded-lg bg-raised text-text-secondary hover:bg-danger-subtle hover:text-danger transition-colors duration-150"
         >
           <X size={14} strokeWidth={2} />
         </button>

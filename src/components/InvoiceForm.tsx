@@ -331,18 +331,18 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6">
-      <h2 className="text-xl font-semibold text-gray-900 mb-4">
+    <div className="bg-surface rounded-lg shadow-sm p-6">
+      <h2 className="text-xl font-semibold text-fg mb-4">
         {isEditMode ? 'Rechnung bearbeiten' : 'Neue Rechnung'}
       </h2>
 
       {/* Warning for editing sent/overdue invoices */}
       {showEditWarning && (
-        <div className="mb-4 flex items-start gap-3 rounded-lg bg-amber-50 border border-amber-200 px-4 py-3">
-          <AlertTriangle className="flex-shrink-0 text-amber-600 mt-0.5" size={20} />
+        <div className="mb-4 flex items-start gap-3 rounded-lg bg-warning-subtle border border-warning-subtle px-4 py-3">
+          <AlertTriangle className="flex-shrink-0 text-warning mt-0.5" size={20} />
           <div>
-            <p className="text-amber-800 font-medium">{editWarningMessage}</p>
-            <p className="text-amber-700 text-sm mt-1">
+            <p className="text-warning font-medium">{editWarningMessage}</p>
+            <p className="text-warning text-sm mt-1">
               Änderungen werden gespeichert, stellen Sie sicher, dass der Kunde über die Korrektur informiert wird.
             </p>
           </div>
@@ -353,15 +353,15 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
         {/* Customer, Project, Invoice Number */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label htmlFor="customer" className="block text-sm font-medium text-gray-700 mb-1">
-              Kunde <span className="text-red-500">*</span>
+            <label htmlFor="customer" className="block text-sm font-medium text-fg mb-1">
+              Kunde <span className="text-danger">*</span>
             </label>
             <select
               id="customer"
               value={customerId}
               onChange={(e) => setCustomerId(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
             >
               <option value="">Kunde auswählen</option>
               {customers.map((customer) => (
@@ -373,7 +373,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
           </div>
 
           <div>
-            <label htmlFor="project" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="project" className="block text-sm font-medium text-fg mb-1">
               Projekt (optional)
             </label>
             <select
@@ -381,7 +381,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
               value={projectId}
               onChange={(e) => setProjectId(e.target.value)}
               disabled={!customerId}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition disabled:bg-gray-50"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition disabled:bg-canvas"
             >
               <option value="">Kein Projekt</option>
               {customerProjects.map((project) => (
@@ -393,7 +393,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
           </div>
 
           <div>
-            <label htmlFor="invoiceNumber" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="invoiceNumber" className="block text-sm font-medium text-fg mb-1">
               Rechnungsnummer
             </label>
             <input
@@ -402,7 +402,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
               value={invoiceNumber}
               onChange={(e) => setInvoiceNumber(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-50 font-medium text-gray-900"
+              className="w-full px-4 py-2 border border-line rounded-lg bg-canvas font-medium text-fg"
               readOnly
             />
           </div>
@@ -410,7 +410,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
 
         {/* Title (new) */}
         <div>
-          <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="title" className="block text-sm font-medium text-fg mb-1">
             Titel / Betreff (optional)
           </label>
           <input
@@ -419,15 +419,15 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="z.B. Webentwicklung Januar 2026"
-            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+            className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
           />
         </div>
 
         {/* Dates and Status */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label htmlFor="issueDate" className="block text-sm font-medium text-gray-700 mb-1">
-              Rechnungsdatum <span className="text-red-500">*</span>
+            <label htmlFor="issueDate" className="block text-sm font-medium text-fg mb-1">
+              Rechnungsdatum <span className="text-danger">*</span>
             </label>
             <input
               type="date"
@@ -435,12 +435,12 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
               value={issueDate}
               onChange={(e) => setIssueDate(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
             />
           </div>
 
           <div>
-            <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="dueDate" className="block text-sm font-medium text-fg mb-1">
               Fällig am
             </label>
             <input
@@ -448,12 +448,12 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
               id="dueDate"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
             />
           </div>
 
           <div>
-            <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="status" className="block text-sm font-medium text-fg mb-1">
               Status
             </label>
             <select
@@ -464,7 +464,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
                 setStatus(next);
                 if (next === 'bezahlt' && !paidDate) setPaidDate(zurichDay(new Date()));
               }}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
             >
               <option value="entwurf">Entwurf</option>
               <option value="versendet">Versendet</option>
@@ -475,7 +475,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
 
           {status === 'bezahlt' && (
             <div>
-              <label htmlFor="paid_at" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="paid_at" className="block text-sm font-medium text-fg mb-1">
                 Zahlungsdatum
               </label>
               <input
@@ -484,7 +484,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
                 required
                 value={paidDate}
                 onChange={(e) => setPaidDate(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
               />
             </div>
           )}
@@ -493,7 +493,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
         {/* Introduction Text (new) */}
         <div>
           <div className="flex items-center justify-between mb-1">
-            <label htmlFor="introText" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="introText" className="block text-sm font-medium text-fg">
               Einleitungstext (optional)
             </label>
             <button
@@ -510,14 +510,14 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
             onChange={(e) => setIntroText(e.target.value)}
             placeholder="Einleitungstext für die Rechnung..."
             rows={2}
-            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition resize-none"
+            className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition resize-none"
           />
         </div>
 
         {/* Items Section */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-lg font-semibold text-gray-900">Positionen</h3>
+            <h3 className="text-lg font-semibold text-fg">Positionen</h3>
             <div className="flex items-center gap-2">
               {/* Time Entry Import Button - only show when customer is selected */}
               {customerId && (
@@ -533,7 +533,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
               <button
                 type="button"
                 onClick={() => setShowDiscounts(!showDiscounts)}
-                className="rounded-lg px-3 py-1.5 text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition flex items-center gap-2"
+                className="rounded-lg px-3 py-1.5 text-sm font-medium bg-raised text-fg hover:bg-sunken transition flex items-center gap-2"
               >
                 {showDiscounts ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                 Rabatte
@@ -541,7 +541,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
               <button
                 type="button"
                 onClick={handleAddItem}
-                className="rounded-lg px-3 py-1.5 text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition flex items-center gap-2"
+                className="rounded-lg px-3 py-1.5 text-sm font-medium bg-raised text-fg hover:bg-sunken transition flex items-center gap-2"
               >
                 <Plus size={16} />
                 Position hinzufügen
@@ -551,20 +551,20 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
 
           <div className="space-y-4">
             {items.map((item, index) => (
-              <div key={index} className="border border-gray-100 rounded-lg p-3 space-y-2 bg-gray-50/50">
+              <div key={index} className="border border-line rounded-lg p-3 space-y-2 bg-canvas/50">
                 {/* Row 1: Product, Qty, Price, VAT, Discount, Delete */}
                 <div className="grid grid-cols-12 gap-2 items-end">
                   {/* Product Selector */}
                   <div className="col-span-3">
                     {index === 0 && (
-                      <label className="block text-xs font-medium text-gray-600 mb-1">
+                      <label className="block text-xs font-medium text-fg-muted mb-1">
                         Produkt
                       </label>
                     )}
                     <select
                       value={item.product_id || ''}
                       onChange={(e) => handleProductSelect(index, e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm bg-white"
+                      className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm bg-surface"
                     >
                       <option value="">Frei</option>
                       {products.map((product) => (
@@ -578,7 +578,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
                   {/* Quantity */}
                   <div className="col-span-2">
                     {index === 0 && (
-                      <label className="block text-xs font-medium text-gray-600 mb-1">
+                      <label className="block text-xs font-medium text-fg-muted mb-1">
                         Menge
                       </label>
                     )}
@@ -590,14 +590,14 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
                       step="0.01"
                       min="0"
                       required
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm bg-white"
+                      className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm bg-surface"
                     />
                   </div>
 
                   {/* Unit Price */}
                   <div className="col-span-2">
                     {index === 0 && (
-                      <label className="block text-xs font-medium text-gray-600 mb-1">
+                      <label className="block text-xs font-medium text-fg-muted mb-1">
                         Preis (CHF)
                       </label>
                     )}
@@ -609,7 +609,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
                       step="0.01"
                       min="0"
                       required
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm bg-white"
+                      className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm bg-surface"
                     />
                   </div>
 
@@ -617,7 +617,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
                   {selectedCompany?.vat_enabled && (
                     <div className="col-span-2">
                       {index === 0 && (
-                        <label className="block text-xs font-medium text-gray-600 mb-1">
+                        <label className="block text-xs font-medium text-fg-muted mb-1">
                           MWST %
                         </label>
                       )}
@@ -629,7 +629,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
                         step="0.1"
                         min="0"
                         max="100"
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm bg-white"
+                        className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm bg-surface"
                       />
                     </div>
                   )}
@@ -638,7 +638,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
                   {showDiscounts && (
                     <div className="col-span-2">
                       {index === 0 && (
-                        <label className="block text-xs font-medium text-gray-600 mb-1">
+                        <label className="block text-xs font-medium text-fg-muted mb-1">
                           Rabatt %
                         </label>
                       )}
@@ -650,19 +650,19 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
                         step="0.1"
                         min="0"
                         max="100"
-                        className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm bg-white"
+                        className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition text-sm bg-surface"
                       />
                     </div>
                   )}
 
                   {/* Spacer + Delete */}
                   <div className={`flex items-end justify-between ${selectedCompany?.vat_enabled && showDiscounts ? 'col-span-3' : selectedCompany?.vat_enabled || showDiscounts ? 'col-span-3' : 'col-span-5'}`}>
-                    <div className="text-sm text-gray-600">
-                      <span className="font-semibold text-gray-900">
+                    <div className="text-sm text-fg-muted">
+                      <span className="font-semibold text-fg">
                         CHF {getLineTotal(item).toFixed(2)}
                       </span>
                       {showDiscounts && parseFloat(item.discount_percent) > 0 && (
-                        <span className="text-xs text-green-600 ml-1.5">
+                        <span className="text-xs text-success ml-1.5">
                           -{item.discount_percent}%
                         </span>
                       )}
@@ -671,7 +671,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
                       type="button"
                       onClick={() => handleRemoveItem(index)}
                       disabled={items.length === 1}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed"
+                      className="p-2 text-danger hover:bg-danger-subtle rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed"
                     >
                       <Trash2 size={16} />
                     </button>
@@ -681,13 +681,13 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
                 {/* Row 2: Description – Rich Text Editor (full width) */}
                 <div>
                   {index === 0 && (
-                    <label className="block text-xs font-medium text-gray-600 mb-1">
-                      Beschreibung <span className="text-red-500">*</span>
-                      <span className="ml-1 font-normal text-gray-400">(Text auswählen für Formatierung)</span>
+                    <label className="block text-xs font-medium text-fg-muted mb-1">
+                      Beschreibung <span className="text-danger">*</span>
+                      <span className="ml-1 font-normal text-fg-subtle">(Text auswählen für Formatierung)</span>
                     </label>
                   )}
                   <Suspense fallback={
-                    <div className="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-400">
+                    <div className="rounded-lg border border-line px-3 py-2 text-sm text-fg-subtle">
                       Editor wird geladen…
                     </div>
                   }>
@@ -705,7 +705,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
 
         {/* Footer Text (new) */}
         <div>
-          <label htmlFor="footerText" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="footerText" className="block text-sm font-medium text-fg mb-1">
             Bemerkungen / Fusstext (optional)
           </label>
           <textarea
@@ -714,7 +714,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
             onChange={(e) => setFooterText(e.target.value)}
             placeholder="Bemerkungen oder zusätzliche Informationen..."
             rows={2}
-            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition resize-none"
+            className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition resize-none"
           />
         </div>
 
@@ -722,24 +722,24 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
         <div className="border-t pt-4">
           <div className="max-w-sm ml-auto space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Zwischentotal (Netto):</span>
+              <span className="text-fg-muted">Zwischentotal (Netto):</span>
               <span className="font-medium">CHF {totals.subtotal.toFixed(2)}</span>
             </div>
 
             {/* Total Discount (conditional) - NEW SYSTEM */}
             {showDiscounts && (
               <div className="flex justify-between text-sm items-center gap-4">
-                <span className="text-gray-600">Gesamtrabatt:</span>
+                <span className="text-fg-muted">Gesamtrabatt:</span>
                 <div className="flex items-center gap-2">
                   {/* Toggle Button for Type */}
-                  <div className="flex rounded-lg border border-gray-300 overflow-hidden">
+                  <div className="flex rounded-lg border border-line-strong overflow-hidden">
                     <button
                       type="button"
                       onClick={() => setDiscountType('percent')}
                       className={`px-2 py-1 text-xs font-medium transition ${
                         discountType === 'percent'
-                          ? 'bg-brand text-white'
-                          : 'bg-white text-gray-700 hover:bg-gray-50'
+                          ? 'bg-brand text-accent-fg'
+                          : 'bg-surface text-fg hover:bg-canvas'
                       }`}
                     >
                       %
@@ -749,8 +749,8 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
                       onClick={() => setDiscountType('fixed')}
                       className={`px-2 py-1 text-xs font-medium transition ${
                         discountType === 'fixed'
-                          ? 'bg-brand text-white'
-                          : 'bg-white text-gray-700 hover:bg-gray-50'
+                          ? 'bg-brand text-accent-fg'
+                          : 'bg-surface text-fg hover:bg-canvas'
                       }`}
                     >
                       CHF
@@ -771,13 +771,13 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
                     step={discountType === 'percent' ? '0.1' : '0.01'}
                     min="0"
                     max={discountType === 'percent' ? '100' : totals.subtotal.toFixed(2)}
-                    className="w-20 px-2 py-1 border border-gray-200 rounded text-sm text-right"
+                    className="w-20 px-2 py-1 border border-line rounded text-sm text-right"
                     placeholder="0"
                   />
 
                   {/* Discount Amount Display */}
                   {totals.discountAmount > 0 && (
-                    <span className="font-medium text-green-600">
+                    <span className="font-medium text-success">
                       -CHF {totals.discountAmount.toFixed(2)}
                     </span>
                   )}
@@ -788,7 +788,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
             {/* VAT - only show if VAT enabled */}
             {selectedCompany?.vat_enabled && (
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">MWST (per Position):</span>
+                <span className="text-fg-muted">MWST (per Position):</span>
                 <span className="font-medium">CHF {totals.vat_amount.toFixed(2)}</span>
               </div>
             )}
@@ -804,7 +804,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
           <button
             type="submit"
             disabled={isSubmitting || items.length === 0}
-            className="rounded-lg px-4 py-2 font-medium bg-brand text-white hover:bg-brand-dark transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-lg px-4 py-2 font-medium bg-brand text-accent-fg hover:bg-brand-dark transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? 'Speichert...' : isEditMode ? 'Änderungen speichern' : 'Rechnung speichern'}
           </button>

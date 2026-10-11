@@ -12,13 +12,13 @@ interface TimeEntryWithCustomer extends TimeEntryWithStatus {
 
 // Status display configuration
 const statusConfig: Record<string, { label: string; className: string }> = {
-  offen: { label: 'Offen', className: 'bg-yellow-100 text-yellow-800' },
-  entwurf: { label: 'Entwurf', className: 'bg-gray-100 text-gray-600' },
-  versendet: { label: 'Versendet', className: 'bg-blue-100 text-blue-800' },
-  bezahlt: { label: 'Bezahlt', className: 'bg-green-100 text-green-800' },
-  überfällig: { label: 'Überfällig', className: 'bg-red-100 text-red-800' },
+  offen: { label: 'Offen', className: 'bg-warning-subtle text-warning' },
+  entwurf: { label: 'Entwurf', className: 'bg-raised text-fg-muted' },
+  versendet: { label: 'Versendet', className: 'bg-accent-subtle text-accent' },
+  bezahlt: { label: 'Bezahlt', className: 'bg-success-subtle text-success' },
+  überfällig: { label: 'Überfällig', className: 'bg-danger-subtle text-danger' },
   // Fallback for legacy 'verrechnet' status
-  verrechnet: { label: 'Verrechnet', className: 'bg-blue-100 text-blue-800' },
+  verrechnet: { label: 'Verrechnet', className: 'bg-accent-subtle text-accent' },
 };
 
 type GroupingMode = 'date' | 'week';
@@ -122,8 +122,8 @@ export default function TimeEntryTable({
 
   if (entries.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <p className="text-gray-500 text-center">Keine Zeiteinträge vorhanden. Erstellen Sie den ersten Eintrag.</p>
+      <div className="bg-surface rounded-lg shadow-sm p-6">
+        <p className="text-fg-muted text-center">Keine Zeiteinträge vorhanden. Erstellen Sie den ersten Eintrag.</p>
       </div>
     );
   }
@@ -135,44 +135,44 @@ export default function TimeEntryTable({
     const projectName = getProjectName(entry.project_id, entry);
 
     return (
-      <tr key={entry.id} className="hover:bg-gray-50 transition">
+      <tr key={entry.id} className="hover:bg-canvas transition">
         <td className="px-4 py-3 whitespace-nowrap">
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-fg-muted">
             {format(parseISO(entry.date), 'dd.MM.yyyy')}
           </div>
         </td>
         <td className="px-4 py-3 whitespace-nowrap">
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-fg-muted">
             KW {getWeekNumber(entry.date)}
           </div>
         </td>
         <td className="px-4 py-3 whitespace-nowrap">
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-fg-muted">
             {getCustomerName(entry)}
           </div>
         </td>
         <td className="px-4 py-3 whitespace-nowrap">
-          <div className="text-sm font-medium text-gray-900">
+          <div className="text-sm font-medium text-fg">
             {projectName}
           </div>
         </td>
         <td className="px-4 py-3">
-          <div className="text-sm text-gray-600 max-w-xs truncate">
+          <div className="text-sm text-fg-muted max-w-xs truncate">
             {entry.description || '-'}
           </div>
         </td>
         <td className="px-4 py-3 whitespace-nowrap text-right">
-          <div className="text-sm text-gray-900">
+          <div className="text-sm text-fg">
             {entry.hours.toFixed(2)}
           </div>
         </td>
         <td className="px-4 py-3 whitespace-nowrap text-right">
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-fg-muted">
             CHF {entry.rate.toFixed(0)}
           </div>
         </td>
         <td className="px-4 py-3 whitespace-nowrap text-right">
-          <div className="text-sm font-medium text-gray-900">
+          <div className="text-sm font-medium text-fg">
             CHF {amount.toFixed(2)}
           </div>
         </td>
@@ -180,8 +180,8 @@ export default function TimeEntryTable({
           <span
             className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
               entry.billable
-                ? 'bg-green-100 text-green-800'
-                : 'bg-gray-100 text-gray-600'
+                ? 'bg-success-subtle text-success'
+                : 'bg-raised text-fg-muted'
             }`}
           >
             {entry.billable ? 'Ja' : 'Nein'}
@@ -230,14 +230,14 @@ export default function TimeEntryTable({
           <div className="flex justify-end gap-1">
             <button
               onClick={() => onEdit(entry)}
-              className="p-1.5 text-brand hover:bg-sage-50 rounded transition"
+              className="p-1.5 text-brand hover:bg-canvas rounded transition"
               title="Bearbeiten"
             >
               <Pencil size={16} />
             </button>
             <button
               onClick={() => handleDelete(entry.id, projectName)}
-              className="p-1.5 text-red-600 hover:bg-red-50 rounded transition"
+              className="p-1.5 text-danger hover:bg-danger-subtle rounded transition"
               title="Löschen"
             >
               <Trash2 size={16} />
@@ -253,24 +253,24 @@ export default function TimeEntryTable({
     const [year, kw] = weekKey.split('-');
 
     return (
-      <tr key={`header-${weekKey}`} className="bg-gray-100 border-t-2 border-gray-300">
+      <tr key={`header-${weekKey}`} className="bg-raised border-t-2 border-line-strong">
         <td colSpan={5} className="px-4 py-2">
           <div className="flex items-center gap-3">
-            <span className="font-semibold text-gray-900">{kw} / {year}</span>
-            <span className="text-sm text-gray-500">
+            <span className="font-semibold text-fg">{kw} / {year}</span>
+            <span className="text-sm text-fg-muted">
               {weekEntries.length} {weekEntries.length === 1 ? 'Eintrag' : 'Einträge'}
             </span>
           </div>
         </td>
         <td className="px-4 py-2 text-right">
-          <span className="font-semibold text-gray-900">{weekHours.toFixed(2)} h</span>
+          <span className="font-semibold text-fg">{weekHours.toFixed(2)} h</span>
         </td>
         <td className="px-4 py-2"></td>
         <td className="px-4 py-2 text-right">
-          <span className="font-semibold text-gray-900">CHF {weekAmount.toFixed(2)}</span>
+          <span className="font-semibold text-fg">CHF {weekAmount.toFixed(2)}</span>
         </td>
         <td className="px-4 py-2 text-center">
-          <span className="text-xs text-gray-500">{weekBillable.toFixed(1)}h verr.</span>
+          <span className="text-xs text-fg-muted">{weekBillable.toFixed(1)}h verr.</span>
         </td>
         <td colSpan={2}></td>
       </tr>
@@ -278,47 +278,47 @@ export default function TimeEntryTable({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+    <div className="bg-surface rounded-lg shadow-sm overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-gray-50 border-b border-gray-200">
+          <thead className="bg-canvas border-b border-line">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-fg-muted uppercase tracking-wider">
                 Datum
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-fg-muted uppercase tracking-wider">
                 KW
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-fg-muted uppercase tracking-wider">
                 Kunde
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-fg-muted uppercase tracking-wider">
                 Projekt
               </th>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-fg-muted uppercase tracking-wider">
                 Beschreibung
               </th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-right text-xs font-medium text-fg-muted uppercase tracking-wider">
                 Stunden
               </th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-right text-xs font-medium text-fg-muted uppercase tracking-wider">
                 Satz
               </th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-right text-xs font-medium text-fg-muted uppercase tracking-wider">
                 Betrag
               </th>
-              <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-center text-xs font-medium text-fg-muted uppercase tracking-wider">
                 Verr.
               </th>
-              <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-center text-xs font-medium text-fg-muted uppercase tracking-wider">
                 Status
               </th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-right text-xs font-medium text-fg-muted uppercase tracking-wider">
                 Aktionen
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody className="divide-y divide-line">
             {groupingMode === 'week' && groupedEntries ? (
               // Grouped by week
               Object.entries(groupedEntries).map(([weekKey, weekEntries]) => (
@@ -334,12 +334,12 @@ export default function TimeEntryTable({
               entries.map(entry => renderTableRow(entry))
             )}
           </tbody>
-          <tfoot className="bg-gray-50 border-t-2 border-gray-300">
+          <tfoot className="bg-canvas border-t-2 border-line-strong">
             <tr>
               <td colSpan={5} className="px-4 py-3">
                 <div className="flex items-center gap-4">
                   <span className="text-sm font-bold text-brand uppercase">Total</span>
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-fg-muted">
                     davon {billableHours.toFixed(1)}h verrechenbar
                   </span>
                 </div>
@@ -409,9 +409,9 @@ export default function TimeEntryTable({
             ref={menuRef}
             role="menu"
             style={{ top: statusMenu.top, left: statusMenu.left }}
-            className="fixed z-50 w-60 rounded-lg border border-gray-200 bg-white py-1 shadow-lg"
+            className="fixed z-50 w-60 rounded-lg border border-line bg-surface py-1 shadow-lg"
           >
-            <div className="px-3 py-1.5 text-xs font-medium text-gray-400 uppercase tracking-wider">
+            <div className="px-3 py-1.5 text-xs font-medium text-fg-subtle uppercase tracking-wider">
               Status setzen
             </div>
             {options.map(option => (
@@ -420,8 +420,8 @@ export default function TimeEntryTable({
                 type="button"
                 role="menuitem"
                 onClick={() => applyStatus(entry.id, option.value)}
-                className={`flex w-full items-start gap-2 px-3 py-2 text-left transition hover:bg-gray-50 ${
-                  option.active ? 'text-brand' : 'text-gray-700'
+                className={`flex w-full items-start gap-2 px-3 py-2 text-left transition hover:bg-canvas ${
+                  option.active ? 'text-brand' : 'text-fg'
                 }`}
               >
                 <span className="mt-0.5 w-3.5 shrink-0">
@@ -429,12 +429,12 @@ export default function TimeEntryTable({
                 </span>
                 <span>
                   <span className="block text-sm font-medium">{option.label}</span>
-                  <span className="block text-xs text-gray-500">{option.hint}</span>
+                  <span className="block text-xs text-fg-muted">{option.hint}</span>
                 </span>
               </button>
             ))}
             {entry.invoice_number && (
-              <div className="mt-1 border-t border-gray-100 px-3 py-2 text-xs text-gray-500">
+              <div className="mt-1 border-t border-line px-3 py-2 text-xs text-fg-muted">
                 Verknüpft mit Rechnung {entry.invoice_number}
               </div>
             )}

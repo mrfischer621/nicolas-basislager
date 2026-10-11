@@ -150,7 +150,7 @@ export default function TimeReporting({ entries, projects }: TimeReportingProps)
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-gray-500">Lädt Reporting-Daten...</p>
+        <p className="text-fg-muted">Lädt Reporting-Daten...</p>
       </div>
     );
   }
@@ -158,38 +158,38 @@ export default function TimeReporting({ entries, projects }: TimeReportingProps)
   return (
     <div className="space-y-6">
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow-sm p-4">
+      <div className="bg-surface rounded-lg shadow-sm p-4">
         <div className="flex items-center gap-2 mb-4">
-          <Filter size={18} className="text-gray-500" />
-          <h3 className="font-medium text-gray-900">Filter</h3>
+          <Filter size={18} className="text-fg-muted" />
+          <h3 className="font-medium text-fg">Filter</h3>
         </div>
 
         <div className="flex flex-wrap gap-4 items-end">
           {/* Quick Date Buttons */}
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Schnellauswahl</label>
+            <label className="block text-xs font-medium text-fg-muted mb-1">Schnellauswahl</label>
             <div className="flex gap-1">
               <button
                 onClick={() => setQuickDateRange(7)}
-                className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded transition"
+                className="px-2 py-1 text-xs bg-raised hover:bg-sunken rounded transition"
               >
                 7 Tage
               </button>
               <button
                 onClick={() => setQuickDateRange(30)}
-                className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded transition"
+                className="px-2 py-1 text-xs bg-raised hover:bg-sunken rounded transition"
               >
                 30 Tage
               </button>
               <button
                 onClick={() => setQuickDateRange('month')}
-                className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded transition"
+                className="px-2 py-1 text-xs bg-raised hover:bg-sunken rounded transition"
               >
                 Monat
               </button>
               <button
                 onClick={() => setQuickDateRange('year')}
-                className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded transition"
+                className="px-2 py-1 text-xs bg-raised hover:bg-sunken rounded transition"
               >
                 Jahr
               </button>
@@ -198,31 +198,31 @@ export default function TimeReporting({ entries, projects }: TimeReportingProps)
 
           {/* Date Range */}
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Von</label>
+            <label className="block text-xs font-medium text-fg-muted mb-1">Von</label>
             <input
               type="date"
               value={dateFrom}
               onChange={(e) => setDateFrom(e.target.value)}
-              className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:border-brand focus:ring-1 focus:ring-brand/20 outline-none"
+              className="px-3 py-1.5 border border-line rounded-lg text-sm focus:border-brand focus:ring-1 focus:ring-brand/20 outline-none"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Bis</label>
+            <label className="block text-xs font-medium text-fg-muted mb-1">Bis</label>
             <input
               type="date"
               value={dateTo}
               onChange={(e) => setDateTo(e.target.value)}
-              className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:border-brand focus:ring-1 focus:ring-brand/20 outline-none"
+              className="px-3 py-1.5 border border-line rounded-lg text-sm focus:border-brand focus:ring-1 focus:ring-brand/20 outline-none"
             />
           </div>
 
           {/* Customer Filter */}
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Kunde</label>
+            <label className="block text-xs font-medium text-fg-muted mb-1">Kunde</label>
             <select
               value={selectedCustomerId}
               onChange={(e) => setSelectedCustomerId(e.target.value)}
-              className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:border-brand focus:ring-1 focus:ring-brand/20 outline-none min-w-[140px]"
+              className="px-3 py-1.5 border border-line rounded-lg text-sm focus:border-brand focus:ring-1 focus:ring-brand/20 outline-none min-w-[140px]"
             >
               <option value="">Alle Kunden</option>
               {customers.map(customer => (
@@ -233,11 +233,11 @@ export default function TimeReporting({ entries, projects }: TimeReportingProps)
 
           {/* Project Filter */}
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1">Projekt</label>
+            <label className="block text-xs font-medium text-fg-muted mb-1">Projekt</label>
             <select
               value={selectedProjectId}
               onChange={(e) => setSelectedProjectId(e.target.value)}
-              className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:border-brand focus:ring-1 focus:ring-brand/20 outline-none min-w-[140px]"
+              className="px-3 py-1.5 border border-line rounded-lg text-sm focus:border-brand focus:ring-1 focus:ring-brand/20 outline-none min-w-[140px]"
             >
               <option value="">Alle Projekte</option>
               {projects.map(project => (
@@ -253,7 +253,7 @@ export default function TimeReporting({ entries, projects }: TimeReportingProps)
               setSelectedCustomerId('');
               setQuickDateRange('month');
             }}
-            className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition"
+            className="px-3 py-1.5 text-sm text-fg-muted hover:text-fg hover:bg-raised rounded-lg transition"
           >
             Zurücksetzen
           </button>
@@ -262,65 +262,65 @@ export default function TimeReporting({ entries, projects }: TimeReportingProps)
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg shadow-sm p-4">
+        <div className="bg-surface rounded-lg shadow-sm p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <FileText size={20} className="text-blue-600" />
+            <div className="p-2 bg-accent-subtle rounded-lg">
+              <FileText size={20} className="text-accent" />
             </div>
             <div>
-              <p className="text-sm text-gray-500">Leistungen</p>
-              <p className="text-2xl font-bold text-gray-900">{kpis.totalEntries}</p>
+              <p className="text-sm text-fg-muted">Leistungen</p>
+              <p className="text-2xl font-bold text-fg">{kpis.totalEntries}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-4">
+        <div className="bg-surface rounded-lg shadow-sm p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <Clock size={20} className="text-purple-600" />
+            <div className="p-2 bg-accent-subtle rounded-lg">
+              <Clock size={20} className="text-accent" />
             </div>
             <div>
-              <p className="text-sm text-gray-500">Total Stunden</p>
-              <p className="text-2xl font-bold text-gray-900">{kpis.totalHours.toFixed(1)}h</p>
+              <p className="text-sm text-fg-muted">Total Stunden</p>
+              <p className="text-2xl font-bold text-fg">{kpis.totalHours.toFixed(1)}h</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-4">
+        <div className="bg-surface rounded-lg shadow-sm p-4">
           <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-lg ${kpis.billablePercent >= 70 ? 'bg-green-100' : 'bg-yellow-100'}`}>
-              <TrendingUp size={20} className={kpis.billablePercent >= 70 ? 'text-green-600' : 'text-yellow-600'} />
+            <div className={`p-2 rounded-lg ${kpis.billablePercent >= 70 ? 'bg-success-subtle' : 'bg-warning-subtle'}`}>
+              <TrendingUp size={20} className={kpis.billablePercent >= 70 ? 'text-success' : 'text-warning'} />
             </div>
             <div>
-              <p className="text-sm text-gray-500">Verrechenbar</p>
-              <p className="text-2xl font-bold text-gray-900">{kpis.billablePercent.toFixed(0)}%</p>
+              <p className="text-sm text-fg-muted">Verrechenbar</p>
+              <p className="text-2xl font-bold text-fg">{kpis.billablePercent.toFixed(0)}%</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-4">
+        <div className="bg-surface rounded-lg shadow-sm p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <DollarSign size={20} className="text-green-600" />
+            <div className="p-2 bg-success-subtle rounded-lg">
+              <DollarSign size={20} className="text-success" />
             </div>
             <div>
-              <p className="text-sm text-gray-500">Eff. Stundensatz</p>
-              <p className="text-2xl font-bold text-gray-900">CHF {kpis.effectiveRate.toFixed(0)}</p>
+              <p className="text-sm text-fg-muted">Eff. Stundensatz</p>
+              <p className="text-2xl font-bold text-fg">CHF {kpis.effectiveRate.toFixed(0)}</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Revenue Summary */}
-      <div className="bg-white rounded-lg shadow-sm p-4">
+      <div className="bg-surface rounded-lg shadow-sm p-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-gray-500">Gesamtumsatz (verrechenbare Stunden)</p>
+            <p className="text-sm text-fg-muted">Gesamtumsatz (verrechenbare Stunden)</p>
             <p className="text-3xl font-bold text-brand">CHF {kpis.totalRevenue.toLocaleString('de-CH', { minimumFractionDigits: 2 })}</p>
           </div>
           <div className="text-right">
-            <p className="text-sm text-gray-500">Verrechenbare Stunden</p>
-            <p className="text-xl font-semibold text-gray-900">{kpis.billableHours.toFixed(1)}h</p>
+            <p className="text-sm text-fg-muted">Verrechenbare Stunden</p>
+            <p className="text-xl font-semibold text-fg">{kpis.billableHours.toFixed(1)}h</p>
           </div>
         </div>
       </div>
@@ -328,8 +328,8 @@ export default function TimeReporting({ entries, projects }: TimeReportingProps)
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Bar Chart: Billable vs Non-Billable */}
-        <div className="bg-white rounded-lg shadow-sm p-4">
-          <h3 className="font-medium text-gray-900 mb-4">Stunden nach Verrechenbarkeit</h3>
+        <div className="bg-surface rounded-lg shadow-sm p-4">
+          <h3 className="font-medium text-fg mb-4">Stunden nach Verrechenbarkeit</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} layout="vertical">
@@ -351,29 +351,29 @@ export default function TimeReporting({ entries, projects }: TimeReportingProps)
         </div>
 
         {/* Project Breakdown */}
-        <div className="bg-white rounded-lg shadow-sm p-4">
-          <h3 className="font-medium text-gray-900 mb-4">Stunden nach Projekt</h3>
+        <div className="bg-surface rounded-lg shadow-sm p-4">
+          <h3 className="font-medium text-fg mb-4">Stunden nach Projekt</h3>
           {projectBreakdown.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">Keine Daten für den gewählten Zeitraum</p>
+            <p className="text-fg-muted text-center py-8">Keine Daten für den gewählten Zeitraum</p>
           ) : (
             <div className="space-y-3 max-h-64 overflow-y-auto">
               {projectBreakdown.map((project, index) => (
                 <div key={index} className="flex items-center justify-between">
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">{project.name}</p>
+                    <p className="text-sm font-medium text-fg truncate">{project.name}</p>
                     <div className="flex items-center gap-2 mt-1">
                       <div
                         className="h-2 bg-brand rounded-full"
                         style={{ width: `${(project.hours / kpis.totalHours) * 100}%`, minWidth: '4px' }}
                       />
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-fg-muted">
                         {((project.hours / kpis.totalHours) * 100).toFixed(0)}%
                       </span>
                     </div>
                   </div>
                   <div className="text-right ml-4">
-                    <p className="text-sm font-semibold text-gray-900">{project.hours.toFixed(1)}h</p>
-                    <p className="text-xs text-gray-500">CHF {project.revenue.toFixed(0)}</p>
+                    <p className="text-sm font-semibold text-fg">{project.hours.toFixed(1)}h</p>
+                    <p className="text-xs text-fg-muted">CHF {project.revenue.toFixed(0)}</p>
                   </div>
                 </div>
               ))}

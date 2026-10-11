@@ -129,8 +129,8 @@ export default function OpportunityForm({
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Deal Title */}
         <div>
-          <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-            Deal-Titel <span className="text-red-500">*</span>
+          <label htmlFor="title" className="block text-sm font-medium text-fg mb-1">
+            Deal-Titel <span className="text-danger">*</span>
           </label>
           <input
             type="text"
@@ -138,7 +138,7 @@ export default function OpportunityForm({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
-            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+            className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
             placeholder="z.B. Website Redesign für Musterfirma"
           />
         </div>
@@ -146,8 +146,8 @@ export default function OpportunityForm({
         {/* Link Type Selection */}
         {!editingOpportunity && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Verknüpfung <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium text-fg mb-2">
+              Verknüpfung <span className="text-danger">*</span>
             </label>
             <div className="flex gap-4">
               <label className="flex items-center cursor-pointer">
@@ -159,7 +159,7 @@ export default function OpportunityForm({
                   onChange={(e) => setLinkType(e.target.value as LinkType)}
                   className="mr-2"
                 />
-                <span className="text-sm text-gray-700">Neuer Interessent</span>
+                <span className="text-sm text-fg">Neuer Interessent</span>
               </label>
               <label className="flex items-center cursor-pointer">
                 <input
@@ -170,7 +170,7 @@ export default function OpportunityForm({
                   onChange={(e) => setLinkType(e.target.value as LinkType)}
                   className="mr-2"
                 />
-                <span className="text-sm text-gray-700">Bestehende Firma</span>
+                <span className="text-sm text-fg">Bestehende Firma</span>
               </label>
             </div>
           </div>
@@ -179,15 +179,15 @@ export default function OpportunityForm({
         {/* Customer Selection */}
         {linkType === 'customer' && (
           <div>
-            <label htmlFor="customer" className="block text-sm font-medium text-gray-700 mb-1">
-              Firma auswählen <span className="text-red-500">*</span>
+            <label htmlFor="customer" className="block text-sm font-medium text-fg mb-1">
+              Firma auswählen <span className="text-danger">*</span>
             </label>
             <select
               id="customer"
               value={selectedCustomerId}
               onChange={(e) => setSelectedCustomerId(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
             >
               <option value="">-- Bitte auswählen --</option>
               {customers.map((customer) => (
@@ -201,11 +201,11 @@ export default function OpportunityForm({
 
         {/* Prospect Information */}
         {linkType === 'prospect' && (
-          <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
-            <h3 className="text-sm font-medium text-gray-700 mb-2">Interessenten-Informationen</h3>
+          <div className="space-y-4 p-4 bg-canvas rounded-lg">
+            <h3 className="text-sm font-medium text-fg mb-2">Interessenten-Informationen</h3>
 
             <div>
-              <label htmlFor="prospectName" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="prospectName" className="block text-sm font-medium text-fg mb-1">
                 Name/Kontaktperson
               </label>
               <input
@@ -213,13 +213,13 @@ export default function OpportunityForm({
                 id="prospectName"
                 value={prospectName}
                 onChange={(e) => setProspectName(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
                 placeholder="z.B. Max Mustermann"
               />
             </div>
 
             <div>
-              <label htmlFor="prospectCompany" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="prospectCompany" className="block text-sm font-medium text-fg mb-1">
                 Firma
               </label>
               <input
@@ -227,13 +227,13 @@ export default function OpportunityForm({
                 id="prospectCompany"
                 value={prospectCompany}
                 onChange={(e) => setProspectCompany(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
                 placeholder="z.B. Musterfirma AG"
               />
             </div>
 
             <div>
-              <label htmlFor="prospectEmail" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="prospectEmail" className="block text-sm font-medium text-fg mb-1">
                 E-Mail
               </label>
               <input
@@ -241,13 +241,13 @@ export default function OpportunityForm({
                 id="prospectEmail"
                 value={prospectEmail}
                 onChange={(e) => setProspectEmail(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
                 placeholder="interessent@example.com"
               />
             </div>
 
             <div>
-              <label htmlFor="prospectPhone" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="prospectPhone" className="block text-sm font-medium text-fg mb-1">
                 Telefon
               </label>
               <input
@@ -255,7 +255,7 @@ export default function OpportunityForm({
                 id="prospectPhone"
                 value={prospectPhone}
                 onChange={(e) => setProspectPhone(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
                 placeholder="+41 79 123 45 67"
               />
             </div>
@@ -264,7 +264,7 @@ export default function OpportunityForm({
 
         {/* Expected Value */}
         <div>
-          <label htmlFor="expectedValue" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="expectedValue" className="block text-sm font-medium text-fg mb-1">
             Erwarteter Wert (CHF)
           </label>
           <input
@@ -274,14 +274,14 @@ export default function OpportunityForm({
             onChange={(e) => setExpectedValue(e.target.value)}
             step="0.01"
             min="0"
-            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+            className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
             placeholder="z.B. 15000.00"
           />
         </div>
 
         {/* Next Action Date */}
         <div>
-          <label htmlFor="nextActionDate" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="nextActionDate" className="block text-sm font-medium text-fg mb-1">
             Nächste Aktion (Datum)
           </label>
           <input
@@ -289,13 +289,13 @@ export default function OpportunityForm({
             id="nextActionDate"
             value={nextActionDate}
             onChange={(e) => setNextActionDate(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+            className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
           />
         </div>
 
         {/* Notes */}
         <div>
-          <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="notes" className="block text-sm font-medium text-fg mb-1">
             Notizen
           </label>
           <textarea
@@ -303,7 +303,7 @@ export default function OpportunityForm({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={4}
-            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition resize-none"
+            className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition resize-none"
             placeholder="Zusätzliche Informationen zum Deal..."
           />
         </div>

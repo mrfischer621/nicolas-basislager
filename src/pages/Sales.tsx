@@ -387,8 +387,8 @@ export default function Sales() {
                   flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium
                   transition-colors border
                   ${showLost
-                    ? 'bg-sage-100 text-content-body border-sage-300'
-                    : 'bg-white text-content-secondary border-surface-border hover:bg-sage-50'
+                    ? 'bg-raised text-content-body border-line-strong'
+                    : 'bg-surface text-content-secondary border-surface-border hover:bg-canvas'
                   }
                 `}
                 title={showLost ? 'Verlorene Deals ausblenden' : 'Verlorene Deals anzeigen'}

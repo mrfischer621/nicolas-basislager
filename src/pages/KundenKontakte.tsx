@@ -194,7 +194,7 @@ export default function KundenKontakte() {
   if (!selectedCompany) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-gray-500">Firma wird geladen...</p>
+        <p className="text-fg-muted">Firma wird geladen...</p>
       </div>
     );
   }
@@ -202,7 +202,7 @@ export default function KundenKontakte() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-gray-500">Lädt...</p>
+        <p className="text-fg-muted">Lädt...</p>
       </div>
     );
   }
@@ -212,12 +212,12 @@ export default function KundenKontakte() {
       <div className="space-y-6">
         <Link
           to="/kunden"
-          className="inline-flex items-center gap-2 text-gray-600 hover:text-brand transition"
+          className="inline-flex items-center gap-2 text-fg-muted hover:text-brand transition"
         >
           <ArrowLeft size={20} />
           Zurück zu Kunden
         </Link>
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+        <div className="bg-danger-subtle border border-danger-subtle text-danger px-4 py-3 rounded-lg">
           Kunde nicht gefunden.
         </div>
       </div>
@@ -229,7 +229,7 @@ export default function KundenKontakte() {
       {/* Breadcrumb */}
       <Link
         to="/kunden"
-        className="inline-flex items-center gap-2 text-gray-600 hover:text-brand transition"
+        className="inline-flex items-center gap-2 text-fg-muted hover:text-brand transition"
       >
         <ArrowLeft size={20} />
         Zurück zu Kunden
@@ -238,12 +238,12 @@ export default function KundenKontakte() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Kontakte</h1>
-          <p className="text-gray-600 mt-1">{customer.name}</p>
+          <h1 className="text-2xl font-bold text-fg">Kontakte</h1>
+          <p className="text-fg-muted mt-1">{customer.name}</p>
         </div>
         <button
           onClick={() => openModal()}
-          className="flex items-center gap-2 px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand-dark transition"
+          className="flex items-center gap-2 px-4 py-2 bg-brand text-accent-fg rounded-lg hover:bg-brand-dark transition"
         >
           <Plus size={20} />
           Neuer Kontakt
@@ -252,45 +252,45 @@ export default function KundenKontakte() {
 
       {/* Contacts Table */}
       {contacts.length === 0 ? (
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <p className="text-gray-500 text-center">
+        <div className="bg-surface rounded-lg shadow-sm p-6">
+          <p className="text-fg-muted text-center">
             Noch keine Kontakte vorhanden. Erstellen Sie den ersten Kontakt.
           </p>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div className="bg-surface rounded-lg shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead className="bg-canvas border-b border-line">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-fg-muted uppercase tracking-wider">
                     Name
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-fg-muted uppercase tracking-wider">
                     Funktion
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-fg-muted uppercase tracking-wider">
                     E-Mail
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-fg-muted uppercase tracking-wider">
                     Telefon
                   </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-center text-xs font-medium text-fg-muted uppercase tracking-wider">
                     Hauptkontakt
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-right text-xs font-medium text-fg-muted uppercase tracking-wider">
                     Aktionen
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-line">
                 {contacts.map((contact) => (
-                  <tr key={contact.id} className="hover:bg-gray-50 transition">
+                  <tr key={contact.id} className="hover:bg-canvas transition">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{contact.name}</div>
+                      <div className="text-sm font-medium text-fg">{contact.name}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-600">{contact.role || '-'}</div>
+                      <div className="text-sm text-fg-muted">{contact.role || '-'}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {contact.email ? (
@@ -301,31 +301,31 @@ export default function KundenKontakte() {
                           {contact.email}
                         </a>
                       ) : (
-                        <span className="text-sm text-gray-400">-</span>
+                        <span className="text-sm text-fg-subtle">-</span>
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {contact.phone ? (
                         <a
                           href={`tel:${contact.phone}`}
-                          className="text-sm text-gray-600 hover:text-brand"
+                          className="text-sm text-fg-muted hover:text-brand"
                         >
                           {contact.phone}
                         </a>
                       ) : (
-                        <span className="text-sm text-gray-400">-</span>
+                        <span className="text-sm text-fg-subtle">-</span>
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
                       {contact.is_primary ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-warning-subtle text-warning">
                           <Star size={12} className="fill-current" />
                           Hauptkontakt
                         </span>
                       ) : (
                         <button
                           onClick={() => handleSetPrimary(contact.id)}
-                          className="p-1 text-gray-400 hover:text-amber-500 transition"
+                          className="p-1 text-fg-subtle hover:text-warning transition"
                           title="Als Hauptkontakt setzen"
                         >
                           <StarOff size={16} />
@@ -336,14 +336,14 @@ export default function KundenKontakte() {
                       <div className="flex justify-end gap-2">
                         <button
                           onClick={() => openModal(contact)}
-                          className="p-2 text-brand hover:bg-sage-50 rounded-lg transition"
+                          className="p-2 text-brand hover:bg-canvas rounded-lg transition"
                           title="Bearbeiten"
                         >
                           <Pencil size={18} />
                         </button>
                         <button
                           onClick={() => handleDelete(contact.id)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                          className="p-2 text-danger hover:bg-danger-subtle rounded-lg transition"
                           title="Löschen"
                         >
                           <Trash2 size={18} />
@@ -366,8 +366,8 @@ export default function KundenKontakte() {
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="contactName" className="block text-sm font-medium text-gray-700 mb-1">
-              Name <span className="text-red-500">*</span>
+            <label htmlFor="contactName" className="block text-sm font-medium text-fg mb-1">
+              Name <span className="text-danger">*</span>
             </label>
             <input
               type="text"
@@ -375,13 +375,13 @@ export default function KundenKontakte() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
               placeholder="z.B. Max Mustermann"
             />
           </div>
 
           <div>
-            <label htmlFor="contactRole" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="contactRole" className="block text-sm font-medium text-fg mb-1">
               Funktion
             </label>
             <input
@@ -389,13 +389,13 @@ export default function KundenKontakte() {
               id="contactRole"
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
               placeholder="z.B. Geschäftsführer"
             />
           </div>
 
           <div>
-            <label htmlFor="contactEmail" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="contactEmail" className="block text-sm font-medium text-fg mb-1">
               E-Mail
             </label>
             <input
@@ -403,13 +403,13 @@ export default function KundenKontakte() {
               id="contactEmail"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
               placeholder="kontakt@example.com"
             />
           </div>
 
           <div>
-            <label htmlFor="contactPhone" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="contactPhone" className="block text-sm font-medium text-fg mb-1">
               Telefon
             </label>
             <input
@@ -417,7 +417,7 @@ export default function KundenKontakte() {
               id="contactPhone"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
+              className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
               placeholder="+41 79 123 45 67"
             />
           </div>
@@ -428,26 +428,26 @@ export default function KundenKontakte() {
               id="isPrimary"
               checked={isPrimary}
               onChange={(e) => setIsPrimary(e.target.checked)}
-              className="w-4 h-4 text-brand border-gray-300 rounded focus:ring-brand"
+              className="w-4 h-4 text-brand border-line-strong rounded focus:ring-brand"
             />
-            <label htmlFor="isPrimary" className="text-sm text-gray-700">
+            <label htmlFor="isPrimary" className="text-sm text-fg">
               Als Hauptkontakt setzen
             </label>
           </div>
 
           {/* Form Actions */}
-          <div className="flex gap-3 pt-4 border-t border-gray-200">
+          <div className="flex gap-3 pt-4 border-t border-line">
             <button
               type="submit"
               disabled={isSubmitting}
-              className="rounded-lg px-6 py-2 font-medium bg-brand text-white hover:bg-brand-dark transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="rounded-lg px-6 py-2 font-medium bg-brand text-accent-fg hover:bg-brand-dark transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? 'Speichert...' : editingContact ? 'Aktualisieren' : 'Speichern'}
             </button>
             <button
               type="button"
               onClick={closeModal}
-              className="rounded-lg px-6 py-2 font-medium bg-gray-200 text-gray-700 hover:bg-gray-300 transition"
+              className="rounded-lg px-6 py-2 font-medium bg-sunken text-fg hover:bg-sunken transition"
             >
               Abbrechen
             </button>

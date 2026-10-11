@@ -236,14 +236,14 @@ export default function TimeEntryImportModal({
     >
       <div className="space-y-4">
         {/* Info Text */}
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-fg-muted">
           Wählen Sie die Zeiteinträge aus, die Sie in diese Rechnung importieren möchten.
           Nur verrechenbare Einträge ohne zugeordnete Rechnung werden angezeigt.
         </p>
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+          <div className="bg-danger-subtle border border-danger-subtle text-danger px-4 py-3 rounded-lg text-sm">
             {error}
           </div>
         )}
@@ -251,13 +251,13 @@ export default function TimeEntryImportModal({
         {/* Loading State */}
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="flex items-center gap-3 text-gray-500">
+            <div className="flex items-center gap-3 text-fg-muted">
               <Clock className="animate-pulse" size={20} />
               <span>Lade Zeiteinträge...</span>
             </div>
           </div>
         ) : groupedEntries.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">
+          <div className="text-center py-12 text-fg-muted">
             <Clock size={48} className="mx-auto mb-4 opacity-50" />
             <p>Keine offenen Zeiteinträge für diesen Kunden gefunden.</p>
             <p className="text-sm mt-2">
@@ -275,7 +275,7 @@ export default function TimeEntryImportModal({
               >
                 {selectedGroups.size === groupedEntries.length ? 'Alle abwählen' : 'Alle auswählen'}
               </button>
-              <span className="text-sm text-gray-500">
+              <span className="text-sm text-fg-muted">
                 {selectedGroups.size} von {groupedEntries.length} Gruppen ausgewählt
               </span>
             </div>
@@ -290,7 +290,7 @@ export default function TimeEntryImportModal({
                     p-4 rounded-lg border cursor-pointer transition-all
                     ${selectedGroups.has(group.key)
                       ? 'border-brand bg-brand/5 ring-1 ring-brand'
-                      : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                      : 'border-line hover:border-line-strong hover:bg-canvas'
                     }
                   `}
                 >
@@ -300,28 +300,28 @@ export default function TimeEntryImportModal({
                         <div className={`
                           w-5 h-5 rounded flex items-center justify-center flex-shrink-0
                           ${selectedGroups.has(group.key)
-                            ? 'bg-brand text-white'
-                            : 'border-2 border-gray-300'
+                            ? 'bg-brand text-accent-fg'
+                            : 'border-2 border-line-strong'
                           }
                         `}>
                           {selectedGroups.has(group.key) && <Check size={14} />}
                         </div>
-                        <span className="font-medium text-gray-900">
+                        <span className="font-medium text-fg">
                           KW {group.weekNumber} ({group.monthYear})
                         </span>
                       </div>
-                      <p className="text-sm text-gray-600 mt-1 ml-7">
+                      <p className="text-sm text-fg-muted mt-1 ml-7">
                         {group.projectName}
                       </p>
-                      <p className="text-xs text-gray-500 mt-1 ml-7">
+                      <p className="text-xs text-fg-muted mt-1 ml-7">
                         {group.entries.length} Einträge
                       </p>
                     </div>
                     <div className="text-right">
-                      <div className="font-semibold text-gray-900">
+                      <div className="font-semibold text-fg">
                         {group.totalHours.toFixed(1)} h
                       </div>
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-fg-muted">
                         à CHF {group.rate.toFixed(0)}.-
                       </div>
                       <div className="text-sm font-medium text-brand mt-1">
@@ -335,16 +335,16 @@ export default function TimeEntryImportModal({
 
             {/* Summary */}
             {selectedGroups.size > 0 && (
-              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+              <div className="bg-canvas rounded-lg p-4 border border-line">
                 <div className="flex items-center justify-between">
                   <div>
-                    <span className="text-sm text-gray-600">Ausgewählt:</span>
-                    <span className="ml-2 font-semibold text-gray-900">
+                    <span className="text-sm text-fg-muted">Ausgewählt:</span>
+                    <span className="ml-2 font-semibold text-fg">
                       {totalSelectedHours.toFixed(1)} Stunden
                     </span>
                   </div>
                   <div className="text-right">
-                    <span className="text-sm text-gray-600">Total:</span>
+                    <span className="text-sm text-fg-muted">Total:</span>
                     <span className="ml-2 font-bold text-brand text-lg">
                       CHF {totalSelectedAmount.toFixed(2)}
                     </span>
@@ -360,7 +360,7 @@ export default function TimeEntryImportModal({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition flex items-center gap-2"
+            className="px-4 py-2 text-fg bg-raised rounded-lg hover:bg-sunken transition flex items-center gap-2"
           >
             <X size={16} />
             Abbrechen
@@ -369,7 +369,7 @@ export default function TimeEntryImportModal({
             type="button"
             onClick={handleImport}
             disabled={selectedGroups.size === 0}
-            className="px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand-dark transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="px-4 py-2 bg-brand text-accent-fg rounded-lg hover:bg-brand-dark transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             <Clock size={16} />
             {selectedGroups.size > 0

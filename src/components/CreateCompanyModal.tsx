@@ -166,33 +166,33 @@ export function CreateCompanyModal({ isOpen, onClose, onSuccess }: CreateCompany
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/50 z-50 animate-fade-in"
+        className="fixed inset-0 bg-ink/50 z-50 animate-fade-in"
         onClick={handleClose}
       />
 
       {/* Modal */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div
-          className="bg-white rounded-xl shadow-floating w-full max-w-lg animate-slide-up"
+          className="bg-surface rounded-xl shadow-floating w-full max-w-lg animate-slide-up"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-line">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                <Building2 className="text-blue-600" size={20} />
+              <div className="w-10 h-10 rounded-lg bg-accent-subtle flex items-center justify-center">
+                <Building2 className="text-accent" size={20} />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">Neue Firma erstellen</h2>
-                <p className="text-sm text-gray-600">Firma zu Ihrem Account hinzufügen</p>
+                <h2 className="text-lg font-semibold text-fg">Neue Firma erstellen</h2>
+                <p className="text-sm text-fg-muted">Firma zu Ihrem Account hinzufügen</p>
               </div>
             </div>
             <button
               onClick={handleClose}
               disabled={isSubmitting}
-              className="p-2 hover:bg-gray-100 rounded-lg transition disabled:opacity-50"
+              className="p-2 hover:bg-raised rounded-lg transition disabled:opacity-50"
             >
-              <X size={20} className="text-gray-500" />
+              <X size={20} className="text-fg-muted" />
             </button>
           </div>
 
@@ -200,17 +200,17 @@ export function CreateCompanyModal({ isOpen, onClose, onSuccess }: CreateCompany
           <form onSubmit={handleSubmit} className="px-6 py-4">
             {/* Error Alert */}
             {submitError && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
-                <AlertCircle className="text-red-600 flex-shrink-0 mt-0.5" size={18} />
-                <p className="text-sm text-red-800">{submitError}</p>
+              <div className="mb-4 p-3 bg-danger-subtle border border-danger-subtle rounded-lg flex items-start gap-2">
+                <AlertCircle className="text-danger flex-shrink-0 mt-0.5" size={18} />
+                <p className="text-sm text-danger">{submitError}</p>
               </div>
             )}
 
             <div className="space-y-4">
               {/* Company Name */}
               <div>
-                <label htmlFor="company_name" className="block text-sm font-medium text-gray-700 mb-1">
-                  Firmenname <span className="text-red-500">*</span>
+                <label htmlFor="company_name" className="block text-sm font-medium text-fg mb-1">
+                  Firmenname <span className="text-danger">*</span>
                 </label>
                 <input
                   type="text"
@@ -218,20 +218,20 @@ export function CreateCompanyModal({ isOpen, onClose, onSuccess }: CreateCompany
                   value={formData.name}
                   onChange={(e) => handleFieldChange('name', e.target.value)}
                   disabled={isSubmitting}
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500/20 outline-none transition disabled:bg-gray-50 disabled:cursor-not-allowed ${
-                    errors.name ? 'border-red-500' : 'border-gray-200 focus:border-blue-500'
+                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-focus/20 outline-none transition disabled:bg-canvas disabled:cursor-not-allowed ${
+                    errors.name ? 'border-danger' : 'border-line focus:border-accent'
                   }`}
                   placeholder="z.B. Muster AG"
                   autoFocus
                 />
-                {errors.name && <p className="text-sm text-red-600 mt-1">{errors.name}</p>}
+                {errors.name && <p className="text-sm text-danger mt-1">{errors.name}</p>}
               </div>
 
               {/* Address */}
               <div className="grid grid-cols-3 gap-3">
                 <div className="col-span-2">
-                  <label htmlFor="street" className="block text-sm font-medium text-gray-700 mb-1">
-                    Strasse <span className="text-red-500">*</span>
+                  <label htmlFor="street" className="block text-sm font-medium text-fg mb-1">
+                    Strasse <span className="text-danger">*</span>
                   </label>
                   <input
                     type="text"
@@ -239,17 +239,17 @@ export function CreateCompanyModal({ isOpen, onClose, onSuccess }: CreateCompany
                     value={formData.street}
                     onChange={(e) => handleFieldChange('street', e.target.value)}
                     disabled={isSubmitting}
-                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500/20 outline-none transition disabled:bg-gray-50 disabled:cursor-not-allowed ${
-                      errors.street ? 'border-red-500' : 'border-gray-200 focus:border-blue-500'
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-focus/20 outline-none transition disabled:bg-canvas disabled:cursor-not-allowed ${
+                      errors.street ? 'border-danger' : 'border-line focus:border-accent'
                     }`}
                     placeholder="Musterstrasse"
                   />
-                  {errors.street && <p className="text-sm text-red-600 mt-1">{errors.street}</p>}
+                  {errors.street && <p className="text-sm text-danger mt-1">{errors.street}</p>}
                 </div>
 
                 <div>
-                  <label htmlFor="house_number" className="block text-sm font-medium text-gray-700 mb-1">
-                    Nr. <span className="text-red-500">*</span>
+                  <label htmlFor="house_number" className="block text-sm font-medium text-fg mb-1">
+                    Nr. <span className="text-danger">*</span>
                   </label>
                   <input
                     type="text"
@@ -257,21 +257,21 @@ export function CreateCompanyModal({ isOpen, onClose, onSuccess }: CreateCompany
                     value={formData.house_number}
                     onChange={(e) => handleFieldChange('house_number', e.target.value)}
                     disabled={isSubmitting}
-                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500/20 outline-none transition disabled:bg-gray-50 disabled:cursor-not-allowed ${
-                      errors.house_number ? 'border-red-500' : 'border-gray-200 focus:border-blue-500'
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-focus/20 outline-none transition disabled:bg-canvas disabled:cursor-not-allowed ${
+                      errors.house_number ? 'border-danger' : 'border-line focus:border-accent'
                     }`}
                     placeholder="123"
                   />
                   {errors.house_number && (
-                    <p className="text-sm text-red-600 mt-1">{errors.house_number}</p>
+                    <p className="text-sm text-danger mt-1">{errors.house_number}</p>
                   )}
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label htmlFor="zip_code" className="block text-sm font-medium text-gray-700 mb-1">
-                    PLZ <span className="text-red-500">*</span>
+                  <label htmlFor="zip_code" className="block text-sm font-medium text-fg mb-1">
+                    PLZ <span className="text-danger">*</span>
                   </label>
                   <input
                     type="text"
@@ -279,18 +279,18 @@ export function CreateCompanyModal({ isOpen, onClose, onSuccess }: CreateCompany
                     value={formData.zip_code}
                     onChange={(e) => handleFieldChange('zip_code', e.target.value)}
                     disabled={isSubmitting}
-                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500/20 outline-none transition disabled:bg-gray-50 disabled:cursor-not-allowed ${
-                      errors.zip_code ? 'border-red-500' : 'border-gray-200 focus:border-blue-500'
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-focus/20 outline-none transition disabled:bg-canvas disabled:cursor-not-allowed ${
+                      errors.zip_code ? 'border-danger' : 'border-line focus:border-accent'
                     }`}
                     placeholder="8000"
                     maxLength={4}
                   />
-                  {errors.zip_code && <p className="text-sm text-red-600 mt-1">{errors.zip_code}</p>}
+                  {errors.zip_code && <p className="text-sm text-danger mt-1">{errors.zip_code}</p>}
                 </div>
 
                 <div className="col-span-2">
-                  <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
-                    Ort <span className="text-red-500">*</span>
+                  <label htmlFor="city" className="block text-sm font-medium text-fg mb-1">
+                    Ort <span className="text-danger">*</span>
                   </label>
                   <input
                     type="text"
@@ -298,19 +298,19 @@ export function CreateCompanyModal({ isOpen, onClose, onSuccess }: CreateCompany
                     value={formData.city}
                     onChange={(e) => handleFieldChange('city', e.target.value)}
                     disabled={isSubmitting}
-                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500/20 outline-none transition disabled:bg-gray-50 disabled:cursor-not-allowed ${
-                      errors.city ? 'border-red-500' : 'border-gray-200 focus:border-blue-500'
+                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-focus/20 outline-none transition disabled:bg-canvas disabled:cursor-not-allowed ${
+                      errors.city ? 'border-danger' : 'border-line focus:border-accent'
                     }`}
                     placeholder="Zürich"
                   />
-                  {errors.city && <p className="text-sm text-red-600 mt-1">{errors.city}</p>}
+                  {errors.city && <p className="text-sm text-danger mt-1">{errors.city}</p>}
                 </div>
               </div>
 
               {/* Info Note */}
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-start gap-2">
-                <CheckCircle className="text-blue-600 flex-shrink-0 mt-0.5" size={18} />
-                <p className="text-sm text-blue-800">
+              <div className="p-3 bg-accent-subtle border border-accent-border rounded-lg flex items-start gap-2">
+                <CheckCircle className="text-accent flex-shrink-0 mt-0.5" size={18} />
+                <p className="text-sm text-accent">
                   Weitere Details (IBAN, MwSt, etc.) können Sie nach der Erstellung in den
                   Einstellungen ergänzen.
                 </p>
@@ -318,11 +318,11 @@ export function CreateCompanyModal({ isOpen, onClose, onSuccess }: CreateCompany
             </div>
 
             {/* Actions */}
-            <div className="flex gap-3 mt-6 pt-4 border-t border-gray-200">
+            <div className="flex gap-3 mt-6 pt-4 border-t border-line">
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex-1 px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                className="flex-1 px-6 py-2.5 bg-accent text-accent-fg rounded-lg hover:bg-accent transition disabled:opacity-50 disabled:cursor-not-allowed font-medium"
               >
                 {isSubmitting ? 'Erstellt...' : 'Firma erstellen'}
               </button>
@@ -330,7 +330,7 @@ export function CreateCompanyModal({ isOpen, onClose, onSuccess }: CreateCompany
                 type="button"
                 onClick={handleClose}
                 disabled={isSubmitting}
-                className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                className="px-6 py-2.5 border border-line-strong text-fg rounded-lg hover:bg-canvas transition disabled:opacity-50 disabled:cursor-not-allowed font-medium"
               >
                 Abbrechen
               </button>
