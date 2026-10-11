@@ -231,7 +231,7 @@ export default function Zeiterfassung() {
                   Nur Zeiten einer Rechnung ✕
                 </button>
               )}
-              <div className="ml-auto">
+              <div className="toolbar-collapsible ml-auto">
                 <SegmentedControl
                   label="Gruppieren nach"
                   size="sm"

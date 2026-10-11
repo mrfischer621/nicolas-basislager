@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { Children, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
-import { ChevronLeft, ChevronRight, Search, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search, SlidersHorizontal, X } from 'lucide-react';
 import { PAGE_SIZE } from './listState';
 
 /**
@@ -77,7 +77,7 @@ export function SearchField({ value, onChange, placeholder }: { value: string; o
   }, [text, value, onChange]);
 
   return (
-    <label className="relative block w-full sm:w-72">
+    <label className="relative block min-w-0 flex-1 max-sm:order-[-2] sm:w-72 sm:flex-none">
       <span className="sr-only">{placeholder}</span>
       <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-muted" aria-hidden="true" />
       <input
@@ -106,7 +106,7 @@ export function FilterSelect({
   allLabel: string;
 }) {
   return (
-    <label className="block">
+    <label className="toolbar-collapsible block">
       <span className="sr-only">{label}</span>
       <select value={value} onChange={(e) => onChange(e.target.value)} className="input w-auto max-w-[14rem] py-2 pr-8">
         <option value="">{allLabel}</option>
@@ -120,10 +120,23 @@ export function FilterSelect({
   );
 }
 
+/**
+ * Werkzeugleiste ueber einer Liste. Auf dem Handy bleiben Suche, aktive
+ * Filter-Chips und Zuruecksetzen sichtbar; Auswahlfilter (.toolbar-collapsible)
+ * liegen hinter dem Knopf «Filter», damit die Liste weiter oben beginnt.
+ */
 export function Toolbar({ children, filterCount, onReset }: { children: ReactNode; filterCount: number; onReset: () => void }) {
+  const [open, setOpen] = useState(false);
+  const collapsible = Children.toArray(children).length > 1;
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="toolbar flex flex-wrap items-center gap-2" data-open={open || undefined}>
       {children}
+      {collapsible && (
+        <button type="button" className="btn-secondary max-sm:order-[-1] sm:hidden" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
+          <SlidersHorizontal className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
+          Filter{filterCount > 0 ? ` (${filterCount})` : ''}
+        </button>
+      )}
       {filterCount > 0 && (
         <button type="button" onClick={onReset} className="btn-ghost min-h-[36px] px-3 py-1.5">
           <X className="h-4 w-4" aria-hidden="true" />
@@ -171,7 +184,8 @@ export function Notice({ tone = 'warning', children, action }: { tone?: 'warning
   }[tone];
   return (
     <div role="status" className={`flex flex-wrap items-center gap-3 rounded-lg border-l-4 px-4 py-3 text-sm text-fg-on-light ${t}`}>
-      <p className="min-w-0 flex-1">{children}</p>
+      {/* basis-60: bei wenig Platz rutscht die Aktion unter den Text, statt ihn zu quetschen */}
+      <p className="min-w-0 flex-1 basis-60">{children}</p>
       {action}
     </div>
   );

@@ -223,6 +223,13 @@
     }
   }
 
+  /* Werkzeugleiste: Auswahlfilter auf dem Handy hinter «Filter» */
+  @media (max-width: 639.98px) {
+    .toolbar:not([data-open]) > .toolbar-collapsible {
+      display: none;
+    }
+  }
+
   .toggle-group {
     @apply inline-flex flex-wrap gap-0.5 rounded-lg bg-raised p-0.5;
   }
