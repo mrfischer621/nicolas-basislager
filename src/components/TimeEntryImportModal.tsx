@@ -136,11 +136,10 @@ export default function TimeEntryImportModal({
       const projectName = entry.projects?.name || 'Unbekanntes Projekt';
       const projectId = entry.project_id;
 
-      // Group by: Week + Project (rate comes from project/company, not per-entry snapshot)
-      const key = `KW${weekNumber}_${monthYear}_${projectId}`;
-
-      // Rate hierarchy: project.hourly_rate → entry snapshot (snapshot already includes customer/company defaults)
-      const rate = entry.projects?.hourly_rate ?? entry.rate;
+            // Satz aus der Erfassung (Snapshot), nicht neu vom Projekt; unterschiedliche
+      // Saetze derselben Woche ergeben getrennte Positionen
+      const rate = Number(entry.rate);
+      const key = `KW${weekNumber}_${monthYear}_${projectId}_${rate}`;
 
       if (!groups.has(key)) {
         groups.set(key, {

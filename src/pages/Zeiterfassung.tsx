@@ -1,684 +1,328 @@
-import { useState, useEffect, useRef, lazy, Suspense } from 'react';
-import { useConfirm } from '../context/ConfirmProvider';
+import { lazy, Suspense, useMemo, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { supabase } from '../lib/supabase';
-import type { TimeEntry, TimeEntryWithStatus, ManualTimeEntryStatus, Project, Customer } from '../lib/supabase';
-import TimeEntryForm from '../components/TimeEntryForm';
-import TimeEntryTable from '../components/TimeEntryTable';
-import Modal from '../components/Modal';
+import { Clock } from 'lucide-react';
+import {
+  BulkBar,
+  DataTable,
+  FilterSelect,
+  ListPage,
+  Pagination,
+  SearchField,
+  Toolbar,
+  ViewTabs,
+  activeFilterCount,
+  useListState,
+  useSelection,
+  type Column,
+  type RowGroup,
+  type RowMenuItem,
+} from '../components/list';
+import { EmptyState, SegmentedControl } from '../components/ui';
+import { useConfirm } from '../context/ConfirmProvider';
 import { useCompany } from '../context/CompanyContext';
-import { Plus, Calendar, Layers, ClipboardList, BarChart3, Filter, X } from 'lucide-react';
-import { getWeek, getYear, parseISO } from 'date-fns';
+import { useCustomers, useProjects } from '../hooks/queries';
+import { projectIdsOf, useInvalidateTime, useTimeList, useTimeSummary } from '../hooks/useTimeEntries';
+import { QuickTimeEntry } from '../components/time/QuickTimeEntry';
+import { TimeEntryDrawer } from '../components/time/TimeEntryDrawer';
+import { InvoiceEditor, type InvoiceEditorMode } from '../components/invoices/InvoiceEditor';
+import { supabase } from '../lib/supabase';
+import type { ManualTimeEntryStatus, TimeEntry } from '../lib/supabase';
+import { addDays, zurichDay } from '../utils/financeAggregation';
+import { formatChfDisplay } from '../utils/money';
+import { formatDate, formatHours } from '../utils/format';
+import {
+  BILLING_BADGE,
+  BILLING_LABEL,
+  TIME_VIEWS,
+  amount,
+  billingState,
+  buildInvoicePreset,
+  groupTimeEntries,
+  isUnbilled,
+  matchesView,
+  totals,
+  type TimeGrouping,
+  type TimeRow,
+  type TimeView,
+} from '../utils/timeEntries';
 
-// Recharts ist schwer und nur im Reporting-Tab noetig -> erst bei Bedarf laden
 const TimeReporting = lazy(() => import('../components/TimeReporting'));
 
-type GroupingMode = 'date' | 'week';
-type TabMode = 'erfassung' | 'reporting';
-
-// Extended TimeEntry with customer name from project and dynamic status
-interface TimeEntryWithCustomer extends TimeEntryWithStatus {
-  customerName?: string;
-  projectName?: string;
-}
+const DEFAULTS = { ansicht: 'offen', gruppe: 'woche', sort: '-date' };
+const TABS = [...TIME_VIEWS, { value: 'auswertung', label: 'Auswertung' }];
 
 export default function Zeiterfassung() {
-  const confirmDialog = useConfirm();
+  const navigate = useNavigate();
+  const confirm = useConfirm();
   const { selectedCompany } = useCompany();
-  const [entries, setEntries] = useState<TimeEntryWithCustomer[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [, setCustomers] = useState<Customer[]>([]);
-  const [editingEntry, setEditingEntry] = useState<TimeEntry | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedProjectId, setSelectedProjectId] = useState<string>('');
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const filterRef = useRef<HTMLDivElement>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { state, set, reset, page } = useListState(DEFAULTS);
+  const view = (TABS.some((t) => t.value === state.ansicht) ? state.ansicht : 'offen') as TimeView | 'auswertung';
+  const grouping = (['woche', 'firma', 'projekt'].includes(state.gruppe) ? state.gruppe : 'woche') as TimeGrouping;
+  const today = zurichDay(new Date());
 
-  // Tab state
-  const [activeTab, setActiveTab] = useState<TabMode>('erfassung');
+  const { data: customers = [] } = useCustomers();
+  const { data: projects = [] } = useProjects();
+  const activeProjects = projects.filter((p) => p.is_active);
+  const summary = useTimeSummary();
+  const list = useTimeList(state);
+  const invalidate = useInvalidateTime();
+  const selection = useSelection(list.rows.map((r) => r.id));
+  const [editing, setEditing] = useState<TimeRow | null>(null);
+  const [editor, setEditor] = useState<InvoiceEditorMode | null>(null);
 
-  // Grouping mode state
-  const [groupingMode, setGroupingMode] = useState<GroupingMode>(() => {
-    const saved = localStorage.getItem('zeiterfassung_grouping');
-    return (saved as GroupingMode) || 'date';
-  });
-
-  // Inline Quick-Add Form state
-  const [quickAddData, setQuickAddData] = useState({
-    projectId: '',
-    date: new Date().toISOString().split('T')[0],
-    hours: '',
-    rate: '160',
-    rateSource: 'default' as 'project' | 'customer' | 'default' | 'manual',
-    description: '',
-    billable: true,
-  });
-  const [isQuickAdding, setIsQuickAdding] = useState(false);
-
-  useEffect(() => {
-    if (selectedCompany) {
-      fetchData();
-    }
-  }, [selectedCompany]);
-
-  // Save grouping preference
-  useEffect(() => {
-    localStorage.setItem('zeiterfassung_grouping', groupingMode);
-  }, [groupingMode]);
-
-  // Close filter dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
-        setIsFilterOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  // Auto-populate rate for Quick-Add when project changes (Rate Hierarchy - Phase 4.3)
-  useEffect(() => {
-    if (!quickAddData.projectId) return;
-
-    const resolveRate = async () => {
-      const { data, error } = await supabase.rpc('resolve_hourly_rate', {
-        p_project_id: quickAddData.projectId,
-        p_default_rate: 160.00
-      });
-
-      if (error) {
-        console.error('Error resolving rate for quick-add:', error);
-        setQuickAddData(prev => ({ ...prev, rate: '160', rateSource: 'default' }));
-        return;
-      }
-
-      if (data && data.length > 0) {
-        const { rate: resolvedRate, source } = data[0];
-        setQuickAddData(prev => ({
-          ...prev,
-          rate: resolvedRate.toString(),
-          rateSource: source as 'project' | 'customer' | 'default'
-        }));
-      }
-    };
-
-    resolveRate();
-  }, [quickAddData.projectId]);
-
-  // Early return if no company selected
-  if (!selectedCompany) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-fg-muted">Firma wird geladen...</p>
-      </div>
+  // Gleiche Filter wie die Datenbankabfrage, fuer Tab-Zahlen und Gruppensummen
+  const filtered = useMemo(() => {
+    const projectIds = state.firma ? new Set(projectIdsOf(state.firma, projects)) : null;
+    const q = state.q?.trim().toLowerCase();
+    return summary.rows.filter(
+      (e) =>
+        (!state.projekt || e.project_id === state.projekt) &&
+        (!projectIds || projectIds.has(e.project_id)) &&
+        (!state.rechnung || e.invoice_id === state.rechnung) &&
+        (!q || (e.description ?? '').toLowerCase().includes(q))
     );
-  }
+  }, [summary.rows, state.firma, state.projekt, state.rechnung, state.q, projects]);
 
-  const fetchData = async () => {
-    if (!selectedCompany) return;
+  const counts = useMemo(
+    () => Object.fromEntries(TIME_VIEWS.map((v) => [v.value, filtered.filter((e) => matchesView(e, v.value, today)).length])) as Record<TimeView, number>,
+    [filtered, today]
+  );
+  const inView = view === 'auswertung' ? [] : filtered.filter((e) => matchesView(e, view, today));
+  const viewTotals = totals(inView);
+  const groupTotals = new Map(groupTimeEntries(inView, grouping).map((g) => [g.key, g.totals]));
+  const unbilled = totals(summary.rows.filter(isUnbilled));
+  const staleUnbilled = summary.rows.filter((e) => isUnbilled(e) && e.date < addDays(today, -30)).length;
 
-    try {
-      setIsLoading(true);
-      setError(null);
+  if (!selectedCompany) return null;
 
-      // Clear existing data to force React re-render
-      setEntries([]);
-      setProjects([]);
-
-      const [entriesResult, projectsResult, customersResult] = await Promise.all([
-        // Use the view for dynamic status - falls back to table if view doesn't exist
-        supabase
-          .from('view_time_entries_with_status')
-          .select('*')
-          .eq('company_id', selectedCompany.id)
-          .order('date', { ascending: false }),
-        supabase
-          .from('projects')
-          .select('*, customers(name)')
-          .eq('company_id', selectedCompany.id)
-          .order('name', { ascending: true }),
-        supabase
-          .from('customers')
-          .select('*')
-          .eq('company_id', selectedCompany.id)
-          .order('name', { ascending: true }),
-      ]);
-
-      // Fallback to time_entries table if view doesn't exist yet
-      let timeEntriesData = entriesResult.data;
-      if (entriesResult.error) {
-        console.warn('View not available, falling back to time_entries table:', entriesResult.error.message);
-        const fallbackResult = await supabase
-          .from('time_entries')
-          .select('*')
-          .eq('company_id', selectedCompany.id)
-          .order('date', { ascending: false });
-
-        if (fallbackResult.error) throw fallbackResult.error;
-        // Map to include derived_status for compatibility
-        timeEntriesData = (fallbackResult.data || []).map(entry => ({
-          ...entry,
-          derived_status: entry.manual_status ?? (entry.invoice_id ? 'verrechnet' : 'offen'),
-          is_manual_status: entry.manual_status !== null,
-          invoice_number: null,
-          invoice_status: null,
-          invoice_date: null,
-        }));
-      }
-
-      if (projectsResult.error) throw projectsResult.error;
-      if (customersResult.error) throw customersResult.error;
-
-      // Enrich entries with project and customer names
-      const projectsData = projectsResult.data || [];
-      const enrichedEntries: TimeEntryWithCustomer[] = (timeEntriesData || []).map(entry => {
-        const project = projectsData.find(p => p.id === entry.project_id) as (Project & { customers?: { name?: string } | null }) | undefined;
-        return {
-          ...entry,
-          projectName: project?.name || 'Unbekannt',
-          customerName: project?.customers?.name || 'Unbekannt',
-        };
-      });
-
-      setEntries(enrichedEntries);
-      setProjects(projectsData);
-      setCustomers(customersResult.data || []);
-    } catch (err) {
-      console.error('Error fetching data:', err);
-      setError('Fehler beim Laden der Daten. Bitte überprüfen Sie Ihre Supabase-Konfiguration.');
-    } finally {
-      setIsLoading(false);
-    }
+  const setManual = async (ids: string[], status: ManualTimeEntryStatus | null) => {
+    const { error } = await supabase.from('time_entries').update({ manual_status: status }).in('id', ids);
+    if (error) toast.error(`Status nicht gespeichert: ${error.message}`);
+    else toast.success(status === null ? 'Status wieder automatisch.' : `Als ${status} markiert.`);
+    selection.clear();
+    await invalidate();
   };
-
-  const handleSubmit = async (entryData: Omit<TimeEntry, 'id' | 'created_at'>) => {
-    if (!selectedCompany) return;
-
-    try {
-      if (editingEntry) {
-        const { error } = await supabase
-          .from('time_entries')
-          .update(entryData)
-          .eq('id', editingEntry.id);
-
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from('time_entries')
-          .insert([{ ...entryData, company_id: selectedCompany.id }]);
-
-        if (error) throw error;
-      }
-
-      setIsModalOpen(false);
-      setEditingEntry(null);
-      await fetchData();
-    } catch (err) {
-      console.error('Error saving time entry:', err);
-      throw err;
-    }
+  const setBillable = async (ids: string[], billable: boolean) => {
+    const { error } = await supabase.from('time_entries').update({ billable }).in('id', ids);
+    if (error) toast.error(error.message);
+    else toast.success(billable ? 'Als verrechenbar markiert.' : 'Als nicht verrechenbar markiert.');
+    selection.clear();
+    await invalidate();
   };
-
-  const handleQuickAdd = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedCompany || !quickAddData.projectId || !quickAddData.hours) return;
-
-    setIsQuickAdding(true);
-    try {
-      const { error } = await supabase
-        .from('time_entries')
-        .insert([{
-          company_id: selectedCompany.id,
-          project_id: quickAddData.projectId,
-          date: quickAddData.date,
-          hours: parseFloat(quickAddData.hours),
-          rate: parseFloat(quickAddData.rate),
-          snapshot_source: quickAddData.rateSource, // Rate source (Phase 4.3)
-          description: quickAddData.description || null,
-          invoiced: false,
-          billable: quickAddData.billable,
-          invoice_id: null,
-          manual_status: null,
-        }]);
-
-      if (error) throw error;
-
-      // Reset form but keep project and rate (for batch entry)
-      setQuickAddData(prev => ({
-        ...prev,
-        date: new Date().toISOString().split('T')[0],
-        hours: '',
-        description: '',
-        // Keep rate and rateSource for next entry
-      }));
-
-      await fetchData();
-    } catch (err) {
-      console.error('Error quick adding time entry:', err);
-      toast.error('Fehler beim Speichern des Zeiteintrags.');
-    } finally {
-      setIsQuickAdding(false);
-    }
-  };
-
-  const handleEdit = (entry: TimeEntry) => {
-    setEditingEntry(entry);
-    setIsModalOpen(true);
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!(await confirmDialog({ title: 'Zeiteintrag löschen', confirmLabel: 'Löschen', message: 'Möchten Sie diesen Zeiteintrag wirklich löschen?', destructive: true }))) return;
-
-    try {
-      const { error } = await supabase
-        .from('time_entries')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-      await fetchData();
-    } catch (err) {
-      console.error('Error deleting time entry:', err);
-      toast.error('Fehler beim Löschen des Zeiteintrags.');
-    }
-  };
-
-  // Manueller Status-Override. null = zurück auf automatische Ableitung.
-  const handleStatusChange = async (id: string, manualStatus: ManualTimeEntryStatus | null) => {
-    const previous = entries;
-
-    // Optimistisch aktualisieren, damit das Badge sofort reagiert
-    setEntries(prev =>
-      prev.map(entry => {
-        if (entry.id !== id) return entry;
-        const derived = manualStatus
-          ?? (entry.invoice_id ? entry.invoice_status ?? 'verrechnet' : 'offen');
-        return {
-          ...entry,
-          manual_status: manualStatus,
-          is_manual_status: manualStatus !== null,
-          derived_status: derived,
-        };
-      })
-    );
-
-    const { error } = await supabase
-      .from('time_entries')
-      .update({ manual_status: manualStatus })
-      .eq('id', id);
-
-    if (error) {
-      console.error('Error updating time entry status:', error);
-      setEntries(previous);
-      toast.error('Status konnte nicht geändert werden.');
-    }
-  };
-
-  const handleAddNew = () => {
-    setEditingEntry(null);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setEditingEntry(null);
-  };
-
-  const filteredEntries = selectedProjectId
-    ? entries.filter((entry) => entry.project_id === selectedProjectId)
-    : entries;
-
-  // Group entries by week
-  const groupEntriesByWeek = (entries: TimeEntryWithCustomer[]) => {
-    const grouped: Record<string, TimeEntryWithCustomer[]> = {};
-
-    entries.forEach(entry => {
-      const date = parseISO(entry.date);
-      const week = getWeek(date, { weekStartsOn: 1 });
-      const year = getYear(date);
-      const key = `${year}-KW${week.toString().padStart(2, '0')}`;
-
-      if (!grouped[key]) {
-        grouped[key] = [];
-      }
-      grouped[key].push(entry);
+  const remove = async (row: TimeRow) => {
+    const ok = await confirm({
+      title: 'Zeit löschen',
+      message: row.invoice_id ? 'Die Zeit steht auf einer Rechnung. Die Rechnung selbst bleibt unverändert.' : `${formatHours(Number(row.hours))} vom ${formatDate(row.date)} löschen?`,
+      confirmLabel: 'Löschen',
+      destructive: true,
     });
-
-    // Sort by key (descending)
-    return Object.entries(grouped)
-      .sort(([a], [b]) => b.localeCompare(a))
-      .reduce((acc, [key, entries]) => {
-        acc[key] = entries;
-        return acc;
-      }, {} as Record<string, TimeEntryWithCustomer[]>);
+    if (!ok) return;
+    const { error } = await supabase.from('time_entries').delete().eq('id', row.id);
+    if (error) toast.error(error.message);
+    else toast.success('Zeit gelöscht.');
+    await invalidate();
   };
 
-  const groupedEntries = groupingMode === 'week' ? groupEntriesByWeek(filteredEntries) : null;
+  const createInvoice = (rows: TimeRow[]) => {
+    const r = buildInvoicePreset(rows);
+    if (!r.ok) {
+      toast.error(r.reason);
+      return;
+    }
+    setEditor({ kind: 'new', preset: r.preset });
+  };
+
+  const menu = (row: TimeRow): RowMenuItem[] => [
+    { label: 'Bearbeiten', onSelect: () => setEditing(row) },
+    { label: `Rechnung ${row.invoice_number ?? ''} öffnen`.trim(), onSelect: () => navigate(`/rechnungen/${row.invoice_id}`), hidden: !row.invoice_id },
+    { label: 'Rechnung erstellen', onSelect: () => createInvoice([row]), hidden: !isUnbilled(row) },
+    { label: 'Als verrechnet markieren (ohne Rechnung)', onSelect: () => setManual([row.id], 'verrechnet'), hidden: !isUnbilled(row) },
+    { label: 'Als bezahlt markieren (ohne Rechnung)', onSelect: () => setManual([row.id], 'bezahlt'), hidden: !isUnbilled(row) },
+    { label: 'Status wieder automatisch', onSelect: () => setManual([row.id], null), hidden: row.manual_status === null },
+    { label: 'Löschen', onSelect: () => remove(row), danger: true },
+  ];
+
+  const columns: Column<TimeRow>[] = [
+    { key: 'datum', header: 'Datum', sortKey: 'date', cell: (r) => <span className="tabular-nums">{formatDate(r.date)}</span> },
+    {
+      key: 'projekt',
+      header: 'Projekt und Tätigkeit',
+      cell: (r) => (
+        <span className="block max-w-[22rem] 2xl:max-w-[30rem]">
+          <span className="block truncate">
+            <span className="font-semibold">{r.projectName}</span>
+            <span className="text-fg-muted"> · {r.customerName}</span>
+          </span>
+          <span className="block truncate text-xs text-fg-muted">{r.description || 'ohne Beschreibung'}</span>
+        </span>
+      ),
+    },
+    { key: 'stunden', header: 'Stunden', sortKey: 'hours', align: 'right', cell: (r) => Number(r.hours).toFixed(2) },
+    { key: 'satz', header: 'Satz', align: 'right', cell: (r) => Number(r.rate).toFixed(0), hideBelow: '2xl' },
+    { key: 'betrag', header: 'Betrag', align: 'right', cell: (r) => (r.billable ? formatChfDisplay(amount(r)) : <span className="text-fg-muted">–</span>) },
+    { key: 'verrechenbar', header: 'Verrechenbar', cell: (r) => (r.billable ? 'Ja' : <span className="text-fg-muted">Nein</span>), hideBelow: '2xl' },
+    {
+      key: 'verrechnung',
+      header: 'Verrechnung',
+      cell: (r) => {
+        const s = billingState(r);
+        if (s === 'nicht_verrechenbar') return <span className="text-xs text-fg-muted">nicht verrechenbar</span>;
+        const badge = <span className={BILLING_BADGE[s]}>{BILLING_LABEL[s]}</span>;
+        return r.invoice_id ? (
+          <Link to={`/rechnungen/${r.invoice_id}`} onClick={(e) => e.stopPropagation()} className="inline-flex items-center gap-2 hover:underline">
+            {badge}
+            <span className="text-xs text-fg-muted">{r.invoice_number}</span>
+          </Link>
+        ) : (
+          badge
+        );
+      },
+    },
+  ];
+
+  const groups: RowGroup<TimeRow>[] = groupTimeEntries(list.rows, grouping).map((g) => {
+    const t = groupTotals.get(g.key) ?? g.totals;
+    return { key: g.key, label: g.label, rows: g.rows, summary: `${formatHours(t.hours)} · ${formatChfDisplay(t.amount)}` };
+  });
+
+  const selectedRows = list.rows.filter((r) => selection.isSelected(r.id));
+  const preset = buildInvoicePreset(selectedRows);
+  const filterCount = activeFilterCount(state, DEFAULTS);
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="page-title">Zeiterfassung</h1>
-          <p className="mt-2 text-sm text-fg-muted">Erfassen und analysieren Sie Ihre Arbeitszeiten</p>
-        </div>
-        {activeTab === 'erfassung' && (
-          <div className="flex items-center gap-3">
-            {/* Grouping Toggle */}
-            <div className="flex bg-raised rounded-lg p-1">
-              <button
-                onClick={() => setGroupingMode('date')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition ${
-                  groupingMode === 'date'
-                    ? 'bg-surface text-fg shadow-sm'
-                    : 'text-fg-muted hover:text-fg'
-                }`}
-              >
-                <Calendar size={16} />
-                Datum
-              </button>
-              <button
-                onClick={() => setGroupingMode('week')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition ${
-                  groupingMode === 'week'
-                    ? 'bg-surface text-fg shadow-sm'
-                    : 'text-fg-muted hover:text-fg'
-                }`}
-              >
-                <Layers size={16} />
-                KW
-              </button>
-            </div>
-
-            {/* Filter Button with Dropdown */}
-            <div className="relative" ref={filterRef}>
-              <button
-                onClick={() => setIsFilterOpen(!isFilterOpen)}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition ${
-                  selectedProjectId
-                    ? 'toggle-on'
-                    : 'toggle-off bg-raised'
-                }`}
-                title="Nach Projekt filtern"
-                aria-label="Nach Projekt filtern"
-              >
-                <Filter size={16} />
-                {selectedProjectId && (
-                  <span className="bg-surface/20 px-1.5 py-0.5 rounded text-xs">1</span>
-                )}
-              </button>
-
-              {isFilterOpen && (
-                <div className="absolute right-0 top-full mt-2 w-64 bg-surface rounded-lg shadow-lg border border-line z-50">
-                  <div className="p-3 border-b border-line">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-fg">Nach Projekt filtern</span>
-                      {selectedProjectId && (
-                        <button
-                          onClick={() => {
-                            setSelectedProjectId('');
-                            setIsFilterOpen(false);
-                          }}
-                          className="text-xs text-fg-muted hover:text-fg flex items-center gap-1"
-                        >
-                          <X size={12} />
-                          Zurücksetzen
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                  <div className="max-h-64 overflow-y-auto p-2">
-                    <button
-                      onClick={() => {
-                        setSelectedProjectId('');
-                        setIsFilterOpen(false);
-                      }}
-                      className={`w-full text-left px-3 py-2 rounded-md text-sm transition ${
-                        !selectedProjectId
-                          ? 'bg-brand/10 text-brand font-medium'
-                          : 'text-fg-muted hover:bg-raised'
-                      }`}
-                    >
-                      Alle Projekte
-                    </button>
-                    {projects.map((project) => (
-                      <button
-                        key={project.id}
-                        onClick={() => {
-                          setSelectedProjectId(project.id);
-                          setIsFilterOpen(false);
-                        }}
-                        className={`w-full text-left px-3 py-2 rounded-md text-sm transition ${
-                          selectedProjectId === project.id
-                            ? 'bg-brand/10 text-brand font-medium'
-                            : 'text-fg-muted hover:bg-raised'
-                        }`}
-                      >
-                        {project.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+    <>
+      <ListPage
+        title="Zeiterfassung"
+        summary={
+          summary.isLoading
+            ? ' '
+            : unbilled.count === 0
+              ? 'Alle verrechenbaren Zeiten sind verrechnet.'
+              : `${formatHours(unbilled.billableHours)} nicht verrechnet, ${formatChfDisplay(unbilled.amount)}${staleUnbilled ? `, davon ${staleUnbilled} älter als 30 Tage` : ''}.`
+        }
+        notices={<QuickTimeEntry projects={activeProjects} onSaved={() => void invalidate()} />}
+        tabs={
+          <ViewTabs
+            tabs={TABS.map((t) => ({ ...t, count: t.value === 'auswertung' || summary.isLoading ? undefined : counts[t.value as TimeView] }))}
+            value={view}
+            onChange={(v) => set({ ansicht: v }, { push: true })}
+          />
+        }
+        toolbar={
+          view !== 'auswertung' && (
+            <Toolbar filterCount={filterCount} onReset={reset}>
+              <SearchField value={state.q ?? ''} onChange={(q) => set({ q })} placeholder="Tätigkeit suchen" />
+              <FilterSelect label="Firma" allLabel="Alle Firmen" value={state.firma ?? ''} onChange={(v) => set({ firma: v, projekt: null })} options={customers.map((c) => ({ value: c.id, label: c.name }))} />
+              <FilterSelect
+                label="Projekt"
+                allLabel="Alle Projekte"
+                value={state.projekt ?? ''}
+                onChange={(v) => set({ projekt: v })}
+                options={projects.filter((p) => !state.firma || p.customer_id === state.firma).map((p) => ({ value: p.id, label: p.name }))}
+              />
+              {state.rechnung && (
+                <button type="button" className="badge-info" onClick={() => set({ rechnung: null })}>
+                  Nur Zeiten einer Rechnung ✕
+                </button>
               )}
-            </div>
-
-            <button
-              onClick={handleAddNew}
-              className="btn-cta"
-            >
-              <Plus size={18} aria-hidden="true" />
-              Detailliert
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* Tabs */}
-      <div className="border-b border-line">
-        <nav className="flex space-x-8">
-          <button
-            onClick={() => setActiveTab('erfassung')}
-            className={`pb-3 px-1 border-b-2 font-medium text-sm transition flex items-center gap-2 ${
-              activeTab === 'erfassung'
-                ? 'border-brand text-brand'
-                : 'border-transparent text-fg-muted hover:text-fg hover:border-line-strong'
-            }`}
-          >
-            <ClipboardList size={18} />
-            Zeiterfassung
-          </button>
-          <button
-            onClick={() => setActiveTab('reporting')}
-            className={`pb-3 px-1 border-b-2 font-medium text-sm transition flex items-center gap-2 ${
-              activeTab === 'reporting'
-                ? 'border-brand text-brand'
-                : 'border-transparent text-fg-muted hover:text-fg hover:border-line-strong'
-            }`}
-          >
-            <BarChart3 size={18} />
-            Reporting
-          </button>
-        </nav>
-      </div>
-
-      {/* Error Message */}
-      {error && (
-        <div role="alert" className="rounded-lg border border-danger bg-danger-subtle px-4 py-3 text-danger-on-subtle">
-          <strong>Fehler:</strong> {error}
-        </div>
-      )}
-
-      {/* Warning if no projects */}
-      {projects.length === 0 && !isLoading && activeTab === 'erfassung' && (
-        <div className="bg-warning-subtle border border-warning-subtle text-warning-on-subtle px-4 py-3 rounded-lg">
-          Bitte erstellen Sie zuerst Projekte, bevor Sie Zeiteinträge erfassen.
-        </div>
-      )}
-
-      {/* Tab Content: Erfassung */}
-      {activeTab === 'erfassung' && (
-        <>
-          {/* Quick-Add Inline Form */}
-      {projects.length > 0 && (
-        <div className="card p-4">
-          <form onSubmit={handleQuickAdd} className="flex flex-wrap gap-3 items-end">
-            <div className="flex-1 min-w-[140px]">
-              <label className="block text-xs font-medium text-fg-muted mb-1">Projekt</label>
-              <select
-                value={quickAddData.projectId}
-                onChange={(e) => setQuickAddData(prev => ({ ...prev, projectId: e.target.value }))}
-                className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition text-sm"
-                required
-              >
-                <option value="">Projekt wählen</option>
-                {projects.map((project) => (
-                  <option key={project.id} value={project.id}>
-                    {project.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="w-32">
-              <label className="block text-xs font-medium text-fg-muted mb-1">Datum</label>
-              <input
-                type="date"
-                value={quickAddData.date}
-                onChange={(e) => setQuickAddData(prev => ({ ...prev, date: e.target.value }))}
-                className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition text-sm"
-                required
-              />
-            </div>
-            <div className="w-20">
-              <label className="block text-xs font-medium text-fg-muted mb-1">Stunden</label>
-              <input
-                type="number"
-                step="0.25"
-                min="0"
-                value={quickAddData.hours}
-                onChange={(e) => setQuickAddData(prev => ({ ...prev, hours: e.target.value }))}
-                placeholder="0.00"
-                className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition text-sm"
-                required
-              />
-            </div>
-            <div className="w-24">
-              <label className="block text-xs font-medium text-fg-muted mb-1">
-                Satz CHF
-                {quickAddData.rateSource === 'project' && (
-                  <span className="ml-1 text-xs bg-accent-subtle text-accent px-1.5 py-0.5 rounded">P</span>
-                )}
-                {quickAddData.rateSource === 'customer' && (
-                  <span className="ml-1 text-xs bg-success-subtle text-success-on-subtle px-1.5 py-0.5 rounded">K</span>
-                )}
-                {quickAddData.rateSource === 'default' && (
-                  <span className="ml-1 text-xs bg-raised text-fg px-1.5 py-0.5 rounded">S</span>
-                )}
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                value={quickAddData.rate}
-                onChange={(e) => setQuickAddData(prev => ({ ...prev, rate: e.target.value, rateSource: 'manual' }))}
-                className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition text-sm"
-                required
-              />
-            </div>
-            <div className="flex-1 min-w-[160px]">
-              <label className="block text-xs font-medium text-fg-muted mb-1">Beschreibung</label>
-              <input
-                type="text"
-                value={quickAddData.description}
-                onChange={(e) => setQuickAddData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Tätigkeit..."
-                className="w-full px-3 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition text-sm"
-              />
-            </div>
-            <div className="w-28">
-              <label className="block text-xs font-medium text-fg-muted mb-1">Verrechenbar</label>
-              <div className="flex gap-3 py-2">
-                <label className="flex items-center gap-1 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="quickBillable"
-                    checked={quickAddData.billable === true}
-                    onChange={() => setQuickAddData(prev => ({ ...prev, billable: true }))}
-                    className="w-3.5 h-3.5 text-brand"
-                  />
-                  <span className="text-sm">Ja</span>
-                </label>
-                <label className="flex items-center gap-1 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="quickBillable"
-                    checked={quickAddData.billable === false}
-                    onChange={() => setQuickAddData(prev => ({ ...prev, billable: false }))}
-                    className="w-3.5 h-3.5 text-brand"
-                  />
-                  <span className="text-sm">Nein</span>
-                </label>
+              <div className="ml-auto">
+                <SegmentedControl
+                  label="Gruppieren nach"
+                  size="sm"
+                  value={grouping}
+                  onChange={(g) => set({ gruppe: g })}
+                  options={[
+                    { value: 'woche', label: 'Woche' },
+                    { value: 'firma', label: 'Firma' },
+                    { value: 'projekt', label: 'Projekt' },
+                  ]}
+                />
               </div>
-            </div>
-            <button
-              type="submit"
-              disabled={isQuickAdding || !quickAddData.projectId || !quickAddData.hours}
-              className="px-4 py-2 bg-brand text-accent-fg rounded-lg hover:bg-brand-dark transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
-            >
-              <Plus size={18} />
-              {isQuickAdding ? 'Speichert...' : 'Hinzufügen'}
-            </button>
-          </form>
-        </div>
-      )}
-
-          {/* Table */}
-          {isLoading ? (
-            <div className="card p-6">
-              <p className="text-fg-muted text-center">Lädt Zeiteinträge...</p>
-            </div>
-          ) : (
-            <TimeEntryTable
-              entries={filteredEntries}
-              projects={projects}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              onStatusChange={handleStatusChange}
-              groupingMode={groupingMode}
-              groupedEntries={groupedEntries}
-            />
-          )}
-        </>
-      )}
-
-      {/* Tab Content: Reporting */}
-      {activeTab === 'reporting' && (
-        <Suspense fallback={
-          <div className="card p-6">
-            <p className="text-fg-muted text-center">Auswertung wird geladen…</p>
-          </div>
-        }>
-          <TimeReporting entries={entries} projects={projects} />
-        </Suspense>
-      )}
-
-      {/* Modal */}
-      <Modal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        title={editingEntry ? 'Zeiteintrag bearbeiten' : 'Neuer Zeiteintrag'}
-        size="lg"
+            </Toolbar>
+          )
+        }
+        bulk={
+          <BulkBar
+            count={selection.count}
+            onClear={selection.clear}
+            actions={[
+              { label: 'Rechnung erstellen', onClick: () => createInvoice(selectedRows), disabledReason: preset.ok ? undefined : preset.reason },
+              { label: 'Verrechenbar', onClick: () => setBillable(selection.ids, true) },
+              { label: 'Nicht verrechenbar', onClick: () => setBillable(selection.ids, false) },
+            ]}
+          />
+        }
+        pagination={view !== 'auswertung' && <Pagination page={page} total={list.total} onPage={(p) => set({ seite: String(p) })} />}
       >
-        <TimeEntryForm
-          onSubmit={handleSubmit}
-          editingEntry={editingEntry}
-          onCancelEdit={handleCloseModal}
-          projects={projects}
-        />
-      </Modal>
-    </div>
+        {view === 'auswertung' ? (
+          <div className="p-4 md:p-6">
+            <Suspense fallback={<div className="skeleton h-64" />}>
+              <TimeReporting entries={summary.rows as unknown as TimeEntry[]} projects={projects} />
+            </Suspense>
+          </div>
+        ) : (
+          <>
+            {inView.length > 0 && (
+              <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-line px-4 py-3 text-sm">
+                <span className="font-display font-bold text-fg">
+                  {TIME_VIEWS.find((v) => v.value === view)?.label}: {formatHours(viewTotals.hours)}
+                  {viewTotals.hours !== viewTotals.billableHours && <span className="font-normal text-fg-muted"> (davon {formatHours(viewTotals.billableHours)} verrechenbar)</span>}
+                </span>
+                <span className="font-display font-bold tabular-nums text-fg">{formatChfDisplay(viewTotals.amount)}</span>
+              </div>
+            )}
+            <DataTable
+              rows={list.rows}
+              groups={groups}
+              rowKey={(r) => r.id}
+              rowLabel={(r) => `Zeit ${formatDate(r.date)}, ${r.projectName}, ${Number(r.hours).toFixed(2)} Stunden`}
+              columns={columns}
+              selection={selection}
+              onRowClick={setEditing}
+              menu={menu}
+              sort={state.sort}
+              onSort={(s) => set({ sort: s })}
+              loading={list.isLoading}
+              mobile={(r) => {
+                const s = billingState(r);
+                return {
+                  title: `${r.projectName}${r.description ? ` · ${r.description}` : ''}`,
+                  amount: `${Number(r.hours).toFixed(2)} h`,
+                  subtitle: `${formatDate(r.date)} · ${r.customerName}`,
+                  badge: s === 'nicht_verrechenbar' ? <span className="text-xs">nicht verrechenbar</span> : <span className={BILLING_BADGE[s]}>{BILLING_LABEL[s]}</span>,
+                };
+              }}
+              empty={
+                view === 'offen' && filterCount === 0 ? (
+                  <EmptyState icon={<Clock size={20} />} title="Alle Zeiten sind verrechnet." text="Neue Zeiten erfasst du oben oder mit dem Timer." />
+                ) : (
+                  <EmptyState
+                    title="Keine Zeiten in dieser Ansicht"
+                    action={
+                      filterCount > 0 && (
+                        <button type="button" className="btn-secondary" onClick={reset}>
+                          Filter zurücksetzen
+                        </button>
+                      )
+                    }
+                  />
+                )
+              }
+            />
+          </>
+        )}
+      </ListPage>
+
+      <TimeEntryDrawer entry={editing} projects={projects} onClose={() => setEditing(null)} onSaved={() => void invalidate()} />
+      <InvoiceEditor
+        mode={editor}
+        onClose={() => setEditor(null)}
+        onSaved={() => {
+          selection.clear();
+          void invalidate();
+        }}
+      />
+    </>
   );
 }

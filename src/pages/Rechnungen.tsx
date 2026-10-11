@@ -171,13 +171,13 @@ export default function Rechnungen() {
       key: 'firma',
       header: 'Firma',
       cell: (r) => (
-        <span className="block max-w-[16rem] truncate">
+        <span className="block max-w-[14rem] truncate 2xl:max-w-[24rem]">
           {r.customers?.name ?? '–'}
           {r.title && <span className="ml-2 text-fg-muted">{r.title.length > 40 ? `${r.title.slice(0, 40)} …` : r.title}</span>}
         </span>
       ),
     },
-    { key: 'datum', header: 'Datum', sortKey: 'issue_date', cell: (r) => <span className="tabular-nums">{formatDate(r.issue_date)}</span>, hideBelow: 'lg' },
+    { key: 'datum', header: 'Datum', sortKey: 'issue_date', cell: (r) => <span className="tabular-nums">{formatDate(r.issue_date)}</span>, hideBelow: '2xl' },
     { key: 'faellig', header: 'Fällig', sortKey: 'due_date', cell: dueCell },
     { key: 'betrag', header: 'Betrag', sortKey: 'total', align: 'right', cell: (r) => formatChfDisplay(Number(r.total)) },
     {
@@ -295,7 +295,7 @@ export default function Rechnungen() {
             return {
               title: `${r.invoice_number} · ${r.customers?.name ?? ''}`,
               amount: formatChfDisplay(Number(r.total)),
-              subtitle: s === 'bezahlt' ? `bezahlt ${formatDate(r.paid_at)}` : `fällig ${formatDate(r.due_date)}`,
+              subtitle: s === 'bezahlt' ? (r.paid_at ? `bezahlt ${formatDate(r.paid_at)}` : 'bezahlt, Datum fehlt') : `fällig ${formatDate(r.due_date)}`,
               badge: <span className={INVOICE_STATE_BADGE[s]}>{INVOICE_STATE_LABEL[s]}</span>,
             };
           }}

@@ -4,6 +4,9 @@ import { useTimer } from '../context/TimerContext';
 import { useCompany } from '../context/CompanyContext';
 import { supabase, type Project } from '../lib/supabase';
 import Modal from './Modal';
+import toast from 'react-hot-toast';
+import { useQueryClient } from '@tanstack/react-query';
+import { defaultRate, useCompanySettings } from '../hooks/useCompanySettings';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -346,6 +349,8 @@ function PreConfigDropdown({
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export function TimerButton() {
+  const queryClient = useQueryClient();
+  const { data: settings } = useCompanySettings();
   const timer = useTimer();
   const { selectedCompany } = useCompany();
 
@@ -411,13 +416,13 @@ export function TimerButton() {
   }) => {
     if (!selectedCompany) throw new Error('Keine Firma ausgewählt');
 
-    // Resolve rate via RPC
-    let rate = 160;
+    // Satz-Hierarchie: Projekt -> Kunde -> Standardsatz aus den Einstellungen
+    let rate = defaultRate(settings);
     let snapshotSource: 'project' | 'customer' | 'default' | 'manual' = 'default';
 
     const { data: rateData } = await supabase.rpc('resolve_hourly_rate', {
       p_project_id: data.projectId,
-      p_default_rate: 160,
+      p_default_rate: defaultRate(settings),
     });
     if (rateData && rateData.length > 0) {
       rate = rateData[0].rate;
@@ -443,12 +448,14 @@ export function TimerButton() {
 
     setIsStopModalOpen(false);
     timer.resetTimer();
+    // Zeiterfassung und Cockpit zeigen den neuen Eintrag sofort
+    void queryClient.invalidateQueries({ queryKey: ['time-entries'] });
+    toast.success('Zeit gespeichert.');
   };
 
   const handleCancelStop = () => {
+    // Zeit bleibt angehalten; "Fortsetzen" laeuft weiter, X verwirft sie
     setIsStopModalOpen(false);
-    // Don't resume – user explicitly stopped, timer is at rest
-    // They can manually click play to start a new session
   };
 
   const isActive = timer.isRunning || timer.isPaused;
@@ -521,11 +528,11 @@ export function TimerButton() {
       )}
 
       {/* X button to cancel when not active but was started (paused seconds remain) */}
-      {!isActive && (timer.elapsedSeconds > 0) && (
+      {timer.isPaused && (
         <button
           onClick={() => timer.resetTimer()}
-          title="Timer zurücksetzen"
-          aria-label="Timer zurücksetzen"
+          title="Zeit verwerfen"
+          aria-label="Zeit verwerfen"
           className="p-2 rounded-lg bg-raised text-text-secondary hover:bg-danger-subtle hover:text-danger transition-colors duration-150"
         >
           <X size={14} strokeWidth={2} />

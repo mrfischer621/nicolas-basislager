@@ -114,12 +114,14 @@ export function TimerProvider({ children }: { children: ReactNode }) {
     setIsPaused(false);
   };
 
+  // Stoppen haelt die Zeit an (Zustand "pausiert"). Bricht man das Speichern
+  // ab, setzt "Fortsetzen" dort fort, statt bei 0 neu zu beginnen.
   const stopTimer = (): number => {
     const total = getCurrentTotal();
     setElapsedSeconds(total);
     setStartTime(null);
     setIsRunning(false);
-    setIsPaused(false);
+    setIsPaused(true);
     return total;
   };
 

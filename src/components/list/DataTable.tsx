@@ -10,7 +10,7 @@ export interface Column<T> {
   cell: (row: T) => ReactNode;
   align?: 'left' | 'right';
   /** Spalte erst ab dieser Breite zeigen */
-  hideBelow?: 'lg' | 'xl';
+  hideBelow?: 'lg' | 'xl' | '2xl';
   /** Sortierbar ueber diesen Schluessel (URL-Wert "sort") */
   sortKey?: string;
   className?: string;
@@ -33,6 +33,7 @@ export interface RowGroup<T> {
 const HIDE: Record<NonNullable<Column<unknown>['hideBelow']>, string> = {
   lg: 'hidden lg:table-cell',
   xl: 'hidden xl:table-cell',
+  '2xl': 'hidden 2xl:table-cell',
 };
 
 /**
@@ -58,6 +59,7 @@ export function DataTable<T>({
   footer,
   loading,
   empty,
+  tableFrom = 'xl',
 }: {
   rows: T[];
   /** optional gruppiert; dann werden `rows` ignoriert */
@@ -75,7 +77,10 @@ export function DataTable<T>({
   footer?: ReactNode;
   loading?: boolean;
   empty: ReactNode;
+  /** ab welcher Breite die Tabelle statt der Kartenliste erscheint */
+  tableFrom?: 'md' | 'lg' | 'xl';
 }) {
+  const show = { md: ['hidden md:table', 'md:hidden'], lg: ['hidden lg:table', 'lg:hidden'], xl: ['hidden xl:table', 'xl:hidden'] }[tableFrom];
   const allGroups: RowGroup<T>[] = groups ?? [{ key: 'alle', label: null, rows }];
   const total = allGroups.reduce((n, g) => n + g.rows.length, 0);
   const colCount = columns.length + (selection ? 1 : 0) + (menu ? 1 : 0);
@@ -126,7 +131,7 @@ export function DataTable<T>({
   return (
     <>
       {/* Desktop: Tabelle. overflow-x: clip statt auto, sonst haftet der Kopf nicht. */}
-      <table className="hidden w-full text-sm md:table [overflow-x:clip]">
+      <table className={`${show[0]} w-full text-sm [overflow-x:clip]`}>
         <thead className="sticky -top-7 z-10 bg-surface">
           <tr>
             {selection && (
@@ -148,7 +153,7 @@ export function DataTable<T>({
                 key={c.key}
                 scope="col"
                 aria-sort={sort === c.sortKey ? 'ascending' : sort === `-${c.sortKey}` ? 'descending' : undefined}
-                className={`caps-sm whitespace-nowrap border-b border-line px-4 py-3 ${c.align === 'right' ? 'text-right' : 'text-left'} ${c.hideBelow ? HIDE[c.hideBelow] : ''}`}
+                className={`caps-sm whitespace-nowrap border-b border-line px-3 py-3 ${c.align === 'right' ? 'text-right' : 'text-left'} ${c.hideBelow ? HIDE[c.hideBelow] : ''}`}
               >
                 {sortHeader(c)}
               </th>
@@ -164,12 +169,12 @@ export function DataTable<T>({
           <tbody key={g.key}>
             {g.label !== null && (
               <tr className="bg-canvas">
-                <th scope="rowgroup" colSpan={colCount} className="border-b border-line px-4 py-2 text-left">
+                <td colSpan={colCount} className="border-b border-line px-4 py-2 text-left">
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
                     <span className="font-display text-sm font-bold text-fg">{g.label}</span>
                     {g.summary && <span className="text-sm font-semibold tabular-nums text-fg-muted">{g.summary}</span>}
                   </div>
-                </th>
+                </td>
               </tr>
             )}
             {g.rows.map((row) => {
@@ -201,7 +206,7 @@ export function DataTable<T>({
                   {columns.map((c) => (
                     <td
                       key={c.key}
-                      className={`px-4 py-2 text-fg ${c.align === 'right' ? 'text-right tabular-nums' : ''} ${c.hideBelow ? HIDE[c.hideBelow] : ''} ${c.className ?? ''}`}
+                      className={`whitespace-nowrap px-3 py-2 text-fg ${c.align === 'right' ? 'text-right tabular-nums' : ''} ${c.hideBelow ? HIDE[c.hideBelow] : ''} ${c.className ?? ''}`}
                     >
                       {c.cell(row)}
                     </td>
@@ -220,7 +225,7 @@ export function DataTable<T>({
       </table>
 
       {/* Handy: Kartenliste */}
-      <div className="md:hidden">
+      <div className={show[1]}>
         {allGroups.map((g) => (
           <Fragment key={g.key}>
             {g.label !== null && (
