@@ -91,8 +91,12 @@ const LAYOUT = {
 const PDF_STYLE_CONFIG = {
   /** Accent colour — Swiss pine green */
   ACCENT: [107, 138, 94] as [number, number, number],
-  /** Company logo: top-right corner */
-  LOGO: { x: 160, y: 15, w: 25, h: 25 },
+  /**
+   * Company logo: top-right corner, right edge at 185 mm.
+   * Fixed maximum box; the logo keeps its aspect ratio (see fitLogo).
+   * Landscape word marks hit maxW, square/portrait logos hit maxH.
+   */
+  LOGO: { right: 185, y: 15, maxW: 60, maxH: 18 },
   /** Recipient address: window-envelope zone */
   ADDR: { x: 20, startY: 55 },
   /** Document title ("RECHNUNG" / "Angebot") */
@@ -656,8 +660,10 @@ function drawDocumentHeader(
   // ── Logo top-right ───────────────────────────────────────────────────────────
   if (logoBase64) {
     try {
-      const { x, y, w, h } = PDF_STYLE_CONFIG.LOGO;
-      doc.addImage(logoBase64, 'AUTO', x, y, w, h);
+      const { right, y, maxW, maxH } = PDF_STYLE_CONFIG.LOGO;
+      const props = doc.getImageProperties(logoBase64);
+      const { w, h } = fitLogo(props.width, props.height, maxW, maxH);
+      doc.addImage(logoBase64, 'AUTO', right - w, y, w, h);
     } catch {
       // Logo is optional — skip silently on error
     }
@@ -1214,6 +1220,29 @@ export async function getInvoicePdfBlobUrl(data: InvoiceData): Promise<string> {
 // ============================================================================
 // QUOTE PDF GENERATION — Swiss International Style
 // ============================================================================
+
+/**
+ * Logo-Groesse im PDF: Seitenverhaeltnis bleibt, hoechstens maxW x maxH (mm).
+ * Ein Querformat (z.B. Wortmarke 920 x 174 px) wird durch die Breite begrenzt,
+ * ein Hoch- oder Quadratformat durch die Hoehe. Nie verzerrt, nie vergroessert
+ * ueber die Box hinaus.
+ */
+export function fitLogo(
+  pxWidth: number,
+  pxHeight: number,
+  maxW: number,
+  maxH: number
+): { w: number; h: number } {
+  if (!(pxWidth > 0) || !(pxHeight > 0)) return { w: maxH, h: maxH };
+  const ratio = pxWidth / pxHeight;
+  let h = maxH;
+  let w = h * ratio;
+  if (w > maxW) {
+    w = maxW;
+    h = w / ratio;
+  }
+  return { w, h };
+}
 
 /**
  * Fetch a remote image as a base64 data URL for embedding in the PDF.

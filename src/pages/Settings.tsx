@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import hotToast from 'react-hot-toast';
+import { uploadCompanyLogo, validateLogoFile } from '../utils/logoUpload';
 import { useConfirm } from '../context/ConfirmProvider';
 import { supabase } from '../lib/supabase';
 import type { PipelineStage, Category, CategoryType } from '../lib/supabase';
@@ -65,6 +67,33 @@ export default function Settings() {
     default_vat_rate: '8.1',
     sender_contact_name: '',
   });
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const [logoUploading, setLogoUploading] = useState(false);
+
+  // Logo sofort hochladen und speichern (unabhaengig vom Formular-Speichern)
+  const handleLogoSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || !selectedCompany) return;
+    const problem = validateLogoFile(file);
+    if (problem) {
+      hotToast.error(problem);
+      return;
+    }
+    setLogoUploading(true);
+    try {
+      const logoUrl = await uploadCompanyLogo(selectedCompany.id, file);
+      setCompanyFormData((prev) => ({ ...prev, logo_url: logoUrl }));
+      await refreshCompanies();
+      hotToast.success('Logo gespeichert.');
+    } catch (err) {
+      console.error('Logo upload failed:', err);
+      hotToast.error('Das Logo konnte nicht hochgeladen werden.');
+    } finally {
+      setLogoUploading(false);
+    }
+  };
+
 
   // User profile state
   const [fullName, setFullName] = useState('');
@@ -837,32 +866,44 @@ export default function Settings() {
               </p>
             </div>
 
-            {/* Company Logo URL */}
+            {/* Firmenlogo: Upload in Supabase Storage (company-assets) */}
             <div>
-              <label htmlFor="logo_url" className="block text-sm font-medium text-gray-700 mb-1">
-                Firmenlogo-URL <span className="text-xs font-normal text-gray-500">(optional, erscheint oben rechts auf PDF-Offerten)</span>
-              </label>
-              <input
-                type="url"
-                id="logo_url"
-                value={companyFormData.logo_url}
-                onChange={(e) => handleCompanyFieldChange('logo_url', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 outline-none transition"
-                placeholder="https://beispiel.ch/logo.png"
-              />
-              {companyFormData.logo_url && (
-                <div className="mt-2 flex items-center gap-3">
-                  <img
-                    src={companyFormData.logo_url}
-                    alt="Firmenlogo Vorschau"
-                    className="h-12 w-auto object-contain border border-gray-200 rounded p-1 bg-white"
-                    onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
-                  />
-                  <span className="text-xs text-gray-500">Vorschau</span>
+              <span id="logo-label" className="block text-sm font-medium text-gray-700 mb-1">
+                Firmenlogo <span className="text-xs font-normal text-gray-500">(optional, erscheint oben rechts auf Rechnungen und Offerten)</span>
+              </span>
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="flex h-16 w-48 items-center justify-center rounded border border-gray-200 bg-white p-2">
+                  {companyFormData.logo_url ? (
+                    <img
+                      src={companyFormData.logo_url}
+                      alt="Vorschau Firmenlogo"
+                      className="max-h-12 max-w-full object-contain"
+                    />
+                  ) : (
+                    <span className="text-xs text-gray-500">Kein Logo</span>
+                  )}
                 </div>
-              )}
+                <input
+                  ref={logoInputRef}
+                  id="logo_upload"
+                  type="file"
+                  accept="image/png,image/jpeg,image/svg+xml,.svg"
+                  className="sr-only"
+                  aria-labelledby="logo-label"
+                  onChange={handleLogoSelected}
+                />
+                <button
+                  type="button"
+                  onClick={() => logoInputRef.current?.click()}
+                  disabled={logoUploading}
+                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                >
+                  {logoUploading ? 'Wird hochgeladen…' : companyFormData.logo_url ? 'Logo ersetzen' : 'Logo hochladen'}
+                </button>
+              </div>
               <p className="text-xs text-gray-500 mt-1">
-                Direkter Link zu einem öffentlich erreichbaren Bild (PNG, JPG, SVG). Empfohlene Grösse: quadratisch, min. 200×200 px.
+                PNG, JPG oder SVG, höchstens 2 MB. Im PDF höchstens 18 mm hoch und 60 mm breit, das Seitenverhältnis bleibt erhalten.
+                SVG wird beim Hochladen in PNG umgewandelt.
               </p>
             </div>
 
