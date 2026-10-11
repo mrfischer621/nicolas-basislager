@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useCompany } from '../context/CompanyContext';
 import { useAuth } from '../context/AuthProvider';
+import { companyDisplayName } from '../utils/companyDisplay';
 
 // Navigation structure with groups
 const navigationGroups = [
@@ -227,7 +228,7 @@ export function BentoSidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: 
         {/* Company Header */}
         <div className="px-5 py-5 border-b border-sidebar-border">
           <h1 className="text-base font-semibold text-white tracking-tight truncate">
-            {isLoading ? 'Laden...' : selectedCompany?.name || 'Nicolas Fischer CRM'}
+            {isLoading ? 'Laden...' : companyDisplayName(selectedCompany) || 'Blauwasser CRM'}
           </h1>
           {user && (
             <p className="text-xs text-sidebar-text truncate mt-1">

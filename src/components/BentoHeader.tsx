@@ -7,6 +7,7 @@ import { User, Menu, ChevronDown, Building2, Settings, LogOut, Check, Plus, Sear
 import { CreateCompanyModal } from './CreateCompanyModal';
 import { useGlobalSearch, type SearchResult } from '../hooks/useGlobalSearch';
 import { TimerButton } from './TimerButton';
+import { companyDisplayName } from '../utils/companyDisplay';
 
 /**
  * SearchResultGroup - Renders a group of search results
@@ -375,7 +376,7 @@ export function BentoHeader({ onMenuClick }: { onMenuClick?: () => void }) {
                           Firma {companies.length > 1 && `(${companies.length} verfügbar)`}
                         </p>
                         <p className="text-sm font-medium text-text-primary truncate group-hover:text-brand transition-colors">
-                          {selectedCompany?.name || 'Firma wählen...'}
+                          {companyDisplayName(selectedCompany) || 'Firma wählen...'}
                         </p>
                       </div>
                     </div>
@@ -409,7 +410,7 @@ export function BentoHeader({ onMenuClick }: { onMenuClick?: () => void }) {
                             "
                           >
                             <span className="text-sm text-text-primary truncate">
-                              {company.name}
+                              {companyDisplayName(company)}
                             </span>
                             {selectedCompany?.id === company.id && (
                               <Check size={16} className="text-brand flex-shrink-0" />
