@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import type { TimeEntry, Project, Customer } from '../lib/supabase';
 import { useCompany } from '../context/CompanyContext';
 import { Clock, FileText, TrendingUp, DollarSign, Filter } from 'lucide-react';
+import { useThemeColors } from '../hooks/useThemeColors';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { format, subDays, startOfMonth, endOfMonth } from 'date-fns';
 
@@ -12,6 +13,7 @@ interface TimeReportingProps {
 }
 
 export default function TimeReporting({ entries, projects }: TimeReportingProps) {
+  const themeColors = useThemeColors();
   const { selectedCompany } = useCompany();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -107,8 +109,8 @@ export default function TimeReporting({ entries, projects }: TimeReportingProps)
 
   // Chart data
   const chartData = [
-    { category: 'Verrechenbar', hours: kpis.billableHours, color: '#166534' },
-    { category: 'Nicht verrechenbar', hours: kpis.nonBillableHours, color: '#991b1b' },
+    { category: 'Verrechenbar', hours: kpis.billableHours, color: themeColors.cta },
+    { category: 'Nicht verrechenbar', hours: kpis.nonBillableHours, color: themeColors.fg },
   ];
 
   // Project breakdown
@@ -333,12 +335,13 @@ export default function TimeReporting({ entries, projects }: TimeReportingProps)
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                <XAxis type="number" tickFormatter={(v) => `${v}h`} />
-                <YAxis type="category" dataKey="category" width={120} />
+                <CartesianGrid horizontal={false} stroke={themeColors.line} />
+                <XAxis type="number" tickFormatter={(v) => `${v}h`} tick={{ fill: themeColors['fg-muted'], fontSize: 12 }} />
+                <YAxis type="category" dataKey="category" width={120} tick={{ fill: themeColors.fg, fontSize: 12 }} />
                 <Tooltip
                   formatter={(value) => [`${Number(value).toFixed(1)} Stunden`, '']}
-                  contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb' }}
+                  contentStyle={{ borderRadius: 'var(--bw-radius-lg)', border: `1px solid ${themeColors.line}`, background: themeColors.surface, color: themeColors.fg }}
+                  cursor={{ fill: themeColors['accent-subtle'] }}
                 />
                 <Bar dataKey="hours" radius={[0, 4, 4, 0]}>
                   {chartData.map((entry, index) => (

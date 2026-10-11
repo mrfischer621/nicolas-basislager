@@ -14,7 +14,6 @@ import PaidWithoutDateNotice from '../components/PaidWithoutDateNotice';
 // Type for financial bookkeeping data
 interface CategorySummary {
   categoryName: string;
-  categoryColor: string;
   isTaxRelevant: boolean;
   total: number;
   count: number;
@@ -74,7 +73,6 @@ export default function Auswertungen() {
           const details = categoryByName.get(g.key);
           return {
             categoryName: g.key,
-            categoryColor: details?.color || '#6B7280',
             isTaxRelevant: details?.is_tax_relevant ?? true,
             total: g.amount,
             count: g.count,
