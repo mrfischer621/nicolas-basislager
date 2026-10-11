@@ -56,7 +56,7 @@ for (const name of pages) {
     await page.waitForTimeout(600);
   }
   const file = `${dir}/${name}-${theme}-${width}.png`;
-  await page.screenshot({ path: file, fullPage: false });
+  await page.screenshot({ path: file, fullPage: process.env.FULL === '1' });
   console.log(file);
   await page.close();
 }

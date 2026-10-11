@@ -7,7 +7,7 @@ import { useCompany } from '../context/CompanyContext';
 import { useYearEnd } from '../hooks/useYearEnd';
 import { useCategories } from '../hooks/queries';
 import Modal from '../components/Modal';
-import { Button, Card, PageHeader } from '../components/ui';
+import { Badge, Button, Card, PageHeader, SegmentedControl } from '../components/ui';
 import type { Asset, BalanceItem, PrivateShare, YearEndClosingData } from '../lib/supabase';
 import { formatChfDisplay, roundRappen } from '../utils/money';
 import { INVOICE_CATEGORY, type FinanceEntry } from '../utils/financeAggregation';
@@ -18,15 +18,15 @@ type View = 'milchbuechli' | 'or';
 
 const chf = (v: number) => formatChfDisplay(v);
 const dmy = (day: string) => `${day.slice(8, 10)}.${day.slice(5, 7)}.${day.slice(0, 4)}`;
-const inputClass =
-  'w-full px-3 py-2 border border-line-strong rounded-lg focus:outline-none focus:ring-2 focus:ring-brand disabled:bg-raised disabled:text-fg-muted';
-const numberClass = `${inputClass} text-right tabular-nums`;
+const inputClass = 'input';
+const numberClass = 'input text-right tabular-nums';
 
 function SectionTitle({ nr, title, hint }: { nr: string; title: string; hint?: string }) {
   return (
     <div className="mb-4">
-      <h2 className="text-lg font-semibold text-fg">
-        {nr}. {title}
+      <h2 className="text-lg font-bold text-fg">
+        <span className="mr-2 inline-flex h-7 min-w-7 items-center justify-center rounded-badge bg-accent-subtle px-1.5 text-sm tabular-nums text-fg">{nr}</span>
+        {title}
       </h2>
       {hint && <p className="mt-1 text-sm text-fg-muted">{hint}</p>}
     </div>
@@ -272,18 +272,14 @@ export default function Jahresabschluss() {
                 </option>
               ))}
             </select>
-            <span
-              className={`rounded px-2 py-1 text-sm font-semibold ${
-                isLocked ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning'
-              }`}
-            >
+            <Badge tone={isLocked ? 'success' : 'warning'} className="px-2.5 py-1 text-sm">
               {isLocked ? 'Abgeschlossen' : 'Entwurf'}
-            </span>
+            </Badge>
           </div>
         }
       />
 
-      {error && <div className="rounded-lg border border-danger-subtle bg-danger-subtle p-4 text-danger">{error}</div>}
+      {error && <div role="alert" className="rounded-lg border border-danger bg-danger-subtle p-4 text-danger"><strong>Fehler:</strong> {error}</div>}
 
       {isLocked && (
         <div role="status" className="rounded-lg border border-success bg-success-subtle p-4 text-sm text-success">
@@ -323,18 +319,16 @@ export default function Jahresabschluss() {
         <Button variant="secondary" onClick={handleCsv} disabled={busy} icon={<FileSpreadsheet size={16} strokeWidth={1.5} />}>
           CSV (alle Buchungen)
         </Button>
-        <div role="group" aria-label="Darstellung der Erfolgsrechnung" className="ml-auto flex rounded-lg border border-line-strong p-0.5">
-          {(['milchbuechli', 'or'] as View[]).map((v) => (
-            <button
-              key={v}
-              type="button"
-              aria-pressed={view === v}
-              onClick={() => setView(v)}
-              className={`rounded-md px-3 py-1.5 text-sm font-medium ${view === v ? 'bg-ink text-white' : 'text-fg'}`}
-            >
-              {v === 'milchbuechli' ? 'Milchbüechli' : 'Gliederung OR'}
-            </button>
-          ))}
+        <div className="ml-auto">
+          <SegmentedControl
+            label="Darstellung der Erfolgsrechnung"
+            options={[
+              { value: 'milchbuechli' as View, label: 'Milchbüechli' },
+              { value: 'or' as View, label: 'Gliederung OR' },
+            ]}
+            value={view}
+            onChange={setView}
+          />
         </div>
       </div>
 
@@ -375,7 +369,7 @@ export default function Jahresabschluss() {
               ] as const
             ).map(([title, lines, total]) => (
               <div key={title}>
-                <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-fg-muted">{title}</h3>
+                <h3 className="caps-sm mb-2">{title}</h3>
                 {lines.length === 0 ? (
                   <p className="text-sm text-fg-muted">Keine {title} im Jahr {selectedYear}.</p>
                 ) : (
@@ -562,13 +556,14 @@ export default function Jahresabschluss() {
       <Card padding="md">
         <SectionTitle nr="5" title="Kontrollen" hint="Vor dem Abschluss bereinigen. Belegprinzip nach Art. 957a OR: Jede Buchung braucht einen Beleg." />
         {openChecks === 0 ? (
-          <p className="text-sm font-medium text-success">Keine offenen Punkte.</p>
+          <Badge tone="success" className="px-2.5 py-1 text-sm">Keine offenen Punkte</Badge>
         ) : (
           <div className="space-y-4 text-sm">
             {c.paidWithoutDate.length > 0 && (
               <div>
-                <h3 className="font-semibold text-danger">
-                  Fehler: {c.paidWithoutDate.length} bezahlte Rechnung{c.paidWithoutDate.length === 1 ? '' : 'en'} ohne Zahlungsdatum (nicht gezählt)
+                <h3 className="font-semibold text-fg">
+                  <Badge tone="danger" className="mr-2">Fehler</Badge>
+                  {c.paidWithoutDate.length} bezahlte Rechnung{c.paidWithoutDate.length === 1 ? '' : 'en'} ohne Zahlungsdatum (nicht gezählt)
                 </h3>
                 <p className="text-fg">
                   {c.paidWithoutDate.map((i) => i.invoice_number).join(', ')} ·{' '}
