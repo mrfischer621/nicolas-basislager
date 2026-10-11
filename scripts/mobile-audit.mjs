@@ -28,6 +28,7 @@ const shots = [
   ['leads', '/leads'],
   ['pipeline', '/pipeline'],
   ['pipeline-tabelle', '/pipeline?darstellung=tabelle'],
+  ['pipeline-board', '/pipeline?darstellung=board'],
   ['offerten', '/offerten'],
   ['offerte', '/offerten/00000000-0000-4000-8000-q00000000002'],
   ['projekte', '/projekte'],

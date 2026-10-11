@@ -1,6 +1,7 @@
+import { useIsMobile } from '../hooks/useMediaQuery';
 import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
-import { DndContext, DragOverlay, PointerSensor, KeyboardSensor, useDraggable, useDroppable, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
+import { DndContext, DragOverlay, MouseSensor, TouchSensor, KeyboardSensor, useDraggable, useDroppable, useSensor, useSensors, type DragEndEvent } from '@dnd-kit/core';
 import { Clock, Plus, Hourglass } from 'lucide-react';
 import { DataTable, ListPage, RowMenu, useListState, type Column, type RowMenuItem } from '../components/list';
 import { EmptyState, SegmentedControl } from '../components/ui';
@@ -25,11 +26,14 @@ import {
 } from '../utils/pipeline';
 
 const DEFAULTS = { darstellung: 'board' };
+// Handy: Liste statt Board als Standard; das Board bleibt per Umschalter
+const MOBILE_DEFAULTS = { darstellung: 'tabelle' };
 
 /** Pipeline: Deals ab Erstgespraech als Board oder Tabelle. */
 export default function Pipeline() {
   const { selectedCompany } = useCompany();
-  const { state, set } = useListState(DEFAULTS);
+  const mobile = useIsMobile();
+  const { state, set } = useListState(mobile ? MOBILE_DEFAULTS : DEFAULTS);
   const today = zurichDay(new Date());
   const { data: stages = [], isLoading: stagesLoading } = usePipelineStages();
   const { data: allDeals = [], isLoading } = useDeals();
@@ -37,7 +41,12 @@ export default function Pipeline() {
   const [drawer, setDrawer] = useState<DrawerTarget | null>(() => (state.neu === '1' ? { mode: 'new', kind: 'deal' } : null));
   const [showWon, setShowWon] = useState(false);
   const [dragging, setDragging] = useState<OpportunityRow | null>(null);
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }), useSensor(KeyboardSensor));
+  // Touch: Ziehen erst nach kurzem Halten, damit Wischen das Board scrollt
+  const sensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 8 } }),
+    useSensor(KeyboardSensor),
+  );
 
   const showLost = state.verloren === '1';
   const onlyDue = state.ansicht === 'faellig';
@@ -184,8 +193,11 @@ export default function Pipeline() {
           />
         ) : (
           <DndContext sensors={sensors} onDragStart={(e) => setDragging(allDeals.find((d) => d.id === e.active.id) ?? null)} onDragEnd={onDragEnd} onDragCancel={() => setDragging(null)}>
-            <div className="scrollbar-thin overflow-x-auto p-3">
-              <div className="grid min-w-max gap-3" style={{ gridTemplateColumns: `repeat(${columns.length}, minmax(11.5rem, 1fr))` }}>
+            <div className="scrollbar-thin snap-x snap-mandatory overflow-x-auto p-3 md:snap-none">
+              <div
+                className="grid min-w-max gap-3 [&>*]:snap-start"
+                style={{ gridTemplateColumns: `repeat(${columns.length}, ${mobile ? 'min(85vw, 20rem)' : 'minmax(11.5rem, 1fr)'})` }}
+              >
                 {columns.map((col) => (
                   <BoardColumn
                     key={col.stage.id}
