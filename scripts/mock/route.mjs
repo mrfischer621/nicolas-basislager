@@ -23,10 +23,18 @@ export async function installMock(context) {
     const table = /\/rest\/v1\/([a-z_]+)/.exec(url.pathname)?.[1];
     if (req.method() !== 'GET') return json(null, 201);
     let rows = fixtures[table] ?? [];
-    // einfache Filter: eq auf id/type/status/year
+    // einfache Filter: eq, neq und in auf einzelne Spalten
     for (const [k, v] of url.searchParams) {
+      if (!rows.length || !(k in rows[0]) || k === 'company_id') continue;
       const m = /^eq\.(.*)$/.exec(v);
-      if (m && rows.length && k in rows[0] && k !== 'company_id') rows = rows.filter((r) => String(r[k]) === m[1]);
+      if (m) rows = rows.filter((r) => String(r[k]) === m[1]);
+      const ne = /^neq\.(.*)$/.exec(v);
+      if (ne) rows = rows.filter((r) => String(r[k]) !== ne[1]);
+      const inList = /^in\.\((.*)\)$/.exec(v);
+      if (inList) {
+        const values = inList[1].split(',').map((x) => decodeURIComponent(x).replace(/^"|"$/g, ''));
+        rows = rows.filter((r) => values.includes(String(r[k])));
+      }
     }
     if ((req.headers()['accept'] ?? '').includes('vnd.pgrst.object')) {
       return rows.length ? json(rows[0]) : json({ code: 'PGRST116', message: 'no rows' }, 406);
