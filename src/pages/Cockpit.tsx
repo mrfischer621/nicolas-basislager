@@ -1,6 +1,9 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AlertTriangle, ChevronRight } from 'lucide-react';
+import { AlertTriangle, Camera, ChevronRight, FileText, Phone, Square, Timer } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { useTimer } from '../context/TimerContext';
+import { requestTimerStop } from '../utils/timerEvents';
 import { useCompany } from '../context/CompanyContext';
 import { useCustomers } from '../hooks/queries';
 import { useFinanceEntries } from '../hooks/useFinance';
@@ -148,6 +151,9 @@ export default function Cockpit() {
         <p className="mt-2 text-sm text-fg-muted">{lagesatz}</p>
       </header>
 
+      {/* Handy: Kurzwege fuer unterwegs (keine Pill, die Seite hat keine Hauptaktion) */}
+      <QuickActions />
+
       {/* 1. Zu erledigen */}
       {todos.length > 0 && (
         <section className="card p-2" aria-label="Zu erledigen">
@@ -161,7 +167,7 @@ export default function Cockpit() {
                   <ChevronRight size={16} className="text-fg-muted" aria-hidden="true" />
                 </>
               );
-              const cls = 'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-canvas';
+              const cls = 'flex min-h-[48px] w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left hover:bg-canvas md:min-h-0';
               return (
                 <li key={t.key}>
                   {t.to ? (
@@ -204,15 +210,15 @@ export default function Cockpit() {
               <dl className="mt-3 grid grid-cols-3 gap-2 text-xs">
                 <div>
                   <dt className="flex items-center gap-1.5 text-fg-muted">
-                    <span className="h-2 w-2 rounded-sm bg-fg-muted" />
-                    AHV/IV/EO {settings?.ahv_rate ?? 10} %
+                    <span className="h-2 w-2 shrink-0 rounded-sm bg-fg-muted" />
+                    AHV/IV/EO {settings?.ahv_rate ?? 10} %
                   </dt>
                   <dd className="font-semibold tabular-nums text-fg">{formatChfDisplay(cash.ahv, { decimals: 0 })}</dd>
                 </div>
                 <div>
                   <dt className="flex items-center gap-1.5 text-fg-muted">
                     <span className="h-2 w-2 rounded-sm bg-line-strong" />
-                    Steuern {settings?.tax_rate != null ? `${settings.tax_rate} %` : ''}
+                    Steuern {settings?.tax_rate != null ? `${settings.tax_rate} %` : ''}
                   </dt>
                   <dd className="font-semibold tabular-nums text-fg">
                     {cash.taxMissing ? (
@@ -253,15 +259,18 @@ export default function Cockpit() {
           }
         >
           {balance ? (
-            <div className="grid grid-cols-3 gap-3">
-              {liquidity.points.map((p) => (
-                <Figure
-                  key={p.days}
-                  value={formatChfDisplay(p.value, { decimals: 0 })}
-                  label={`in ${p.days} Tagen${p.level === 'warning' ? ', unter Reserve' : p.level === 'negative' ? ', unter null' : ''}`}
-                  tone={p.level}
-                />
-              ))}
+            // Container Query: drei Spalten erst ab 26rem Kartenbreite, sonst untereinander
+            <div className="cq">
+              <div className="cq-cols-3 grid gap-3">
+                {liquidity.points.map((p) => (
+                  <Figure
+                    key={p.days}
+                    value={formatChfDisplay(p.value, { decimals: 0 })}
+                    label={`in ${p.days} Tagen${p.level === 'warning' ? ', unter Reserve' : p.level === 'negative' ? ', unter null' : ''}`}
+                    tone={p.level}
+                  />
+                ))}
+              </div>
             </div>
           ) : (
             <div className="flex flex-col items-start gap-2">
@@ -488,5 +497,40 @@ export default function Cockpit() {
         <BankBalanceForm compact onSaved={() => setBalanceOpen(false)} />
       </Drawer>
     </div>
+  );
+}
+
+/** Vier Kurzwege auf dem Handy: Timer, Beleg, Rechnungen, Anrufen. */
+function QuickActions() {
+  const timer = useTimer();
+  const active = timer.isRunning || timer.isPaused;
+  const tile = 'flex min-h-[64px] flex-col items-center justify-center gap-1 rounded-tile bg-surface px-1 text-center text-[12px] font-semibold text-fg shadow-card hover:bg-raised';
+  return (
+    <nav aria-label="Kurzwege" className="grid grid-cols-4 gap-2 md:hidden">
+      <button
+        type="button"
+        className={tile}
+        onClick={() => {
+          if (active) return requestTimerStop();
+          timer.startTimer(timer.selectedProjectId, timer.description, timer.billable);
+          toast.success('Timer läuft. Projekt wählst du beim Stoppen.');
+        }}
+      >
+        {active ? <Square size={22} strokeWidth={1.5} aria-hidden="true" /> : <Timer size={22} strokeWidth={1.5} aria-hidden="true" />}
+        {active ? 'Timer stoppen' : 'Timer starten'}
+      </button>
+      <Link to="/buchungen?neu=1" className={tile}>
+        <Camera size={22} strokeWidth={1.5} aria-hidden="true" />
+        Beleg
+      </Link>
+      <Link to="/rechnungen" className={tile}>
+        <FileText size={22} strokeWidth={1.5} aria-hidden="true" />
+        Rechnungen
+      </Link>
+      <Link to="/kontakte?ansicht=personen" className={tile}>
+        <Phone size={22} strokeWidth={1.5} aria-hidden="true" />
+        Anrufen
+      </Link>
+    </nav>
   );
 }

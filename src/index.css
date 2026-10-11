@@ -230,6 +230,16 @@
     }
   }
 
+  /* Container Queries (ohne Plugin): Spalten nach Kartenbreite, nicht nach Bildschirm */
+  .cq {
+    container-type: inline-size;
+  }
+  @container (min-width: 26rem) {
+    .cq-cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
   .toggle-group {
     @apply inline-flex flex-wrap gap-0.5 rounded-lg bg-raised p-0.5;
   }

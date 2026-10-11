@@ -190,7 +190,7 @@ for (const width of widths) {
       // JPEG halbiert die Groesse; Text bleibt bei Faktor 2 lesbar
       await page.screenshot({ path: `${out}/${name}.jpg`, type: 'jpeg', quality: 70 });
       if (process.env.FULL === '1' && width === 390 && theme === 'hell' && !action) {
-        await page.addStyleTag({ content: 'html,body,.h-screen{height:auto!important;overflow:visible!important} main,main>div{overflow:visible!important;height:auto!important}' });
+        await page.addStyleTag({ content: 'html,body,.h-screen,.h-dvh{height:auto!important;overflow:visible!important} main,main>div{overflow:visible!important;height:auto!important}' });
         await page.waitForTimeout(200);
         fs.mkdirSync(`${dir}/390-hell-ganz`, { recursive: true });
         await page.screenshot({ path: `${dir}/390-hell-ganz/${name}.jpg`, type: 'jpeg', quality: 60, fullPage: true });
