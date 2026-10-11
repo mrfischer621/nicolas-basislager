@@ -192,7 +192,7 @@ export function DataTable<T>({
                   aria-selected={selection ? selected : undefined}
                   onClick={() => onRowClick?.(row)}
                   onKeyDown={(e) => onRowKey(e, row)}
-                  className={`h-12 border-b border-line transition-colors duration-fast focus:outline-none focus-visible:bg-raised ${
+                  className={`h-12 border-b border-line transition-colors duration-fast focus-visible:bg-raised focus-visible:[outline-offset:-2px] ${
                     onRowClick ? 'cursor-pointer' : ''
                   } ${selected ? 'bg-accent-subtle' : 'hover:bg-canvas'}`}
                 >

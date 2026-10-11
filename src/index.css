@@ -311,7 +311,6 @@
   font-size: 0.875rem;
   color: rgb(var(--bw-fg));
   line-height: 1.5;
-  outline: none;
 }
 .rich-editor p {
   margin: 0;

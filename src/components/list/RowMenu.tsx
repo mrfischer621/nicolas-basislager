@@ -87,7 +87,7 @@ export function RowMenu({ items, label }: { items: RowMenuItem[]; label: string 
         e.stopPropagation();
         void run(item);
       }}
-      className={`block w-full px-4 py-2 text-left text-sm focus:outline-none ${
+      className={`block w-full px-4 py-2 text-left text-sm focus-visible:[outline-offset:-2px] ${
         item.danger ? 'text-danger-on-subtle hover:bg-danger-subtle focus:bg-danger-subtle' : 'text-fg hover:bg-raised focus:bg-raised'
       }`}
     >

@@ -141,7 +141,7 @@ export function CommandPalette() {
               }
             }}
             placeholder="Suchen oder Aktion wählen …"
-            className="h-14 flex-1 bg-transparent text-base text-fg outline-none placeholder:text-fg-subtle"
+            className="h-14 flex-1 bg-transparent text-base text-fg focus-visible:[outline-offset:-2px] placeholder:text-fg-subtle"
           />
           {isLoading && <Loader2 size={16} className="animate-spin text-fg-muted" aria-label="Sucht" />}
         </div>
