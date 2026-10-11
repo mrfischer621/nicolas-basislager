@@ -54,6 +54,9 @@ export interface FinanceTransactionInput {
   tags?: string[] | null;
   transaction_number: string | null;
   created_at?: string;
+  /** Wiederkehrende Ausgabe (Migration 20261011170000) */
+  is_recurring?: boolean | null;
+  recurrence_interval?: 'monatlich' | 'quartalsweise' | 'jaehrlich' | null;
 }
 
 export interface FinanceEntry {
@@ -72,6 +75,8 @@ export interface FinanceEntry {
   receiptUrl: string | null;
   tags: string[];
   number: string | null;
+  /** Intervall einer als wiederkehrend markierten Buchung, sonst null */
+  recurrence: 'monatlich' | 'quartalsweise' | 'jaehrlich' | null;
 }
 
 export interface FinanceEntriesResult {
@@ -227,6 +232,7 @@ export function buildFinanceEntries(
       receiptUrl: null,
       tags: [],
       number: inv.invoice_number,
+      recurrence: null,
     });
   }
 
@@ -248,6 +254,7 @@ export function buildFinanceEntries(
       receiptUrl: t.receipt_url ?? null,
       tags: t.tags ?? [],
       number: t.transaction_number,
+      recurrence: t.is_recurring ? t.recurrence_interval ?? 'monatlich' : null,
     });
   }
 

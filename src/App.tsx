@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import BentoLayout from './components/BentoLayout';
-import Dashboard from './pages/Dashboard';
+import Cockpit from './pages/Cockpit';
 import Pipeline from './pages/Pipeline';
 import Leads from './pages/Leads';
 import KundenDetail from './pages/KundenDetail';
@@ -48,7 +48,7 @@ function App() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<Dashboard />} />
+          <Route index element={<Cockpit />} />
           <Route path="kontakte" element={<Kontakte />} />
           <Route path="kontakte/firmen/:id" element={<KundenDetail />} />
           <Route path="leads" element={<Leads />} />
