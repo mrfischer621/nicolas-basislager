@@ -236,29 +236,29 @@ export default function KundenKontakte() {
       </Link>
 
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-fg">Kontakte</h1>
-          <p className="text-fg-muted mt-1">{customer.name}</p>
+          <h1 className="page-title">Kontakte</h1>
+          <p className="mt-2 text-sm text-fg-muted">{customer.name}</p>
         </div>
         <button
           onClick={() => openModal()}
-          className="flex items-center gap-2 px-4 py-2 bg-brand text-accent-fg rounded-lg hover:bg-brand-dark transition"
+          className="btn-cta"
         >
-          <Plus size={20} />
+          <Plus size={18} aria-hidden="true" />
           Neuer Kontakt
         </button>
       </div>
 
       {/* Contacts Table */}
       {contacts.length === 0 ? (
-        <div className="bg-surface rounded-lg shadow-sm p-6">
+        <div className="card p-6">
           <p className="text-fg-muted text-center">
             Noch keine Kontakte vorhanden. Erstellen Sie den ersten Kontakt.
           </p>
         </div>
       ) : (
-        <div className="bg-surface rounded-lg shadow-sm overflow-hidden">
+        <div className="card overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-canvas border-b border-line">
