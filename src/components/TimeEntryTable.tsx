@@ -414,7 +414,7 @@ export default function TimeEntryTable({
             style={{ top: statusMenu.top, left: statusMenu.left }}
             className="fixed z-50 w-60 rounded-lg border border-line bg-surface py-1 shadow-lg"
           >
-            <div className="px-3 py-1.5 text-xs font-medium text-fg-subtle uppercase tracking-wider">
+            <div className="px-3 py-1.5 text-xs font-medium text-fg-muted uppercase tracking-wider">
               Status setzen
             </div>
             {options.map(option => (

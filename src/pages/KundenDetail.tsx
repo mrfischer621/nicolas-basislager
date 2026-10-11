@@ -275,7 +275,7 @@ export default function KundenDetail() {
   if (!selectedCompany) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-content-tertiary">Firma wird geladen...</p>
+        <p className="text-fg-muted">Firma wird geladen...</p>
       </div>
     );
   }
@@ -283,7 +283,7 @@ export default function KundenDetail() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-content-tertiary">Lädt...</p>
+        <p className="text-fg-muted">Lädt...</p>
       </div>
     );
   }
@@ -344,7 +344,7 @@ export default function KundenDetail() {
               className={`pb-3 px-1 border-b-2 font-medium text-sm transition flex items-center gap-2 ${
                 activeTab === tab.id
                   ? 'border-brand text-brand'
-                  : 'border-transparent text-content-tertiary hover:text-content-body hover:border-line-strong'
+                  : 'border-transparent text-fg-muted hover:text-content-body hover:border-line-strong'
               }`}
             >
               {tab.label}
@@ -369,7 +369,7 @@ export default function KundenDetail() {
             <div className="space-y-3">
               {customer.email && (
                 <div className="flex items-center gap-3 text-content-secondary">
-                  <Mail size={18} className="text-content-tertiary" />
+                  <Mail size={18} className="text-fg-muted" />
                   <a href={`mailto:${customer.email}`} className="hover:text-brand">
                     {customer.email}
                   </a>
@@ -377,7 +377,7 @@ export default function KundenDetail() {
               )}
               {customer.phone && (
                 <div className="flex items-center gap-3 text-content-secondary">
-                  <Phone size={18} className="text-content-tertiary" />
+                  <Phone size={18} className="text-fg-muted" />
                   <a href={`tel:${customer.phone}`} className="hover:text-brand">
                     {customer.phone}
                   </a>
@@ -385,7 +385,7 @@ export default function KundenDetail() {
               )}
               {customer.website && (
                 <div className="flex items-center gap-3 text-content-secondary">
-                  <Globe size={18} className="text-content-tertiary" />
+                  <Globe size={18} className="text-fg-muted" />
                   <a href={customer.website} target="_blank" rel="noopener noreferrer" className="hover:text-brand">
                     {customer.website}
                   </a>
@@ -398,7 +398,7 @@ export default function KundenDetail() {
           <div className="card p-6">
             <h3 className="font-semibold text-content-heading mb-4">Adresse</h3>
             <div className="flex items-start gap-3 text-content-secondary">
-              <MapPin size={18} className="text-content-tertiary mt-0.5" />
+              <MapPin size={18} className="text-fg-muted mt-0.5" />
               <div>
                 {customer.street && customer.house_number && (
                   <p>{customer.street} {customer.house_number}</p>
@@ -417,15 +417,15 @@ export default function KundenDetail() {
             <div className="grid grid-cols-3 gap-4">
               <div className="text-center">
                 <p className="text-2xl font-bold text-content-heading">{contacts.length}</p>
-                <p className="text-sm text-content-tertiary">Kontakte</p>
+                <p className="text-sm text-fg-muted">Kontakte</p>
               </div>
               <div className="text-center">
                 <p className="text-2xl font-bold text-content-heading">{projects.length}</p>
-                <p className="text-sm text-content-tertiary">Projekte</p>
+                <p className="text-sm text-fg-muted">Projekte</p>
               </div>
               <div className="text-center">
                 <p className="text-2xl font-bold text-content-heading">{invoices.length}</p>
-                <p className="text-sm text-content-tertiary">Rechnungen</p>
+                <p className="text-sm text-fg-muted">Rechnungen</p>
               </div>
             </div>
           </div>
@@ -435,7 +435,7 @@ export default function KundenDetail() {
             <div className="card p-6">
               <h3 className="font-semibold text-content-heading mb-4">Konditionen</h3>
               <div className="flex items-center gap-3">
-                <Building2 size={18} className="text-content-tertiary" />
+                <Building2 size={18} className="text-fg-muted" />
                 <span className="text-content-secondary">
                   Standard-Stundenansatz: <span className="font-medium">{formatCurrency(customer.hourly_rate)}</span>
                 </span>
@@ -458,7 +458,7 @@ export default function KundenDetail() {
           </div>
 
           {contacts.length === 0 ? (
-            <div className="card p-6 text-center text-content-tertiary">
+            <div className="card p-6 text-center text-fg-muted">
               Noch keine Kontakte vorhanden.
             </div>
           ) : (
@@ -466,12 +466,12 @@ export default function KundenDetail() {
               <table className="w-full">
                 <thead className="bg-canvas border-b border-surface-border">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-content-tertiary uppercase">Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-content-tertiary uppercase">Funktion</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-content-tertiary uppercase">E-Mail</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-content-tertiary uppercase">Telefon</th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-content-tertiary uppercase">Haupt</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-content-tertiary uppercase">Aktionen</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-fg-muted uppercase">Name</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-fg-muted uppercase">Funktion</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-fg-muted uppercase">E-Mail</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-fg-muted uppercase">Telefon</th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-fg-muted uppercase">Haupt</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-fg-muted uppercase">Aktionen</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-line">
@@ -491,7 +491,7 @@ export default function KundenDetail() {
                         {contact.is_primary ? (
                           <Star size={16} className="inline text-warning fill-current" />
                         ) : (
-                          <button onClick={() => handleSetPrimary(contact.id)} className="text-fg-subtle hover:text-warning">
+                          <button onClick={() => handleSetPrimary(contact.id)} className="text-fg-muted hover:text-warning">
                             <StarOff size={16} />
                           </button>
                         )}
@@ -528,7 +528,7 @@ export default function KundenDetail() {
           </div>
 
           {projects.length === 0 ? (
-            <div className="card p-6 text-center text-content-tertiary">
+            <div className="card p-6 text-center text-fg-muted">
               Noch keine Projekte vorhanden.
             </div>
           ) : (
@@ -536,9 +536,9 @@ export default function KundenDetail() {
               <table className="w-full">
                 <thead className="bg-canvas border-b border-surface-border">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-content-tertiary uppercase">Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-content-tertiary uppercase">Status</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-content-tertiary uppercase">Budget</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-fg-muted uppercase">Name</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-fg-muted uppercase">Status</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-fg-muted uppercase">Budget</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-line">
@@ -575,7 +575,7 @@ export default function KundenDetail() {
           </div>
 
           {invoices.length === 0 ? (
-            <div className="card p-6 text-center text-content-tertiary">
+            <div className="card p-6 text-center text-fg-muted">
               Noch keine Rechnungen vorhanden.
             </div>
           ) : (
@@ -583,10 +583,10 @@ export default function KundenDetail() {
               <table className="w-full">
                 <thead className="bg-canvas border-b border-surface-border">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-content-tertiary uppercase">Nr.</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-content-tertiary uppercase">Datum</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-content-tertiary uppercase">Status</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-content-tertiary uppercase">Betrag</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-fg-muted uppercase">Nr.</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-fg-muted uppercase">Datum</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-fg-muted uppercase">Status</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-fg-muted uppercase">Betrag</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-line">

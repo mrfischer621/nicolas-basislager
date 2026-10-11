@@ -179,7 +179,7 @@ export default function AlleKontakte() {
   if (!selectedCompany) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-content-tertiary">Firma wird geladen...</p>
+        <p className="text-fg-muted">Firma wird geladen...</p>
       </div>
     );
   }
@@ -203,7 +203,7 @@ export default function AlleKontakte() {
 
       {/* Search */}
       <div className="relative max-w-md">
-        <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-content-tertiary" />
+        <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-fg-muted" />
         <input
           type="text"
           placeholder="Kontakt, Firma oder E-Mail suchen..."
@@ -216,11 +216,11 @@ export default function AlleKontakte() {
       {/* Contacts Grid */}
       {isLoading ? (
         <div className="card p-6">
-          <p className="text-content-tertiary text-center">Lädt Kontakte...</p>
+          <p className="text-fg-muted text-center">Lädt Kontakte...</p>
         </div>
       ) : filteredContacts.length === 0 ? (
         <div className="card p-6">
-          <p className="text-content-tertiary text-center">
+          <p className="text-fg-muted text-center">
             {searchTerm ? 'Keine Kontakte gefunden.' : 'Noch keine Kontakte vorhanden.'}
           </p>
         </div>
@@ -236,7 +236,7 @@ export default function AlleKontakte() {
                 <div>
                   <h3 className="font-medium text-content-heading">{contact.name}</h3>
                   {contact.role && (
-                    <p className="text-sm text-content-tertiary">{contact.role}</p>
+                    <p className="text-sm text-fg-muted">{contact.role}</p>
                   )}
                 </div>
                 {contact.is_primary && (
@@ -284,7 +284,7 @@ export default function AlleKontakte() {
 
       {/* Stats */}
       {!isLoading && contacts.length > 0 && (
-        <div className="text-sm text-content-tertiary text-center">
+        <div className="text-sm text-fg-muted text-center">
           {filteredContacts.length} von {contacts.length} Kontakten
         </div>
       )}
@@ -308,7 +308,7 @@ export default function AlleKontakte() {
                   <button
                     type="button"
                     onClick={() => setSelectedCustomerId('')}
-                    className="p-1 text-content-tertiary hover:text-content-secondary"
+                    className="p-1 text-fg-muted hover:text-content-secondary"
                   >
                     <X size={16} />
                   </button>
@@ -330,13 +330,13 @@ export default function AlleKontakte() {
                       onClick={(e) => e.stopPropagation()}
                       className="flex-1 bg-transparent"
                     />
-                    <ChevronDown size={18} className="text-content-tertiary" />
+                    <ChevronDown size={18} className="text-fg-muted" />
                   </div>
 
                   {isCustomerDropdownOpen && (
                     <div className="absolute z-10 w-full mt-1 bg-surface border border-surface-border rounded-lg shadow-lg max-h-60 overflow-y-auto">
                       {filteredCustomers.length === 0 ? (
-                        <div className="px-4 py-3 text-sm text-content-tertiary">
+                        <div className="px-4 py-3 text-sm text-fg-muted">
                           Keine Kunden gefunden
                         </div>
                       ) : (

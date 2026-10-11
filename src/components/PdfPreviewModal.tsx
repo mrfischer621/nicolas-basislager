@@ -42,7 +42,7 @@ export default function PdfPreviewModal({
             </div>
             <button
               onClick={onClose}
-              className="p-2 text-fg-subtle hover:text-fg-muted hover:bg-raised rounded-lg transition"
+              className="p-2 text-fg-muted hover:text-fg-muted hover:bg-raised rounded-lg transition"
             >
               <X size={20} />
             </button>

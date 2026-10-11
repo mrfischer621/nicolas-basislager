@@ -301,7 +301,7 @@ export default function KundenKontakte() {
                           {contact.email}
                         </a>
                       ) : (
-                        <span className="text-sm text-fg-subtle">-</span>
+                        <span className="text-sm text-fg-muted">-</span>
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -313,7 +313,7 @@ export default function KundenKontakte() {
                           {contact.phone}
                         </a>
                       ) : (
-                        <span className="text-sm text-fg-subtle">-</span>
+                        <span className="text-sm text-fg-muted">-</span>
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
@@ -325,7 +325,7 @@ export default function KundenKontakte() {
                       ) : (
                         <button
                           onClick={() => handleSetPrimary(contact.id)}
-                          className="p-1 text-fg-subtle hover:text-warning transition"
+                          className="p-1 text-fg-muted hover:text-warning transition"
                           title="Als Hauptkontakt setzen"
                           aria-label="Als Hauptkontakt setzen"
                         >

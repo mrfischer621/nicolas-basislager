@@ -100,7 +100,7 @@ export default function CustomerTable({ customers, onEdit, onRowClick, onArchive
                         {formatCurrency(customer.open_invoice_amount)}
                       </span>
                     ) : (
-                      <span className="text-sm text-fg-subtle">-</span>
+                      <span className="text-sm text-fg-muted">-</span>
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-center" onClick={(e) => e.stopPropagation()}>

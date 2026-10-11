@@ -384,7 +384,7 @@ export default function QuoteForm({
         {/* Intro Text — shown above items in PDF */}
         <div>
           <label className="block text-sm font-medium text-fg mb-1">
-            Einleitungstext <span className="text-xs font-normal text-fg-subtle">(optional — überschreibt die Firmenvorlage für dieses Angebot)</span>
+            Einleitungstext <span className="text-xs font-normal text-fg-muted">(optional — überschreibt die Firmenvorlage für dieses Angebot)</span>
           </label>
           <textarea
             value={introText}
@@ -452,7 +452,7 @@ export default function QuoteForm({
                 <div className="mb-2">
                   {index === 0 && (
                     <label className="block text-xs font-medium text-fg-muted mb-1">
-                      Beschreibung <span className="font-normal text-fg-subtle">(1. Zeile = Titel fett im PDF)</span>
+                      Beschreibung <span className="font-normal text-fg-muted">(1. Zeile = Titel fett im PDF)</span>
                     </label>
                   )}
                   <textarea
@@ -629,7 +629,7 @@ export default function QuoteForm({
         {/* Outro Text — shown below items/totals in PDF */}
         <div>
           <label className="block text-sm font-medium text-fg mb-1">
-            Schlusstext <span className="text-xs font-normal text-fg-subtle">(optional — überschreibt die Firmenvorlage für dieses Angebot)</span>
+            Schlusstext <span className="text-xs font-normal text-fg-muted">(optional — überschreibt die Firmenvorlage für dieses Angebot)</span>
           </label>
           <textarea
             value={outroText}

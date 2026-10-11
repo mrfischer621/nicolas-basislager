@@ -49,8 +49,8 @@ const colors = {
 
   // Aliasse der bisherigen Namen, damit nichts ohne Farbe bleibt
   brand: { light: token('accent-subtle'), DEFAULT: token('accent'), dark: token('accent-hover'), darker: token('accent-hover') },
-  content: { heading: token('fg'), body: token('fg'), secondary: token('fg-muted'), tertiary: token('fg-subtle'), inverse: token('fg-inverted') },
-  text: { primary: token('fg'), secondary: token('fg-muted'), tertiary: token('fg-subtle'), inverse: token('fg-inverted') },
+  content: { heading: token('fg'), body: token('fg'), secondary: token('fg-muted'), tertiary: token('fg-muted'), inverse: token('fg-inverted') },
+  text: { primary: token('fg'), secondary: token('fg-muted'), tertiary: token('fg-muted'), inverse: token('fg-inverted') },
   app: { bg: token('canvas') },
   sidebar: { bg: token('ink'), hover: token('ink-raised'), text: token('fg-inverted-muted'), 'text-active': token('fg-inverted'), border: token('line-inverted') },
 };

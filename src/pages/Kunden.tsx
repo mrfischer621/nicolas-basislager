@@ -283,7 +283,7 @@ export default function Kunden() {
       <div className="flex items-center gap-4">
         {/* Search */}
         <div className="relative flex-1 max-w-md">
-          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-fg-subtle" />
+          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-fg-muted" />
           <input
             type="text"
             placeholder="Kunde suchen..."

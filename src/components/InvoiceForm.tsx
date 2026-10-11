@@ -681,11 +681,11 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
                   {index === 0 && (
                     <label className="block text-xs font-medium text-fg-muted mb-1">
                       Beschreibung <span className="text-danger">*</span>
-                      <span className="ml-1 font-normal text-fg-subtle">(Text auswählen für Formatierung)</span>
+                      <span className="ml-1 font-normal text-fg-muted">(Text auswählen für Formatierung)</span>
                     </label>
                   )}
                   <Suspense fallback={
-                    <div className="rounded-lg border border-line px-3 py-2 text-sm text-fg-subtle">
+                    <div className="rounded-lg border border-line px-3 py-2 text-sm text-fg-muted">
                       Editor wird geladen…
                     </div>
                   }>

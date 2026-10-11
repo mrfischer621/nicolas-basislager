@@ -123,7 +123,7 @@ export function KanbanColumn({
         <div className="flex-1 overflow-y-auto space-y-2 min-h-[200px] scrollbar-thin">
           {opportunities.length === 0 ? (
             <div className="flex items-center justify-center h-32 border-2 border-dashed border-surface-border rounded-xl">
-              <p className="text-sm text-text-tertiary">Keine Deals</p>
+              <p className="text-sm text-fg-muted">Keine Deals</p>
             </div>
           ) : (
             opportunities.map((opp) => {

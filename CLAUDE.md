@@ -84,40 +84,26 @@ All tables scoped by `company_id` foreign key for tenant isolation:
 
 ## Code Organization
 
-### Design System: Swiss Modern 2026
+### Design System: Blauwasser (seit Okt. 2026)
 
-The application uses a custom design system with the following architecture:
+Verbindliche Quelle: `design-system/blauwasser/` (README-CRM.md, project/tokens.json).
+Konzept, Kontrast und Screenshots: `docs/design-review/`.
 
-**Layout Components (`/src/components/`):**
-- `BentoLayout.tsx` - Main app shell (dark sidebar + light content area)
-- `BentoSidebar.tsx` - Dark navigation sidebar (`bg-slate-900`)
-- `BentoHeader.tsx` - Top header bar with user actions
-
-**UI Building Blocks (`/src/components/ui/`):**
-- `PageHeader.tsx` - Page title with description and action slots
-- `Card.tsx` - Compound component with `Card.Header` and `Card.Content`
-- `KPICard.tsx` - Metric display with trend indicators
-- `Button.tsx` - Primary/Secondary/Ghost/Danger variants
-
-**Design Tokens (`tailwind.config.js`):**
-```
-Colors:
-- sidebar.bg: #0f172a (slate-900)
-- app.bg: #f8fafc (slate-50)
-- brand: #2563eb (blue-600) - active states
-- surface.border: #e2e8f0 (slate-200)
-
-Shadows: rest, hover, elevated, floating, glow-*
-Border Radius: card (12px), button (8px), input (6px)
-```
-
-**CSS Utilities (`/src/index.css`):**
-- `.card`, `.card-hover`, `.card-interactive`
-- `.btn-primary`, `.btn-secondary`, `.btn-ghost`, `.btn-danger`
-- `.input`, `.input-error`
-- `.table`, `.table-container`
-- `.badge-success`, `.badge-warning`, `.badge-danger`
-- `.scrollbar-thin`, `.scrollbar-hidden`
+- **Tokens:** `src/styles/tokens.css` wird mit `node scripts/build-tokens.mjs` aus
+  `tokens.json` erzeugt (Hell und Tiefsee, `data-theme` uebersteuert das System).
+  Nie von Hand aendern.
+- **Tailwind kennt nur Tokens** (`canvas`, `surface`, `raised`, `ink`, `fg`,
+  `fg-muted`, `accent`, `cta`, `line`, `line-strong`, `success|warning|danger`
+  mit `-subtle`, `focus`). Die Standardpalette (`gray-500` usw.) ist entfernt.
+  Keine Hex-Werte in Komponenten; fuer recharts `useThemeColors()`.
+- **Bausteine** (`src/components/ui/`, Klassen in `src/index.css`): `Button`
+  (cta = die eine Pill pro Ansicht, primary, secondary, ghost, danger),
+  `PageHeader` (Titel in Versalien), `Card`, `KPICard`, `Badge`,
+  `SegmentedControl`, `EmptyState`, `Skeleton`; `Modal` mit Fokusfalle.
+- Statusfarben nur als Badge/Meldung mit Wort, Betraege in Tinte, Icons Lucide
+  mit Strich 1.5, Fokus nie unterdruecken (`outline-none` ist tabu).
+- Screenshots ohne echte Daten: `MOCK=1 node scripts/screenshots.mjs <ordner>`
+  (Repo ist oeffentlich). Rauchtest: `node scripts/smoke-pages.mjs`.
 
 ### Custom Hooks
 
@@ -209,16 +195,18 @@ VITE_SUPABASE_ANON_KEY=your-anon-key
 
 ## Financial Analytics
 
-### KPI Calculation
+### Zentrale Aggregation
 
-**Income:** Sum of paid invoices (`status = 'bezahlt'`)
-**Expenses:** Sum of expense transactions
-**Profit:** Income - Expenses
+Alle Finanzzahlen (Dashboard, Auswertung beide Modi, Buchungsliste,
+Jahresabschluss) kommen aus `src/utils/financeAggregation.ts` ueber
+`useFinanceEntries()` (`src/hooks/useFinance.ts`). Keine eigenen Rechenwege.
 
-**Timeline Aggregation:**
-- Daily data points for date ranges ≤ 60 days
-- Monthly data points for longer periods
-- Implemented in `useAnalytics` hook
+- **Einnahmen:** bezahlte Rechnungen nach `paid_at` plus Buchungen `einnahme`
+  ohne `invoice_id`. Bezahlte Rechnungen ohne `paid_at` werden nicht geraten,
+  sondern gemeldet (`paidWithoutDate`).
+- **Ausgaben:** Buchungen `ausgabe`. Die Tabelle `expenses` ist leer und wird
+  nicht gelesen.
+- Datum immer als Zuercher Kalendertag `YYYY-MM-DD`, nie `toISOString()`.
 
 ### Year-End Closing
 
@@ -237,8 +225,9 @@ VITE_SUPABASE_ANON_KEY=your-anon-key
 ## Testing
 
 **Vitest** (seit 12.08.2026). Ausführen mit `npm test`, im Watch-Modus mit
-`npm run test:watch`. Konfiguration in `vite.config.ts` (`environment: 'node'`,
-nur `src/**/*.test.ts`).
+`npm run test:watch`. Konfiguration in `vite.config.ts` (`environment: 'node'`;
+Komponententests `*.test.tsx` mit Kopfkommentar `@vitest-environment jsdom` und
+Testing Library).
 
 Abgedeckt sind die Stellen, an denen ein Fehler Geld kostet:
 

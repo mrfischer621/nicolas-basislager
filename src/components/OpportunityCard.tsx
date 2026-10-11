@@ -116,7 +116,7 @@ export function OpportunityCard({
               e.stopPropagation();
               setShowMenu(!showMenu);
             }}
-            className="p-1.5 rounded-lg text-fg-subtle hover:text-fg-muted hover:bg-raised transition-colors opacity-0 group-hover:opacity-100"
+            className="p-1.5 rounded-lg text-fg-muted hover:text-fg-muted hover:bg-raised transition-colors opacity-0 group-hover:opacity-100"
           >
             <MoreVertical size={16} />
           </button>

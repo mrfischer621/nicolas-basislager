@@ -101,7 +101,7 @@ export default function ProjectTable({ projects, customers, onEdit, onArchive, o
                       {project.open_hours.toFixed(1)}h offen
                     </span>
                   ) : (
-                    <span className="text-sm text-fg-subtle">-</span>
+                    <span className="text-sm text-fg-muted">-</span>
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
