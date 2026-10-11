@@ -6,3 +6,4 @@ export { Button } from './Button';
 export { Badge } from './Badge';
 export { EmptyState } from './EmptyState';
 export { Skeleton, SkeletonRows } from './Skeleton';
+export { SegmentedControl } from './SegmentedControl';

@@ -2,14 +2,14 @@ import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import type { Invoice, Customer } from '../lib/supabase';
-import { AlertCircle, TrendingUp, TrendingDown, Wallet, Calendar } from 'lucide-react';
+import { TrendingUp, TrendingDown, Wallet } from 'lucide-react';
 import FinancialChart from '../components/FinancialChart';
 import { useCompany } from '../context/CompanyContext';
 import { useAnalytics } from '../hooks/useAnalytics';
 import { presetRange, yearRange, type DayRange, type Granularity } from '../utils/financeAggregation';
 import { formatChfDisplay } from '../utils/money';
 import PaidWithoutDateNotice from '../components/PaidWithoutDateNotice';
-import { PageHeader, Card, KPICard, Button } from '../components/ui';
+import { PageHeader, Card, KPICard, Badge, EmptyState, Skeleton, SkeletonRows, SegmentedControl } from '../components/ui';
 
 type TimeFilter = 7 | 30 | 90;
 
@@ -17,7 +17,7 @@ const formatDay = (day: string) => `${day.slice(8, 10)}.${day.slice(5, 7)}.${day
 type ViewMode = 'days' | 'year';
 
 interface InvoiceWithCustomer extends Invoice {
-  customer?: Customer;
+  customers?: Customer | null;
 }
 
 interface ChartData {
@@ -101,42 +101,29 @@ export default function Dashboard() {
     <div className="space-y-6">
       {/* Page Header with Time Filter */}
       <PageHeader
-        title="Dashboard"
+        title={<span className="bw-marker">Dashboard</span>}
         description={viewMode === 'year' ? `Finanzübersicht ${selectedYear}` : `Finanzübersicht der letzten ${timeFilter} Tage`}
         actions={
-          <div className="flex items-center gap-4">
-            {/* View Mode Toggle */}
-            <div className="flex rounded-lg border border-line overflow-hidden">
-              <button
-                onClick={() => setViewMode('days')}
-                className={`px-3 py-1.5 text-sm font-medium transition ${
-                  viewMode === 'days'
-                    ? 'bg-brand text-accent-fg'
-                    : 'bg-surface text-fg-muted hover:bg-canvas'
-                }`}
-              >
-                Tage
-              </button>
-              <button
-                onClick={() => setViewMode('year')}
-                className={`px-3 py-1.5 text-sm font-medium transition ${
-                  viewMode === 'year'
-                    ? 'bg-brand text-accent-fg'
-                    : 'bg-surface text-fg-muted hover:bg-canvas'
-                }`}
-              >
-                Jahr
-              </button>
-            </div>
-
-            {/* Year Dropdown (only shown in year mode) */}
-            {viewMode === 'year' && (
-              <div className="flex items-center gap-2">
-                <Calendar size={16} className="text-fg-muted" />
+          <>
+            <SegmentedControl
+              label="Ansicht"
+              options={[
+                { value: 'days' as ViewMode, label: 'Tage' },
+                { value: 'year' as ViewMode, label: 'Jahr' },
+              ]}
+              value={viewMode}
+              onChange={setViewMode}
+            />
+            {viewMode === 'year' ? (
+              <>
+                <label htmlFor="dashboard-year" className="sr-only">
+                  Jahr
+                </label>
                 <select
+                  id="dashboard-year"
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                  className="px-3 py-1.5 text-sm font-medium border border-line rounded-lg bg-surface text-fg focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent"
+                  className="input w-auto py-1.5"
                 >
                   {yearOptions.map((year) => (
                     <option key={year} value={year}>
@@ -144,75 +131,62 @@ export default function Dashboard() {
                     </option>
                   ))}
                 </select>
-              </div>
+              </>
+            ) : (
+              <SegmentedControl
+                label="Zeitraum"
+                options={timeFilters}
+                value={timeFilter}
+                onChange={setTimeFilter}
+              />
             )}
-
-            {/* Time Filter (only shown in days mode) */}
-            {viewMode === 'days' && (
-              <div className="flex gap-2">
-                {timeFilters.map((filter) => (
-                  <Button
-                    key={filter.value}
-                    variant={timeFilter === filter.value ? 'primary' : 'secondary'}
-                    size="sm"
-                    onClick={() => setTimeFilter(filter.value)}
-                  >
-                    {filter.label}
-                  </Button>
-                ))}
-              </div>
-            )}
-          </div>
+          </>
         }
       />
 
       <PaidWithoutDateNotice invoices={paidWithoutDate} />
 
       {/* KPI Cards - Bento Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <KPICard
           label="Einnahmen"
-          value={loading ? '...' : formatCurrency(revenue)}
-          trend="up"
-          icon={<TrendingUp size={20} />}
+          value={formatCurrency(revenue)}
+          hint="Bezahlte Rechnungen und Einnahmen"
+          icon={<TrendingUp size={18} />}
           loading={loading}
         />
 
         <KPICard
           label="Ausgaben"
-          value={loading ? '...' : formatCurrency(expenses)}
-          trend="down"
-          icon={<TrendingDown size={20} />}
+          value={formatCurrency(expenses)}
+          hint="Gebuchte Ausgaben"
+          icon={<TrendingDown size={18} />}
           loading={loading}
         />
 
         <KPICard
-          label="Profit"
-          value={loading ? '...' : formatCurrency(profit)}
-          trend={profit >= 0 ? 'up' : 'down'}
-          icon={<Wallet size={20} />}
+          label="Ergebnis"
+          value={formatCurrency(profit)}
+          hint={profit >= 0 ? 'Gewinn im Zeitraum' : 'Verlust im Zeitraum'}
+          icon={<Wallet size={18} />}
           loading={loading}
         />
       </div>
 
       {/* Financial Chart */}
-      <Card padding="md" hover>
+      <Card padding="md">
         <Card.Header
-          title="Einnahmen vs. Ausgaben"
+          title="Einnahmen und Ausgaben"
           subtitle={viewMode === 'year' ? `Jahr ${selectedYear}` : `Letzte ${timeFilter} Tage`}
         />
         <Card.Content>
           {loading ? (
-            <div className="flex items-center justify-center h-[300px]">
-              <p className="text-text-secondary">Laden...</p>
-            </div>
+            <Skeleton className="h-[300px] w-full" label="Chart wird geladen" />
           ) : entries.length === 0 ? (
-            <div className="flex h-[300px] flex-col items-center justify-center gap-1 text-center">
-              <p className="font-medium text-text-primary">Keine Buchungen im Zeitraum</p>
-              <p className="text-sm text-text-secondary">
-                Zwischen {formatDay(range.from)} und {formatDay(range.to)} gibt es weder Einnahmen noch Ausgaben.
-              </p>
-            </div>
+            <EmptyState
+              title="Keine Buchungen im Zeitraum"
+              text={`Zwischen ${formatDay(range.from)} und ${formatDay(range.to)} gibt es weder Einnahmen noch Ausgaben.`}
+            />
           ) : (
             <FinancialChart data={chartData} height={300} />
           )}
@@ -227,50 +201,33 @@ export default function Dashboard() {
         />
         <Card.Content>
           {openLoading ? (
-            <p className="text-text-secondary">Laden...</p>
+            <SkeletonRows rows={3} />
           ) : openInvoices.length === 0 ? (
-            <div className="py-8 text-center">
-              <p className="text-text-secondary">Keine offenen Rechnungen</p>
-            </div>
+            <EmptyState title="Keine offenen Rechnungen" text="Alle versendeten Rechnungen sind bezahlt." />
           ) : (
-            <div className="table-container -mx-6">
+            <div className="table-container -mx-5 md:-mx-7">
               <table className="table">
                 <thead>
                   <tr>
-                    <th className="pl-6">Rechnungsnummer</th>
+                    <th className="pl-5 md:pl-7">Rechnung</th>
                     <th>Kunde</th>
-                    <th>Betrag</th>
-                    <th className="pr-6">Fälligkeitsdatum</th>
+                    <th className="text-right">Betrag</th>
+                    <th className="pr-5 md:pr-7">Fällig</th>
                   </tr>
                 </thead>
                 <tbody>
                   {openInvoices.map((invoice) => {
                     const overdue = isOverdue(invoice.due_date);
                     return (
-                      <tr
-                        key={invoice.id}
-                        className={overdue ? 'bg-danger-light/50' : ''}
-                      >
-                        <td className="pl-6">
-                          <div className="flex items-center gap-2">
-                            {overdue && (
-                              <AlertCircle className="w-4 h-4 text-danger" />
-                            )}
-                            <span className={overdue ? 'font-semibold text-danger-dark' : ''}>
-                              {invoice.invoice_number}
-                            </span>
-                          </div>
-                        </td>
-                        <td>
-                          {invoice.customer?.name || 'Unbekannt'}
-                        </td>
-                        <td className="font-medium">
-                          {formatCurrency(invoice.total)}
-                        </td>
-                        <td className={`pr-6 ${overdue ? 'font-semibold text-danger' : ''}`}>
-                          {invoice.due_date
-                            ? new Date(invoice.due_date).toLocaleDateString('de-CH')
-                            : '-'}
+                      <tr key={invoice.id}>
+                        <td className="pl-5 font-medium md:pl-7">{invoice.invoice_number}</td>
+                        <td>{invoice.customers?.name || 'Unbekannt'}</td>
+                        <td className="text-right tabular-nums">{formatCurrency(invoice.total)}</td>
+                        <td className="pr-5 md:pr-7">
+                          <span className="inline-flex flex-wrap items-center gap-2">
+                            {invoice.due_date ? formatDay(invoice.due_date.slice(0, 10)) : '-'}
+                            {overdue && <Badge tone="danger">Überfällig</Badge>}
+                          </span>
                         </td>
                       </tr>
                     );
