@@ -1,3 +1,5 @@
+import { FileText } from 'lucide-react';
+import { useIsMobile } from '../../hooks/useMediaQuery';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Drawer } from '../list';
@@ -19,6 +21,7 @@ export function BookingDrawer({ entry, onClose, onEdit, onDelete, locked }: { en
       return data.signedUrl;
     },
   });
+  const mobile = useIsMobile();
   const isPdf = entry?.receiptUrl?.toLowerCase().endsWith('.pdf');
   const missing = entry ? missingParts(entry) : [];
 
@@ -78,7 +81,12 @@ export function BookingDrawer({ entry, onClose, onEdit, onDelete, locked }: { en
           {missing.length > 0 && entry.source === 'transaction' && entry.type === 'ausgabe' && <p className="text-sm text-warning">Es fehlt: {missing.join(', ')}.</p>}
           {entry.receiptUrl ? (
             receipt.data ? (
-              isPdf ? (
+              isPdf && mobile ? (
+                // iOS zeigt PDFs im iframe nur unvollstaendig: am Handy oeffnen statt einbetten
+                <a href={receipt.data} target="_blank" rel="noreferrer" className="btn-secondary w-full">
+                  <FileText size={16} strokeWidth={1.5} aria-hidden="true" /> Beleg öffnen (PDF)
+                </a>
+              ) : isPdf ? (
                 <iframe title="Beleg" src={receipt.data} className="h-[60vh] w-full rounded-tile border border-line" />
               ) : (
                 <a href={receipt.data} target="_blank" rel="noreferrer">
