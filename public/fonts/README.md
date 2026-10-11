@@ -1,29 +1,24 @@
-# PDF Fonts
+# PDF-Schriften
 
-Place the following Montserrat font files in this directory to enable Montserrat in generated PDFs.
-Without these files the PDF generator silently falls back to Helvetica.
+Schriften für die PDF-Dokumente (Rechnung, Offerte, Jahresabschluss). Sie stammen
+aus dem Blauwasser-Design-System-Paket (`design-system/blauwasser/project/fonts/`,
+Lizenz SIL OFL) und wurden mit fontTools unverändert von WOFF2 nach TTF gewandelt,
+weil jsPDF nur TTF einbetten kann. Abgedeckt ist der ganze Latin-1-Bereich, den der
+PDF-Generator ohnehin erzwingt.
 
-## Required files
+| Datei | Verwendung |
+|---|---|
+| `Montserrat-Regular.ttf` | Text, Tabellen (400) |
+| `Montserrat-Bold.ttf` | Hervorhebungen im Text (700) |
+| `AlbertSans-Bold.ttf` | Etiketten, Spaltenköpfe, Beträge (700) |
+| `AlbertSans-Black.ttf` | Dokumenttitel, Total (900) |
 
-| File | Weight |
-|------|--------|
-| `Montserrat-Regular.ttf` | 400 (normal) |
-| `Montserrat-Bold.ttf` | 700 (bold) |
+Fehlen die Dateien, fällt der Generator still auf Helvetica zurück. Die QR-Rechnung
+verwendet immer Helvetica (Vorgabe Swiss Payment Standards).
 
-## Download
+Neu erzeugen:
 
-1. Go to https://fonts.google.com/specimen/Montserrat
-2. Click **Download family**
-3. Unzip → copy `static/Montserrat-Regular.ttf` and `static/Montserrat-Bold.ttf` here
-
-Or use the direct static URLs from Google Fonts (run in terminal from this directory):
-
-```bash
-curl -L "https://fonts.gstatic.com/s/montserrat/v29/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCtr6Hw5aXo.ttf" \
-  -o Montserrat-Regular.ttf
-
-curl -L "https://fonts.gstatic.com/s/montserrat/v29/JTUHjIg1_i6t8kCHKm4532VJOt5-QNFgpCuM73w5aXo.ttf" \
-  -o Montserrat-Bold.ttf
 ```
-
-Note: The Google Fonts static URLs above are version-pinned. Check https://fonts.google.com for the latest version if they stop working.
+pip install fonttools brotli
+python -c "from fontTools.ttLib import TTFont; f=TTFont('AlbertSans-900.woff2'); f.flavor=None; f.save('AlbertSans-Black.ttf')"
+```

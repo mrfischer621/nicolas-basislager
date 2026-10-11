@@ -108,6 +108,10 @@ Konzept, Kontrast und Screenshots: `docs/design-review/`.
   `text-<x>` fuer Text, `bg-<x>-subtle` + `text-<x>-on-subtle` fuer Badges,
   `text-fg-on-light` fuer Tinte auf Statusflaechen. Farbe nie allein:
   Vorzeichen, Pfeil, Wort. Details: `docs/design-review/hell-und-status/`.
+- **PDF (Rechnung/Offerte):** Blauwasser-Gestaltung, Schriften als TTF in
+  `public/fonts/` (`src/utils/pdfFonts.ts`), keine farbigen Unterstreichungen,
+  Hellblau nur als senkrechte Linie am Total. QR-Teil immer Helvetica.
+  Muster: `node scripts/pdf-muster/render.mjs` (siehe `docs/design-review/pdf/`).
 - Icons Lucide mit Strich 1.5, Fokus nie unterdruecken (`outline-none` ist tabu).
 - Screenshots ohne echte Daten: `MOCK=1 node scripts/screenshots.mjs <ordner>`
   (Repo ist oeffentlich). Rauchtest: `node scripts/smoke-pages.mjs`.

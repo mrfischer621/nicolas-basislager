@@ -13,11 +13,41 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import QRCode from 'qrcode';
 import { SwissQRBill } from './swissqr';
-import { setupPdfFonts } from './pdfFonts';
+import { setupPdfFontSet, type PdfFontSet } from './pdfFonts';
 import type { Invoice, InvoiceItem, Customer, Company, Quote, QuoteItem } from '../lib/supabase';
 
 // Active font family — set at the start of each PDF generation call
 let PDF_FONT = 'helvetica';
+/** Schriften fuer Rechnung/Offerte (Blauwasser); QR-Teil nutzt immer Helvetica */
+let FONTS: PdfFontSet = { body: 'helvetica', display: 'helvetica', black: 'helvetica' };
+
+/**
+ * Farben der Dokumente nach Blauwasser Design System (Druck, hell).
+ * Bewusst keine farbigen Unterstreichungen: Hellblau nur als senkrechte
+ * Akzentlinie am Total.
+ */
+const INK: [number, number, number] = [11, 18, 32]; // foreground
+const MUTED: [number, number, number] = [75, 85, 102]; // foreground-muted
+const HAIRLINE: [number, number, number] = [217, 222, 230]; // border
+const PAPER_TINT: [number, number, number] = [242, 244, 247]; // background
+const CTA: [number, number, number] = [10, 149, 255]; // cta
+
+/** Titel/Total: Albert Sans 900 (Rueckfall Helvetica fett) */
+function setBlack(doc: jsPDF, size: number): void {
+  doc.setFont(FONTS.black, FONTS.black === 'helvetica' ? 'bold' : 'normal');
+  doc.setFontSize(size);
+}
+
+/** Kleine Etikette in Versalien: Albert Sans 700, gesperrt, gedaempft */
+function drawLabel(doc: jsPDF, text: string, x: number, y: number, opts: { align?: 'left' | 'right' } = {}): void {
+  doc.setFont(FONTS.display, 'bold');
+  doc.setFontSize(7);
+  doc.setTextColor(...MUTED);
+  doc.setCharSpace(0.35);
+  doc.text(text.toUpperCase(), x, y, opts.align === 'right' ? { align: 'right' } : undefined);
+  doc.setCharSpace(0);
+  doc.setTextColor(...INK);
+}
 
 // ============================================================================
 // TYPES
@@ -89,8 +119,8 @@ const LAYOUT = {
 // ============================================================================
 
 const PDF_STYLE_CONFIG = {
-  /** Accent colour — Swiss pine green */
-  ACCENT: [107, 138, 94] as [number, number, number],
+  /** Akzent (nur Total-Linie): cta */
+  ACCENT: CTA,
   /**
    * Company logo: top-right corner, right edge at 185 mm.
    * Fixed maximum box; the logo keeps its aspect ratio (see fitLogo).
@@ -99,10 +129,10 @@ const PDF_STYLE_CONFIG = {
   LOGO: { right: 185, y: 15, maxW: 60, maxH: 18 },
   /** Recipient address: window-envelope zone */
   ADDR: { x: 20, startY: 55 },
-  /** Document title ("RECHNUNG" / "Angebot") */
-  TITLE: { x: 20, y: 85, fontSize: 14 },
-  /** Metadata block below title (Nummer, Datum, etc.) */
-  META: { labelX: 20, valueX: 70, startY: 95, lineH: 6 },
+  /** Dokumenttitel ("RECHNUNG" / "OFFERTE"), Albert Sans 900 */
+  TITLE: { x: 20, y: 90, fontSize: 22 },
+  /** Metadaten als Spalten unter dem Titel: Etikette, darunter Wert */
+  META: { x: 20, colW: 42, labelY: 99, valueY: 104 },
   /** Table margins */
   TABLE_MARGIN: { left: 20, right: 20 },
   /** Table column widths (sum = 170 mm: 210 - 20 left - 20 right) */
@@ -655,11 +685,12 @@ function drawDocumentHeader(
   customer: Customer,
   title: string,
   metaLines: MetaLine[],
-  logoBase64?: string | null
+  logoBase64: string | null | undefined,
+  company: Company
 ): number {
-  doc.setTextColor(0, 0, 0);
+  doc.setTextColor(...INK);
 
-  // ── Logo top-right ───────────────────────────────────────────────────────────
+  // ── Logo oben rechts ─────────────────────────────────────────────────────────
   if (logoBase64) {
     try {
       const { right, y, maxW, maxH } = PDF_STYLE_CONFIG.LOGO;
@@ -667,68 +698,81 @@ function drawDocumentHeader(
       const { w, h } = fitLogo(props.width, props.height, maxW, maxH);
       doc.addImage(logoBase64, 'AUTO', right - w, y, w, h);
     } catch {
-      // Logo is optional — skip silently on error
+      // Logo ist optional
     }
   }
 
-  // ── Recipient address (left, window-envelope zone ≈ y=55) ───────────────────
+  // ── Absender oben links ──────────────────────────────────────────────────────
+  const senderName = sanitizeForPDF(company.rechnungsname || company.name);
+  doc.setFont(FONTS.display, 'bold');
+  doc.setFontSize(10);
+  doc.text(senderName, 20, 20);
+  doc.setFont(FONTS.body, 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(...MUTED);
+  const senderLines = [
+    company.sender_contact_name ? sanitizeForPDF(company.sender_contact_name) : null,
+    sanitizeForPDF(formatAddress(company.street, company.house_number)),
+    sanitizeForPDF(`${company.zip_code ?? ''} ${company.city ?? ''}`.trim()),
+  ].filter((l): l is string => !!l);
+  senderLines.forEach((line, i) => doc.text(line, 20, 25 + i * 4));
+
+  // ── Absenderzeile im Fenster (klein, ohne Unterstreichung) ───────────────────
+  doc.setFontSize(6.5);
+  doc.text(
+    [senderName, formatAddress(company.street, company.house_number), `${company.zip_code ?? ''} ${company.city ?? ''}`.trim()]
+      .map((t) => sanitizeForPDF(t))
+      .filter(Boolean)
+      .join(' · '),
+    PDF_STYLE_CONFIG.ADDR.x,
+    PDF_STYLE_CONFIG.ADDR.startY - 6
+  );
+  doc.setTextColor(...INK);
+
+  // ── Empfaenger (Fensterbereich, y≈55, Position unveraendert) ─────────────────
   let addrY = PDF_STYLE_CONFIG.ADDR.startY;
   const addrX = PDF_STYLE_CONFIG.ADDR.x;
-  doc.setFont(PDF_FONT, 'normal');
+  doc.setFont(FONTS.body, 'normal');
   doc.setFontSize(10);
 
   doc.text(sanitizeForPDF(customer.name), addrX, addrY);
   addrY += 5;
-
   if (customer.contact_person) {
     doc.text(sanitizeForPDF(customer.contact_person), addrX, addrY);
     addrY += 5;
   }
-
   if (customer.street) {
-    doc.text(
-      sanitizeForPDF(formatAddress(customer.street, customer.house_number)),
-      addrX, addrY
-    );
+    doc.text(sanitizeForPDF(formatAddress(customer.street, customer.house_number)), addrX, addrY);
     addrY += 5;
   }
-
   if (customer.zip_code && customer.city) {
     doc.text(sanitizeForPDF(`${customer.zip_code} ${customer.city}`), addrX, addrY);
     addrY += 5;
   }
-
-  // Country only when not Switzerland
   const rawCountry = (customer.country || 'CH').trim();
   const customerCountry =
-    rawCountry === 'Schweiz' || rawCountry === 'CH'
-      ? 'CH'
-      : rawCountry.substring(0, 2).toUpperCase();
-
+    rawCountry === 'Schweiz' || rawCountry === 'CH' ? 'CH' : rawCountry.substring(0, 2).toUpperCase();
   if (customerCountry !== 'CH') {
     doc.text(sanitizeForPDF(getCountryName(customerCountry)), addrX, addrY);
-    addrY += 5;
   }
 
-  // ── Document title ───────────────────────────────────────────────────────────
-  doc.setFont(PDF_FONT, 'bold');
-  doc.setFontSize(PDF_STYLE_CONFIG.TITLE.fontSize);
-  doc.text(title, PDF_STYLE_CONFIG.TITLE.x, PDF_STYLE_CONFIG.TITLE.y);
+  // ── Titel: Albert Sans 900, Versalien ────────────────────────────────────────
+  setBlack(doc, PDF_STYLE_CONFIG.TITLE.fontSize);
+  doc.setTextColor(...INK);
+  doc.text(title.toUpperCase(), PDF_STYLE_CONFIG.TITLE.x, PDF_STYLE_CONFIG.TITLE.y);
 
-  // ── Metadata block ───────────────────────────────────────────────────────────
-  const { labelX, valueX, startY: metaStartY, lineH } = PDF_STYLE_CONFIG.META;
-  let metaY = metaStartY;
+  // ── Metadaten als Spalten: Etikette oben, Wert darunter ──────────────────────
+  const { x, colW, labelY, valueY } = PDF_STYLE_CONFIG.META;
+  metaLines.forEach((line, i) => {
+    const colX = x + i * colW;
+    drawLabel(doc, line.label.replace(/:$/, ''), colX, labelY);
+    doc.setFont(FONTS.body, 'normal');
+    doc.setFontSize(9.5);
+    doc.setTextColor(...INK);
+    doc.text(line.value, colX, valueY);
+  });
 
-  doc.setFontSize(10);
-  for (const line of metaLines) {
-    doc.setFont(PDF_FONT, 'bold');
-    doc.text(line.label, labelX, metaY);
-    doc.setFont(PDF_FONT, 'normal');
-    doc.text(line.value, valueX, metaY);
-    metaY += lineH;
-  }
-
-  return metaY;
+  return valueY + 4;
 }
 
 // ============================================================================
@@ -749,8 +793,9 @@ function drawIntroText(
   }
 
   let y = startY;
-  doc.setFont(PDF_FONT, 'normal');
-  doc.setFontSize(10);
+  doc.setFont(FONTS.body, 'normal');
+  doc.setFontSize(9.5);
+  doc.setTextColor(...INK);
 
   const sanitizedText = sanitizeForPDF(introText);
   const lines = doc.splitTextToSize(sanitizedText, 170);
@@ -777,9 +822,10 @@ function drawFooterText(
     return startY;
   }
 
-  let y = startY + 8; // Spacing before footer
-  doc.setFont(PDF_FONT, 'normal');
-  doc.setFontSize(10); // Match intro text size
+  let y = startY + 10; // Abstand nach dem Total-Block
+  doc.setFont(FONTS.body, 'normal');
+  doc.setFontSize(9.5);
+  doc.setTextColor(...INK);
 
   const sanitizedText = sanitizeForPDF(footerText);
   const lines = doc.splitTextToSize(sanitizedText, 170);
@@ -792,6 +838,103 @@ function drawFooterText(
   return y;
 }
 
+/** Tabellenstil (beide Dokumente): Kopf ohne Flaeche, Etiketten gedaempft,
+ *  Linie in Tinte unter dem Kopf, Haarlinien zwischen den Zeilen. */
+const TABLE_PAD = { top: 3.2, right: 2, bottom: 3.2, left: 2 };
+
+function tableStyles() {
+  return {
+    styles: {
+      font: FONTS.body,
+      fontSize: 9,
+      cellPadding: TABLE_PAD,
+      textColor: INK,
+      lineColor: HAIRLINE,
+      lineWidth: { top: 0, right: 0, bottom: 0.2, left: 0 },
+      valign: 'top' as const,
+    },
+    headStyles: {
+      font: FONTS.display,
+      fontStyle: 'bold' as const,
+      fontSize: 7,
+      textColor: MUTED,
+      fillColor: false as const,
+      lineColor: INK,
+      lineWidth: { top: 0, right: 0, bottom: 0.4, left: 0 },
+      cellPadding: { top: 2, right: 2, bottom: 2.5, left: 2 },
+    },
+  };
+}
+
+/** Beschreibung: erste Zeile fett (Titel), weitere Zeilen normal und gedaempft. */
+function drawDescriptionCell(doc: jsPDF, rawText: string, cellX: number, cellY: number, textWidth: number): void {
+  const [firstLine, ...restLines] = rawText.split('\n');
+  const x = cellX + TABLE_PAD.left;
+  const lineH = 4.4;
+  let y = cellY + TABLE_PAD.top + 3;
+  if (firstLine && firstLine.trim()) {
+    doc.setFont(FONTS.body, 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(...INK);
+    (doc.splitTextToSize(sanitizeForPDF(firstLine), textWidth) as string[]).forEach((l) => {
+      doc.text(l, x, y);
+      y += lineH;
+    });
+  }
+  const restText = restLines.join('\n').trim();
+  if (restText) {
+    doc.setFont(FONTS.body, 'normal');
+    doc.setFontSize(8.5);
+    doc.setTextColor(...MUTED);
+    (doc.splitTextToSize(sanitizeForPDF(restText), textWidth) as string[]).forEach((l) => {
+      doc.text(l, x, y);
+      y += lineH;
+    });
+  }
+  doc.setFont(FONTS.body, 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(...INK);
+}
+
+/** Zeilenhoehe der Beschreibung fuer autotable berechnen. */
+function descriptionCellHeight(doc: jsPDF, rawText: string, textWidth: number): { lines: string[]; height: number } {
+  const lines: string[] = [];
+  rawText.split('\n').forEach((line) => lines.push(...(doc.splitTextToSize(sanitizeForPDF(line), textWidth) as string[])));
+  return { lines, height: TABLE_PAD.top + 3 + lines.length * 4.4 + TABLE_PAD.bottom };
+}
+
+/**
+ * Summenblock rechts: Zwischenzeilen gedaempft, Total in Albert Sans 900 auf
+ * getoenter Flaeche mit senkrechter Akzentlinie in cta (keine Unterstreichung).
+ * @returns Y nach dem Block
+ */
+function drawTotalsBlock(doc: jsPDF, lines: { label: string; value: string }[], total: string, startY: number): number {
+  const left = 110;
+  const right = 190;
+  let y = startY;
+  doc.setFont(FONTS.body, 'normal');
+  doc.setFontSize(9);
+  for (const line of lines) {
+    doc.setTextColor(...MUTED);
+    doc.text(line.label, left + 4, y);
+    doc.setTextColor(...INK);
+    doc.text(line.value, right - 4, y, { align: 'right' });
+    y += 5.5;
+  }
+  y += 1;
+  // Total-Flaeche
+  const boxH = 13;
+  doc.setFillColor(...PAPER_TINT);
+  doc.rect(left, y, right - left, boxH, 'F');
+  doc.setFillColor(...CTA);
+  doc.rect(left, y, 1.2, boxH, 'F');
+  drawLabel(doc, 'Total', left + 4, y + 8.2);
+  setBlack(doc, 14);
+  doc.setTextColor(...INK);
+  doc.text(total, right - 4, y + 8.6, { align: 'right' });
+  return y + boxH;
+}
+
 /**
  * Draw invoice items table
  * @returns The Y position after the items and totals
@@ -802,7 +945,7 @@ function drawInvoiceItems(
   invoice: Invoice,
   startY: number
 ): number {
-  const { ACCENT, TABLE_MARGIN, TABLE_COL, DESC_TEXT_W, CELL_PAD, TOTALS } = PDF_STYLE_CONFIG;
+  const { TABLE_MARGIN, TABLE_COL } = PDF_STYLE_CONFIG;
   const hasLineDiscounts = items.some(item => (item.discount_percent || 0) > 0);
   const hasTotalDiscount = (invoice.discount_value || 0) > 0;
 
@@ -817,7 +960,7 @@ function drawInvoiceItems(
 
   if (hasLineDiscounts) {
     descWidth = 75;
-    descTextWidth = descWidth - 2 * CELL_PAD;
+    descTextWidth = descWidth - TABLE_PAD.left - TABLE_PAD.right;
     head = [['Beschreibung', 'Menge', 'Einzelpreis', 'Rabatt', 'Total (CHF)']];
     tableBody = items.map(item => [
       sanitizeForPDF(item.description || ''),
@@ -835,7 +978,7 @@ function drawInvoiceItems(
     };
   } else {
     descWidth = TABLE_COL.desc;
-    descTextWidth = DESC_TEXT_W;
+    descTextWidth = descWidth - TABLE_PAD.left - TABLE_PAD.right;
     head = [['Beschreibung', 'Menge', 'Einzelpreis', 'Total (CHF)']];
     tableBody = items.map(item => [
       sanitizeForPDF(item.description || ''),
@@ -853,96 +996,33 @@ function drawInvoiceItems(
 
   autoTable(doc, {
     startY,
-    // bottom margin leaves room for totals block (~36 mm) + footer bar at y=260
+    // Platz fuer den Summenblock und die Fusszeile (y=262)
     margin: { ...TABLE_MARGIN, bottom: 80 },
     showHead: 'everyPage',
     rowPageBreak: 'avoid',
     theme: 'plain',
-    head,
+    head: head.map((row) => row.map((h) => h.toUpperCase())),
     body: tableBody,
-    styles: {
-      font: PDF_FONT,
-      fontSize: 9,
-      cellPadding: CELL_PAD,
-      textColor: [0, 0, 0] as [number, number, number],
-      lineColor: [220, 220, 220] as [number, number, number],
-      lineWidth: 0.1,
-      valign: 'top',
-    },
-    headStyles: {
-      fillColor: ACCENT,
-      textColor: [255, 255, 255] as [number, number, number],
-      fontStyle: 'bold',
-      fontSize: 9,
-    },
+    ...tableStyles(),
     columnStyles,
-
-    // Expand description cell so autotable computes correct row height.
-    // splitTextToSize with the active 9pt font gives accurate line counts.
     didParseCell: (data) => {
+      if (data.section === 'head' && data.column.index > 0) data.cell.styles.halign = 'right';
       if (data.section === 'body' && data.column.index === 0) {
-        const rawText = String(
-          Array.isArray(data.row.raw) ? (data.row.raw as string[])[0] ?? '' : ''
-        );
-        const expanded: string[] = [];
-        rawText.split('\n').forEach((line) => {
-          const wrapped = doc.splitTextToSize(sanitizeForPDF(line), descTextWidth);
-          expanded.push(...(wrapped as string[]));
-        });
-        if (expanded.length > 0) {
-          data.cell.text = expanded;
-          // Force cell height to match our manual rendering metrics
-          const CAP_H = 3; // baseline offset for 9pt font
-          const LINE_H = 4.5;
-          data.cell.styles.minCellHeight = CELL_PAD + CAP_H + expanded.length * LINE_H + CELL_PAD;
+        const rawText = String(Array.isArray(data.row.raw) ? (data.row.raw as string[])[0] ?? '' : '');
+        const { lines, height } = descriptionCellHeight(doc, rawText, descTextWidth);
+        if (lines.length > 0) {
+          data.cell.text = lines;
+          data.cell.styles.minCellHeight = height;
         }
       }
     },
-
-    // Suppress autotable's default description rendering (we do it manually below)
     willDrawCell: (data) => {
-      if (data.section === 'body' && data.column.index === 0) {
-        data.cell.text = [];
-      }
+      if (data.section === 'body' && data.column.index === 0) data.cell.text = [];
     },
-
-    // Manually render description: first line bold (title), rest normal
     didDrawCell: (data) => {
       if (data.section === 'body' && data.column.index === 0) {
-        const rawText = String(
-          Array.isArray(data.row.raw) ? (data.row.raw as string[])[0] ?? '' : ''
-        );
-        const [firstLine, ...restLines] = rawText.split('\n');
-        const x = data.cell.x + CELL_PAD;
-        const lineH = 4.5;
-        let y = data.cell.y + CELL_PAD + 3;
-
-        // Title line — bold
-        if (firstLine && firstLine.trim()) {
-          doc.setFont(PDF_FONT, 'bold');
-          doc.setFontSize(9);
-          doc.setTextColor(0, 0, 0);
-          const wrappedTitle = doc.splitTextToSize(
-            sanitizeForPDF(firstLine), descTextWidth
-          ) as string[];
-          wrappedTitle.forEach((l) => { doc.text(l, x, y); y += lineH; });
-        }
-
-        // Body lines — normal, slightly smaller
-        const restText = restLines.join('\n').trim();
-        if (restText) {
-          doc.setFont(PDF_FONT, 'normal');
-          doc.setFontSize(8.5);
-          const wrappedRest = doc.splitTextToSize(
-            sanitizeForPDF(restText), descTextWidth
-          ) as string[];
-          wrappedRest.forEach((l) => { doc.text(l, x, y); y += lineH; });
-        }
-
-        // Reset for subsequent cells
-        doc.setFont(PDF_FONT, 'normal');
-        doc.setFontSize(9);
-        doc.setTextColor(0, 0, 0);
+        const rawText = String(Array.isArray(data.row.raw) ? (data.row.raw as string[])[0] ?? '' : '');
+        drawDescriptionCell(doc, rawText, data.cell.x, data.cell.y, descTextWidth);
       }
     },
   });
@@ -950,54 +1030,25 @@ function drawInvoiceItems(
   const finalY: number = (doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? startY + 20;
   let y = finalY + 8;
 
-  // ── Totals section (aligned with right portion of table: x=120…190) ─────────
-  const { labelX, valueX } = TOTALS;
+  // ── Summen ──────────────────────────────────────────────────────────────────
   const itemsSubtotal = items.reduce((sum, item) => sum + item.total, 0);
-
-  doc.setFont(PDF_FONT, 'normal');
-  doc.setFontSize(9);
-  doc.setTextColor(0, 0, 0);
-
-  doc.text('Zwischensumme', labelX, y);
-  doc.text(`CHF ${formatAmount(itemsSubtotal)}`, valueX, y, { align: 'right' });
-  y += 6;
-
+  const lines: { label: string; value: string }[] = [
+    { label: 'Zwischensumme', value: `CHF ${formatAmount(itemsSubtotal)}` },
+  ];
   if (hasTotalDiscount) {
-    let totalDiscountAmount = 0;
-    let discountLabel = '';
-
-    if (invoice.discount_type === 'percent') {
-      totalDiscountAmount = itemsSubtotal * (invoice.discount_value / 100);
-      discountLabel = `Rabatt (${invoice.discount_value}%)`;
-    } else {
-      totalDiscountAmount = Math.min(invoice.discount_value, itemsSubtotal);
-      discountLabel = 'Rabatt';
-    }
-
-    doc.text(discountLabel, labelX, y);
-    doc.setTextColor(0, 128, 0);
-    doc.text(`- CHF ${formatAmount(totalDiscountAmount)}`, valueX, y, { align: 'right' });
-    doc.setTextColor(0, 0, 0);
-    y += 6;
+    const amount =
+      invoice.discount_type === 'percent'
+        ? itemsSubtotal * (invoice.discount_value / 100)
+        : Math.min(invoice.discount_value, itemsSubtotal);
+    lines.push({
+      label: invoice.discount_type === 'percent' ? `Rabatt (${invoice.discount_value}%)` : 'Rabatt',
+      value: `− CHF ${formatAmount(amount)}`,
+    });
   }
-
   if (invoice.vat_amount > 0) {
-    doc.text(`MWST (${invoice.vat_rate}%)`, labelX, y);
-    doc.text(`CHF ${formatAmount(invoice.vat_amount)}`, valueX, y, { align: 'right' });
-    y += 6;
+    lines.push({ label: `MWST (${invoice.vat_rate}%)`, value: `CHF ${formatAmount(invoice.vat_amount)}` });
   }
-
-  // Separator line
-  doc.setDrawColor(180, 180, 180);
-  doc.setLineWidth(0.3);
-  doc.line(labelX, y, valueX, y);
-  y += 5;
-
-  // Total — bold, Swiss-rounded
-  doc.setFont(PDF_FONT, 'bold');
-  doc.setFontSize(11);
-  doc.text('Total', labelX, y);
-  doc.text(`CHF ${formatAmount(swissRound(invoice.total))}`, valueX, y, { align: 'right' });
+  y = drawTotalsBlock(doc, lines, `CHF ${formatAmount(swissRound(invoice.total))}`, y);
 
   return y;
 }
@@ -1070,8 +1121,10 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<Blob> {
     format: 'a4',
   });
 
-  // Load Montserrat font (falls back to helvetica if not available)
-  PDF_FONT = await setupPdfFonts(doc);
+  // Blauwasser-Schriften fuer das Dokument; die QR-Rechnung bleibt in
+  // Helvetica (Swiss Payment Standards erlauben nur Arial/Helvetica/Frutiger)
+  FONTS = await setupPdfFontSet(doc);
+  PDF_FONT = 'helvetica';
 
   // Determine which account to use
   const account = company.qr_iban || company.iban || '';
@@ -1135,16 +1188,16 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<Blob> {
 
   // ── Document header ──────────────────────────────────────────────────────────
   const metaLines: MetaLine[] = [
-    { label: 'Rechnungsnummer:', value: sanitizeForPDF(invoice.invoice_number) },
-    { label: 'Datum:', value: formatDate(invoice.issue_date) },
+    { label: 'Rechnung Nr.', value: sanitizeForPDF(invoice.invoice_number) },
+    { label: 'Datum', value: formatDate(invoice.issue_date) },
   ];
   if (invoice.due_date) {
-    metaLines.push({ label: 'Fälligkeitsdatum:', value: formatDate(invoice.due_date) });
+    metaLines.push({ label: 'Zahlbar bis', value: formatDate(invoice.due_date) });
   }
   if (company.uid_number) {
-    metaLines.push({ label: 'UID:', value: sanitizeForPDF(company.uid_number) });
+    metaLines.push({ label: 'UID', value: sanitizeForPDF(company.uid_number) });
   }
-  const headerEndY = drawDocumentHeader(doc, customer, 'RECHNUNG', metaLines, logoBase64);
+  const headerEndY = drawDocumentHeader(doc, customer, 'Rechnung', metaLines, logoBase64, company);
 
   // ── Text templates ────────────────────────────────────────────────────────────
   // Use passed values or fall back to company-level templates
@@ -1158,9 +1211,9 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<Blob> {
   // ── Invoice title / description ───────────────────────────────────────────────
   let itemsStartY = contentY > introStartY ? contentY : introStartY + 5;
   if (invoice.title && invoice.title.trim()) {
-    doc.setFont(PDF_FONT, 'bold');
+    doc.setFont(FONTS.display, 'bold');
     doc.setFontSize(11);
-    doc.setTextColor(0, 0, 0);
+    doc.setTextColor(...INK);
     doc.text(sanitizeForPDF(invoice.title.trim()), 20, itemsStartY);
     itemsStartY += 8;
   }
@@ -1176,6 +1229,7 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<Blob> {
   for (let p = 1; p <= lastContentPage; p++) {
     doc.setPage(p);
     drawCompanyFooterBar(doc, company);
+    drawPageNumber(doc, p, lastContentPage);
   }
   doc.setPage(lastContentPage);
 
@@ -1276,14 +1330,15 @@ function drawQuoteHeader(
   doc: jsPDF,
   customer: Customer,
   quote: Quote,
-  logoBase64?: string | null
+  logoBase64: string | null | undefined,
+  company: Company
 ): number {
   const metaLines: MetaLine[] = [
-    { label: 'Angebotsnummer:', value: sanitizeForPDF(quote.quote_number) },
-    { label: 'Datum:', value: formatDate(quote.issue_date) },
-    { label: 'Gültig bis:', value: formatDate(quote.valid_until) },
+    { label: 'Offerte Nr.', value: sanitizeForPDF(quote.quote_number) },
+    { label: 'Datum', value: formatDate(quote.issue_date) },
+    { label: 'Gültig bis', value: formatDate(quote.valid_until) },
   ];
-  return drawDocumentHeader(doc, customer, 'Angebot', metaLines, logoBase64);
+  return drawDocumentHeader(doc, customer, 'Offerte', metaLines, logoBase64, company);
 }
 
 /**
@@ -1300,18 +1355,12 @@ function drawQuoteItems(
   quote: Quote,
   startY: number
 ): number {
-  const ACCENT: [number, number, number] = [107, 138, 94];
-  const CELL_PAD = 5;
-  // Column widths sum to exactly 170mm (210 - 20 left - 20 right margin)
-  // Beschreibung:90 + Menge:20 + Einzelpreis:35 + Total:25 = 170mm
-  // Table right edge: x = 20 + 170 = 190mm
-  const DESC_TEXT_WIDTH = 80; // 90mm col - 2×5mm padding
+  // Spalten: Beschreibung 90 + Menge 20 + Einzelpreis 35 + Total 25 = 170 mm
+  const DESC_TEXT_WIDTH = 90 - TABLE_PAD.left - TABLE_PAD.right;
 
   const tableBody: string[][] = items.map((item) => [
     sanitizeForPDF(item.description || ''),
-    item.quantity % 1 === 0
-      ? item.quantity.toString()
-      : item.quantity.toFixed(2),
+    item.quantity % 1 === 0 ? item.quantity.toString() : item.quantity.toFixed(2),
     formatAmount(item.unit_price),
     formatAmount(item.total),
   ]);
@@ -1319,107 +1368,36 @@ function drawQuoteItems(
   autoTable(doc, {
     startY,
     margin: { left: 20, right: 20, bottom: 80 },
+    showHead: 'everyPage',
     rowPageBreak: 'avoid',
     theme: 'plain',
-    head: [['Beschreibung', 'Menge', 'Einzelpreis', 'Total (CHF)']],
+    head: [['BESCHREIBUNG', 'MENGE', 'EINZELPREIS', 'TOTAL (CHF)']],
     body: tableBody,
-    styles: {
-      font: PDF_FONT,
-      fontSize: 9,
-      cellPadding: CELL_PAD,
-      textColor: [0, 0, 0] as [number, number, number],
-      lineColor: [220, 220, 220] as [number, number, number],
-      lineWidth: 0.1,
-      valign: 'top',
-    },
-    headStyles: {
-      fillColor: ACCENT,
-      textColor: [255, 255, 255] as [number, number, number],
-      fontStyle: 'bold',
-      fontSize: 9,
-    },
+    ...tableStyles(),
     columnStyles: {
       0: { cellWidth: 90 },
       1: { cellWidth: 20, halign: 'right' },
       2: { cellWidth: 35, halign: 'right' },
       3: { cellWidth: 25, halign: 'right' },
     },
-
-    // Expand description cell.text so autotable computes the correct row height
     didParseCell: (data) => {
+      if (data.section === 'head' && data.column.index > 0) data.cell.styles.halign = 'right';
       if (data.section === 'body' && data.column.index === 0) {
-        const rawText = String(
-          Array.isArray(data.row.raw) ? (data.row.raw as string[])[0] ?? '' : ''
-        );
-        const expanded: string[] = [];
-        rawText.split('\n').forEach((line) => {
-          const wrapped = doc.splitTextToSize(sanitizeForPDF(line), DESC_TEXT_WIDTH);
-          expanded.push(...(wrapped as string[]));
-        });
-        if (expanded.length > 0) {
-          data.cell.text = expanded;
-          // Force cell height to match our manual rendering metrics
-          const CAP_H = 3; // baseline offset for 9pt font
-          const LINE_H = 4.5;
-          data.cell.styles.minCellHeight = CELL_PAD + CAP_H + expanded.length * LINE_H + CELL_PAD;
+        const rawText = String(Array.isArray(data.row.raw) ? (data.row.raw as string[])[0] ?? '' : '');
+        const { lines, height } = descriptionCellHeight(doc, rawText, DESC_TEXT_WIDTH);
+        if (lines.length > 0) {
+          data.cell.text = lines;
+          data.cell.styles.minCellHeight = height;
         }
       }
     },
-
-    // Prevent autotable from rendering description text (we do it in didDrawCell)
     willDrawCell: (data) => {
-      if (data.section === 'body' && data.column.index === 0) {
-        data.cell.text = [];
-      }
+      if (data.section === 'body' && data.column.index === 0) data.cell.text = [];
     },
-
-    // Manually render description: first line bold (title), rest normal
     didDrawCell: (data) => {
       if (data.section === 'body' && data.column.index === 0) {
-        const rawText = String(
-          Array.isArray(data.row.raw) ? (data.row.raw as string[])[0] ?? '' : ''
-        );
-        const [firstLine, ...restLines] = rawText.split('\n');
-
-        const x = data.cell.x + CELL_PAD;
-        const lineH = 4.5;
-        // Baseline offset: cell top + padding + approximate cap height for 9pt
-        let y = data.cell.y + CELL_PAD + 3;
-
-        // Title line — bold
-        if (firstLine && firstLine.trim()) {
-          doc.setFont(PDF_FONT, 'bold');
-          doc.setFontSize(9);
-          doc.setTextColor(0, 0, 0);
-          const wrappedTitle = doc.splitTextToSize(
-            sanitizeForPDF(firstLine),
-            DESC_TEXT_WIDTH
-          ) as string[];
-          wrappedTitle.forEach((l) => {
-            doc.text(l, x, y);
-            y += lineH;
-          });
-        }
-
-        // Body lines — normal, slightly smaller
-        const restText = restLines.join('\n').trim();
-        if (restText) {
-          doc.setFont(PDF_FONT, 'normal');
-          doc.setFontSize(8.5);
-          const wrappedRest = doc.splitTextToSize(
-            sanitizeForPDF(restText),
-            DESC_TEXT_WIDTH
-          ) as string[];
-          wrappedRest.forEach((l) => {
-            doc.text(l, x, y);
-            y += lineH;
-          });
-        }
-
-        // Reset font for subsequent cells
-        doc.setFont(PDF_FONT, 'normal');
-        doc.setFontSize(9);
-        doc.setTextColor(0, 0, 0);
+        const rawText = String(Array.isArray(data.row.raw) ? (data.row.raw as string[])[0] ?? '' : '');
+        drawDescriptionCell(doc, rawText, data.cell.x, data.cell.y, DESC_TEXT_WIDTH);
       }
     },
   });
@@ -1428,58 +1406,24 @@ function drawQuoteItems(
   const hasTotalDiscount = (quote.discount_value || 0) > 0;
   let y = finalY + 8;
 
-  // ── Totals section — aligned with right portion of table (x=120…190) ────────
-  // Table right edge is x=190; labels start at x=120 (where numeric cols begin)
-  const TOTALS_LABEL_X = 120;
-  const TOTALS_VALUE_X = 190;
-
-  doc.setFont(PDF_FONT, 'normal');
-  doc.setFontSize(9);
-  doc.setTextColor(0, 0, 0);
-
-  // Zwischensumme
-  doc.text('Zwischensumme', TOTALS_LABEL_X, y);
-  doc.text(`CHF ${formatAmount(quote.subtotal)}`, TOTALS_VALUE_X, y, { align: 'right' });
-  y += 6;
-
-  // Rabatt (if any)
+  // ── Summen ──────────────────────────────────────────────────────────────────
+  const lines: { label: string; value: string }[] = [
+    { label: 'Zwischensumme', value: `CHF ${formatAmount(quote.subtotal)}` },
+  ];
   if (hasTotalDiscount) {
-    let discountAmount: number;
-    let discountLabel: string;
-
-    if (quote.discount_type === 'percent') {
-      discountAmount = quote.subtotal * (quote.discount_value / 100);
-      discountLabel = `Rabatt (${quote.discount_value}%)`;
-    } else {
-      discountAmount = Math.min(quote.discount_value, quote.subtotal);
-      discountLabel = 'Rabatt';
-    }
-
-    doc.text(discountLabel, TOTALS_LABEL_X, y);
-    doc.setTextColor(0, 128, 0);
-    doc.text(`- CHF ${formatAmount(discountAmount)}`, TOTALS_VALUE_X, y, { align: 'right' });
-    doc.setTextColor(0, 0, 0);
-    y += 6;
+    const amount =
+      quote.discount_type === 'percent'
+        ? quote.subtotal * (quote.discount_value / 100)
+        : Math.min(quote.discount_value, quote.subtotal);
+    lines.push({
+      label: quote.discount_type === 'percent' ? `Rabatt (${quote.discount_value}%)` : 'Rabatt',
+      value: `− CHF ${formatAmount(amount)}`,
+    });
   }
-
-  // MwSt (if any)
   if (quote.vat_amount > 0) {
-    doc.text(`MWST (${quote.vat_rate}%)`, TOTALS_LABEL_X, y);
-    doc.text(`CHF ${formatAmount(quote.vat_amount)}`, TOTALS_VALUE_X, y, { align: 'right' });
-    y += 6;
+    lines.push({ label: `MWST (${quote.vat_rate}%)`, value: `CHF ${formatAmount(quote.vat_amount)}` });
   }
-
-  // Separator line
-  doc.setDrawColor(180, 180, 180);
-  doc.setLineWidth(0.3);
-  doc.line(TOTALS_LABEL_X, y, TOTALS_VALUE_X, y);
-  y += 5;
-
-  // Total — bold, Swiss-rounded
-  doc.setFont(PDF_FONT, 'bold');
-  doc.setFontSize(11);
-  doc.text('Total', TOTALS_LABEL_X, y);
-  doc.text(`CHF ${formatAmount(swissRound(quote.total))}`, TOTALS_VALUE_X, y, { align: 'right' });
+  y = drawTotalsBlock(doc, lines, `CHF ${formatAmount(swissRound(quote.total))}`, y);
 
   return y;
 }
@@ -1491,54 +1435,60 @@ function drawQuoteItems(
  * Used by both invoice and quote PDFs.
  */
 function drawCompanyFooterBar(doc: jsPDF, company: Company): void {
-  const ACCENT: [number, number, number] = [107, 138, 94];
-  const BAR_Y = 260;
+  const BAR_Y = 262;
 
-  // Format IBAN with a space every 4 characters: "CH58 0844 0261 3973 0200 1"
   const rawIban = company.qr_iban || company.iban;
   const formattedIban = rawIban
     ? (sanitizeForPDF(rawIban).replace(/\s+/g, '').toUpperCase().match(/.{1,4}/g)?.join(' ') ?? rawIban)
     : null;
 
-  // Accent line
-  doc.setDrawColor(...ACCENT);
-  doc.setLineWidth(1.5);
+  // Haarlinie statt farbigem Balken
+  doc.setDrawColor(...HAIRLINE);
+  doc.setLineWidth(0.3);
   doc.line(20, BAR_Y, 190, BAR_Y);
 
-  const textY = BAR_Y + 5.5;
-  doc.setFont(PDF_FONT, 'normal');
+  const textY = BAR_Y + 5;
+  doc.setFont(FONTS.body, 'normal');
   doc.setFontSize(7.5);
-  doc.setTextColor(80, 80, 80);
+  doc.setTextColor(...MUTED);
 
-  // Col 1 — Company name + address + IBAN (x=20)
-  let nameBlock = sanitizeForPDF(company.name);
+  // Spalte 1: Absender
+  let nameBlock = sanitizeForPDF(company.rechnungsname || company.name);
   if (company.sender_contact_name && company.sender_contact_name.trim()) {
-    nameBlock = `${sanitizeForPDF(company.sender_contact_name)} c/o ${sanitizeForPDF(company.name)}`;
+    nameBlock = `${sanitizeForPDF(company.sender_contact_name)} c/o ${nameBlock}`;
   }
-  const streetLine = sanitizeForPDF(formatAddress(company.street, company.house_number));
-  const cityLine = sanitizeForPDF(`${company.zip_code ?? ''} ${company.city ?? ''}`.trim());
+  const col1 = [
+    nameBlock,
+    sanitizeForPDF(formatAddress(company.street, company.house_number)),
+    sanitizeForPDF(`${company.zip_code ?? ''} ${company.city ?? ''}`.trim()),
+  ].filter(Boolean);
+  // Spalte 2: Bank und Register
+  const col2 = [
+    formattedIban ? `IBAN ${formattedIban}` : '',
+    company.bank_name ? sanitizeForPDF(company.bank_name) : '',
+    company.uid_number ? `UID ${sanitizeForPDF(company.uid_number)}` : '',
+    company.vat_registered && company.vat_number ? `MWST ${sanitizeForPDF(company.vat_number)}` : '',
+  ].filter(Boolean);
+  // Spalte 3: Kontakt
+  const col3 = [company.phone, company.email, company.website]
+    .filter((v): v is string => !!v)
+    .map((v) => sanitizeForPDF(v));
 
-  doc.text(nameBlock, 20, textY);
-  if (streetLine) doc.text(streetLine, 20, textY + 4);
-  if (cityLine)   doc.text(cityLine,  20, textY + 8);
-  if (formattedIban) doc.text(`IBAN: ${formattedIban}`, 20, textY + 12);
+  ([[col1, 20], [col2, 85], [col3, 145]] as [string[], number][]).forEach(([lines, x]) => {
+    lines.forEach((line, i) => doc.text(line, x, textY + i * 3.8));
+  });
 
-  // Col 2 — Phone, Email, Website stacked (x=120)
-  let contactY = textY;
-  if (company.phone) {
-    doc.text(sanitizeForPDF(company.phone), 120, contactY);
-    contactY += 4;
-  }
-  if (company.email) {
-    doc.text(sanitizeForPDF(company.email), 120, contactY);
-    contactY += 4;
-  }
-  if (company.website) {
-    doc.text(sanitizeForPDF(company.website), 120, contactY);
-  }
+  doc.setTextColor(...INK);
+}
 
-  // Reset colour
-  doc.setTextColor(0, 0, 0);
+/** Seitenzahl rechts in der Fusszeile, nur bei mehrseitigen Dokumenten. */
+function drawPageNumber(doc: jsPDF, page: number, total: number): void {
+  if (total < 2) return;
+  doc.setFont(FONTS.body, 'normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(...MUTED);
+  doc.text(`Seite ${page} von ${total}`, 190, 280, { align: 'right' });
+  doc.setTextColor(...INK);
 }
 
 /**
@@ -1595,11 +1545,13 @@ export async function generateQuotePDF(data: QuoteData): Promise<Blob> {
     format: 'a4',
   });
 
-  // Load Montserrat font (falls back to helvetica if not available)
-  PDF_FONT = await setupPdfFonts(doc);
+  // Blauwasser-Schriften fuer das Dokument; die QR-Rechnung bleibt in
+  // Helvetica (Swiss Payment Standards erlauben nur Arial/Helvetica/Frutiger)
+  FONTS = await setupPdfFontSet(doc);
+  PDF_FONT = 'helvetica';
 
   // Header — returns Y after last metadata line
-  const headerEndY = drawQuoteHeader(doc, customer, quote, logoBase64);
+  const headerEndY = drawQuoteHeader(doc, customer, quote, logoBase64, company);
 
   // Text priority: per-quote override (data.introText/footerText) → company template → nothing
   // Callers pass `undefined` (not null) to fall through to company defaults.
@@ -1617,8 +1569,13 @@ export async function generateQuotePDF(data: QuoteData): Promise<Blob> {
   // Dynamic footer text (from company settings — no hardcoded fallback)
   drawFooterText(doc, footerText, endY);
 
-  // Company footer bar at bottom of page
-  drawCompanyFooterBar(doc, company);
+  // Fusszeile auf jeder Seite (vorher nur auf der letzten)
+  const pages = doc.getNumberOfPages();
+  for (let p = 1; p <= pages; p++) {
+    doc.setPage(p);
+    drawCompanyFooterBar(doc, company);
+    drawPageNumber(doc, p, pages);
+  }
 
   return doc.output('blob');
 }
@@ -1632,7 +1589,7 @@ export async function downloadQuotePDF(data: QuoteData): Promise<void> {
 
   const link = document.createElement('a');
   link.href = url;
-  link.download = `Angebot_${data.quote.quote_number}.pdf`;
+  link.download = `Offerte_${data.quote.quote_number}.pdf`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
