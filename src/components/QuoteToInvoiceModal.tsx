@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Trash2, Plus, AlertCircle } from 'lucide-react';
 import type { Quote, QuoteItem, Customer } from '../lib/supabase';
 import { asError } from '../utils/errors';
+import { addDays, zurichDay } from '../utils/financeAggregation';
+import { calculateInvoiceTotals } from '../utils/invoiceTotals';
 
 interface QuoteToInvoiceModalProps {
   quote: Quote;
@@ -15,6 +17,8 @@ interface QuoteToInvoiceModalProps {
     vatRate: number;
   }) => Promise<void>;
   onCancel: () => void;
+  /** Zahlungsfrist in Tagen aus den Einstellungen */
+  paymentTermsDays?: number;
 }
 
 export default function QuoteToInvoiceModal({
@@ -24,6 +28,7 @@ export default function QuoteToInvoiceModal({
   nextInvoiceNumber,
   onConvert,
   onCancel,
+  paymentTermsDays = 30,
 }: QuoteToInvoiceModalProps) {
   const [invoiceNumber, setInvoiceNumber] = useState(nextInvoiceNumber);
   const [dueDate, setDueDate] = useState('');
@@ -43,24 +48,22 @@ export default function QuoteToInvoiceModal({
     );
   }, [initialItems]);
 
-  // Set default due date (30 days from now)
+  // Faelligkeit aus der Zahlungsfrist (Einstellungen)
   useEffect(() => {
-    const due = new Date();
-    due.setDate(due.getDate() + 30);
-    setDueDate(due.toISOString().split('T')[0]);
-  }, []);
+    setDueDate(addDays(zurichDay(new Date()), paymentTermsDays));
+  }, [paymentTermsDays]);
 
+  // Wie auf der Rechnung: Gesamtrabatt der Offerte vor der MWST
   const calculateTotals = () => {
-    const subtotal = items.reduce((sum, item) => {
-      const qty = parseFloat(item.quantity) || 0;
-      const price = parseFloat(item.unit_price) || 0;
-      return sum + qty * price;
-    }, 0);
-
-    const vat_amount = subtotal * (parseFloat(vatRate) / 100);
-    const total = subtotal + vat_amount;
-
-    return { subtotal, vat_amount, total };
+    const rate = parseFloat(vatRate) || 0;
+    const t = calculateInvoiceTotals({
+      items: items.map((item) => ({ quantity: parseFloat(item.quantity) || 0, unitPrice: parseFloat(item.unit_price) || 0, vatRate: rate })),
+      vatEnabled: rate > 0,
+      defaultVatRate: rate,
+      discountType: quote.discount_type ?? 'percent',
+      discountValue: quote.discount_value ?? 0,
+    });
+    return { subtotal: t.subtotal, discount: t.discountAmount, vat_amount: t.vatAmount, total: t.total };
   };
 
   const handleAddItem = () => {
@@ -120,11 +123,12 @@ export default function QuoteToInvoiceModal({
           <AlertCircle className="text-accent flex-shrink-0" size={20} />
           <div>
             <p className="text-sm text-accent">
-              <strong>Angebot {quote.quote_number}</strong> wird in eine Rechnung umgewandelt.
+              <strong>Offerte {quote.quote_number}</strong> wird in eine Rechnung umgewandelt.
             </p>
             <p className="text-sm text-accent mt-1">
-              Kunde: <strong>{customer.name}</strong>
+              Firma: <strong>{customer.name}</strong>
             </p>
+            <p className="text-sm text-accent mt-1">Rabatt sowie Einleitung und Schluss der Offerte werden übernommen.</p>
           </div>
         </div>
       </div>
@@ -280,6 +284,12 @@ export default function QuoteToInvoiceModal({
               <span className="text-fg-muted">Zwischentotal:</span>
               <span className="font-medium">CHF {totals.subtotal.toFixed(2)}</span>
             </div>
+            {totals.discount > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-fg-muted">Rabatt:</span>
+                <span className="font-medium">− CHF {totals.discount.toFixed(2)}</span>
+              </div>
+            )}
             <div className="flex justify-between text-sm">
               <span className="text-fg-muted">MwSt ({vatRate}%):</span>
               <span className="font-medium">CHF {totals.vat_amount.toFixed(2)}</span>

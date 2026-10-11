@@ -30,6 +30,8 @@ type QuoteFormProps = {
   initialOpportunityId?: string;
   existingQuote?: Quote;
   existingItems?: QuoteItem[];
+  /** Kopie als neue Offerte: Inhalt uebernehmen, Nummer/Datum/Status neu */
+  copyFrom?: { quote: Quote; items: QuoteItem[] };
 };
 
 export default function QuoteForm({
@@ -39,11 +41,15 @@ export default function QuoteForm({
   nextQuoteNumber,
   initialCustomerId,
   initialOpportunityId,
-  existingQuote,
-  existingItems,
+  existingQuote: editQuote,
+  existingItems: editItems,
+  copyFrom,
 }: QuoteFormProps) {
   const { selectedCompany } = useCompany();
-  const isEditMode = !!existingQuote;
+  const isEditMode = !!editQuote;
+  const existingQuote: Quote | undefined =
+    editQuote ?? (copyFrom ? { ...copyFrom.quote, quote_number: nextQuoteNumber, issue_date: new Date().toISOString().split('T')[0], valid_until: '', status: 'offen', converted_to_invoice_id: null, converted_at: null, sent_at: null } : undefined);
+  const existingItems = editItems ?? copyFrom?.items;
 
   // Initialize state with existing values or defaults
   const [customerId, setCustomerId] = useState(existingQuote?.customer_id || initialCustomerId || '');
@@ -84,8 +90,8 @@ export default function QuoteForm({
   );
 
   // Show warning for sent/accepted/rejected quotes in edit mode
-  const showEditWarning = isEditMode && shouldWarnOnEdit(existingQuote.status);
-  const editWarningMessage = isEditMode ? getEditWarningMessage(existingQuote.status) : '';
+  const showEditWarning = !!editQuote && shouldWarnOnEdit(editQuote.status);
+  const editWarningMessage = editQuote ? getEditWarningMessage(editQuote.status) : '';
 
   // Only update quote number from prop in create mode
   useEffect(() => {
@@ -223,7 +229,7 @@ export default function QuoteForm({
           quote_number: quoteNumber,
           customer_id: customerId,
           project_id: projectId || null,
-          opportunity_id: initialOpportunityId || null,
+          opportunity_id: existingQuote?.opportunity_id ?? initialOpportunityId ?? null,
           issue_date: issueDate,
           valid_until: validUntil,
           vat_rate: parseFloat(vatRate),
@@ -373,7 +379,7 @@ export default function QuoteForm({
               onChange={(e) => setStatus(e.target.value as Quote['status'])}
               className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
             >
-              <option value="offen">Offen</option>
+              <option value="offen">Entwurf</option>
               <option value="versendet">Versendet</option>
               <option value="akzeptiert">Akzeptiert</option>
               <option value="abgelehnt">Abgelehnt</option>

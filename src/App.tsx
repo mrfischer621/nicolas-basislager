@@ -7,7 +7,8 @@ import KundenDetail from './pages/KundenDetail';
 import Kontakte from './pages/Kontakte';
 import Projekte from './pages/Projekte';
 import Zeiterfassung from './pages/Zeiterfassung';
-import Angebote from './pages/Angebote';
+import Offerten from './pages/Offerten';
+import OfferteDetail from './pages/OfferteDetail';
 import Rechnungen from './pages/Rechnungen';
 import RechnungDetail from './pages/RechnungDetail';
 import Buchungen from './pages/Buchungen';
@@ -53,7 +54,8 @@ function App() {
           <Route path="kontakte/firmen/:id" element={<KundenDetail />} />
           <Route path="leads" element={<Leads />} />
           <Route path="pipeline" element={<Pipeline />} />
-          <Route path="offerten" element={<Angebote />} />
+          <Route path="offerten" element={<Offerten />} />
+          <Route path="offerten/:id" element={<OfferteDetail />} />
           <Route path="projekte" element={<Projekte />} />
           <Route path="zeiterfassung" element={<Zeiterfassung />} />
           <Route path="rechnungen" element={<RechnungenRoute />} />
