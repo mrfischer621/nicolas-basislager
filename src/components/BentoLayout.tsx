@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { BentoSidebar } from './BentoSidebar';
 import { BentoHeader } from './BentoHeader';
@@ -62,7 +62,10 @@ export default function BentoLayout() {
                 Fehler beim Navigieren auf eine andere Seite wieder auf. */}
             <ErrorBoundary resetKey={location.pathname}>
               {/* CRITICAL FIX: Key prop forces complete remount when company changes */}
-              <Outlet key={selectedCompany?.id || 'no-company'} />
+              {/* Seiten werden erst bei Bedarf geladen (kleineres Haupt-Bundle) */}
+              <Suspense fallback={<div className="skeleton h-64 w-full" aria-label="Seite wird geladen" />}>
+                <Outlet key={selectedCompany?.id || 'no-company'} />
+              </Suspense>
             </ErrorBoundary>
           </div>
         </main>

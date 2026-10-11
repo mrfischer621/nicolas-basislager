@@ -1,24 +1,27 @@
+import { lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import BentoLayout from './components/BentoLayout';
-import Cockpit from './pages/Cockpit';
-import Pipeline from './pages/Pipeline';
-import Leads from './pages/Leads';
-import FirmaDetail from './pages/FirmaDetail';
-import Kontakte from './pages/Kontakte';
-import Projekte from './pages/Projekte';
-import ProjektDetail from './pages/ProjektDetail';
-import Zeiterfassung from './pages/Zeiterfassung';
-import Offerten from './pages/Offerten';
-import OfferteDetail from './pages/OfferteDetail';
-import Rechnungen from './pages/Rechnungen';
-import RechnungDetail from './pages/RechnungDetail';
-import Buchungen from './pages/Buchungen';
-import Berichte from './pages/Berichte';
-import Einstellungen from './pages/Einstellungen';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ProtectedRoute from './components/ProtectedRoute';
 import { legacyTarget } from './routes/legacy';
+
+// Seiten werden erst beim Aufruf geladen
+const Cockpit = lazy(() => import('./pages/Cockpit'));
+const Pipeline = lazy(() => import('./pages/Pipeline'));
+const Leads = lazy(() => import('./pages/Leads'));
+const FirmaDetail = lazy(() => import('./pages/FirmaDetail'));
+const Kontakte = lazy(() => import('./pages/Kontakte'));
+const Projekte = lazy(() => import('./pages/Projekte'));
+const ProjektDetail = lazy(() => import('./pages/ProjektDetail'));
+const Zeiterfassung = lazy(() => import('./pages/Zeiterfassung'));
+const Offerten = lazy(() => import('./pages/Offerten'));
+const OfferteDetail = lazy(() => import('./pages/OfferteDetail'));
+const Rechnungen = lazy(() => import('./pages/Rechnungen'));
+const RechnungDetail = lazy(() => import('./pages/RechnungDetail'));
+const Buchungen = lazy(() => import('./pages/Buchungen'));
+const Berichte = lazy(() => import('./pages/Berichte'));
+const Einstellungen = lazy(() => import('./pages/Einstellungen'));
 
 /** Alte URL auf die neue Struktur umleiten (Lesezeichen), Parameter bleiben. */
 function Legacy({ fallback }: { fallback: string }) {
