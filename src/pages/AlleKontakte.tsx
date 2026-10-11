@@ -185,16 +185,16 @@ export default function AlleKontakte() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-content-heading">Alle Kontakte</h1>
-          <p className="text-content-secondary mt-1">Übersicht aller Ansprechpersonen</p>
+          <h1 className="page-title">Alle Kontakte</h1>
+          <p className="mt-2 text-sm text-fg-muted">Übersicht aller Ansprechpersonen</p>
         </div>
         <button
           onClick={handleOpenModal}
-          className="flex items-center gap-2 px-4 py-2 bg-brand text-accent-fg rounded-lg hover:bg-brand-dark transition"
+          className="btn-cta"
         >
-          <Plus size={20} />
+          <Plus size={18} aria-hidden="true" />
           Neuer Kontakt
         </button>
       </div>
@@ -213,11 +213,11 @@ export default function AlleKontakte() {
 
       {/* Contacts Grid */}
       {isLoading ? (
-        <div className="bg-surface rounded-lg shadow-sm p-6">
+        <div className="card p-6">
           <p className="text-content-tertiary text-center">Lädt Kontakte...</p>
         </div>
       ) : filteredContacts.length === 0 ? (
-        <div className="bg-surface rounded-lg shadow-sm p-6">
+        <div className="card p-6">
           <p className="text-content-tertiary text-center">
             {searchTerm ? 'Keine Kontakte gefunden.' : 'Noch keine Kontakte vorhanden.'}
           </p>
@@ -227,7 +227,7 @@ export default function AlleKontakte() {
           {filteredContacts.map((contact) => (
             <div
               key={contact.id}
-              className="bg-surface rounded-lg shadow-sm p-4 hover:shadow-md transition border border-line"
+              className="card p-4 hover:shadow-md transition border border-line"
             >
               {/* Header with name and primary badge */}
               <div className="flex items-start justify-between mb-3">
