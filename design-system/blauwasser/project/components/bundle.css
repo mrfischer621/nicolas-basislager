@@ -1,0 +1,187 @@
+/* Blauwasser Plakatform, Bausteine als CSS-Klassen.
+   Liest nur Tokens aus tokens.css (Farben, Radien, Abstände, Schatten) und
+   setzt Grössen über die Typo-Klassen (.poster, .caps-sm, .ov-title …).
+   Von Hand übertragen aus der Website (components/ui, components/landing,
+   app/theme.css) und dem Logbuch (blauwasser-logbuch/styles/komponenten.css).
+   Gilt für Web, Grafiken und Video-Overlays gleichermassen. */
+
+.bw { font-family: var(--font-body); color: var(--foreground); -webkit-font-smoothing: antialiased; }
+.bw *, .bw *::before, .bw *::after { box-sizing: border-box; }
+.bw :where(h1, h2, h3, h4, p, ul, ol, figure, blockquote) { margin: 0; padding: 0; }
+.bw :where(ul, ol) { list-style: none; }
+
+/* ── Titel ─────────────────────────────────────────────────────────────── */
+.bw-title { font-family: var(--font-display); text-transform: uppercase; color: inherit; text-wrap: balance; }
+.bw-title__pointe { color: var(--cta); }
+.bw-title--pointe-block .bw-title__pointe { display: block; }
+
+/* Der Textmarker: hellblauer Balken hinter der unteren Hälfte der Wörter. */
+.bw-marker {
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  background-image: linear-gradient(transparent var(--marker-from), var(--marker) var(--marker-from), var(--marker) var(--marker-to), transparent var(--marker-to));
+  padding-inline: var(--marker-inset);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+.bw-marker--nowrap { white-space: nowrap; }
+/* Auf Tinte wird das markierte Wort hellblau statt hinterlegt. */
+.bw-on-ink .bw-marker, [data-theme="dark"] .bw-marker { background-image: none; color: var(--cta); padding-inline: 0; }
+/* Ausnahme Logbuch-Cover und Overlay: Balken auch auf Tinte, weisse Versalien darauf (gross, 3.1:1). */
+.bw-on-ink .bw-marker--force, [data-theme="dark"] .bw-marker--force {
+  background-image: linear-gradient(transparent var(--marker-from), var(--marker) var(--marker-from), var(--marker) var(--marker-to), transparent var(--marker-to));
+  color: inherit; padding-inline: var(--marker-inset);
+}
+
+/* Dachzeile: kleine Versalien, gedämpft. */
+.bw-overline { font-family: var(--font-display); text-transform: uppercase; color: var(--foreground-muted); }
+.bw-on-ink .bw-overline { color: var(--foreground-inverted-muted); }
+.bw-overline--blue { color: var(--cta); }
+
+/* Zweifarbige Aussage: Satz in Tinte, Rest im hellen Grau. */
+.bw-statement { font-family: var(--font-display); color: var(--foreground); text-wrap: balance; }
+.bw-statement__rest { color: var(--foreground-inverted-muted); }
+.bw-lead { color: var(--foreground-muted); max-width: var(--narrow); }
+.bw-on-ink .bw-lead { color: var(--foreground-inverted-muted); }
+
+/* ── Flächen ───────────────────────────────────────────────────────────── */
+.bw-band { padding: var(--space-section) var(--space-card); }
+.bw-band--ground { background: var(--background); color: var(--foreground); }
+.bw-band--paper { background: var(--surface); color: var(--foreground); }
+.bw-band--ink { background: var(--surface-inverted); color: var(--foreground-inverted); }
+.bw-band--brand { background: var(--cta); color: var(--cta-foreground); }
+.bw-on-ink { color: var(--foreground-inverted); }
+
+/* ── Aktionen ──────────────────────────────────────────────────────────── */
+.bw-pill {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-3);
+  height: 52px; padding: 0 28px; border: 0; border-radius: var(--radius-full);
+  background: var(--cta); color: var(--cta-foreground);
+  font-family: var(--font-display); text-transform: uppercase; text-decoration: none; white-space: nowrap;
+  box-shadow: var(--shadow-cta); cursor: pointer;
+  transition: background-color 150ms cubic-bezier(0.2, 0, 0.13, 1);
+}
+.bw-pill:hover { background: var(--cta-hover); }
+.bw-pill:focus-visible { outline: var(--border-strong-width) solid var(--focus); outline-offset: 2px; }
+.bw-pill--xl { height: var(--button-xl-height); min-width: var(--cta-min); padding: 0 44px; }
+.bw-pill--ink { background: var(--surface-inverted); color: var(--foreground-inverted); box-shadow: var(--shadow-sm); }
+.bw-pill svg { width: 20px; height: 20px; flex: none; }
+
+.bw-textlink { font-family: var(--font-body); font-weight: 600; color: var(--foreground); text-decoration: underline; text-decoration-color: var(--cta); text-decoration-thickness: 2px; text-underline-offset: 4px; }
+
+/* Häkchen im hellblauen Punkt. */
+.bw-check { display: inline-grid; place-items: center; flex: none; width: 20px; height: 20px; border-radius: var(--radius-full); background: var(--cta); color: var(--cta-foreground); }
+.bw-check svg { width: 12px; height: 12px; }
+.bw-check--lg { width: 36px; height: 36px; }
+.bw-check--lg svg { width: 18px; height: 18px; }
+
+.bw-checklist { display: grid; gap: var(--space-3); }
+.bw-checklist li { display: flex; gap: var(--space-3); align-items: flex-start; }
+.bw-checklist .bw-check { margin-top: 2px; }
+
+/* Faktenzeile unter einer Hauptaktion: dünne Häkchen ohne Punkt. */
+.bw-facts { display: flex; flex-wrap: wrap; gap: 8px 22px; justify-content: center; color: var(--foreground-muted); }
+.bw-facts li { display: inline-flex; align-items: center; gap: 6px; }
+.bw-facts svg { width: 16px; height: 16px; }
+
+/* Nummernschild «01». */
+.bw-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 1.9em; padding: 0.3em 0.75em; border-radius: var(--radius-badge); background: var(--surface-inverted); color: var(--foreground-inverted); font-family: var(--font-display); text-transform: uppercase; white-space: nowrap; }
+.bw-on-ink .bw-badge, [data-theme="dark"] .bw-badge { background: var(--cta); color: var(--cta-foreground); }
+
+/* Ankündigungs-Badge auf der Leiste. */
+.bw-tag { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: var(--radius-full); background: var(--surface-inverted); color: var(--foreground-inverted); font-family: var(--font-display); text-transform: uppercase; }
+
+/* ── Bausteine ─────────────────────────────────────────────────────────── */
+/* Kennzahl mit 4 px Akzentlinie links. */
+.bw-fact { border-left: var(--border-accent) solid var(--cta); padding-left: 16px; }
+.bw-fact__value { font-family: var(--font-display); color: inherit; }
+.bw-fact__label { margin-top: 6px; color: var(--foreground-muted); font-family: var(--font-display); text-transform: uppercase; }
+.bw-on-ink .bw-fact__label { color: var(--foreground-inverted-muted); }
+
+/* Nummerierte Spalte: Akzentlinie oben, blaue Nummer, Versalien-Titel. */
+.bw-column { border-top: var(--border-accent) solid var(--cta); padding-top: 28px; }
+.bw-column__num { color: var(--cta); font-family: var(--font-display); }
+.bw-column__title { margin-top: 12px; font-family: var(--font-display); text-transform: uppercase; }
+.bw-column__text { margin-top: 10px; color: var(--foreground-muted); }
+.bw-on-ink .bw-column__text { color: var(--foreground-inverted-muted); }
+
+/* Leistungskarte. */
+.bw-card { position: relative; background: var(--surface); border: var(--border-hairline) solid var(--border); border-radius: var(--radius-card); padding: var(--space-card); box-shadow: var(--shadow-card); color: var(--foreground); }
+.bw-card--tinted { background: var(--background); box-shadow: none; }
+.bw-card__badge { position: absolute; top: 20px; right: 20px; }
+.bw-card__icon { display: grid; place-items: center; width: 56px; height: 56px; border-radius: var(--radius-tile); background: var(--accent-subtle); color: var(--cta); }
+.bw-card__icon svg { width: 24px; height: 24px; }
+.bw-card__title { margin-top: 28px; font-family: var(--font-display); text-transform: uppercase; }
+.bw-card__text { margin-top: 12px; color: var(--foreground-muted); }
+.bw-card__foot { margin-top: 24px; padding-top: 16px; border-top: var(--border-hairline) dashed var(--border); display: flex; flex-wrap: wrap; gap: 8px; }
+.bw-chip { display: inline-flex; padding: 4px 10px; border: var(--border-hairline) solid var(--border); border-radius: var(--radius-full); background: var(--surface); color: var(--foreground-muted); }
+
+/* Angebotskarte: links Papier, rechts Tinte. */
+.bw-offer { display: grid; grid-template-columns: 1.15fr 1fr; border-radius: var(--radius-card); overflow: hidden; border: var(--border-hairline) solid var(--border); box-shadow: var(--shadow-offer); }
+.bw-offer__main { background: var(--surface); color: var(--foreground); padding: 40px 48px; }
+.bw-offer__side { position: relative; background: var(--surface-inverted); color: var(--foreground-inverted); padding: 40px 48px; display: flex; flex-direction: column; justify-content: center; gap: 20px; }
+.bw-offer__stamp { position: absolute; top: 14px; right: 16px; color: var(--cta); font-family: var(--font-display); font-style: italic; text-transform: uppercase; }
+.bw-offer__price { display: flex; align-items: baseline; gap: 16px; font-family: var(--font-display); }
+.bw-offer__unit { font-family: var(--font-display); text-transform: uppercase; color: var(--foreground-inverted-muted); }
+
+/* Zitat: blaues «, Satz fett, Zuschreibung klein. */
+.bw-quote { text-align: center; }
+.bw-quote__mark { display: block; height: 0.62em; color: var(--cta); font-family: var(--font-display); font-weight: 900; line-height: 0.75; }
+.bw-quote__text { margin-inline: auto; max-width: var(--poster-measure); font-family: var(--font-display); color: inherit; }
+.bw-quote__by { margin-top: 24px; color: var(--foreground-muted); }
+.bw-quote__by strong { color: var(--foreground); font-weight: 600; }
+.bw-quote--left { text-align: left; }
+.bw-quote--left .bw-quote__text { margin-inline: 0; }
+
+/* Randnotiz in Handschrift mit Pfeil. */
+.bw-note { font-family: var(--font-hand); color: var(--note-ink); transform: rotate(-2deg); transform-origin: left top; display: inline-block; }
+.bw-note__arrow { display: block; width: 80px; height: auto; color: var(--note-ink); fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; overflow: visible; }
+
+
+/* Foto mit versetztem blauem Block. */
+.bw-photo { position: relative; padding: 0 16px 16px 0; }
+.bw-photo::before { content: ""; position: absolute; inset: 16px 0 0 16px; border-radius: var(--radius-card); background: var(--cta); }
+.bw-photo img { position: relative; display: block; width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-card); }
+
+/* Verteilungsbalken. */
+.bw-split { display: flex; height: 20px; border-radius: var(--radius-full); overflow: hidden; }
+.bw-split > span { display: block; }
+.bw-split__a { background: var(--cta); } .bw-split__b { background: var(--surface-inverted); } .bw-split__c { background: var(--foreground-subtle); }
+.bw-legend { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 28px; }
+.bw-legend__dot { display: inline-block; width: 12px; height: 12px; border-radius: var(--radius-full); margin-right: 8px; vertical-align: 0.15em; }
+
+/* Etappenleiste (Fuss des Logbuchs). */
+.bw-progress { display: inline-grid; grid-auto-flow: column; grid-auto-columns: 32px; border: var(--border-hairline) solid var(--border-strong); height: 8px; }
+.bw-progress > span { border-right: var(--border-hairline) solid var(--border-strong); }
+.bw-progress > span:last-child { border-right: 0; }
+.bw-progress > .is-on { background: var(--cta); }
+
+/* Fragen mit gestrichelter Linie. */
+.bw-faq details { border-bottom: var(--border-dashed) dashed var(--border-strong); }
+.bw-faq summary { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 22px 0; cursor: pointer; list-style: none; font-family: var(--font-display); font-weight: 800; }
+.bw-faq summary::-webkit-details-marker { display: none; }
+.bw-faq summary svg { width: 20px; height: 20px; flex: none; }
+.bw-faq details[open] summary svg { transform: rotate(180deg); }
+.bw-faq details p { padding-bottom: 22px; color: var(--foreground-muted); }
+
+/* Polarnetz: konzentrische Kreise und Meridiane als Textur. */
+.bw-polar { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; fill: none; stroke: var(--border); opacity: var(--polar-grid); }
+.bw-on-ink .bw-polar, [data-theme="dark"] .bw-polar { stroke: var(--foreground-inverted); opacity: var(--polar-grid-dark); }
+
+/* Route: gestrichelte Linie in cta. */
+.bw-route-line { fill: none; stroke: var(--cta); stroke-dasharray: 6 6; stroke-width: 2; }
+
+/* ── Video-Overlays (1920 x 1080, Titelsicherheit 5 % = 96 px) ───────────── */
+.bw-frame { position: relative; width: 1920px; height: 1080px; overflow: hidden; }
+.bw-frame--portrait { width: 1080px; height: 1920px; }
+.bw-frame--feed { width: 1080px; height: 1350px; }
+.bw-lower { position: absolute; left: 96px; bottom: 96px; display: grid; gap: 10px; padding: 26px 40px 28px 36px; background: var(--surface-inverted); color: var(--foreground-inverted); border-left: var(--border-accent) solid var(--cta); border-radius: 0 var(--radius-badge) var(--radius-badge) 0; }
+.bw-lower__name { font-family: var(--font-display); text-transform: uppercase; }
+.bw-lower__role { font-family: var(--font-display); text-transform: uppercase; color: var(--foreground-inverted-muted); }
+.bw-lower--paper { background: var(--surface); color: var(--foreground); }
+.bw-lower--paper .bw-lower__role { color: var(--foreground-muted); }
+.bw-caption { position: absolute; left: 50%; bottom: 120px; transform: translateX(-50%); max-width: 32ch; padding: 14px 28px 16px; border-radius: var(--radius-badge); background: var(--surface-inverted); color: var(--foreground-inverted); text-align: center; text-wrap: balance; }
+.bw-bug { position: absolute; top: 72px; right: 96px; height: 44px; }
+
+/* Kleine Etiketten stehen immer in Versalien der Titelschrift. */
+.bw :is(.caps-sm, .ov-role, .print-overline) { font-family: var(--font-display); text-transform: uppercase; }
