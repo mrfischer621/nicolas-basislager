@@ -1,736 +1,343 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { FileText, Plus } from 'lucide-react';
+import {
+  BulkBar,
+  DataTable,
+  FilterSelect,
+  KpiStrip,
+  ListPage,
+  Notice,
+  Pagination,
+  SearchField,
+  Toolbar,
+  ViewTabs,
+  activeFilterCount,
+  useListState,
+  useSelection,
+  type Column,
+  type RowMenuItem,
+} from '../components/list';
+import { EmptyState } from '../components/ui';
 import { useConfirm } from '../context/ConfirmProvider';
-import { useSearchParams } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
-import type { Invoice, InvoiceItem, Customer, Project, Company } from '../lib/supabase';
-import InvoiceForm from '../components/InvoiceForm';
-import InvoiceTable from '../components/InvoiceTable';
-import Modal from '../components/Modal';
-import PdfPreviewModal from '../components/PdfPreviewModal';
-import { downloadInvoicePDF, getInvoicePdfBlobUrl } from '../utils/pdfLazy';
-import { validateInvoiceData } from '../utils/invoiceValidation';
-import { canEditInvoice, getEditBlockedReason } from '../utils/invoiceUtils';
 import { useCompany } from '../context/CompanyContext';
-import { useInvalidateFinance } from '../hooks/useFinance';
-import { paidDateToTimestamp } from '../utils/financeAggregation';
-import { Plus, AlertCircle } from 'lucide-react';
+import { useCustomers, useProjects } from '../hooks/queries';
+import {
+  deleteInvoice,
+  loadInvoiceItems,
+  markInvoicesSent,
+  prepareInvoicePdf,
+  useInvalidateInvoices,
+  useInvoiceList,
+  useInvoiceSummary,
+  type InvoiceRow,
+} from '../hooks/useInvoices';
+import { InvoiceEditor, type InvoiceEditorMode } from '../components/invoices/InvoiceEditor';
+import { PaidDatesDialog } from '../components/invoices/PaidDatesDialog';
+import { MarkPaidDrawer, type PaidTarget } from '../components/invoices/MarkPaidDrawer';
+import { downloadInvoicePDF } from '../utils/pdfLazy';
+import { zurichDay } from '../utils/financeAggregation';
+import { formatChfDisplay } from '../utils/money';
+import { formatDate } from '../utils/format';
 import { asError } from '../utils/errors';
+import {
+  INVOICE_STATE_BADGE,
+  INVOICE_STATE_LABEL,
+  INVOICE_VIEWS,
+  daysUntilDue,
+  invoiceState,
+  invoiceSummarySentence,
+  summarizeInvoices,
+  type InvoiceView,
+} from '../utils/invoiceViews';
 
-type InvoiceFormData = {
-  invoice: Omit<Invoice, 'id' | 'created_at' | 'subtotal' | 'vat_amount' | 'total' | 'total_discount_percent'>;
-  items: Array<Omit<InvoiceItem, 'id' | 'invoice_id' | 'total'>>;
-};
-
-interface Toast {
-  type: 'success' | 'error';
-  message: string;
-}
+const DEFAULTS = { ansicht: 'alle', sort: '-issue_date' };
 
 export default function Rechnungen() {
-  const confirmDialog = useConfirm();
+  const navigate = useNavigate();
+  const confirm = useConfirm();
   const { selectedCompany } = useCompany();
-  const invalidateFinance = useInvalidateFinance();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [nextInvoiceNumber, setNextInvoiceNumber] = useState(`RE-${new Date().getFullYear()}-001`);
-  const [toast, setToast] = useState<Toast | null>(null);
-  const isFetchingRef = useRef(false);
+  const [searchParams] = useSearchParams();
+  const { state, set, reset, page } = useListState(DEFAULTS);
+  const view = (INVOICE_VIEWS.some((v) => v.value === state.ansicht) ? state.ansicht : 'alle') as InvoiceView;
+  const today = zurichDay(new Date());
 
-  // Edit mode state
-  const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
-  const [editingItems, setEditingItems] = useState<InvoiceItem[]>([]);
+  const { data: customers = [] } = useCustomers();
+  const { data: projects = [] } = useProjects();
+  const summaryQuery = useInvoiceSummary();
+  const listQuery = useInvoiceList(state, customers);
+  const invalidate = useInvalidateInvoices();
+  const summary = useMemo(() => summarizeInvoices(summaryQuery.data ?? [], today), [summaryQuery.data, today]);
+  const rows = listQuery.data?.rows ?? [];
+  const selection = useSelection(rows.map((r) => r.id));
 
-  // PDF Preview state
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [previewBlobUrl, setPreviewBlobUrl] = useState<string | null>(null);
-  const [previewInvoice, setPreviewInvoice] = useState<Invoice | null>(null);
-  const [previewData, setPreviewData] = useState<{
-    invoice: Invoice;
-    items: InvoiceItem[];
-    customer: Customer;
-    company: Company;
-    logoBase64?: string | null;
-    introText?: string | null;
-    footerText?: string | null;
-  } | null>(null);
+  // ?neu=1 (Befehlspalette, Cockpit) oeffnet direkt die Maske
+  const [editor, setEditor] = useState<InvoiceEditorMode | null>(() => (searchParams.get('neu') === '1' ? { kind: 'new' } : null));
+  const [paidTargets, setPaidTargets] = useState<PaidTarget[]>([]);
+  const [paidMode, setPaidMode] = useState<'markieren' | 'aendern'>('markieren');
+  const [paidDatesOpen, setPaidDatesOpen] = useState(false);
 
+  // Alte Deep Links: ?id= oeffnet die Detailseite, ?customerId= filtert nach Firma
   useEffect(() => {
-    console.log('[Rechnungen] useEffect triggered, selectedCompany:', selectedCompany?.name);
-    if (selectedCompany) {
-      console.log('[Rechnungen] Calling fetchData...');
-      fetchData();
-    }
-  }, [selectedCompany]);
+    const id = searchParams.get('id');
+    if (id) navigate(`/rechnungen/${id}`, { replace: true });
+    const customerId = searchParams.get('customerId');
+    if (customerId) set({ firma: customerId, customerId: null });
+    if (searchParams.get('neu') === '1') set({ neu: null });
+  }, [searchParams, navigate, set]);
 
-  // Auto-hide toast after 5 seconds
-  useEffect(() => {
-    if (toast) {
-      const timer = setTimeout(() => setToast(null), 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [toast]);
+  if (!selectedCompany) return null;
 
-  // Handle query parameter for opening specific invoice
-  useEffect(() => {
-    const invoiceId = searchParams.get('id');
-    if (invoiceId && invoices.length > 0) {
-      const invoice = invoices.find(i => i.id === invoiceId);
-      if (invoice) {
-        handleEdit(invoice);
-        setSearchParams({}); // Clear query param after opening
-      }
-    }
-  }, [searchParams, invoices]);
-
-  // Bezahlte Rechnungen ohne Zahlungsdatum: Filter aus dem Hinweis im Dashboard
-  const onlyMissingPaidDate = searchParams.get('ohne-zahlungsdatum') === '1';
-  const visibleInvoices = onlyMissingPaidDate
-    ? invoices.filter((i) => i.status === 'bezahlt' && !i.paid_at)
-    : invoices;
-
-  // Nur das Zahlungsdatum nachtragen, die Rechnung selbst bleibt unveraendert
-  const handleSetPaidDate = async (invoice: Invoice, day: string) => {
-    const { error: updateError } = await supabase
-      .from('invoices')
-      .update({ paid_at: paidDateToTimestamp(day) })
-      .eq('id', invoice.id)
-      .eq('company_id', selectedCompany!.id);
-    if (updateError) {
-      setToast({ type: 'error', message: 'Zahlungsdatum konnte nicht gespeichert werden.' });
-      return;
-    }
-    setInvoices((prev) => prev.map((i) => (i.id === invoice.id ? { ...i, paid_at: paidDateToTimestamp(day) } : i)));
-    await invalidateFinance();
-    setToast({ type: 'success', message: `Zahlungsdatum für ${invoice.invoice_number} gespeichert.` });
+  const openPaid = (targets: InvoiceRow[], mode: 'markieren' | 'aendern' = 'markieren') => {
+    setPaidMode(mode);
+    setPaidTargets(targets.map((t) => ({ id: t.id, invoice_number: t.invoice_number, total: Number(t.total), issue_date: t.issue_date, paid_at: t.paid_at })));
   };
 
-  // Early return if no company selected
-  if (!selectedCompany) {
+  const pdf = async (inv: InvoiceRow) => {
+    try {
+      const customer = customers.find((c) => c.id === inv.customer_id);
+      await downloadInvoicePDF(await prepareInvoicePdf(inv, customer, selectedCompany.id));
+    } catch (caught) {
+      toast.error(`PDF nicht erstellt: ${asError(caught).message}`);
+    }
+  };
+
+  const sent = async (ids: string[]) => {
+    const result = await markInvoicesSent(selectedCompany.id, ids);
+    await invalidate();
+    selection.clear();
+    if (result.failed.length) toast.error(`${result.failed.length} nicht gespeichert: ${result.failed[0].message}`);
+    else toast.success(ids.length === 1 ? 'Als versendet gespeichert.' : `${result.saved} Rechnungen als versendet gespeichert.`);
+  };
+
+  const remove = async (inv: InvoiceRow) => {
+    const ok = await confirm({
+      title: `Rechnung ${inv.invoice_number} löschen`,
+      message: 'Die Rechnung und ihre Positionen werden gelöscht. Verknüpfte Zeiten gelten danach wieder als nicht verrechnet.',
+      confirmLabel: 'Löschen',
+      destructive: true,
+    });
+    if (!ok) return;
+    try {
+      await deleteInvoice(inv.id);
+      await invalidate();
+      toast.success(`Rechnung ${inv.invoice_number} gelöscht.`);
+    } catch (caught) {
+      toast.error(`Nicht gelöscht: ${asError(caught).message}`);
+    }
+  };
+
+  const edit = async (inv: InvoiceRow, kind: 'edit' | 'copy') => {
+    try {
+      const items = await loadInvoiceItems(inv.id);
+      setEditor({ kind, invoice: inv, items });
+    } catch (caught) {
+      toast.error(`Positionen nicht geladen: ${asError(caught).message}`);
+    }
+  };
+
+  const menu = (inv: InvoiceRow): RowMenuItem[] => {
+    const s = invoiceState(inv, today);
+    const open = s === 'versendet' || s === 'ueberfaellig';
+    return [
+      { label: 'Öffnen', onSelect: () => navigate(`/rechnungen/${inv.id}`) },
+      { label: 'Bearbeiten', onSelect: () => edit(inv, 'edit'), hidden: s === 'bezahlt' },
+      { label: 'PDF herunterladen', onSelect: () => pdf(inv) },
+      { label: 'Als versendet markieren', onSelect: () => sent([inv.id]), hidden: s !== 'entwurf' },
+      { label: 'Als bezahlt markieren', onSelect: () => openPaid([inv]), hidden: !open && s !== 'entwurf' },
+      { label: 'Zahlungsdatum ändern', onSelect: () => openPaid([inv], 'aendern'), hidden: s !== 'bezahlt' },
+      { label: 'Kopie als neue Rechnung', onSelect: () => edit(inv, 'copy') },
+      { label: 'Löschen', onSelect: () => remove(inv), danger: true, hidden: s === 'bezahlt' },
+    ];
+  };
+
+  const dueCell = (inv: InvoiceRow) => {
+    const s = invoiceState(inv, today);
+    if (s === 'bezahlt') return <span className="tabular-nums text-fg-muted">{inv.paid_at ? `bezahlt ${formatDate(inv.paid_at)}` : 'bezahlt, Datum fehlt'}</span>;
+    const d = daysUntilDue(inv.due_date, today);
+    const hint = s === 'ueberfaellig' && d !== null ? `seit ${-d} ${d === -1 ? 'Tag' : 'Tagen'}` : s === 'versendet' && d !== null && d <= 7 ? (d === 0 ? 'heute' : `in ${d} ${d === 1 ? 'Tag' : 'Tagen'}`) : null;
     return (
-      <div className="flex items-center justify-center h-64">
-        <p className="text-fg-muted">Firma wird geladen...</p>
-      </div>
+      <span className="tabular-nums">
+        {formatDate(inv.due_date)}
+        {hint && <span className={`ml-2 text-xs ${s === 'ueberfaellig' ? 'text-negative' : 'text-attention'}`}>{hint}</span>}
+      </span>
     );
-  }
-
-  const fetchData = async () => {
-    console.log('[Rechnungen] fetchData called for company:', selectedCompany?.name);
-    if (!selectedCompany) return;
-
-    // Finanzzahlen (Dashboard, Auswertung) nach Aenderungen neu laden
-    void invalidateFinance();
-
-    // Prevent concurrent fetches
-    if (isFetchingRef.current) {
-      console.log('[Rechnungen] Already fetching, skipping duplicate call');
-      return;
-    }
-
-    try {
-      isFetchingRef.current = true;
-      setIsLoading(true);
-      setError(null);
-
-      console.log('[Rechnungen] Fetching data...');
-
-      const [invoicesResult, customersResult, projectsResult] = await Promise.all([
-        supabase
-          .from('invoices')
-          .select('*')
-          .eq('company_id', selectedCompany.id)
-          .order('created_at', { ascending: false }),
-        supabase
-          .from('customers')
-          .select('*')
-          .eq('company_id', selectedCompany.id)
-          .order('name', { ascending: true }),
-        supabase
-          .from('projects')
-          .select('*')
-          .eq('company_id', selectedCompany.id)
-          .order('name', { ascending: true }),
-      ]);
-
-      if (invoicesResult.error) throw invoicesResult.error;
-      if (customersResult.error) throw customersResult.error;
-      if (projectsResult.error) throw projectsResult.error;
-
-      setInvoices(invoicesResult.data || []);
-      setCustomers(customersResult.data || []);
-      setProjects(projectsResult.data || []);
-
-      console.log('[Rechnungen] Data fetched successfully:', {
-        invoices: invoicesResult.data?.length || 0,
-        customers: customersResult.data?.length || 0,
-        projects: projectsResult.data?.length || 0
-      });
-
-      // Generate next invoice number (COMPANY-SPECIFIC)
-      // Find the highest invoice number for the current year
-      const currentYear = new Date().getFullYear();
-      let highestNumber = 0;
-
-      if (invoicesResult.data && invoicesResult.data.length > 0) {
-        for (const invoice of invoicesResult.data) {
-          const invoiceNumber = invoice.invoice_number;
-          const match = invoiceNumber?.match(/RE-(\d{4})-(\d{3})/);
-          if (match) {
-            const invoiceYear = parseInt(match[1]);
-            const num = parseInt(match[2]);
-            // Only consider invoices from current year
-            if (invoiceYear === currentYear && num > highestNumber) {
-              highestNumber = num;
-            }
-          }
-        }
-      }
-
-      // Set next invoice number
-      setNextInvoiceNumber(`RE-${currentYear}-${String(highestNumber + 1).padStart(3, '0')}`);
-    } catch (err) {
-      console.error('[Rechnungen] Error fetching data:', err);
-      setError('Fehler beim Laden der Daten. Bitte überprüfen Sie Ihre Supabase-Konfiguration.');
-    } finally {
-      console.log('[Rechnungen] fetchData completed, setting isLoading to false');
-      setIsLoading(false);
-      isFetchingRef.current = false;
-    }
   };
 
-  const handleSubmit = async (
-    data: InvoiceFormData,
-    calculatedTotals: { subtotal: number; vat_amount: number; total: number; discountAmount?: number },
-    timeEntryIds?: string[]
-  ) => {
-    if (!selectedCompany) return;
+  const columns: Column<InvoiceRow>[] = [
+    { key: 'nr', header: 'Nr', sortKey: 'invoice_number', cell: (r) => <span className="font-semibold">{r.invoice_number}</span> },
+    {
+      key: 'firma',
+      header: 'Firma',
+      cell: (r) => (
+        <span className="block max-w-[16rem] truncate">
+          {r.customers?.name ?? '–'}
+          {r.title && <span className="ml-2 text-fg-muted">{r.title.length > 40 ? `${r.title.slice(0, 40)} …` : r.title}</span>}
+        </span>
+      ),
+    },
+    { key: 'datum', header: 'Datum', sortKey: 'issue_date', cell: (r) => <span className="tabular-nums">{formatDate(r.issue_date)}</span>, hideBelow: 'lg' },
+    { key: 'faellig', header: 'Fällig', sortKey: 'due_date', cell: dueCell },
+    { key: 'betrag', header: 'Betrag', sortKey: 'total', align: 'right', cell: (r) => formatChfDisplay(Number(r.total)) },
+    {
+      key: 'status',
+      header: 'Status',
+      cell: (r) => {
+        const s = invoiceState(r, today);
+        return <span className={INVOICE_STATE_BADGE[s]}>{INVOICE_STATE_LABEL[s]}</span>;
+      },
+    },
+  ];
 
-    const isUpdate = !!editingInvoice;
-
-    try {
-      // Ensure session variable is set (fixes RLS policy enforcement)
-      const { error: sessionError } = await supabase.rpc('set_active_company', {
-        company_id: selectedCompany.id
-      });
-
-      if (sessionError) {
-        console.error('Failed to set active company:', sessionError);
-        throw sessionError;
-      }
-
-      // Helper to calculate item total with discount
-      const calculateItemTotal = (item: typeof data.items[0]) => {
-        const lineTotal = item.quantity * item.unit_price;
-        const discountAmount = lineTotal * ((item.discount_percent || 0) / 100);
-        return lineTotal - discountAmount;
-      };
-
-      if (isUpdate) {
-        // UPDATE MODE: Update existing invoice
-        const { error: invoiceError } = await supabase
-          .from('invoices')
-          .update({
-            customer_id: data.invoice.customer_id,
-            project_id: data.invoice.project_id,
-            issue_date: data.invoice.issue_date,
-            due_date: data.invoice.due_date,
-            vat_rate: data.invoice.vat_rate,
-            status: data.invoice.status,
-            paid_at: data.invoice.paid_at,
-            subtotal: calculatedTotals.subtotal,
-            vat_amount: calculatedTotals.vat_amount,
-            total: calculatedTotals.total,
-            // New fields for Phase 3.3
-            title: data.invoice.title,
-            introduction_text: data.invoice.introduction_text,
-            footer_text: data.invoice.footer_text,
-            // Discount system (Task 3.2)
-            discount_type: data.invoice.discount_type,
-            discount_value: data.invoice.discount_value,
-          })
-          .eq('id', editingInvoice.id);
-
-        if (invoiceError) throw invoiceError;
-
-        // DATA INTEGRITY: Delete all old items and insert new ones
-        // This is the safest approach - no complex ID matching required
-        const { error: deleteError } = await supabase
-          .from('invoice_items')
-          .delete()
-          .eq('invoice_id', editingInvoice.id);
-
-        if (deleteError) throw deleteError;
-
-        // Insert new items with discount and VAT
-        const itemsWithInvoiceId = data.items.map(item => ({
-          invoice_id: editingInvoice.id,
-          description: item.description,
-          quantity: item.quantity,
-          unit_price: item.unit_price,
-          discount_percent: item.discount_percent || 0,
-          vat_rate: item.vat_rate,
-          vat_amount: item.vat_amount,
-          total: calculateItemTotal(item),
-        }));
-
-        const { error: itemsError } = await supabase
-          .from('invoice_items')
-          .insert(itemsWithInvoiceId);
-
-        if (itemsError) throw itemsError;
-
-        // Zeiteinträge, die beim Bearbeiten dazu importiert wurden, ebenfalls verknüpfen.
-        // Ohne das blieben sie dauerhaft auf "offen", obwohl sie auf der Rechnung stehen.
-        if (timeEntryIds && timeEntryIds.length > 0) {
-          const { error: timeEntriesError } = await supabase
-            .from('time_entries')
-            .update({ invoice_id: editingInvoice.id })
-            .in('id', timeEntryIds);
-
-          if (timeEntriesError) {
-            console.error('Error linking time entries:', timeEntriesError);
-            handleCloseModal();
-            setToast({
-              type: 'success',
-              message: `Rechnung aktualisiert, aber ${timeEntryIds.length} Zeiteinträge konnten nicht verknüpft werden.`
-            });
-            await fetchData();
-            return;
-          }
-        }
-
-        handleCloseModal();
-        setToast({
-          type: 'success',
-          message: timeEntryIds && timeEntryIds.length > 0
-            ? `Rechnung aktualisiert mit ${timeEntryIds.length} neu verknüpften Zeiteinträgen!`
-            : 'Rechnung erfolgreich aktualisiert!'
-        });
-        await fetchData();
-      } else {
-        // CREATE MODE: Insert new invoice
-        const { data: invoiceData, error: invoiceError } = await supabase
-          .from('invoices')
-          .insert([{
-            ...data.invoice,
-            company_id: selectedCompany.id,
-            subtotal: calculatedTotals.subtotal,
-            vat_amount: calculatedTotals.vat_amount,
-            total: calculatedTotals.total,
-          }])
-          .select()
-          .single();
-
-        if (invoiceError) throw invoiceError;
-
-        // Insert invoice items with discount and VAT
-        const itemsWithInvoiceId = data.items.map(item => ({
-          invoice_id: invoiceData.id,
-          description: item.description,
-          quantity: item.quantity,
-          unit_price: item.unit_price,
-          discount_percent: item.discount_percent || 0,
-          vat_rate: item.vat_rate,
-          vat_amount: item.vat_amount,
-          total: calculateItemTotal(item),
-        }));
-
-        const { error: itemsError } = await supabase
-          .from('invoice_items')
-          .insert(itemsWithInvoiceId);
-
-        if (itemsError) throw itemsError;
-
-        // Link time entries to the new invoice (atomic update)
-        if (timeEntryIds && timeEntryIds.length > 0) {
-          const { error: timeEntriesError } = await supabase
-            .from('time_entries')
-            .update({ invoice_id: invoiceData.id })
-            .in('id', timeEntryIds);
-
-          if (timeEntriesError) {
-            console.error('Error linking time entries:', timeEntriesError);
-            // Don't throw - invoice was created successfully, just warn
-            setToast({
-              type: 'success',
-              message: `Rechnung erstellt, aber ${timeEntryIds.length} Zeiteinträge konnten nicht verknüpft werden.`
-            });
-          } else {
-            setToast({ type: 'success', message: `Rechnung erfolgreich erstellt mit ${timeEntryIds.length} verknüpften Zeiteinträgen!` });
-          }
-        } else {
-          setToast({ type: 'success', message: 'Rechnung erfolgreich erstellt!' });
-        }
-
-        handleCloseModal();
-        await fetchData();
-      }
-    } catch (caught) {
-      const err = asError(caught);
-      console.error('Error saving invoice:', err);
-      // Show user-friendly error message
-      if (err?.code === '23505') {
-        setToast({
-          type: 'error',
-          message: `Rechnungsnummer "${data.invoice.invoice_number}" existiert bereits. Bitte wählen Sie eine andere Nummer.`
-        });
-      } else {
-        setToast({
-          type: 'error',
-          message: 'Fehler beim Speichern der Rechnung: ' + (err?.message || 'Unbekannter Fehler')
-        });
-      }
-      throw err;
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!(await confirmDialog({ title: 'Rechnung löschen', confirmLabel: 'Löschen', message: 'Möchten Sie diese Rechnung wirklich löschen?', destructive: true }))) return;
-
-    try {
-      // First, unlink any time entries from this invoice (set invoice_id to NULL)
-      // This is redundant with ON DELETE SET NULL but provides explicit control
-      await supabase
-        .from('time_entries')
-        .update({ invoice_id: null })
-        .eq('invoice_id', id);
-
-      // Delete invoice items first (cascade should handle this, but being explicit)
-      await supabase.from('invoice_items').delete().eq('invoice_id', id);
-
-      // Delete invoice
-      const { error } = await supabase.from('invoices').delete().eq('id', id);
-
-      if (error) throw error;
-      setToast({ type: 'success', message: 'Rechnung und Verknüpfungen erfolgreich gelöscht.' });
-      await fetchData();
-    } catch (err) {
-      console.error('Error deleting invoice:', err);
-      setToast({ type: 'error', message: 'Fehler beim Löschen der Rechnung.' });
-    }
-  };
-
-  const handleAddNew = () => {
-    // Reset edit mode for new invoice
-    setEditingInvoice(null);
-    setEditingItems([]);
-    setIsModalOpen(true);
-  };
-
-  const handleEdit = async (invoice: Invoice) => {
-    // Check if editing is allowed
-    if (!canEditInvoice(invoice.status)) {
-      setToast({ type: 'error', message: getEditBlockedReason(invoice.status) });
-      return;
-    }
-
-    try {
-      // Fetch invoice items
-      const { data: items, error } = await supabase
-        .from('invoice_items')
-        .select('*')
-        .eq('invoice_id', invoice.id)
-        .order('id', { ascending: true });
-
-      if (error) throw error;
-
-      setEditingInvoice(invoice);
-      setEditingItems(items || []);
-      setIsModalOpen(true);
-    } catch (err) {
-      console.error('Error loading invoice items:', err);
-      setToast({ type: 'error', message: 'Fehler beim Laden der Rechnungspositionen.' });
-    }
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setEditingInvoice(null);
-    setEditingItems([]);
-  };
-
-  // Helper function to prepare PDF data (shared by preview and download)
-  const preparePdfData = async (invoice: Invoice) => {
-    if (!selectedCompany) {
-      throw new Error('Keine Firma ausgewählt');
-    }
-
-    // Fetch invoice items and fresh company data in parallel
-    const [itemsResult, companyResult] = await Promise.all([
-      supabase
-        .from('invoice_items')
-        .select('*')
-        .eq('invoice_id', invoice.id),
-      supabase
-        .from('companies')
-        .select('*')
-        .eq('id', selectedCompany.id)
-        .single()
-    ]);
-
-    if (itemsResult.error) throw itemsResult.error;
-    if (companyResult.error) throw companyResult.error;
-
-    const items = itemsResult.data;
-    const freshCompanyData = companyResult.data;
-
-    // Get customer
-    const customer = customers.find((c) => c.id === invoice.customer_id);
-    if (!customer) {
-      throw new Error('Kunde nicht gefunden');
-    }
-
-    // Validate data
-    const validation = validateInvoiceData(
-      { ...invoice, items: items || [] },
-      freshCompanyData,
-      customer
-    );
-
-    if (!validation.valid) {
-      throw new Error(validation.errors.join(' • '));
-    }
-
-    // Prefetch logo as base64 so the PDF generator doesn't need a second network call
-    let logoBase64: string | null = null;
-    if (freshCompanyData.logo_url) {
-      try {
-        const resp = await fetch(freshCompanyData.logo_url);
-        if (resp.ok) {
-          const blob = await resp.blob();
-          logoBase64 = await new Promise<string | null>((resolve) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result as string);
-            reader.onerror = () => resolve(null);
-            reader.readAsDataURL(blob);
-          });
-        }
-      } catch {
-        // Logo is optional — continue without it
-      }
-    }
-
-    return {
-      invoice,
-      items: items || [],
-      customer,
-      company: freshCompanyData,
-      logoBase64,
-      // Use invoice-specific texts if available, otherwise pdfGenerator falls back to company defaults
-      introText: invoice.introduction_text,
-      footerText: invoice.footer_text,
-    };
-  };
-
-  const handlePreviewPDF = async (invoice: Invoice) => {
-    try {
-      const data = await preparePdfData(invoice);
-      const blobUrl = await getInvoicePdfBlobUrl(data);
-
-      setPreviewInvoice(invoice);
-      setPreviewData(data);
-      setPreviewBlobUrl(blobUrl);
-      setIsPreviewOpen(true);
-    } catch (caught) {
-      const err = asError(caught);
-      console.error('Error generating PDF preview:', err);
-      setToast({
-        type: 'error',
-        message: `Fehler beim Erstellen der Vorschau: ${err instanceof Error ? err.message : 'Unbekannter Fehler'}`,
-      });
-    }
-  };
-
-  const handlePreviewClose = () => {
-    // Cleanup blob URL to prevent memory leaks
-    if (previewBlobUrl) {
-      URL.revokeObjectURL(previewBlobUrl);
-    }
-    setIsPreviewOpen(false);
-    setPreviewBlobUrl(null);
-    setPreviewInvoice(null);
-    setPreviewData(null);
-  };
-
-  const handlePreviewDownload = async () => {
-    if (!previewData) return;
-
-    try {
-      await downloadInvoicePDF(previewData);
-      setToast({ type: 'success', message: 'PDF erfolgreich heruntergeladen' });
-    } catch (caught) {
-      const err = asError(caught);
-      console.error('Error downloading PDF:', err);
-      setToast({
-        type: 'error',
-        message: `Fehler beim Herunterladen: ${err instanceof Error ? err.message : 'Unbekannter Fehler'}`,
-      });
-    }
-  };
-
-  const handleDownloadPDF = async (invoice: Invoice) => {
-    try {
-      const data = await preparePdfData(invoice);
-      await downloadInvoicePDF(data);
-      setToast({ type: 'success', message: 'PDF erfolgreich erstellt' });
-    } catch (caught) {
-      const err = asError(caught);
-      console.error('Error generating PDF:', err);
-      setToast({
-        type: 'error',
-        message: `Fehler beim Erstellen des PDFs: ${err instanceof Error ? err.message : 'Unbekannter Fehler'}`,
-      });
-    }
-  };
+  const selectedRows = rows.filter((r) => selection.isSelected(r.id));
+  const selectedStates = selectedRows.map((r) => invoiceState(r, today));
+  const filterCount = activeFilterCount(state, DEFAULTS);
+  const years = [...new Set((summaryQuery.data ?? []).map((r) => r.issue_date.slice(0, 4)))].sort().reverse();
+  const yearValue = state.von && state.bis && state.von.slice(0, 4) === state.bis.slice(0, 4) && state.von.endsWith('-01-01') && state.bis.endsWith('-12-31') ? state.von.slice(0, 4) : '';
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="page-title">Rechnungen</h1>
-          <p className="mt-2 text-sm text-fg-muted">Erstellen und verwalten Sie Ihre Rechnungen</p>
-        </div>
-        <button
-          onClick={handleAddNew}
-          className="btn-cta"
-        >
-          <Plus size={18} aria-hidden="true" />
-          Neue Rechnung
-        </button>
-      </div>
-
-      {/* Error Message */}
-      {error && (
-        <div role="alert" className="rounded-lg border border-danger bg-danger-subtle px-4 py-3 text-danger-on-subtle">
-          <strong>Fehler:</strong> {error}
-        </div>
-      )}
-
-      {onlyMissingPaidDate && (
-        <div className="flex items-center justify-between rounded-lg border border-warning bg-warning-subtle px-4 py-3 text-sm text-warning-on-subtle">
-          <span>
-            Gefiltert: {visibleInvoices.length} bezahlte {visibleInvoices.length === 1 ? 'Rechnung' : 'Rechnungen'} ohne Zahlungsdatum.
-            Ohne Datum zählen sie in keiner Auswertung.
-          </span>
-          <button type="button" className="font-medium underline" onClick={() => setSearchParams({})}>
-            Alle Rechnungen anzeigen
+    <>
+      <ListPage
+        title="Rechnungen"
+        summary={summaryQuery.isLoading ? ' ' : invoiceSummarySentence(summary)}
+        primary={
+          <button type="button" className="btn-cta" onClick={() => setEditor({ kind: 'new' })}>
+            <Plus size={18} aria-hidden="true" />
+            Neue Rechnung
           </button>
-        </div>
-      )}
-
-      {/* Warning if no customers */}
-      {customers.length === 0 && !isLoading && (
-        <div className="bg-warning-subtle border border-warning-subtle text-warning-on-subtle px-4 py-3 rounded-lg">
-          Bitte erstellen Sie zuerst Kunden, bevor Sie Rechnungen erstellen.
-        </div>
-      )}
-
-      {/* Table */}
-      {isLoading ? (
-        <div className="bg-surface rounded-lg shadow-sm p-6">
-          <p className="text-fg-muted text-center">Lädt Rechnungen...</p>
-        </div>
-      ) : (
-        <InvoiceTable
-          invoices={visibleInvoices}
-          onSetPaidDate={handleSetPaidDate}
-          customers={customers}
-          onDelete={handleDelete}
-          onDownloadPDF={handleDownloadPDF}
-          onPreviewPDF={handlePreviewPDF}
-          onEdit={handleEdit}
-        />
-      )}
-
-      {/* Create/Edit Modal */}
-      <Modal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        title={editingInvoice ? 'Rechnung bearbeiten' : 'Neue Rechnung'}
-        size="xl"
-      >
-        <InvoiceForm
-          onSubmit={handleSubmit}
-          customers={customers}
-          projects={projects}
-          nextInvoiceNumber={nextInvoiceNumber}
-          existingInvoice={editingInvoice || undefined}
-          existingItems={editingItems.length > 0 ? editingItems : undefined}
-        />
-      </Modal>
-
-      {/* PDF Preview Modal */}
-      <PdfPreviewModal
-        isOpen={isPreviewOpen}
-        onClose={handlePreviewClose}
-        pdfBlobUrl={previewBlobUrl}
-        onDownload={handlePreviewDownload}
-        title="Rechnungs-Vorschau"
-        fileName={previewInvoice ? `Rechnung_${previewInvoice.invoice_number}.pdf` : ''}
-      />
-
-      {/* Toast Notification */}
-      {toast && (
-        <div className="fixed bottom-6 right-6 z-50 max-w-md animate-slide-in">
-          <div
-            className={`flex items-start gap-3 rounded-lg px-4 py-3 shadow-lg ${
-              toast.type === 'success'
-                ? 'bg-success-subtle border border-success-subtle'
-                : 'bg-danger-subtle border border-danger-subtle'
-            }`}
-          >
-            {toast.type === 'success' ? (
-              <div className="flex-shrink-0 w-5 h-5 text-success">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-            ) : (
-              <AlertCircle
-                className={`flex-shrink-0 ${toast.type === 'error' ? 'text-danger' : 'text-success'}`}
-                size={20}
-              />
-            )}
-            <div className="flex-1">
-              <p className={toast.type === 'success' ? 'text-success' : 'text-danger'}>
-                {toast.message}
-              </p>
-            </div>
-            <button
-              onClick={() => setToast(null)}
-              className={`flex-shrink-0 ${
-                toast.type === 'success'
-                  ? 'text-success hover:text-success'
-                  : 'text-danger hover:text-danger'
-              }`}
+        }
+        notices={
+          summary.missingPaidDate.length > 0 && (
+            <Notice
+              action={
+                <button type="button" className="btn-secondary min-h-[36px] py-1.5" onClick={() => setPaidDatesOpen(true)}>
+                  Zahlungsdaten nachtragen
+                </button>
+              }
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
+              <strong>
+                {summary.missingPaidDate.length} bezahlte {summary.missingPaidDate.length === 1 ? 'Rechnung' : 'Rechnungen'} ohne Zahlungsdatum.
+              </strong>{' '}
+              Sie fehlen in Einnahmen und Berichten.
+            </Notice>
+          )
+        }
+        kpis={
+          <KpiStrip
+            items={[
+              { key: 'offen', label: 'Offen', value: formatChfDisplay(summary.sums.versendet), hint: 'versendet, noch nicht fällig', onClick: () => set({ ansicht: 'versendet' }, { push: true }), active: view === 'versendet' },
+              { key: 'ueberfaellig', label: 'Überfällig', value: formatChfDisplay(summary.sums.ueberfaellig), tone: summary.sums.ueberfaellig > 0 ? 'negative' : 'neutral', hint: `${summary.counts.ueberfaellig} ${summary.counts.ueberfaellig === 1 ? 'Rechnung' : 'Rechnungen'}`, onClick: () => set({ ansicht: 'ueberfaellig' }, { push: true }), active: view === 'ueberfaellig' },
+              { key: 'bezahlt', label: `Bezahlt ${today.slice(0, 4)}`, value: formatChfDisplay(summary.paidThisYear), hint: 'nach Zahlungsdatum', onClick: () => set({ ansicht: 'bezahlt' }, { push: true }), active: view === 'bezahlt' },
+              { key: 'entwurf', label: 'Entwürfe', value: String(summary.counts.entwurf), onClick: () => set({ ansicht: 'entwurf' }, { push: true }), active: view === 'entwurf' },
+            ]}
+          />
+        }
+        tabs={
+          <ViewTabs
+            tabs={INVOICE_VIEWS.map((v) => ({ ...v, count: summaryQuery.data ? summary.counts[v.value] : undefined }))}
+            value={view}
+            onChange={(v) => set({ ansicht: v }, { push: true })}
+          />
+        }
+        toolbar={
+          <Toolbar filterCount={filterCount} onReset={reset}>
+            <SearchField value={state.q ?? ''} onChange={(q) => set({ q })} placeholder="Nr, Titel oder Firma suchen" />
+            <FilterSelect label="Firma" allLabel="Alle Firmen" value={state.firma ?? ''} onChange={(v) => set({ firma: v })} options={customers.map((c) => ({ value: c.id, label: c.name }))} />
+            <FilterSelect label="Projekt" allLabel="Alle Projekte" value={state.projekt ?? ''} onChange={(v) => set({ projekt: v })} options={projects.map((p) => ({ value: p.id, label: p.name }))} />
+            <FilterSelect
+              label="Jahr"
+              allLabel="Alle Jahre"
+              value={yearValue}
+              onChange={(y) => set({ von: y ? `${y}-01-01` : null, bis: y ? `${y}-12-31` : null })}
+              options={years.map((y) => ({ value: y, label: y }))}
+            />
+            {state['ohne-zahlungsdatum'] === '1' && (
+              <button type="button" className="badge-warning" onClick={() => set({ 'ohne-zahlungsdatum': null })}>
+                Nur ohne Zahlungsdatum ✕
+              </button>
+            )}
+          </Toolbar>
+        }
+        bulk={
+          <BulkBar
+            count={selection.count}
+            onClear={selection.clear}
+            actions={[
+              {
+                label: 'Als versendet markieren',
+                onClick: () => sent(selection.ids),
+                disabledReason: selectedStates.some((s) => s !== 'entwurf') ? 'Nur Entwürfe lassen sich als versendet markieren.' : undefined,
+              },
+              {
+                label: 'Als bezahlt markieren',
+                onClick: () => openPaid(selectedRows),
+                disabledReason: selectedStates.some((s) => s === 'bezahlt') ? 'Die Auswahl enthält bereits bezahlte Rechnungen.' : undefined,
+              },
+            ]}
+          />
+        }
+        pagination={<Pagination page={page} total={listQuery.data?.total ?? 0} onPage={(p) => set({ seite: String(p) })} />}
+      >
+        <DataTable
+          rows={rows}
+          rowKey={(r) => r.id}
+          rowLabel={(r) => `Rechnung ${r.invoice_number}`}
+          columns={columns}
+          selection={selection}
+          onRowClick={(r) => navigate(`/rechnungen/${r.id}`)}
+          menu={menu}
+          sort={state.sort}
+          onSort={(s) => set({ sort: s })}
+          loading={listQuery.isLoading}
+          mobile={(r) => {
+            const s = invoiceState(r, today);
+            return {
+              title: `${r.invoice_number} · ${r.customers?.name ?? ''}`,
+              amount: formatChfDisplay(Number(r.total)),
+              subtitle: s === 'bezahlt' ? `bezahlt ${formatDate(r.paid_at)}` : `fällig ${formatDate(r.due_date)}`,
+              badge: <span className={INVOICE_STATE_BADGE[s]}>{INVOICE_STATE_LABEL[s]}</span>,
+            };
+          }}
+          empty={
+            filterCount > 0 || view !== 'alle' ? (
+              <EmptyState
+                title="Keine Rechnungen in dieser Ansicht"
+                text={view === 'ueberfaellig' ? 'Nichts überfällig.' : 'Ändere die Filter oder wechsle die Ansicht.'}
+                action={
+                  filterCount > 0 && (
+                    <button type="button" className="btn-secondary" onClick={reset}>
+                      Filter zurücksetzen
+                    </button>
+                  )
+                }
+              />
+            ) : (
+              <EmptyState
+                icon={<FileText size={20} />}
+                title="Noch keine Rechnungen"
+                text="Erstelle die erste Rechnung oder übernimm offene Zeiten aus der Zeiterfassung."
+                action={
+                  <button type="button" className="btn-primary" onClick={() => setEditor({ kind: 'new' })}>
+                    Neue Rechnung
+                  </button>
+                }
+              />
+            )
+          }
+        />
+      </ListPage>
+
+      <InvoiceEditor mode={editor} onClose={() => setEditor(null)} onSaved={(id) => navigate(`/rechnungen/${id}`)} />
+      <MarkPaidDrawer
+        targets={paidTargets}
+        mode={paidMode}
+        onClose={() => {
+          setPaidTargets([]);
+          selection.clear();
+        }}
+      />
+      <PaidDatesDialog open={paidDatesOpen} onClose={() => setPaidDatesOpen(false)} invoices={summary.missingPaidDate} customers={customers} />
+    </>
   );
 }

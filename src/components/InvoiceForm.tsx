@@ -1,7 +1,7 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { Trash2, Plus, AlertTriangle, ChevronDown, ChevronUp, Clock } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { toDay, zurichDay, paidDateToTimestamp } from '../utils/financeAggregation';
+import { toDay, zurichDay, paidDateToTimestamp, addDays } from '../utils/financeAggregation';
 import type { Invoice, InvoiceItem, Customer, Project, Product } from '../lib/supabase';
 import { useCompany } from '../context/CompanyContext';
 import { shouldWarnOnEdit, getEditWarningMessage } from '../utils/invoiceUtils';
@@ -28,6 +28,12 @@ type InvoiceFormProps = {
   nextInvoiceNumber: string;
   existingInvoice?: Invoice;
   existingItems?: InvoiceItem[];
+  /** Kopie als neue Rechnung: Inhalt uebernehmen, Nummer/Datum/Status neu */
+  copyFrom?: { invoice: Invoice; items: InvoiceItem[] };
+  /** Zahlungsfrist in Tagen (Einstellungen), Standard 30 */
+  paymentTermsDays?: number;
+  /** Vorbelegung aus der Zeiterfassung (Sammelaktion "Rechnung erstellen") */
+  preset?: { customerId: string; projectId?: string | null; items: Array<{ description: string; quantity: number; unit_price: number; timeEntryIds: string[] }> };
 };
 
 type ItemState = {
@@ -39,16 +45,22 @@ type ItemState = {
   product_id?: string;
 };
 
-export default function InvoiceForm({ onSubmit, customers, projects, nextInvoiceNumber, existingInvoice, existingItems }: InvoiceFormProps) {
+export default function InvoiceForm({ onSubmit, customers, projects, nextInvoiceNumber, existingInvoice: editInvoice, existingItems: editItems, copyFrom, paymentTermsDays = 30, preset }: InvoiceFormProps) {
   const { selectedCompany } = useCompany();
-  const isEditMode = !!existingInvoice;
+  const isEditMode = !!editInvoice;
+  // Bei einer Kopie gelten Inhalt und Texte der Vorlage, aber nicht Nummer, Datum, Status und Zahlung
+  const existingInvoice: Invoice | undefined = editInvoice ?? (copyFrom
+    ? { ...copyFrom.invoice, invoice_number: '', issue_date: zurichDay(new Date()), due_date: null, status: 'entwurf', paid_at: null, paid_at_source: null, sent_at: null }
+    : undefined);
+  const existingItems = editItems ?? copyFrom?.items;
 
   // Initialize state with existing values or defaults
-  const [customerId, setCustomerId] = useState(existingInvoice?.customer_id || '');
-  const [projectId, setProjectId] = useState(existingInvoice?.project_id || '');
-  const [invoiceNumber, setInvoiceNumber] = useState(existingInvoice?.invoice_number || nextInvoiceNumber);
+  const [customerId, setCustomerId] = useState(existingInvoice?.customer_id || preset?.customerId || '');
+  const [projectId, setProjectId] = useState(existingInvoice?.project_id || preset?.projectId || '');
+  const [invoiceNumber, setInvoiceNumber] = useState(editInvoice?.invoice_number || nextInvoiceNumber);
+  const [isRecurringRevenue, setIsRecurringRevenue] = useState(existingInvoice?.is_recurring_revenue ?? false);
   const [issueDate, setIssueDate] = useState(
-    existingInvoice?.issue_date || new Date().toISOString().split('T')[0]
+    existingInvoice?.issue_date || zurichDay(new Date())
   );
   const [dueDate, setDueDate] = useState(existingInvoice?.due_date || '');
   const [status, setStatus] = useState<Invoice['status']>(existingInvoice?.status || 'entwurf');
@@ -89,7 +101,15 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
   );
 
   const [items, setItems] = useState<ItemState[]>(
-    existingItems && existingItems.length > 0
+    preset && preset.items.length > 0
+      ? preset.items.map((item) => ({
+          description: item.description,
+          quantity: item.quantity.toString(),
+          unit_price: item.unit_price.toString(),
+          discount_percent: '0',
+          vat_rate: '',
+        }))
+      : existingItems && existingItems.length > 0
       ? existingItems.map(item => ({
           description: item.description,
           quantity: item.quantity.toString(),
@@ -102,11 +122,11 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [isTimeImportModalOpen, setIsTimeImportModalOpen] = useState(false);
-  const [importedTimeEntryIds, setImportedTimeEntryIds] = useState<string[]>([]);
+  const [importedTimeEntryIds, setImportedTimeEntryIds] = useState<string[]>(() => preset?.items.flatMap((i) => i.timeEntryIds) ?? []);
 
   // Show warning for sent/overdue invoices in edit mode
-  const showEditWarning = isEditMode && shouldWarnOnEdit(existingInvoice.status);
-  const editWarningMessage = isEditMode ? getEditWarningMessage(existingInvoice.status) : '';
+  const showEditWarning = !!editInvoice && shouldWarnOnEdit(editInvoice.status);
+  const editWarningMessage = editInvoice ? getEditWarningMessage(editInvoice.status) : "";
 
   // Only update invoice number from prop in create mode
   useEffect(() => {
@@ -115,15 +135,12 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
     }
   }, [nextInvoiceNumber, isEditMode]);
 
-  // Auto-calculate due date only in create mode
+  // Faelligkeit aus der Zahlungsfrist, nur beim Erstellen
   useEffect(() => {
-    if (!isEditMode) {
-      const issue = new Date(issueDate);
-      const due = new Date(issue);
-      due.setDate(due.getDate() + 30);
-      setDueDate(due.toISOString().split('T')[0]);
+    if (!isEditMode && issueDate) {
+      setDueDate(addDays(issueDate, paymentTermsDays));
     }
-  }, [issueDate, isEditMode]);
+  }, [issueDate, isEditMode, paymentTermsDays]);
 
   useEffect(() => {
     if (selectedCompany) {
@@ -291,6 +308,11 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
           vat_rate: selectedCompany?.default_vat_rate || 0,
           status,
           paid_at: status === 'bezahlt' && paidDate ? paidDateToTimestamp(paidDate) : null,
+          paid_at_source: status === 'bezahlt' && paidDate
+            ? (existingInvoice?.paid_at && toDay(existingInvoice.paid_at) === paidDate ? existingInvoice.paid_at_source ?? 'erfasst' : 'erfasst')
+            : null,
+          sent_at: existingInvoice?.sent_at ?? (status !== 'entwurf' ? new Date().toISOString() : null),
+          is_recurring_revenue: isRecurringRevenue,
           title: title || null,
           introduction_text: introText || null,
           footer_text: footerText || null,
@@ -467,7 +489,8 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
               <option value="entwurf">Entwurf</option>
               <option value="versendet">Versendet</option>
               <option value="bezahlt">Bezahlt</option>
-              <option value="überfällig">Überfällig</option>
+              {/* Ueberfaellig wird aus der Faelligkeit abgeleitet; der alte Wert bleibt waehlbar, falls gespeichert */}
+              {status === 'überfällig' && <option value="überfällig">Überfällig (alt)</option>}
             </select>
           </div>
 
@@ -487,6 +510,16 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
             </div>
           )}
         </div>
+
+        <label className="flex items-center gap-2 text-sm text-fg">
+          <input
+            type="checkbox"
+            checked={isRecurringRevenue}
+            onChange={(e) => setIsRecurringRevenue(e.target.checked)}
+            className="h-4 w-4 rounded border-line-strong accent-[rgb(var(--bw-fg))]"
+          />
+          Wiederkehrender Umsatz (Wartung, Retainer)
+        </label>
 
         {/* Introduction Text (new) */}
         <div>

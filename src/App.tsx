@@ -8,6 +8,7 @@ import Projekte from './pages/Projekte';
 import Zeiterfassung from './pages/Zeiterfassung';
 import Angebote from './pages/Angebote';
 import Rechnungen from './pages/Rechnungen';
+import RechnungDetail from './pages/RechnungDetail';
 import Buchungen from './pages/Buchungen';
 import Berichte from './pages/Berichte';
 import Produkte from './pages/Produkte';
@@ -55,6 +56,7 @@ function App() {
           <Route path="projekte" element={<Projekte />} />
           <Route path="zeiterfassung" element={<Zeiterfassung />} />
           <Route path="rechnungen" element={<RechnungenRoute />} />
+          <Route path="rechnungen/:id" element={<RechnungDetail />} />
           <Route path="buchungen" element={<Buchungen />} />
           <Route path="berichte" element={<Berichte />} />
           <Route path="einstellungen" element={<Navigate to="/einstellungen/unternehmen" replace />} />
