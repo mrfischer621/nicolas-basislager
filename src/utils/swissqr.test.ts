@@ -132,3 +132,35 @@ describe('QR-Nutzlast — Latin-1-Beschraenkung', () => {
     expect(p).toContain('15.00');
   });
 });
+
+describe('toString — Datenaufbau nach IG QR-Rechnung 2.3', () => {
+  const creditor: QRAddress = { name: 'Test Person', street: 'Musterstrasse', houseNumber: '12', postalCode: '8500', city: 'Frauenfeld', country: 'CH' };
+  const debtor: QRAddress = { name: 'Beispiel GmbH', street: 'Bahnhofstrasse', houseNumber: '5', postalCode: '8570', city: 'Weinfelden', country: 'CH' };
+
+  it('hat 31 Elemente, endet mit EPD ohne Zeilenschaltung (Kap. 4.1.4)', () => {
+    const payload = new SwissQRBill({
+      creditor: { account: 'CH93 0076 2011 6238 5295 7', address: creditor },
+      debtor: { address: debtor },
+      amount: 2390,
+      currency: 'CHF',
+      message: 'Rechnung RE-2026-014',
+    }).toString();
+    const lines = payload.split('\r\n');
+    expect(lines).toHaveLength(31);
+    expect(payload.endsWith('EPD')).toBe(true);
+    expect(lines.slice(0, 5)).toEqual(['SPC', '0200', '1', 'CH9300762011623852957', 'S']);
+    expect(lines[18]).toBe('2390.00');
+    expect(lines[19]).toBe('CHF');
+    expect(lines[20]).toBe('S');
+    expect(lines[27]).toBe('NON');
+  });
+
+  it('laesst den Adress-Typ leer, wenn kein Zahlungspflichtiger angegeben ist', () => {
+    const lines = new SwissQRBill({
+      creditor: { account: 'CH9300762011623852957', address: creditor },
+      currency: 'CHF',
+    }).toString().split('\r\n');
+    expect(lines.slice(20, 27)).toEqual(['', '', '', '', '', '', '']);
+    expect(lines[18]).toBe('');
+  });
+});

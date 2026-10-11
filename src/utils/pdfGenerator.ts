@@ -17,7 +17,6 @@ import { setupPdfFontSet, type PdfFontSet } from './pdfFonts';
 import type { Invoice, InvoiceItem, Customer, Company, Quote, QuoteItem } from '../lib/supabase';
 
 // Active font family — set at the start of each PDF generation call
-let PDF_FONT = 'helvetica';
 /** Schriften fuer Rechnung/Offerte (Blauwasser); QR-Teil nutzt immer Helvetica */
 let FONTS: PdfFontSet = { body: 'helvetica', display: 'helvetica', black: 'helvetica' };
 
@@ -81,32 +80,43 @@ export interface QuoteData {
 // CONSTANTS - Swiss QR-Bill Layout Dimensions
 // ============================================================================
 
+/**
+ * Raster der QR-Rechnung nach Style Guide QR-Rechnung 1.1 (gueltig ab
+ * 01.01.2026), Seite 6 «Praezise Masse», und Implementation Guidelines 2.3.
+ * Alle Werte in mm, absolut auf der A4-Seite (Zahlteil unten, 105 mm hoch).
+ */
 const LAYOUT = {
-  // Page dimensions
   PAGE_WIDTH: 210,
   PAGE_HEIGHT: 297,
-
-  // QR-Bill section
   QR_SECTION_HEIGHT: 105,
-  QR_SECTION_Y: 192, // 297 - 105
-
-  // Receipt part (Empfangsschein)
-  RECEIPT_WIDTH: 62,
-  RECEIPT_X: 5,
-
-  // Payment part (Zahlteil)
-  PAYMENT_WIDTH: 148,
-  PAYMENT_X: 67, // 62 + 5 margin
-
-  // Separator
+  QR_SECTION_Y: 192, // 297 - 105: obere Schnittkante
   SEPARATOR_Y: 192,
 
-  // QR code
-  QR_SIZE: 46, // 46mm x 46mm
-  QR_X: 67,
-  QR_Y: 204, // Directly after "Zahlteil" title (197 + ~7mm)
+  // Empfangsschein 62 mm: Rand 5 | Inhalt 52 | Rand 5
+  RECEIPT_WIDTH: 62,
+  RECEIPT_X: 5,
+  RECEIPT_CONTENT_W: 52,
+  // Hoehen: Rand 5 | Titel 7 | Angaben 56 | Betrag 14 | Annahmestelle 18 | Rand 5
+  RECEIPT_TITLE_Y: 197,
+  RECEIPT_INFO_Y: 204,
+  RECEIPT_AMOUNT_Y: 260,
+  RECEIPT_ACCEPT_Y: 274,
 
-  // Swiss cross
+  // Zahlteil 148 mm: Rand 5 | linke Spalte 51 (QR 46 + 5) | Angaben 87 | Rand 5
+  PAYMENT_WIDTH: 148,
+  PAYMENT_X: 67, // 62 + 5
+  PAYMENT_TITLE_Y: 197, // Titel 7 mm
+  QR_AREA_Y: 204, // Bereich Swiss QR Code 56 mm (5 + 46 + 5)
+  QR_SIZE: 46,
+  QR_X: 67,
+  QR_Y: 209, // 204 + 5 mm Rand
+  PAYMENT_AMOUNT_Y: 260, // Bereich Betrag 22 mm
+  FURTHER_INFO_Y: 282, // Bereich Weitere Informationen 10 mm
+  INFO_X: 118, // 67 + 51
+  INFO_W: 87,
+  INFO_Y: 197, // Bereich Angaben ab Oberkante (neben dem Titel)
+  AMOUNT_COL_OFFSET: 22, // Spalte «Betrag» neben «Waehrung»
+
   CROSS_SIZE: 7,
 };
 
@@ -294,6 +304,10 @@ function formatAddress(street: string | null, houseNumber: string | null): strin
 function drawSwissCross(doc: jsPDF, x: number, y: number, size: number = 7): void {
   const s = size / 19.8; // Scale factor from SVG viewBox to target mm
 
+  // Weisse Grundflaeche 7 x 7 mm, damit keine QR-Module durchscheinen
+  doc.setFillColor(255, 255, 255);
+  doc.rect(x, y, size, size, 'F');
+
   // Black background square (polygon inset by 0.7 on each side)
   doc.setFillColor(0, 0, 0);
   doc.rect(x + 0.7 * s, y + 0.7 * s, 18.4 * s, 18.4 * s, 'F');
@@ -309,37 +323,24 @@ function drawSwissCross(doc: jsPDF, x: number, y: number, size: number = 7): voi
 }
 
 /**
- * Draw scissors symbol (for cutting line)
- */
-function drawScissors(doc: jsPDF, x: number, y: number): void {
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal'); // ✂ is in Dingbats, stay on helvetica
-  doc.text('✂', x, y);
-}
-
-/**
- * Draw dashed separator lines for QR-Bill section.
- * Per SPS Style Guide 2026:
- *  - Horizontal line separating invoice from QR section
- *  - Vertical line separating Empfangsschein (62mm) from Zahlteil
- *  - Scissors symbols at intersections
+ * Trennlinien fuer die QR-Rechnung im PDF (IG 2.3, Kap. 3.7): Linie oberhalb
+ * des Zahlteils und zwischen Empfangsschein und Zahlteil. Statt des
+ * Scherensymbols (in Helvetica nicht vorhanden, erschien als Strich) der
+ * zulaessige Hinweis «Vor der Einzahlung abzutrennen» oberhalb der Linie,
+ * ausserhalb des Zahlteils.
  */
 function drawSeparatorLine(doc: jsPDF, y: number): void {
   doc.setDrawColor(0, 0, 0);
   doc.setLineWidth(0.2);
-  (doc as unknown as { setLineDash: (d: number[], p: number) => void }).setLineDash([2, 2], 0);
-
-  // Horizontal separator (full page width)
+  (doc as unknown as { setLineDash: (d: number[], p: number) => void }).setLineDash([1, 1], 0);
   doc.line(0, y, LAYOUT.PAGE_WIDTH, y);
-
-  // Vertical separator between Empfangsschein (62mm) and Zahlteil
   doc.line(LAYOUT.RECEIPT_WIDTH, y, LAYOUT.RECEIPT_WIDTH, LAYOUT.PAGE_HEIGHT);
+  (doc as unknown as { setLineDash: (d: number[], p: number) => void }).setLineDash([], 0);
 
-  (doc as unknown as { setLineDash: (d: number[], p: number) => void }).setLineDash([], 0); // Reset to solid line
-
-  // Scissors at left end of horizontal line and at intersection
-  drawScissors(doc, 3, y + 1);
-  drawScissors(doc, LAYOUT.RECEIPT_WIDTH - 3, y + 1);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7);
+  doc.setTextColor(0, 0, 0);
+  doc.text('Vor der Einzahlung abzutrennen', LAYOUT.PAGE_WIDTH / 2, y - 2, { align: 'center' });
 }
 
 /**
@@ -435,235 +436,202 @@ function getCountryName(countryCode: string): string {
 }
 
 // ============================================================================
-// RECEIPT SECTION (Empfangsschein - Left Part, 62mm)
+// QR-RECHNUNG: Empfangsschein und Zahlteil
+// Style Guide QR-Rechnung 1.1, Seite 15 «Beschriftung als Muster»:
+//   Empfangsschein: Titel 11 pt fett, Ueberschrift 6 pt fett, Wert 8 pt,
+//     Zeilenabstand 9 pt, Betrag 8 pt mit 11 pt, Annahmestelle 6 pt fett.
+//   Zahlteil: Titel 11 pt fett, Ueberschrift 8 pt fett, Wert 10 pt,
+//     Zeilenabstand 11 pt, Betrag 10 pt mit 13 pt, Weitere Infos 7 pt / 8 pt.
+//   Zwischen den Textbloecken eine Leerzeile. Nur Helvetica, schwarz.
+// Gedruckt wird ausschliesslich, was im Swiss QR Code steht.
 // ============================================================================
 
-/**
- * Draw Empfangsschein (left section, 62mm wide).
- * Per SPS Style Guide 2026:
- *   - Labels: 6pt bold
- *   - Values: 8pt normal
- *   - Betrag section at fixed position near bottom
- *   - Annahmestelle right-aligned at x=57mm
- */
-function drawReceiptSection(
-  doc: jsPDF,
-  company: Company,
-  customer: Customer,
-  invoice: Invoice,
-  qrReference?: string
-): void {
-  const x = LAYOUT.RECEIPT_X; // = 5mm
-  const maxW = 52; // Empfangsschein content width (62 - 5 left - 5 right)
-  let y = LAYOUT.QR_SECTION_Y + 5; // = 197mm
+const PT = 0.3528; // mm pro Punkt
 
-  // ── Title: "Empfangsschein" (11pt bold) ──────────────────────────────────
-  doc.setFont(PDF_FONT, 'bold');
-  doc.setFontSize(11);
-  doc.text('Empfangsschein', x, y);
-  y += 7;
-
-  // ── Konto / Zahlbar an (6pt bold label, 8pt normal values) ───────────────
-  doc.setFont(PDF_FONT, 'bold');
-  doc.setFontSize(6);
-  doc.text('Konto / Zahlbar an', x, y);
-  y += 3;
-
-  doc.setFont(PDF_FONT, 'normal');
-  doc.setFontSize(8);
-  const iban = company.qr_iban || company.iban || '';
-  doc.text(SwissQRBill.formatIBAN(sanitizeForPDF(iban)), x, y, { maxWidth: maxW });
-  y += 3;
-  if (company.sender_contact_name && company.sender_contact_name.trim()) {
-    doc.text(sanitizeForPDF(company.sender_contact_name), x, y, { maxWidth: maxW });
-    y += 3;
-  }
-  doc.text(sanitizeForPDF(company.name), x, y, { maxWidth: maxW });
-  y += 3;
-  doc.text(sanitizeForPDF(formatAddress(company.street, company.house_number)), x, y, { maxWidth: maxW });
-  y += 3;
-  doc.text(sanitizeForPDF(`${company.zip_code} ${company.city}`), x, y);
-  y += 6; // Empty line between blocks
-
-  // ── Referenz (6pt bold label, 8pt normal value) ───────────────────────────
-  if (qrReference) {
-    doc.setFont(PDF_FONT, 'bold');
-    doc.setFontSize(6);
-    doc.text('Referenz', x, y);
-    y += 3;
-
-    doc.setFont(PDF_FONT, 'normal');
-    doc.setFontSize(8);
-    doc.text(formatQRReference(qrReference), x, y, { maxWidth: maxW });
-    y += 6;
-  }
-
-  // ── Zahlbar durch (6pt bold label, 8pt normal values) ────────────────────
-  doc.setFont(PDF_FONT, 'bold');
-  doc.setFontSize(6);
-  doc.text('Zahlbar durch', x, y);
-  y += 3;
-
-  doc.setFont(PDF_FONT, 'normal');
-  doc.setFontSize(8);
-  doc.text(sanitizeForPDF(customer.name), x, y, { maxWidth: maxW });
-  y += 3;
-  if (customer.street) {
-    doc.text(sanitizeForPDF(formatAddress(customer.street, customer.house_number)), x, y, { maxWidth: maxW });
-    y += 3;
-  }
-  if (customer.zip_code && customer.city) {
-    doc.text(sanitizeForPDF(`${customer.zip_code} ${customer.city}`), x, y);
-  }
-
-  // ── Betrag (fixed position near bottom, 6pt bold labels, 8pt normal values)
-  // Per Style Guide: "Währung" and "Betrag" as column headers side by side
-  const betragY = LAYOUT.QR_SECTION_Y + LAYOUT.QR_SECTION_HEIGHT - 25; // = 272mm
-  doc.setFont(PDF_FONT, 'bold');
-  doc.setFontSize(6);
-  doc.text('Währung', x, betragY);
-  doc.text('Betrag', x + 18, betragY);
-
-  doc.setFont(PDF_FONT, 'normal');
-  doc.setFontSize(8);
-  doc.text('CHF', x, betragY + 5);
-  doc.text(formatQRAmount(invoice.total), x + 18, betragY + 5);
-
-  // ── Annahmestelle (right-aligned at right edge of Empfangsschein, 6pt bold)
-  // Per Style Guide: right-aligned within Empfangsschein (max x = 62 - 5 = 57mm)
-  const annahmeY = LAYOUT.QR_SECTION_Y + LAYOUT.QR_SECTION_HEIGHT - 5; // = 292mm
-  doc.setFont(PDF_FONT, 'bold');
-  doc.setFontSize(6);
-  doc.text('Annahmestelle', 57, annahmeY, { align: 'right' });
+/** Was im QR-Code steht und deshalb gedruckt wird. */
+export interface QrBillPrintData {
+  account: string;
+  creditor: { name: string; street: string; houseNumber?: string; postalCode: string; city: string; country: string };
+  debtor?: { name: string; street: string; houseNumber?: string; postalCode: string; city: string; country: string };
+  amount?: number;
+  currency: 'CHF' | 'EUR';
+  reference?: string;
+  message?: string;
 }
 
-// ============================================================================
-// PAYMENT SECTION (Zahlteil - Right Part, 148mm)
-// ============================================================================
+/** Adresszeilen wie im QR-Code; Laendercode vor der PLZ nur bei Ausland. */
+function qrAddressLines(a: QrBillPrintData['creditor']): string[] {
+  const street = formatAddress(a.street, a.houseNumber ?? null);
+  const place = a.country && a.country !== 'CH' ? `${a.country}-${a.postalCode} ${a.city}` : `${a.postalCode} ${a.city}`;
+  return [a.name, street, place].filter((l) => l && l.trim()).map((l) => sanitizeForPDF(l));
+}
 
 /**
- * Draw Zahlteil (right section, 148mm wide).
- * Per SPS Style Guide 2026:
- *   - Labels: 8pt bold (different from Empfangsschein's 6pt)
- *   - Values: 10pt normal (different from Empfangsschein's 8pt)
- *   - QR code on left side of section
- *   - Angaben (Konto, Referenz, Zahlbar durch) to the RIGHT of QR code
- *   - Betrag section BELOW the QR code (not to the right!)
+ * Schreibt einen Block (Ueberschrift + Werte) und liefert die naechste
+ * Grundlinie. Lange Werte werden umbrochen (Name hoechstens zwei Zeilen).
  */
-async function drawPaymentSection(
+function drawQrBlock(
   doc: jsPDF,
-  company: Company,
-  customer: Customer,
-  invoice: Invoice,
-  qrCodeDataURL: string,
-  qrReference?: string
-): Promise<void> {
-  const x = LAYOUT.PAYMENT_X; // = 67mm (left edge of Zahlteil)
-  const y = LAYOUT.QR_SECTION_Y + 5; // = 197mm
+  x: number,
+  y: number,
+  width: number,
+  heading: string,
+  values: string[],
+  spec: { headingPt: number; valuePt: number; leadingPt: number }
+): number {
+  const lead = spec.leadingPt * PT;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(spec.headingPt);
+  doc.text(heading, x, y);
+  y += lead;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(spec.valuePt);
+  for (const value of values) {
+    const lines = (doc.splitTextToSize(value, width) as string[]).slice(0, 2);
+    for (const line of lines) {
+      doc.text(line, x, y);
+      y += lead;
+    }
+  }
+  return y + lead; // Leerzeile zwischen den Bloecken
+}
 
-  // ── Title: "Zahlteil" (11pt bold) ────────────────────────────────────────
-  doc.setFont(PDF_FONT, 'bold');
+/** Grundlinie fuer Text, dessen Oberkante bei top (mm) liegen soll. */
+function baseline(top: number, pt: number): number {
+  return top + pt * PT * 0.75;
+}
+
+function drawReceiptSection(doc: jsPDF, data: QrBillPrintData): void {
+  const x = LAYOUT.RECEIPT_X;
+  const w = LAYOUT.RECEIPT_CONTENT_W;
+  const spec = { headingPt: 6, valuePt: 8, leadingPt: 9 };
+  doc.setTextColor(0, 0, 0);
+
+  // Bereich Titel (7 mm)
+  doc.setFont('helvetica', 'bold');
   doc.setFontSize(11);
-  doc.text('Zahlteil', x, y);
+  doc.text('Empfangsschein', x, baseline(LAYOUT.RECEIPT_TITLE_Y, 11));
 
-  // ── QR Code (46×46mm, starts below title) ────────────────────────────────
-  doc.addImage(qrCodeDataURL, 'PNG', LAYOUT.QR_X, LAYOUT.QR_Y, LAYOUT.QR_SIZE, LAYOUT.QR_SIZE);
-
-  // Swiss cross centred inside QR code
-  const crossX = LAYOUT.QR_X + (LAYOUT.QR_SIZE - LAYOUT.CROSS_SIZE) / 2;
-  const crossY = LAYOUT.QR_Y + (LAYOUT.QR_SIZE - LAYOUT.CROSS_SIZE) / 2;
-  drawSwissCross(doc, crossX, crossY, LAYOUT.CROSS_SIZE);
-
-  // ── Angaben section (right of QR code, x=118, starts at same y as QR) ───
-  const infoX = LAYOUT.QR_X + LAYOUT.QR_SIZE + 5; // = 118mm
-  const infoMaxW = LAYOUT.PAGE_WIDTH - 5 - infoX;  // = 87mm (to right margin at x=205)
-  let infoY = LAYOUT.QR_Y; // = 204mm
-
-  // Konto / Zahlbar an (8pt bold label, 10pt normal values)
-  doc.setFont(PDF_FONT, 'bold');
-  doc.setFontSize(8);
-  doc.text('Konto / Zahlbar an', infoX, infoY);
-  infoY += 4;
-
-  doc.setFont(PDF_FONT, 'normal');
-  doc.setFontSize(10);
-  const iban = company.qr_iban || company.iban || '';
-  doc.text(SwissQRBill.formatIBAN(sanitizeForPDF(iban)), infoX, infoY, { maxWidth: infoMaxW });
-  infoY += 4;
-  if (company.sender_contact_name && company.sender_contact_name.trim()) {
-    doc.text(sanitizeForPDF(company.sender_contact_name), infoX, infoY, { maxWidth: infoMaxW });
-    infoY += 4;
+  // Bereich Angaben (56 mm). Keine «Zusaetzlichen Informationen» auf dem Empfangsschein.
+  let y = baseline(LAYOUT.RECEIPT_INFO_Y, 6) + 1;
+  y = drawQrBlock(doc, x, y, w, 'Konto / Zahlbar an', [SwissQRBill.formatIBAN(sanitizeForPDF(data.account)), ...qrAddressLines(data.creditor)], spec);
+  if (data.reference) {
+    y = drawQrBlock(doc, x, y, w, 'Referenz', [formatQRReference(data.reference)], spec);
   }
-  doc.text(sanitizeForPDF(company.name), infoX, infoY, { maxWidth: infoMaxW });
-  infoY += 4;
-  doc.text(sanitizeForPDF(formatAddress(company.street, company.house_number)), infoX, infoY, { maxWidth: infoMaxW });
-  infoY += 4;
-  doc.text(sanitizeForPDF(`${company.zip_code} ${company.city}`), infoX, infoY);
-  infoY += 8; // Empty line between blocks
+  if (data.debtor) {
+    drawQrBlock(doc, x, y, w, 'Zahlbar durch', qrAddressLines(data.debtor), spec);
+  } else {
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(6);
+    doc.text('Zahlbar durch (Name/Adresse)', x, y);
+    drawCornerMarks(doc, x, y + 1, 52, 20);
+  }
 
-  // Referenz (8pt bold label, 10pt normal value)
-  if (qrReference) {
-    doc.setFont(PDF_FONT, 'bold');
+  // Bereich Betrag (14 mm)
+  const hy = baseline(LAYOUT.RECEIPT_AMOUNT_Y, 6);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(6);
+  doc.text('Währung', x, hy);
+  doc.text('Betrag', x + LAYOUT.AMOUNT_COL_OFFSET, hy);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.text(data.currency, x, hy + 11 * PT);
+  if (data.amount !== undefined) {
+    doc.text(formatQRAmount(data.amount), x + LAYOUT.AMOUNT_COL_OFFSET, hy + 11 * PT);
+  } else {
+    drawCornerMarks(doc, x + LAYOUT.AMOUNT_COL_OFFSET, hy + 1, 30, 10);
+  }
+
+  // Bereich Annahmestelle (18 mm), rechtsbuendig
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(6);
+  doc.text('Annahmestelle', x + w, baseline(LAYOUT.RECEIPT_ACCEPT_Y, 6), { align: 'right' });
+}
+
+/** Eckmarken fuer Leerfelder (0.75 pt, Schenkel 3 mm). */
+function drawCornerMarks(doc: jsPDF, x: number, y: number, w: number, h: number): void {
+  const l = 3;
+  doc.setDrawColor(0, 0, 0);
+  doc.setLineWidth(0.75 * PT);
+  doc.line(x, y, x + l, y); doc.line(x, y, x, y + l);
+  doc.line(x + w, y, x + w - l, y); doc.line(x + w, y, x + w, y + l);
+  doc.line(x, y + h, x + l, y + h); doc.line(x, y + h, x, y + h - l);
+  doc.line(x + w, y + h, x + w - l, y + h); doc.line(x + w, y + h, x + w, y + h - l);
+}
+
+/**
+ * Swiss QR Code als Vektorgrafik (IG 2.3, Kap. 6.4): exakt 46 x 46 mm ohne
+ * Ruhezone, Fehlerkorrekturstufe M, kleinste Version, Schweizerkreuz 7 x 7 mm mittig.
+ */
+function drawSwissQrCode(doc: jsPDF, payload: string, x: number, y: number): void {
+  const qr = QRCode.create(payload, { errorCorrectionLevel: 'M' });
+  const n = qr.modules.size;
+  const m = LAYOUT.QR_SIZE / n;
+  doc.setFillColor(0, 0, 0);
+  for (let row = 0; row < n; row++) {
+    let runStart = -1;
+    for (let col = 0; col <= n; col++) {
+      const dark = col < n && qr.modules.get(row, col);
+      if (dark && runStart < 0) runStart = col;
+      if (!dark && runStart >= 0) {
+        // kleine Ueberlappung gegen Haarrisse zwischen Modulen im Viewer
+        doc.rect(x + runStart * m, y + row * m, (col - runStart) * m + 0.01, m + 0.01, 'F');
+        runStart = -1;
+      }
+    }
+  }
+  const c = LAYOUT.CROSS_SIZE;
+  drawSwissCross(doc, x + (LAYOUT.QR_SIZE - c) / 2, y + (LAYOUT.QR_SIZE - c) / 2, c);
+}
+
+function drawPaymentSection(doc: jsPDF, data: QrBillPrintData, payload: string): void {
+  const x = LAYOUT.PAYMENT_X;
+  doc.setTextColor(0, 0, 0);
+
+  // Bereich Titel (7 mm)
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.text('Zahlteil', x, baseline(LAYOUT.PAYMENT_TITLE_Y, 11));
+
+  // Bereich Swiss QR Code (56 mm, darin 46 x 46 mm mit 5 mm Rand)
+  drawSwissQrCode(doc, payload, LAYOUT.QR_X, LAYOUT.QR_Y);
+
+  // Bereich Betrag (22 mm)
+  const hy = baseline(LAYOUT.PAYMENT_AMOUNT_Y, 8);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8);
+  doc.text('Währung', x, hy);
+  doc.text('Betrag', x + LAYOUT.AMOUNT_COL_OFFSET, hy);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.text(data.currency, x, hy + 13 * PT);
+  if (data.amount !== undefined) {
+    doc.text(formatQRAmount(data.amount), x + LAYOUT.AMOUNT_COL_OFFSET, hy + 13 * PT);
+  } else {
+    drawCornerMarks(doc, x + LAYOUT.AMOUNT_COL_OFFSET, hy + 1, 40, 15);
+  }
+
+  // Bereich Angaben (87 mm, ab Oberkante)
+  const spec = { headingPt: 8, valuePt: 10, leadingPt: 11 };
+  const ix = LAYOUT.INFO_X;
+  const iw = LAYOUT.INFO_W;
+  let y = baseline(LAYOUT.INFO_Y, 8) + 1;
+  y = drawQrBlock(doc, ix, y, iw, 'Konto / Zahlbar an', [SwissQRBill.formatIBAN(sanitizeForPDF(data.account)), ...qrAddressLines(data.creditor)], spec);
+  if (data.reference) {
+    y = drawQrBlock(doc, ix, y, iw, 'Referenz', [formatQRReference(data.reference)], spec);
+  }
+  if (data.message) {
+    y = drawQrBlock(doc, ix, y, iw, 'Zusätzliche Informationen', [sanitizeForPDF(data.message)], spec);
+  }
+  if (data.debtor) {
+    drawQrBlock(doc, ix, y, iw, 'Zahlbar durch', qrAddressLines(data.debtor), spec);
+  } else {
+    doc.setFont('helvetica', 'bold');
     doc.setFontSize(8);
-    doc.text('Referenz', infoX, infoY);
-    infoY += 4;
-
-    doc.setFont(PDF_FONT, 'normal');
-    doc.setFontSize(10);
-    doc.text(formatQRReference(qrReference), infoX, infoY, { maxWidth: infoMaxW });
-    infoY += 8;
+    doc.text('Zahlbar durch (Name/Adresse)', ix, y);
+    drawCornerMarks(doc, ix, y + 1.5, 65, 25);
   }
-
-  // Zusätzliche Informationen (8pt bold label, 10pt normal values)
-  doc.setFont(PDF_FONT, 'bold');
-  doc.setFontSize(8);
-  doc.text('Zusätzliche Informationen', infoX, infoY);
-  infoY += 4;
-
-  doc.setFont(PDF_FONT, 'normal');
-  doc.setFontSize(10);
-  doc.text(sanitizeForPDF(`Rechnung ${invoice.invoice_number}`), infoX, infoY);
-  infoY += 4;
-  if (invoice.due_date) {
-    doc.text(`Fällig: ${formatDate(invoice.due_date)}`, infoX, infoY);
-    infoY += 4;
-  }
-  infoY += 4; // Empty line
-
-  // Zahlbar durch (8pt bold label, 10pt normal values)
-  doc.setFont(PDF_FONT, 'bold');
-  doc.setFontSize(8);
-  doc.text('Zahlbar durch', infoX, infoY);
-  infoY += 4;
-
-  doc.setFont(PDF_FONT, 'normal');
-  doc.setFontSize(10);
-  doc.text(sanitizeForPDF(customer.name), infoX, infoY, { maxWidth: infoMaxW });
-  infoY += 4;
-  if (customer.street) {
-    doc.text(sanitizeForPDF(formatAddress(customer.street, customer.house_number)), infoX, infoY, { maxWidth: infoMaxW });
-    infoY += 4;
-  }
-  if (customer.zip_code && customer.city) {
-    doc.text(sanitizeForPDF(`${customer.zip_code} ${customer.city}`), infoX, infoY);
-  }
-
-  // ── Betrag section (BELOW the QR code, per Style Guide layout) ───────────
-  // QR code ends at y = QR_Y + QR_SIZE = 204 + 46 = 250mm
-  // Betrag starts 5mm below the QR code
-  const betragY = LAYOUT.QR_Y + LAYOUT.QR_SIZE + 5; // = 255mm
-
-  // Labels: 8pt bold (Zahlteil spec)
-  doc.setFont(PDF_FONT, 'bold');
-  doc.setFontSize(8);
-  doc.text('Währung', x, betragY);
-  doc.text('Betrag', x + 20, betragY);
-
-  // Values: 10pt normal (Zahlteil spec); space as thousands separator
-  doc.setFont(PDF_FONT, 'normal');
-  doc.setFontSize(10);
-  doc.text('CHF', x, betragY + 5);
-  doc.text(formatQRAmount(invoice.total), x + 20, betragY + 5);
+  // Bereich Weitere Informationen: keine alternativen Verfahren -> leer
 }
 
 // ============================================================================
@@ -1124,7 +1092,6 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<Blob> {
   // Blauwasser-Schriften fuer das Dokument; die QR-Rechnung bleibt in
   // Helvetica (Swiss Payment Standards erlauben nur Arial/Helvetica/Frutiger)
   FONTS = await setupPdfFontSet(doc);
-  PDF_FONT = 'helvetica';
 
   // Determine which account to use
   const account = company.qr_iban || company.iban || '';
@@ -1149,42 +1116,45 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<Blob> {
   // ========================================================================
   // This ensures no matter what garbage data is in the database,
   // the QR code payload remains valid and compliant with Swiss standards.
-  const qrBill = new SwissQRBill({
+  // Was im QR-Code steht, wird 1:1 gedruckt (IG 2.3, Kap. 3.5.4 / 3.6.2)
+  const dueText = invoice.due_date ? `, zahlbar bis ${formatDate(invoice.due_date)}` : '';
+  const qrData: QrBillPrintData = {
+    account: sanitizeForQR(account).replace(/\s/g, ''),
     creditor: {
-      account: sanitizeForQR(account), // Sanitize IBAN
-      address: {
-        // Use qr_creditor_name if set (e.g., "Nicolas Fischer"), otherwise company name
-        name: sanitizeForQR(company.qr_creditor_name || company.name),
-        street: sanitizeForQR(company.street),
-        houseNumber: company.house_number ? sanitizeForQR(company.house_number) : undefined,
-        postalCode: sanitizeForQR(company.zip_code),
-        city: sanitizeForQR(company.city),
-        country: 'CH', // Always Switzerland for creditor
-      },
+      // qr_creditor_name, falls gesetzt (Kontoinhaber), sonst Firmenname
+      name: sanitizeForQR(company.qr_creditor_name || company.name),
+      street: sanitizeForQR(company.street),
+      houseNumber: company.house_number ? sanitizeForQR(company.house_number) : undefined,
+      postalCode: sanitizeForQR(company.zip_code),
+      city: sanitizeForQR(company.city),
+      country: 'CH',
     },
     debtor: {
-      address: {
-        name: sanitizeForQR(customer.name),
-        street: sanitizeForQR(customer.street),
-        houseNumber: customer.house_number ? sanitizeForQR(customer.house_number) : undefined,
-        postalCode: sanitizeForQR(customer.zip_code),
-        city: sanitizeForQR(customer.city),
-        country: qrCountry, // Sanitized country code
-      },
+      name: sanitizeForQR(customer.name),
+      street: sanitizeForQR(customer.street),
+      houseNumber: customer.house_number ? sanitizeForQR(customer.house_number) : undefined,
+      postalCode: sanitizeForQR(customer.zip_code),
+      city: sanitizeForQR(customer.city),
+      country: qrCountry,
     },
-    amount: invoice.total, // Number, no sanitization needed
+    // derselbe Betrag wie im Total der Rechnung (auf 5 Rappen gerundet);
+    // vorher stand im QR-Code der ungerundete Betrag
+    amount: swissRound(invoice.total),
     currency: 'CHF',
-    reference: qrReference, // Already validated by SwissQRBill.generateQRReference()
-    message: sanitizeForQR(`Rechnung ${invoice.invoice_number}`), // Sanitize message
-  });
+    reference: qrReference,
+    // Die Faelligkeit steht in der Mitteilung, damit sie gedruckt werden darf
+    message: sanitizeForQR(`Rechnung ${invoice.invoice_number}${dueText}`),
+  };
 
-  // Generate QR code as data URL
-  const qrCodeData = qrBill.toString();
-  const qrCodeDataURL = await QRCode.toDataURL(qrCodeData, {
-    errorCorrectionLevel: 'M',
-    margin: 0,
-    width: 200, // High resolution
+  const qrBill = new SwissQRBill({
+    creditor: { account: qrData.account, address: qrData.creditor },
+    debtor: { address: qrData.debtor! },
+    amount: qrData.amount,
+    currency: qrData.currency,
+    reference: qrData.reference,
+    message: qrData.message,
   });
+  const qrPayload = qrBill.toString();
 
   // ── Document header ──────────────────────────────────────────────────────────
   const metaLines: MetaLine[] = [
@@ -1236,8 +1206,8 @@ export async function generateInvoicePDF(data: InvoiceData): Promise<Blob> {
   // ── QR-Bill — always on its own page ─────────────────────────────────────────
   doc.addPage();
   drawSeparatorLine(doc, LAYOUT.SEPARATOR_Y);
-  drawReceiptSection(doc, company, customer, invoice, qrReference);
-  await drawPaymentSection(doc, company, customer, invoice, qrCodeDataURL, qrReference);
+  drawReceiptSection(doc, qrData);
+  drawPaymentSection(doc, qrData, qrPayload);
 
   // Convert to blob
   const pdfBlob = doc.output('blob');
@@ -1548,7 +1518,6 @@ export async function generateQuotePDF(data: QuoteData): Promise<Blob> {
   // Blauwasser-Schriften fuer das Dokument; die QR-Rechnung bleibt in
   // Helvetica (Swiss Payment Standards erlauben nur Arial/Helvetica/Frutiger)
   FONTS = await setupPdfFontSet(doc);
-  PDF_FONT = 'helvetica';
 
   // Header — returns Y after last metadata line
   const headerEndY = drawQuoteHeader(doc, customer, quote, logoBase64, company);

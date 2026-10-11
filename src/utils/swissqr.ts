@@ -389,7 +389,7 @@ export class SwissQRBill {
 
   /**
    * Generate the Swiss Payment Code (SPC) string.
-   * Returns exactly 31 lines separated by \r\n.
+   * Returns 31 elements separated by \r\n, ending with EPD (no trailing line break).
    *
    * Format according to Swiss Payment Standards 2025 v2.3
    * Using Address Type 'S' (Structured) exclusively.
@@ -424,7 +424,8 @@ export class SwissQRBill {
       currency || 'CHF',                                        // 20. Currency
     ];
 
-    // Add debtor information (or empty fields)
+    // Zahlungspflichtiger (optionale Datengruppe). Ohne Zahlungspflichtigen
+    // bleibt auch der Adress-Typ leer (IG 2.3: Status «D»).
     if (debtor && debtor.address && debtor.address.name) {
       lines.push(
         'S',                                                    // 21. Debtor Address Type (S = Structured)
@@ -436,15 +437,7 @@ export class SwissQRBill {
         debtor.address.country.toUpperCase()                   // 27. Debtor Country
       );
     } else {
-      lines.push(
-        'S',                                                    // 21. Debtor Address Type
-        '',                                                     // 22. Debtor Name (empty)
-        '',                                                     // 23. Debtor Street (empty)
-        '',                                                     // 24. Debtor House Number (empty)
-        '',                                                     // 25. Debtor Postal Code (empty)
-        '',                                                     // 26. Debtor City (empty)
-        ''                                                      // 27. Debtor Country (empty)
-      );
+      lines.push('', '', '', '', '', '', '');                  // 21.-27. leer
     }
 
     // Add reference
@@ -453,17 +446,13 @@ export class SwissQRBill {
 
     // Add additional information
     lines.push(message ? truncate(message, 140) : '');         // 30. Unstructured Message
-    lines.push('EPD');                                          // 31. End Payment Data (Trailer)
+    lines.push('EPD');                                          // 31. Trailer (End Payment Data)
 
-    // Alternative procedures (empty)
-    lines.push('');                                             // 32. Alternative Procedure 1 (optional)
-    lines.push('');                                             // 33. Alternative Procedure 2 (optional)
-
-    // Validate line count (must be exactly 33 lines for complete format)
-    if (lines.length !== 33) {
-      console.warn(
-        `⚠️ WARNING: SPC should have exactly 33 lines, but has ${lines.length}`
-      );
+    // Rechnungsinformationen und alternative Verfahren (Status «A») werden
+    // nicht verwendet und deshalb weggelassen. Nach dem letzten Element folgt
+    // keine Zeilenschaltung (IG 2.3, Kap. 4.1.4).
+    if (lines.length !== 31) {
+      console.warn(`SPC sollte 31 Elemente haben, hat aber ${lines.length}`);
     }
 
     // Join with \r\n as specified in SPS 2025
