@@ -10,14 +10,15 @@ import { savePerson, useInvalidateContacts } from '../../hooks/useContacts';
 import { asError } from '../../utils/errors';
 
 /** Firma anlegen oder bearbeiten. Beim Anlegen entsteht aus "Hauptperson" eine Person. */
-export function CompanyEditor({ customer, open, onClose, onSaved }: { customer: Customer | null; open: boolean; onClose: () => void; onSaved?: (id: string) => void }) {
+export function CompanyEditor({ customer, open, onClose, onSaved, supplier = false }: { customer: Customer | null; open: boolean; onClose: () => void; onSaved?: (id: string) => void; supplier?: boolean }) {
   const { selectedCompany } = useCompany();
   const invalidate = useInvalidateContacts();
   if (!open || !selectedCompany) return null;
   return (
-    <Modal isOpen onClose={onClose} title={customer ? `${customer.name} bearbeiten` : 'Neue Firma'} size="lg">
+    <Modal isOpen onClose={onClose} title={customer ? `${customer.name} bearbeiten` : supplier ? 'Neuer Lieferant' : 'Neue Firma'} size="lg">
       <CustomerForm
         editingCustomer={customer}
+        defaultSupplier={supplier}
         onCancelEdit={onClose}
         onSubmit={async (data) => {
           await supabase.rpc('set_active_company', { company_id: selectedCompany.id });

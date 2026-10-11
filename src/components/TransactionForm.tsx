@@ -495,7 +495,7 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
             </label>
             <select id="transaction-customer" value={customerId} onChange={(e) => setCustomerId(e.target.value)} className="input">
               <option value="">Keine Auswahl</option>
-              {customers.map((customer) => (
+              {customers.filter((c) => !c.is_supplier || c.id === customerId).map((customer) => (
                 <option key={customer.id} value={customer.id}>
                   {customer.name}
                 </option>

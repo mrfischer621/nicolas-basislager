@@ -7,7 +7,7 @@ const context = await browser.newContext({ viewport: { width: 1280, height: 800 
 await installMock(context);
 // Neue Seiten und alte Adressen (Weiterleitungen); Stand UX-Struktur Oktober 2026
 const routes = [
-  '/', '/kontakte', '/kontakte?ansicht=personen', '/kontakte/firmen/00000000-0000-4000-8000-00000000c001', '/leads', '/pipeline', '/pipeline?darstellung=tabelle',
+  '/', '/kontakte', '/kontakte?ansicht=personen', '/kontakte?ansicht=lieferanten', '/kontakte/firmen/00000000-0000-4000-8000-00000000c003?tab=buchungen', '/kontakte/firmen/00000000-0000-4000-8000-00000000c001', '/leads', '/pipeline', '/pipeline?darstellung=tabelle',
   '/offerten', '/offerten/00000000-0000-4000-8000-q00000000002', '/projekte', '/projekte/00000000-0000-4000-8000-p00000000001', '/zeiterfassung', '/zeiterfassung?ansicht=auswertung',
   '/rechnungen', '/rechnungen/00000000-0000-4000-8000-00000000f005', '/buchungen', '/buchungen?ansicht=unvollstaendig', '/berichte', '/berichte?tab=erfolgsrechnung',
   '/berichte?tab=jahresabschluss', '/berichte?tab=export',

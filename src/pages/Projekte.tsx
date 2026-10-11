@@ -110,7 +110,7 @@ export default function Projekte() {
         toolbar={
           <Toolbar filterCount={activeFilterCount(state, DEFAULTS)} onReset={reset}>
             <SearchField value={state.q ?? ''} onChange={(v) => set({ q: v })} placeholder="Projekt oder Firma suchen" />
-            <FilterSelect label="Firma" allLabel="Alle Firmen" value={state.firma ?? ''} onChange={(v) => set({ firma: v })} options={customers.map((c) => ({ value: c.id, label: c.name }))} />
+            <FilterSelect label="Firma" allLabel="Alle Firmen" value={state.firma ?? ''} onChange={(v) => set({ firma: v })} options={customers.filter((c) => !c.is_supplier).map((c) => ({ value: c.id, label: c.name }))} />
           </Toolbar>
         }
       >

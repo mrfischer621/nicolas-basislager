@@ -140,7 +140,7 @@ export default function Offerten() {
         toolbar={
           <Toolbar filterCount={filterCount} onReset={reset}>
             <SearchField value={state.q ?? ''} onChange={(q) => set({ q })} placeholder="Nr oder Firma suchen" />
-            <FilterSelect label="Firma" allLabel="Alle Firmen" value={state.firma ?? ''} onChange={(v) => set({ firma: v })} options={customers.map((c) => ({ value: c.id, label: c.name }))} />
+            <FilterSelect label="Firma" allLabel="Alle Firmen" value={state.firma ?? ''} onChange={(v) => set({ firma: v })} options={customers.filter((c) => !c.is_supplier).map((c) => ({ value: c.id, label: c.name }))} />
           </Toolbar>
         }
         pagination={<Pagination page={page} total={list.data?.total ?? 0} onPage={(p) => set({ seite: String(p) })} />}

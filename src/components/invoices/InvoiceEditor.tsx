@@ -30,7 +30,7 @@ export function InvoiceEditor({ mode, onClose, onSaved }: { mode: InvoiceEditorM
   // Auswahl: nur aktive Firmen und Projekte, ausser der gespeicherte Eintrag
   const keepCustomer = mode.kind === 'new' ? mode.preset?.customerId : mode.invoice.customer_id;
   const keepProject = mode.kind === 'new' ? mode.preset?.projectId : mode.invoice.project_id;
-  const activeCustomers = customers.filter((c) => c.is_active !== false || c.id === keepCustomer);
+  const activeCustomers = customers.filter((c) => (c.is_active !== false && !c.is_supplier) || c.id === keepCustomer);
   const activeProjects = projects.filter((p) => p.is_active !== false || p.id === keepProject);
 
   const submit = async (data: InvoiceFormData, totals: { subtotal: number; vat_amount: number; total: number }, timeEntryIds?: string[]) => {

@@ -18,6 +18,7 @@ import { last12Months } from '../utils/cockpit';
 import { incomeByCustomer } from '../utils/reports';
 import { invoiceState } from '../utils/invoiceViews';
 import { formatChfDisplay } from '../utils/money';
+import { formatDate } from '../utils/format';
 
 const STATUS_TABS = [
   { value: 'aktiv', label: 'Aktiv' },
@@ -31,15 +32,16 @@ export default function Kontakte() {
   const confirm = useConfirm();
   const { selectedCompany } = useCompany();
   const { state, set, reset, page } = useListState({ ansicht: 'firmen', status: 'aktiv' });
-  const view = state.ansicht === 'personen' ? 'personen' : 'firmen';
+  const view = state.ansicht === 'personen' ? 'personen' : state.ansicht === 'lieferanten' ? 'lieferanten' : 'firmen';
+  const isSuppliers = view === 'lieferanten';
   const today = zurichDay(new Date());
-  const companies = useCompanyList(view === 'firmen' ? state : { ...state, seite: '1' });
+  const companies = useCompanyList(view !== 'personen' ? { ...state, ansicht: view } : { ...state, ansicht: 'firmen', seite: '1' });
   const persons = usePersonList(view === 'personen' ? state : { ...state, seite: '1' });
   const { data: allCustomers = [] } = useCustomers();
   const finance = useFinanceEntries();
   const { data: invoices = [] } = useInvoiceSummary();
   const invalidate = useInvalidateContacts();
-  const [companyEditor, setCompanyEditor] = useState<{ customer: Customer | null } | null>(() => (state.neu === '1' ? { customer: null } : null));
+  const [companyEditor, setCompanyEditor] = useState<{ customer: Customer | null; supplier?: boolean } | null>(() => (state.neu === '1' ? { customer: null } : null));
   const [personEditor, setPersonEditor] = useState<{ person: CustomerContact | null } | null>(null);
 
   useEffect(() => {
@@ -47,7 +49,20 @@ export default function Kontakte() {
   }, [state.neu, set]);
 
   const names = useMemo(() => new Map(allCustomers.map((c) => [c.id, c.name])), [allCustomers]);
-  const revenue = useMemo(() => new Map(incomeByCustomer(filterRange(finance.data?.entries ?? [], last12Months(today)), names).map((r) => [r.key, r.amount])), [finance.data, names, today]);
+  const revenue = useMemo(
+    () => new Map(incomeByCustomer(filterRange(finance.data?.entries ?? [], last12Months(today)), names).map((r) => [r.key, r.amount])),
+    [finance.data, names, today],
+  );
+  // Lieferanten: Ausgaben der letzten 12 Monate und letzte Buchung
+  const spend = useMemo(() => {
+    const m = new Map<string, { amount: number; last: string }>();
+    for (const e of filterRange(finance.data?.entries ?? [], last12Months(today))) {
+      if (e.type !== 'ausgabe' || !e.supplierId) continue;
+      const cur = m.get(e.supplierId) ?? { amount: 0, last: '' };
+      m.set(e.supplierId, { amount: Math.round((cur.amount + e.amount) * 100) / 100, last: e.date > cur.last ? e.date : cur.last });
+    }
+    return m;
+  }, [finance.data, today]);
   const open = useMemo(() => {
     const m = new Map<string, number>();
     for (const i of invoices) {
@@ -66,7 +81,15 @@ export default function Kontakte() {
     await invalidate();
   };
   const removeCompany = async (c: Customer) => {
-    if (!(await confirm({ title: `${c.name} löschen`, message: 'Endgültig löschen? Firmen mit Rechnungen, Offerten oder Projekten lassen sich nur archivieren.', confirmLabel: 'Löschen', destructive: true }))) return;
+    if (
+      !(await confirm({
+        title: `${c.name} löschen`,
+        message: 'Endgültig löschen? Firmen mit Rechnungen, Offerten oder Projekten lassen sich nur archivieren.',
+        confirmLabel: 'Löschen',
+        destructive: true,
+      }))
+    )
+      return;
     const { error } = await supabase.from('customers').delete().eq('id', c.id);
     if (error) toast.error(error.code === '23503' ? `${c.name} hat noch verknüpfte Daten. Archiviere die Firma stattdessen.` : error.message);
     else toast.success(`${c.name} gelöscht.`);
@@ -107,16 +130,83 @@ export default function Kontakte() {
       ),
     },
     { key: 'kontakt', header: 'E-Mail', cell: (c) => <span className="block max-w-[14rem] truncate text-fg-muted">{c.email ?? '–'}</span>, hideBelow: '2xl' },
-    { key: 'umsatz', header: 'Umsatz 12 Mte.', align: 'right', cell: (c) => (revenue.get(c.id) ? formatChfDisplay(revenue.get(c.id)!, { decimals: 0 }) : <span className="text-fg-muted">–</span>) },
-    { key: 'offen', header: 'Offen', align: 'right', cell: (c) => (open.get(c.id) ? formatChfDisplay(open.get(c.id)!, { decimals: 0 }) : <span className="text-fg-muted">–</span>) },
+    {
+      key: 'umsatz',
+      header: 'Umsatz 12 Mte.',
+      align: 'right',
+      cell: (c) => (revenue.get(c.id) ? formatChfDisplay(revenue.get(c.id)!, { decimals: 0 }) : <span className="text-fg-muted">–</span>),
+    },
+    {
+      key: 'offen',
+      header: 'Offen',
+      align: 'right',
+      cell: (c) => (open.get(c.id) ? formatChfDisplay(open.get(c.id)!, { decimals: 0 }) : <span className="text-fg-muted">–</span>),
+    },
+    { key: 'status', header: 'Status', cell: (c) => (c.is_active ? <span className="badge-positive">Aktiv</span> : <span className="badge-neutral">Archiviert</span>) },
+  ];
+  const supplierColumns: Column<Customer>[] = [
+    {
+      key: 'name',
+      header: 'Lieferant',
+      cell: (c) => (
+        <span className="block max-w-[20rem]">
+          <span className="block truncate font-semibold">{c.name}</span>
+          <span className="block truncate text-xs text-fg-muted">{[c.city, c.website].filter(Boolean).join(' · ')}</span>
+        </span>
+      ),
+    },
+    { key: 'kontakt', header: 'E-Mail', cell: (c) => <span className="block max-w-[14rem] truncate text-fg-muted">{c.email ?? '–'}</span>, hideBelow: '2xl' },
+    {
+      key: 'ausgaben',
+      header: 'Ausgaben 12 Mte.',
+      align: 'right',
+      cell: (c) => (spend.get(c.id) ? formatChfDisplay(spend.get(c.id)!.amount) : <span className="text-fg-muted">–</span>),
+    },
+    {
+      key: 'letzte',
+      header: 'Letzte Buchung',
+      cell: (c) => (spend.get(c.id) ? <span className="tabular-nums">{formatDate(spend.get(c.id)!.last)}</span> : <span className="text-fg-muted">–</span>),
+    },
     { key: 'status', header: 'Status', cell: (c) => (c.is_active ? <span className="badge-positive">Aktiv</span> : <span className="badge-neutral">Archiviert</span>) },
   ];
   const personColumns: Column<PersonRow>[] = [
-    { key: 'name', header: 'Name', cell: (p) => <span className="font-semibold">{p.name}{p.is_primary && <span className="badge-info ml-2">Hauptperson</span>}</span> },
+    {
+      key: 'name',
+      header: 'Name',
+      cell: (p) => (
+        <span className="font-semibold">
+          {p.name}
+          {p.is_primary && <span className="badge-info ml-2">Hauptperson</span>}
+        </span>
+      ),
+    },
     { key: 'rolle', header: 'Funktion', cell: (p) => p.role ?? <span className="text-fg-muted">–</span> },
     { key: 'firma', header: 'Firma', cell: (p) => <span className="block max-w-[14rem] truncate">{p.customer.name}</span> },
-    { key: 'mail', header: 'E-Mail', cell: (p) => (p.email ? <a className="hover:underline" href={`mailto:${p.email}`} onClick={(e) => e.stopPropagation()}>{p.email}</a> : '–') },
-    { key: 'tel', header: 'Telefon', cell: (p) => (p.phone ? <a className="hover:underline" href={`tel:${p.phone}`} onClick={(e) => e.stopPropagation()}>{p.phone}</a> : '–'), hideBelow: '2xl' },
+    {
+      key: 'mail',
+      header: 'E-Mail',
+      cell: (p) =>
+        p.email ? (
+          <a className="hover:underline" href={`mailto:${p.email}`} onClick={(e) => e.stopPropagation()}>
+            {p.email}
+          </a>
+        ) : (
+          '–'
+        ),
+    },
+    {
+      key: 'tel',
+      header: 'Telefon',
+      cell: (p) =>
+        p.phone ? (
+          <a className="hover:underline" href={`tel:${p.phone}`} onClick={(e) => e.stopPropagation()}>
+            {p.phone}
+          </a>
+        ) : (
+          '–'
+        ),
+      hideBelow: '2xl',
+    },
   ];
 
   const toggle = (
@@ -126,6 +216,7 @@ export default function Kontakte() {
       onChange={(v) => set({ ansicht: v, status: null, q: null }, { push: true })}
       options={[
         { value: 'firmen', label: 'Firmen' },
+        { value: 'lieferanten', label: 'Lieferanten' },
         { value: 'personen', label: 'Personen' },
       ]}
     />
@@ -135,33 +226,49 @@ export default function Kontakte() {
     <>
       <ListPage
         title="Kontakte"
-        summary={view === 'firmen' ? `${companies.data?.total ?? 0} ${state.status === 'archiviert' ? 'archivierte ' : state.status === 'alle' ? '' : 'aktive '}Firmen.` : `${persons.data?.total ?? 0} Personen.`}
+        summary={
+          view !== 'personen'
+            ? `${companies.data?.total ?? 0} ${state.status === 'archiviert' ? 'archivierte ' : state.status === 'alle' ? '' : 'aktive '}${isSuppliers ? 'Lieferanten' : 'Firmen'}.`
+            : `${persons.data?.total ?? 0} Personen.`
+        }
         primary={
-          <button type="button" className="btn-cta" onClick={() => (view === 'firmen' ? setCompanyEditor({ customer: null }) : setPersonEditor({ person: null }))}>
+          <button
+            type="button"
+            className="btn-cta"
+            onClick={() => (view !== 'personen' ? setCompanyEditor({ customer: null, supplier: isSuppliers }) : setPersonEditor({ person: null }))}
+          >
             <Plus size={18} aria-hidden="true" />
-            {view === 'firmen' ? 'Neue Firma' : 'Neue Person'}
+            {view === 'firmen' ? 'Neue Firma' : isSuppliers ? 'Neuer Lieferant' : 'Neue Person'}
           </button>
         }
-        tabs={view === 'firmen' ? <ViewTabs label="Status" tabs={STATUS_TABS} value={state.status ?? 'aktiv'} onChange={(v) => set({ status: v }, { push: true })} /> : undefined}
+        tabs={view !== 'personen' ? <ViewTabs label="Status" tabs={STATUS_TABS} value={state.status ?? 'aktiv'} onChange={(v) => set({ status: v }, { push: true })} /> : undefined}
         toolbar={
-          <Toolbar filterCount={activeFilterCount(state, { ansicht: 'firmen', status: 'aktiv' }) - (view === 'personen' ? 1 : 0)} onReset={reset}>
+          <Toolbar filterCount={activeFilterCount(state, { ansicht: 'firmen', status: 'aktiv' }) - (view !== 'firmen' ? 1 : 0)} onReset={reset}>
             {toggle}
-            <SearchField value={state.q ?? ''} onChange={(q) => set({ q })} placeholder={view === 'firmen' ? 'Firma, Ort oder E-Mail suchen' : 'Name, Funktion oder E-Mail suchen'} />
+            <SearchField
+              value={state.q ?? ''}
+              onChange={(q) => set({ q })}
+              placeholder={view === 'firmen' ? 'Firma, Ort oder E-Mail suchen' : isSuppliers ? 'Lieferant, Ort oder E-Mail suchen' : 'Name, Funktion oder E-Mail suchen'}
+            />
           </Toolbar>
         }
-        pagination={<Pagination page={page} total={(view === 'firmen' ? companies.data?.total : persons.data?.total) ?? 0} onPage={(p) => set({ seite: String(p) })} />}
+        pagination={<Pagination page={page} total={(view !== 'personen' ? companies.data?.total : persons.data?.total) ?? 0} onPage={(p) => set({ seite: String(p) })} />}
       >
-        {view === 'firmen' ? (
+        {view !== 'personen' ? (
           <DataTable
             rows={companies.data?.rows ?? []}
             rowKey={(c) => c.id}
-            rowLabel={(c) => `Firma ${c.name}`}
-            columns={companyColumns}
+            rowLabel={(c) => `${isSuppliers ? 'Lieferant' : 'Firma'} ${c.name}`}
+            columns={isSuppliers ? supplierColumns : companyColumns}
             onRowClick={(c) => navigate(`/kontakte/firmen/${c.id}`)}
             menu={companyMenu}
             loading={companies.isLoading}
-            mobile={(c) => ({ title: c.name, subtitle: c.city ?? '', amount: open.get(c.id) ? `${formatChfDisplay(open.get(c.id)!, { decimals: 0 })} offen` : undefined })}
-            empty={<EmptyState icon={<Users size={20} />} title="Keine Firmen gefunden" />}
+            mobile={(c) =>
+              isSuppliers
+                ? { title: c.name, subtitle: c.city ?? '', amount: spend.get(c.id) ? `${formatChfDisplay(spend.get(c.id)!.amount)} in 12 Mte.` : undefined }
+                : { title: c.name, subtitle: c.city ?? '', amount: open.get(c.id) ? `${formatChfDisplay(open.get(c.id)!, { decimals: 0 })} offen` : undefined }
+            }
+            empty={<EmptyState icon={<Users size={20} />} title={isSuppliers ? 'Keine Lieferanten gefunden' : 'Keine Firmen gefunden'} />}
           />
         ) : (
           <DataTable
@@ -177,7 +284,13 @@ export default function Kontakte() {
           />
         )}
       </ListPage>
-      <CompanyEditor open={!!companyEditor} customer={companyEditor?.customer ?? null} onClose={() => setCompanyEditor(null)} onSaved={(id) => !companyEditor?.customer && navigate(`/kontakte/firmen/${id}`)} />
+      <CompanyEditor
+        open={!!companyEditor}
+        customer={companyEditor?.customer ?? null}
+        supplier={companyEditor?.supplier}
+        onClose={() => setCompanyEditor(null)}
+        onSaved={(id) => !companyEditor?.customer && navigate(`/kontakte/firmen/${id}`)}
+      />
       <PersonEditor open={!!personEditor} person={personEditor?.person ?? null} onClose={() => setPersonEditor(null)} />
     </>
   );

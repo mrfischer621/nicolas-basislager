@@ -218,7 +218,7 @@ export default function Zeiterfassung() {
           view !== 'auswertung' && (
             <Toolbar filterCount={filterCount} onReset={reset}>
               <SearchField value={state.q ?? ''} onChange={(q) => set({ q })} placeholder="Tätigkeit suchen" />
-              <FilterSelect label="Firma" allLabel="Alle Firmen" value={state.firma ?? ''} onChange={(v) => set({ firma: v, projekt: null })} options={customers.map((c) => ({ value: c.id, label: c.name }))} />
+              <FilterSelect label="Firma" allLabel="Alle Firmen" value={state.firma ?? ''} onChange={(v) => set({ firma: v, projekt: null })} options={customers.filter((c) => !c.is_supplier).map((c) => ({ value: c.id, label: c.name }))} />
               <FilterSelect
                 label="Projekt"
                 allLabel="Alle Projekte"

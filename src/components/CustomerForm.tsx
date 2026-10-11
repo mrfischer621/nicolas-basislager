@@ -5,11 +5,13 @@ type CustomerFormProps = {
   onSubmit: (customer: Omit<Customer, 'id' | 'created_at'>) => Promise<void>;
   editingCustomer: Customer | null;
   onCancelEdit: () => void;
+  /** Vorgabe fuer eine neue Firma (aus der Lieferantenansicht) */
+  defaultSupplier?: boolean;
 };
 
 type TabType = 'general' | 'address' | 'more';
 
-export default function CustomerForm({ onSubmit, editingCustomer, onCancelEdit }: CustomerFormProps) {
+export default function CustomerForm({ onSubmit, editingCustomer, onCancelEdit, defaultSupplier = false }: CustomerFormProps) {
   const [activeTab, setActiveTab] = useState<TabType>('general');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -18,6 +20,7 @@ export default function CustomerForm({ onSubmit, editingCustomer, onCancelEdit }
   const [contactPerson, setContactPerson] = useState('');
   const [email, setEmail] = useState('');
   const [hourlyRate, setHourlyRate] = useState('');
+  const [isSupplier, setIsSupplier] = useState(editingCustomer?.is_supplier ?? defaultSupplier);
 
   // Tab: Address
   const [street, setStreet] = useState('');
@@ -40,6 +43,7 @@ export default function CustomerForm({ onSubmit, editingCustomer, onCancelEdit }
       setContactPerson(editingCustomer.contact_person || '');
       setEmail(editingCustomer.email || '');
       setHourlyRate(editingCustomer.hourly_rate?.toString() || '');
+      setIsSupplier(editingCustomer.is_supplier ?? false);
 
       setStreet(editingCustomer.street || '');
       setHouseNumber(editingCustomer.house_number || '');
@@ -103,6 +107,7 @@ export default function CustomerForm({ onSubmit, editingCustomer, onCancelEdit }
         website: website || null,
         notes: notes || null,
         is_active: editingCustomer?.is_active ?? true,
+        is_supplier: isSupplier,
       });
       resetForm();
     } catch (error) {
@@ -125,9 +130,7 @@ export default function CustomerForm({ onSubmit, editingCustomer, onCancelEdit }
 
   return (
     <div className="card p-6">
-      <h2 className="text-xl font-semibold text-fg mb-6">
-        {editingCustomer ? 'Firma bearbeiten' : 'Neue Firma'}
-      </h2>
+      <h2 className="text-xl font-semibold text-fg mb-6">{editingCustomer ? 'Firma bearbeiten' : isSupplier ? 'Neuer Lieferant' : 'Neue Firma'}</h2>
 
       {/* Tab Navigation */}
       <div className="border-b border-line mb-6">
@@ -138,9 +141,7 @@ export default function CustomerForm({ onSubmit, editingCustomer, onCancelEdit }
               type="button"
               onClick={() => setActiveTab(tab.id)}
               className={`pb-3 px-1 border-b-2 font-medium text-sm transition ${
-                activeTab === tab.id
-                  ? 'border-brand text-brand'
-                  : 'border-transparent text-fg-muted hover:text-fg hover:border-line-strong'
+                activeTab === tab.id ? 'border-brand text-brand' : 'border-transparent text-fg-muted hover:text-fg hover:border-line-strong'
               }`}
             >
               {tab.label}
@@ -214,21 +215,31 @@ export default function CustomerForm({ onSubmit, editingCustomer, onCancelEdit }
               />
             </div>
 
-            <div>
-              <label htmlFor="hourlyRate" className="block text-sm font-medium text-fg mb-1">
-                Standard Stundenansatz (CHF)
-              </label>
-              <input
-                type="number"
-                id="hourlyRate"
-                value={hourlyRate}
-                onChange={(e) => setHourlyRate(e.target.value)}
-                step="0.01"
-                min="0"
-                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
-                placeholder="z.B. 120.00"
-              />
-            </div>
+            <label className="flex items-start gap-2 text-sm text-fg">
+              <input type="checkbox" checked={isSupplier} onChange={(e) => setIsSupplier(e.target.checked)} className="mt-0.5 h-4 w-4 accent-[rgb(var(--bw-fg))]" />
+              <span>
+                Lieferant
+                <span className="block text-fg-muted">Du bezahlst diese Firma. Sie erscheint unter Kontakte › Lieferanten und nicht bei Rechnungen, Offerten und Projekten.</span>
+              </span>
+            </label>
+
+            {!isSupplier && (
+              <div>
+                <label htmlFor="hourlyRate" className="block text-sm font-medium text-fg mb-1">
+                  Standard Stundenansatz (CHF)
+                </label>
+                <input
+                  type="number"
+                  id="hourlyRate"
+                  value={hourlyRate}
+                  onChange={(e) => setHourlyRate(e.target.value)}
+                  step="0.01"
+                  min="0"
+                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
+                  placeholder="z.B. 120.00"
+                />
+              </div>
+            )}
           </div>
         )}
 
@@ -236,9 +247,7 @@ export default function CustomerForm({ onSubmit, editingCustomer, onCancelEdit }
         {activeTab === 'address' && (
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-fg mb-1">
-                Strasse & Hausnummer
-              </label>
+              <label className="block text-sm font-medium text-fg mb-1">Strasse & Hausnummer</label>
               <div className="flex gap-3">
                 <div className="flex-grow">
                   <input
@@ -394,11 +403,7 @@ export default function CustomerForm({ onSubmit, editingCustomer, onCancelEdit }
             {isSubmitting ? 'Speichert...' : editingCustomer ? 'Aktualisieren' : 'Speichern'}
           </button>
           {editingCustomer && (
-            <button
-              type="button"
-              onClick={handleCancel}
-              className="rounded-lg px-6 py-2 font-medium bg-sunken text-fg hover:bg-sunken transition"
-            >
+            <button type="button" onClick={handleCancel} className="rounded-lg px-6 py-2 font-medium bg-sunken text-fg hover:bg-sunken transition">
               Abbrechen
             </button>
           )}

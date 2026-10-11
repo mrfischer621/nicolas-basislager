@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { Category } from '../lib/supabase';
-import { buildCategoryOptions, defaultCategoryName, distinctCounterparties, emptyToNull } from './transactionCategories';
+import { buildCategoryOptions, defaultCategoryName, distinctCounterparties, emptyToNull, supplierIdFor } from './transactionCategories';
 
 const cat = (name: string, type: 'income' | 'expense', is_active = true, sort_order = 0): Category => ({
   id: `id-${name}`,
@@ -67,5 +67,22 @@ describe('distinctCounterparties', () => {
     expect(
       distinctCounterparties(['Anthropic', 'anthropic', 'Anthropic', ' Infomaniak ', null, '', 'Superflex'])
     ).toEqual(['Anthropic', 'Infomaniak', 'Superflex']);
+  });
+});
+
+describe('supplierIdFor', () => {
+  const suppliers = [
+    { id: 's1', name: 'Anthropic, PBC' },
+    { id: 's2', name: 'Infomaniak Network SA' },
+  ];
+
+  it('verknuepft eine Ausgabe mit dem Lieferanten gleichen Namens, Schreibweise egal', () => {
+    expect(supplierIdFor('ausgabe', ' infomaniak network sa ', suppliers)).toBe('s2');
+  });
+
+  it('laesst unbekannte Namen, leere Texte und Einnahmen ohne Lieferant', () => {
+    expect(supplierIdFor('ausgabe', 'Infomaniak', suppliers)).toBeNull();
+    expect(supplierIdFor('ausgabe', '  ', suppliers)).toBeNull();
+    expect(supplierIdFor('einnahme', 'Anthropic, PBC', suppliers)).toBeNull();
   });
 });

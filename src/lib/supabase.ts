@@ -79,6 +79,8 @@ export interface Customer {
   website: string | null;
   notes: string | null;
   is_active: boolean;
+  /** Lieferant statt Kunde: erscheint nicht in Rechnungen, Offerten und Projekten. Migration 20261011190000 */
+  is_supplier: boolean;
   created_at: string;
 }
 
@@ -242,6 +244,8 @@ export interface Transaction {
   created_at: string;
   /** Lieferant (Ausgabe) bzw. Zahler (Einnahme), Freitext. Migration 20261011120100 */
   counterparty?: string | null;
+  /** Lieferant der Ausgabe (customers mit is_supplier). Migration 20261011190000 */
+  supplier_id?: string | null;
   /** Wiederkehrende Ausgabe (Fixkosten). Migration 20261011170000 */
   is_recurring?: boolean;
   recurrence_interval?: RecurrenceInterval | null;

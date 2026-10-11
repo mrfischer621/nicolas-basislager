@@ -90,7 +90,7 @@ export function QuoteEditor({ mode, onClose, onSaved }: { mode: QuoteEditorMode 
     <Modal isOpen onClose={onClose} title={mode.kind === 'edit' ? `Offerte ${mode.quote.quote_number} bearbeiten` : mode.kind === 'copy' ? `Kopie von ${mode.quote.quote_number}` : 'Neue Offerte'} size="xl">
       <QuoteForm
         onSubmit={submit}
-        customers={customers.filter((c) => c.is_active !== false || c.id === keep)}
+        customers={customers.filter((c) => (c.is_active !== false && !c.is_supplier) || c.id === keep)}
         projects={projects.filter((p) => p.is_active !== false)}
         nextQuoteNumber={nextQuoteNumber(quoteSummary.map((q) => q.quote_number))}
         initialCustomerId={mode.kind === 'new' ? mode.customerId : undefined}

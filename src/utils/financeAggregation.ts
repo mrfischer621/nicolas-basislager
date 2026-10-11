@@ -48,6 +48,8 @@ export interface FinanceTransactionInput {
   description: string | null;
   counterparty?: string | null;
   customer_id: string | null;
+  /** Lieferant einer Ausgabe (Migration 20261011190000) */
+  supplier_id?: string | null;
   project_id?: string | null;
   invoice_id: string | null;
   receipt_url?: string | null;
@@ -70,6 +72,8 @@ export interface FinanceEntry {
   counterparty: string | null;
   description: string | null;
   customerId: string | null;
+  /** Verknuepfter Lieferant (nur Buchungen) */
+  supplierId?: string | null;
   projectId: string | null;
   invoiceId: string | null;
   receiptUrl: string | null;
@@ -249,6 +253,7 @@ export function buildFinanceEntries(
       counterparty: t.counterparty && t.counterparty.trim() !== '' ? t.counterparty : null,
       description: t.description,
       customerId: t.customer_id,
+      supplierId: t.supplier_id ?? null,
       projectId: t.project_id ?? null,
       invoiceId: t.invoice_id,
       receiptUrl: t.receipt_url ?? null,

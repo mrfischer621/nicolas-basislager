@@ -243,7 +243,7 @@ export default function Rechnungen() {
         toolbar={
           <Toolbar filterCount={filterCount} onReset={reset}>
             <SearchField value={state.q ?? ''} onChange={(q) => set({ q })} placeholder="Nr, Titel oder Firma suchen" />
-            <FilterSelect label="Firma" allLabel="Alle Firmen" value={state.firma ?? ''} onChange={(v) => set({ firma: v })} options={customers.map((c) => ({ value: c.id, label: c.name }))} />
+            <FilterSelect label="Firma" allLabel="Alle Firmen" value={state.firma ?? ''} onChange={(v) => set({ firma: v })} options={customers.filter((c) => !c.is_supplier).map((c) => ({ value: c.id, label: c.name }))} />
             <FilterSelect label="Projekt" allLabel="Alle Projekte" value={state.projekt ?? ''} onChange={(v) => set({ projekt: v })} options={projects.map((p) => ({ value: p.id, label: p.name }))} />
             <FilterSelect
               label="Jahr"

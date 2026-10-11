@@ -98,3 +98,13 @@ export function distinctCounterparties(values: Array<string | null | undefined>)
     })
     .sort((a, b) => a.localeCompare(b, 'de-CH'));
 }
+
+/**
+ * Lieferant zu einem Lieferanten-Text: erfasster Lieferant mit gleichem Namen
+ * (Gross- und Kleinschreibung egal), sonst null. Nur Ausgaben haben einen.
+ */
+export function supplierIdFor(type: 'einnahme' | 'ausgabe' | undefined, name: string | null | undefined, suppliers: { id: string; name: string }[]): string | null {
+  const key = (name ?? '').trim().toLocaleLowerCase('de-CH');
+  if (type !== 'ausgabe' || !key) return null;
+  return suppliers.find((s) => s.name.trim().toLocaleLowerCase('de-CH') === key)?.id ?? null;
+}

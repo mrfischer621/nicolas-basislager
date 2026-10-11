@@ -4,20 +4,21 @@ import Modal from '../Modal';
 import { supabase } from '../../lib/supabase';
 import { formatChfDisplay } from '../../utils/money';
 import type { SupplierGroup } from '../../utils/bookings';
+import { supplierIdFor } from '../../utils/transactionCategories';
 
 /**
  * "Lieferanten nachtragen": Buchungen ohne Lieferant nach Text gruppiert.
  * Pro Gruppe ein Name (mit Vorschlag), ein Speichern fuer alle.
  */
-export function SupplierDialog({ open, onClose, groups, known, onSaved }: { open: boolean; onClose: () => void; groups: SupplierGroup[]; known: string[]; onSaved: () => void }) {
+export function SupplierDialog({ open, onClose, groups, known, suppliers = [], onSaved }: { open: boolean; onClose: () => void; groups: SupplierGroup[]; known: string[]; suppliers?: { id: string; name: string }[]; onSaved: () => void }) {
   return (
     <Modal isOpen={open} onClose={onClose} title="Lieferanten nachtragen" size="lg">
-      {open && <Form groups={groups} known={known} onClose={onClose} onSaved={onSaved} />}
+      {open && <Form groups={groups} known={known} suppliers={suppliers} onClose={onClose} onSaved={onSaved} />}
     </Modal>
   );
 }
 
-function Form({ groups, known, onClose, onSaved }: { groups: SupplierGroup[]; known: string[]; onClose: () => void; onSaved: () => void }) {
+function Form({ groups, known, suppliers, onClose, onSaved }: { groups: SupplierGroup[]; known: string[]; suppliers: { id: string; name: string }[]; onClose: () => void; onSaved: () => void }) {
   const [names, setNames] = useState<Record<string, string>>(() => Object.fromEntries(groups.map((g) => [g.key, g.suggestion])));
   const [saving, setSaving] = useState(false);
   const filled = groups.filter((g) => names[g.key]?.trim());
@@ -28,6 +29,8 @@ function Form({ groups, known, onClose, onSaved }: { groups: SupplierGroup[]; kn
     const failed: string[] = [];
     for (const g of filled) {
       const { error } = await supabase.from('transactions').update({ counterparty: names[g.key].trim() }).in('id', g.ids);
+      // Verknuepfung mit dem Lieferanten nur bei Ausgaben (Einnahmen haben einen Zahler)
+      if (!error) await supabase.from('transactions').update({ supplier_id: supplierIdFor('ausgabe', names[g.key], suppliers) }).in('id', g.ids).eq('type', 'ausgabe');
       if (error) failed.push(`${g.label}: ${error.message}`);
       else saved += g.ids.length;
     }

@@ -37,7 +37,7 @@ function Form({ target, stages, onClose }: { target: DrawerTarget; stages: Pipel
   const navigate = useNavigate();
   const confirm = useConfirm();
   const { selectedCompany } = useCompany();
-  const { data: customers = [] } = useCustomers({ activeOnly: true });
+  const { data: customers = [] } = useCustomers({ activeOnly: true, kind: 'kunden' });
   const invalidate = useInvalidatePipeline();
   const existing = target.mode === 'edit' ? target.opportunity : null;
   const kind = existing?.kind ?? (target.mode === 'new' ? target.kind : 'deal');

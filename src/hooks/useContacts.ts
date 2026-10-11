@@ -6,7 +6,7 @@ import { orSearch, pageRange, type ListState } from '../components/list';
 
 export type PersonRow = CustomerContact & { customer: { id: string; name: string; company_id: string; is_active: boolean } };
 
-/** Firmen nach URL-Zustand (Tab, Suche), seitenweise aus der Datenbank. */
+/** Firmen oder Lieferanten nach URL-Zustand (Ansicht, Tab, Suche), seitenweise aus der Datenbank. */
 export function useCompanyList(state: ListState) {
   const { selectedCompany } = useCompany();
   const companyId = selectedCompany?.id ?? '';
@@ -16,7 +16,8 @@ export function useCompanyList(state: ListState) {
     placeholderData: (prev) => prev,
     queryFn: async (): Promise<{ rows: Customer[]; total: number }> => {
       const [from, to] = pageRange(Number(state.seite ?? 1));
-      let q = supabase.from('customers').select('*', { count: 'exact' }).eq('company_id', companyId);
+      // Ansicht "lieferanten" zeigt nur Lieferanten, "firmen" nur Kunden
+      let q = supabase.from('customers').select('*', { count: 'exact' }).eq('company_id', companyId).eq('is_supplier', state.ansicht === 'lieferanten');
       if (state.status === 'archiviert') q = q.eq('is_active', false);
       else if (state.status !== 'alle') q = q.eq('is_active', true);
       if (state.q?.trim()) q = q.or(orSearch(['name', 'city', 'email', 'contact_person'], state.q));

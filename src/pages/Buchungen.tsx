@@ -31,7 +31,7 @@ import { useFinanceEntries, useInvalidateFinance, useLockedYears } from '../hook
 import { supabase } from '../lib/supabase';
 import type { Transaction } from '../lib/supabase';
 import { zurichDay, type FinanceEntry } from '../utils/financeAggregation';
-import { distinctCounterparties } from '../utils/transactionCategories';
+import { distinctCounterparties, supplierIdFor } from '../utils/transactionCategories';
 import { formatChfDisplay } from '../utils/money';
 import { formatDate } from '../utils/format';
 import { asError } from '../utils/errors';
@@ -87,7 +87,8 @@ export default function Buchungen() {
   const inView = filtered.filter((e) => matchesBookingView(e, view));
   const rows = inView.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
   const selection = useSelection(rows.filter((r) => r.source === 'transaction').map((r) => r.id));
-  const known = useMemo(() => distinctCounterparties(all.filter((e) => e.source === 'transaction').map((e) => e.counterparty)), [all]);
+  const suppliers = useMemo(() => customers.filter((c) => c.is_supplier), [customers]);
+  const known = useMemo(() => distinctCounterparties([...suppliers.map((c) => c.name), ...all.filter((e) => e.source === 'transaction').map((e) => e.counterparty)]), [all, suppliers]);
   const groups = useMemo(() => supplierGroups(all, known), [all, known]);
 
   // ?id= (alte Links, Suche) oeffnet die Buchung im Seitenpanel
@@ -110,11 +111,13 @@ export default function Buchungen() {
   const sums = { einnahmen: inView.filter((e) => e.type === 'einnahme').reduce((s, e) => s + e.amount, 0), ausgaben: inView.filter((e) => e.type === 'ausgabe').reduce((s, e) => s + e.amount, 0) };
   const incompleteAll = all.filter(isIncomplete).length;
 
-  const save = async (data: Partial<Transaction>) => {
-    if (data.date && isLocked(data.date)) {
-      toast.error(`Das Jahr ${data.date.slice(0, 4)} ist abgeschlossen.`);
+  const save = async (form: Partial<Transaction>) => {
+    if (form.date && isLocked(form.date)) {
+      toast.error(`Das Jahr ${form.date.slice(0, 4)} ist abgeschlossen.`);
       throw new Error('locked');
     }
+    // Lieferanten-Text eines erfassten Lieferanten verknuepft die Buchung mit ihm
+    const data = { ...form, supplier_id: supplierIdFor(form.type, form.counterparty, suppliers) };
     const result =
       editing && editing !== 'neu'
         ? await supabase.from('transactions').update(data).eq('id', editing.id)
@@ -140,6 +143,7 @@ export default function Buchungen() {
 
   const setSupplier = async (ids: string[], name: string) => {
     const { error } = await supabase.from('transactions').update({ counterparty: name.trim() || null }).in('id', ids);
+    if (!error) await supabase.from('transactions').update({ supplier_id: supplierIdFor('ausgabe', name, suppliers) }).in('id', ids).eq('type', 'ausgabe');
     if (error) toast.error(error.message);
     else toast.success(`Lieferant bei ${ids.length} ${ids.length === 1 ? 'Buchung' : 'Buchungen'} gesetzt.`);
     selection.clear();
@@ -277,7 +281,7 @@ export default function Buchungen() {
           />
         )}
       </Modal>
-      <SupplierDialog open={suppliersOpen} onClose={() => setSuppliersOpen(false)} groups={groups} known={known} onSaved={() => void invalidate()} />
+      <SupplierDialog open={suppliersOpen} onClose={() => setSuppliersOpen(false)} groups={groups} known={known} suppliers={suppliers} onSaved={() => void invalidate()} />
       <Drawer open={bulkSupplier !== null} onClose={() => setBulkSupplier(null)} title={`Lieferant für ${selection.count} Buchungen`}>
         <form
           className="space-y-4"

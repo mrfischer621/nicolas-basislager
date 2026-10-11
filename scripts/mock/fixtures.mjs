@@ -50,7 +50,11 @@ const transactions = [
 const customers = [
   { id: '00000000-0000-4000-8000-00000000c001', company_id: C1, name: 'Beispiel GmbH', is_active: true, city: 'Weinfelden', hourly_rate: 130, contact_person: 'Anna Beispiel', email: 'info@example.ch' },
   { id: '00000000-0000-4000-8000-00000000c002', company_id: C1, name: 'Muster Treuhand AG', is_active: true, city: 'Frauenfeld', hourly_rate: 120, contact_person: 'Beat Muster', email: 'info@example.org' },
+  // Lieferant (Migration 20261011190000): Buchungen per supplier_id verknuepft
+  { id: '00000000-0000-4000-8000-00000000c003', company_id: C1, name: 'Muster Hosting AG', is_active: true, is_supplier: true, city: 'Musterstadt', hourly_rate: null, contact_person: null, email: 'billing@example.net', website: 'example.net' },
 ];
+for (const c of customers) c.is_supplier ??= false;
+for (const t of transactions) t.supplier_id = t.type === 'ausgabe' && t.counterparty === 'Muster Hosting AG' ? customers[2].id : null;
 const inv = (i, status, issue, paid, total, cust = 0) => ({
   id: `00000000-0000-4000-8000-00000000f${String(i).padStart(3, '0')}`, company_id: C1, invoice_number: `RE-2026-${String(i).padStart(3, '0')}`,
   customer_id: customers[cust].id, project_id: null, issue_date: issue, due_date: issue, status, paid_at: paid,

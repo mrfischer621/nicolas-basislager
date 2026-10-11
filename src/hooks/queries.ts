@@ -25,13 +25,18 @@ export const queryKeys = {
   categories: (companyId: string) => ['categories', companyId] as const,
 };
 
-/** Kunden der aktiven Firma. `activeOnly` blendet archivierte aus. */
-export function useCustomers(options: { activeOnly?: boolean } = {}) {
+/**
+ * Firmen der aktiven Firma. `activeOnly` blendet archivierte aus.
+ * `kind`: 'kunden' fuer Auswahlen in Rechnung, Offerte, Projekt und Deal
+ * (ohne Lieferanten), 'lieferanten' nur Lieferanten, Standard alle.
+ */
+export function useCustomers(options: { activeOnly?: boolean; kind?: 'kunden' | 'lieferanten' | 'alle' } = {}) {
   const { selectedCompany } = useCompany();
   const companyId = selectedCompany?.id;
+  const kind = options.kind ?? 'alle';
 
   return useQuery({
-    queryKey: [...queryKeys.customers(companyId ?? ''), options.activeOnly ?? false],
+    queryKey: [...queryKeys.customers(companyId ?? ''), options.activeOnly ?? false, kind],
     enabled: !!companyId,
     queryFn: async (): Promise<Customer[]> => {
       let query = supabase
@@ -41,6 +46,7 @@ export function useCustomers(options: { activeOnly?: boolean } = {}) {
         .order('name', { ascending: true });
 
       if (options.activeOnly) query = query.eq('is_active', true);
+      if (kind !== 'alle') query = query.eq('is_supplier', kind === 'lieferanten');
 
       const { data, error } = await query;
       if (error) throw error;

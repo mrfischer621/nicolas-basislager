@@ -17,7 +17,7 @@ export function ProjectEditor({ project, open, onClose, presetCustomerId }: { pr
   return (
     <Modal isOpen onClose={onClose} title={project ? `Projekt ${project.name} bearbeiten` : 'Neues Projekt'} size="md">
       <ProjectForm
-        customers={customers.filter((c) => c.is_active !== false || c.id === keep)}
+        customers={customers.filter((c) => (c.is_active !== false && !c.is_supplier) || c.id === keep)}
         editingProject={project ?? (presetCustomerId ? ({ name: '', customer_id: presetCustomerId, description: null, status: 'offen', budget: null, hourly_rate: null, is_active: true } as unknown as Project) : null)}
         onCancelEdit={onClose}
         onSubmit={async (data) => {
