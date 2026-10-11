@@ -10,37 +10,13 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.1"
-  }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
       categories: {
         Row: {
+          account_number: string | null
           color: string | null
           company_id: string
           created_at: string | null
@@ -54,6 +30,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          account_number?: string | null
           color?: string | null
           company_id: string
           created_at?: string | null
@@ -67,6 +44,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          account_number?: string | null
           color?: string | null
           company_id?: string
           created_at?: string | null
@@ -934,6 +912,7 @@ export type Database = {
           billable: boolean | null
           category: string | null
           company_id: string
+          counterparty: string | null
           created_at: string | null
           customer_id: string | null
           date: string
@@ -952,6 +931,7 @@ export type Database = {
           billable?: boolean | null
           category?: string | null
           company_id: string
+          counterparty?: string | null
           created_at?: string | null
           customer_id?: string | null
           date: string
@@ -970,6 +950,7 @@ export type Database = {
           billable?: boolean | null
           category?: string | null
           company_id?: string
+          counterparty?: string | null
           created_at?: string | null
           customer_id?: string | null
           date?: string
@@ -1049,6 +1030,50 @@ export type Database = {
           },
         ]
       }
+      year_end_closing_log: {
+        Row: {
+          action: string
+          closing_id: string
+          company_id: string
+          created_at: string
+          hash: string
+          id: string
+          reason: string | null
+          user_id: string | null
+          year: number
+        }
+        Insert: {
+          action: string
+          closing_id: string
+          company_id: string
+          created_at?: string
+          hash: string
+          id?: string
+          reason?: string | null
+          user_id?: string | null
+          year: number
+        }
+        Update: {
+          action?: string
+          closing_id?: string
+          company_id?: string
+          created_at?: string
+          hash?: string
+          id?: string
+          reason?: string | null
+          user_id?: string | null
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "year_end_closing_log_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       year_end_closings: {
         Row: {
           company_id: string
@@ -1057,6 +1082,7 @@ export type Database = {
           final_profit: number | null
           id: string
           locked_at: string | null
+          snapshot_hash: string | null
           status: string
           updated_at: string
           year: number
@@ -1068,6 +1094,7 @@ export type Database = {
           final_profit?: number | null
           id?: string
           locked_at?: string | null
+          snapshot_hash?: string | null
           status?: string
           updated_at?: string
           year: number
@@ -1079,6 +1106,7 @@ export type Database = {
           final_profit?: number | null
           id?: string
           locked_at?: string | null
+          snapshot_hash?: string | null
           status?: string
           updated_at?: string
           year?: number
@@ -1216,6 +1244,11 @@ export type Database = {
         }[]
       }
       get_user_company_id: { Args: never; Returns: string }
+      ist_firmenadmin: { Args: { p_company_id: string }; Returns: boolean }
+      jahresabschluss_hash: {
+        Args: { p_company_id: string; p_data: Json; p_year: number }
+        Returns: string
+      }
       resolve_hourly_rate: {
         Args: { p_default_rate?: number; p_project_id: string }
         Returns: {
@@ -1224,6 +1257,14 @@ export type Database = {
         }[]
       }
       set_active_company: { Args: { company_id: string }; Returns: undefined }
+      unlock_year_end_closing: {
+        Args: { p_closing_id: string; p_reason: string }
+        Returns: undefined
+      }
+      website_anfrage_ablegen: {
+        Args: { anfrage: Json; geheimnis: string }
+        Returns: string
+      }
     }
     Enums: {
       category_type: "income" | "expense"
@@ -1242,12 +1283,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1271,11 +1312,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1296,11 +1337,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1321,11 +1362,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1338,11 +1379,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1352,9 +1393,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       category_type: ["income", "expense"],
