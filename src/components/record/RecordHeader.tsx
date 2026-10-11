@@ -54,7 +54,7 @@ export function RecordHeader({
           {highlights.map((h) => (
             <div key={h.label} className="min-w-0">
               <dt className="caps-sm">{h.label}</dt>
-              <dd className="mt-1 truncate font-display text-lg font-black tabular-nums text-fg">{h.value}</dd>
+              <dd className="mt-1 break-words font-display text-lg font-black tabular-nums text-fg sm:truncate">{h.value}</dd>
               {h.hint && <dd className="text-xs text-fg-muted">{h.hint}</dd>}
             </div>
           ))}

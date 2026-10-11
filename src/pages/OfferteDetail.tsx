@@ -1,3 +1,4 @@
+import { PdfFrame } from '../components/PdfFrame';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -133,7 +134,7 @@ export default function OfferteDetail() {
       />
       <div className="grid gap-6 xl:grid-cols-3">
         <section className="overflow-hidden rounded-card bg-surface shadow-card xl:col-span-2" aria-label="Vorschau">
-          {preview.url ? <iframe title={`Vorschau ${quote.quote_number}`} src={preview.url} className="h-[80vh] w-full" /> : preview.error ? <EmptyState title="Vorschau nicht möglich" text={preview.error} /> : <div className="skeleton m-6 h-[60vh]" />}
+          {preview.url ? <PdfFrame title={`Vorschau ${quote.quote_number}`} url={preview.url} filename={`${quote.quote_number}.pdf`} /> : preview.error ? <EmptyState title="Vorschau nicht möglich" text={preview.error} /> : <div className="skeleton m-6 h-[60vh]" />}
         </section>
         <div className="space-y-6">
           <SideCard title="Verlauf">

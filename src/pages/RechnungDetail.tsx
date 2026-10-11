@@ -1,3 +1,4 @@
+import { PdfFrame } from '../components/PdfFrame';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -160,7 +161,7 @@ export default function RechnungDetail() {
       <div className="grid gap-6 xl:grid-cols-3">
         <section className="overflow-hidden rounded-card bg-surface shadow-card xl:col-span-2" aria-label="Vorschau">
           {preview.url ? (
-            <iframe title={`Vorschau ${invoice.invoice_number}`} src={preview.url} className="h-[80vh] w-full" />
+            <PdfFrame title={`Vorschau ${invoice.invoice_number}`} url={preview.url} filename={`${invoice.invoice_number}.pdf`} />
           ) : preview.error ? (
             <EmptyState title="Vorschau nicht möglich" text={preview.error} />
           ) : (

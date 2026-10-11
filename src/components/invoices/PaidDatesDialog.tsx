@@ -88,8 +88,9 @@ function PaidDatesForm({ invoices, customers, onClose }: { invoices: InvoiceSumm
       </div>
 
       <div className="overflow-x-auto rounded-tile border border-line">
-        <table className="w-full text-sm">
-          <thead>
+        {/* Handy: jede Rechnung als Karte (Nr, Betrag, Firma, Datum in voller Breite) */}
+        <table className="w-full text-sm max-sm:block">
+          <thead className="max-sm:hidden">
             <tr>
               <th className="caps-sm border-b border-line px-3 py-2 text-left">Nr</th>
               <th className="caps-sm border-b border-line px-3 py-2 text-left">Firma</th>
@@ -99,18 +100,18 @@ function PaidDatesForm({ invoices, customers, onClose }: { invoices: InvoiceSumm
               <th className="caps-sm border-b border-line px-3 py-2 text-left">Bezahlt am</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="max-sm:block">
             {drafts.map((d) => {
               const inv = byId.get(d.id);
               const error = rowErrors[d.id] ?? draftError(d, today);
               return (
-                <tr key={d.id} className="border-b border-line last:border-0">
-                  <td className="px-3 py-2 font-semibold">{d.invoice_number}</td>
-                  <td className="max-w-[10rem] truncate px-3 py-2">{inv ? customerName(inv.customer_id) : '–'}</td>
+                <tr key={d.id} className="border-b border-line last:border-0 max-sm:grid max-sm:grid-cols-[1fr_auto] max-sm:gap-x-3 max-sm:gap-y-1 max-sm:p-3">
+                  <td className="px-3 py-2 font-semibold max-sm:p-0">{d.invoice_number}</td>
+                  <td className="max-w-[10rem] truncate px-3 py-2 max-sm:col-span-2 max-sm:row-start-2 max-sm:max-w-none max-sm:p-0 max-sm:text-fg-muted">{inv ? customerName(inv.customer_id) : '–'}</td>
                   <td className="hidden px-3 py-2 tabular-nums sm:table-cell">{formatDate(d.issue_date)}</td>
                   <td className="hidden px-3 py-2 tabular-nums sm:table-cell">{formatDate(d.due_date)}</td>
-                  <td className="px-3 py-2 text-right tabular-nums">{inv ? formatChfDisplay(Number(inv.total)) : ''}</td>
-                  <td className="px-3 py-2">
+                  <td className="px-3 py-2 text-right tabular-nums max-sm:col-start-2 max-sm:row-start-1 max-sm:p-0 max-sm:font-semibold">{inv ? formatChfDisplay(Number(inv.total)) : ''}</td>
+                  <td className="px-3 py-2 max-sm:col-span-2 max-sm:row-start-3 max-sm:px-0 max-sm:pb-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <input
                         type="date"
@@ -125,11 +126,11 @@ function PaidDatesForm({ invoices, customers, onClose }: { invoices: InvoiceSumm
                             return next;
                           });
                         }}
-                        className={`input w-auto py-1.5 ${error ? 'input-error' : ''}`}
+                        className={`input w-auto py-1.5 max-sm:flex-1 ${error ? 'input-error' : ''}`}
                         aria-invalid={!!error}
                       />
                       {d.due_date && !d.day && (
-                        <button type="button" className="btn-ghost min-h-[32px] px-2 py-1 text-xs" onClick={() => setDrafts((prev) => applyDueDate(prev, [d.id]))}>
+                        <button type="button" className="btn-ghost min-h-[32px] px-2 py-1 text-xs max-sm:min-h-[44px] max-sm:border max-sm:border-line-strong" onClick={() => setDrafts((prev) => applyDueDate(prev, [d.id]))}>
                           Fälligkeit
                         </button>
                       )}
@@ -144,7 +145,7 @@ function PaidDatesForm({ invoices, customers, onClose }: { invoices: InvoiceSumm
         </table>
       </div>
 
-      <div className="flex justify-end gap-2">
+      <div className="sheet-actions flex justify-end gap-2">
         <button type="button" className="btn-ghost" onClick={onClose}>
           Abbrechen
         </button>

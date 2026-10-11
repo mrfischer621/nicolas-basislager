@@ -547,9 +547,9 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
 
         {/* Items Section */}
         <div>
-          <div className="flex items-center justify-between mb-3">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <h3 className="text-lg font-semibold text-fg">Positionen</h3>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {/* Time Entry Import Button - only show when customer is selected */}
               {customerId && (
                 <button

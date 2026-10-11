@@ -264,10 +264,8 @@ export default function QuoteForm({
   const totals = calculateTotals();
 
   return (
-    <div className="card p-6">
-      <h2 className="text-xl font-semibold text-fg mb-4">
-        {isEditMode ? 'Offerte bearbeiten' : 'Neue Offerte'}
-      </h2>
+    // Titel und Rahmen kommen vom Dialog (QuoteEditor), nicht doppelt
+    <div>
 
       {/* Warning for editing sent/accepted/rejected quotes */}
       {showEditWarning && (
@@ -408,9 +406,9 @@ export default function QuoteForm({
         </div>
 
         <div>
-          <div className="flex items-center justify-between mb-3">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <h3 className="text-lg font-semibold text-fg">Positionen</h3>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 onClick={() => setShowDiscounts(!showDiscounts)}
