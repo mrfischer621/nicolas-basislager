@@ -258,7 +258,7 @@ export default function QuoteForm({
   const totals = calculateTotals();
 
   return (
-    <div className="bg-surface rounded-lg shadow-sm p-6">
+    <div className="card p-6">
       <h2 className="text-xl font-semibold text-fg mb-4">
         {isEditMode ? 'Angebot bearbeiten' : 'Neues Angebot'}
       </h2>

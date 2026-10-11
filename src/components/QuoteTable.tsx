@@ -64,14 +64,14 @@ export default function QuoteTable({
 
   if (quotes.length === 0) {
     return (
-      <div className="bg-surface rounded-lg shadow-sm p-6">
+      <div className="card p-6">
         <p className="text-fg-muted text-center">Keine Angebote vorhanden. Erstellen Sie das erste Angebot.</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-surface rounded-lg shadow-sm overflow-hidden">
+    <div className="card overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead className="bg-canvas border-b border-line">
