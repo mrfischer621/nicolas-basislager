@@ -5,6 +5,12 @@ import { supabase } from '../lib/supabase';
 import { useCompany } from '../context/CompanyContext';
 import { useAuth } from '../context/AuthProvider';
 import type { Transaction, Customer, Project, Category } from '../lib/supabase';
+import {
+  buildCategoryOptions,
+  defaultCategoryName,
+  emptyToNull,
+  transactionTypeFor,
+} from '../utils/transactionCategories';
 
 interface TransactionFormProps {
   transaction?: Transaction;
@@ -24,7 +30,10 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
   const [transactionNumber, setTransactionNumber] = useState(transaction?.transaction_number || '');
   const [date, setDate] = useState(transaction?.date || new Date().toISOString().split('T')[0]);
   const [amount, setAmount] = useState(transaction?.amount.toString() || '');
-  const [categoryId, setCategoryId] = useState(transaction?.category || '');
+  // Kategorie wird als NAME gefuehrt, genau wie in transactions.category gespeichert.
+  // (Frueher stand hier der Name, verglichen wurde aber mit der ID: Beim Bearbeiten
+  // zeigte das Feld eine falsche Kategorie und beim Speichern wurde NULL geschrieben.)
+  const [categoryName, setCategoryName] = useState(transaction?.category || '');
   const [description, setDescription] = useState(transaction?.description || '');
   const [customerId, setCustomerId] = useState(transaction?.customer_id || '');
   const [projectId, setProjectId] = useState(transaction?.project_id || '');
@@ -44,23 +53,20 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
 
       try {
         setIsLoadingCategories(true);
+        // Auch inaktive Kategorien laden: Sie werden nicht zur Auswahl angeboten,
+        // aber eine bestehende Buchung mit inaktiver Kategorie behaelt sie.
         const { data, error } = await supabase
           .from('categories')
           .select('*')
           .eq('company_id', selectedCompany.id)
-          .eq('is_active', true)
           .order('sort_order', { ascending: true });
 
         if (error) throw error;
         setCategories(data || []);
 
-        // Set default category if none selected
-        if (!categoryId && data && data.length > 0) {
-          const typeForTab = activeTab === 'einnahme' ? 'income' : 'expense';
-          const defaultCat = data.find(c => c.type === typeForTab);
-          if (defaultCat) {
-            setCategoryId(defaultCat.id);
-          }
+        // Default nur beim Neuanlegen, nie beim Bearbeiten
+        if (!transaction) {
+          setCategoryName((current) => current || defaultCategoryName(data || [], activeTab));
         }
       } catch (err) {
         console.error('Error fetching categories:', err);
@@ -72,27 +78,28 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
     fetchCategories();
   }, [selectedCompany]);
 
-  // Group categories by type
-  const incomeCategories = categories.filter(c => c.type === 'income');
-  const expenseCategories = categories.filter(c => c.type === 'expense');
+  // Auswahlliste: aktive Kategorien plus ggf. die gespeicherte (inaktive) Kategorie
+  const categoryOptions = buildCategoryOptions(categories, transaction?.category);
+  const incomeOptions = categoryOptions.filter((o) => o.type === 'income');
+  const expenseOptions = categoryOptions.filter((o) => o.type === 'expense');
+  const otherOptions = categoryOptions.filter((o) => o.type === null);
 
-  // Handle category change - auto-set type based on category
-  const handleCategoryChange = (newCategoryId: string) => {
-    setCategoryId(newCategoryId);
-    const selectedCat = categories.find(c => c.id === newCategoryId);
-    if (selectedCat) {
-      const newType = selectedCat.type === 'income' ? 'einnahme' : 'ausgabe';
-      setActiveTab(newType);
+  // Kategorie gewaehlt: Typ passend nachziehen
+  const handleCategoryChange = (newName: string) => {
+    setCategoryName(newName);
+    const option = categoryOptions.find((o) => o.value === newName);
+    if (option?.type) {
+      setActiveTab(transactionTypeFor(option.type));
     }
   };
 
-  // Handle tab change - update category to first of that type
+  // Typ gewechselt: Passt die gewaehlte Kategorie nicht mehr zum Typ, die erste
+  // Kategorie des neuen Typs vorschlagen (bewusste Aktion des Benutzers).
   const handleTabChange = (newTab: 'einnahme' | 'ausgabe') => {
     setActiveTab(newTab);
-    const targetCategories = newTab === 'einnahme' ? incomeCategories : expenseCategories;
-    if (targetCategories.length > 0) {
-      setCategoryId(targetCategories[0].id);
-    }
+    const option = categoryOptions.find((o) => o.value === categoryName);
+    if (option?.type && transactionTypeFor(option.type) === newTab) return;
+    setCategoryName(defaultCategoryName(categories, newTab));
   };
 
   // Removed auto-generation logic (Phase 3.4)
@@ -102,10 +109,6 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
   const handleSubmit = async (e: React.FormEvent, saveAndNew = false) => {
     e.preventDefault();
     setLoading(true);
-
-    // Get category name for storage (backward compatible with string category field)
-    const selectedCategory = categories.find(c => c.id === categoryId);
-    const categoryName = selectedCategory?.name || null;
 
     try {
       // Upload receipt if a new file was selected
@@ -119,8 +122,8 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
         transaction_number: transactionNumber || null, // Let DB trigger generate if empty
         date,
         amount: parseFloat(amount),
-        category: categoryName,
-        description: description || null,
+        category: emptyToNull(categoryName),
+        description: emptyToNull(description),
         customer_id: customerId || null,
         project_id: projectId || null,
         tags: tags.length > 0 ? tags : null,
@@ -129,11 +132,10 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
 
       if (saveAndNew) {
         // Reset form - keep current type and select first category of that type
-        const currentTypeCategories = activeTab === 'einnahme' ? incomeCategories : expenseCategories;
         setTransactionNumber('');
         setAmount('');
         setDescription('');
-        setCategoryId(currentTypeCategories[0]?.id || '');
+        setCategoryName(defaultCategoryName(categories, activeTab));
         setCustomerId('');
         setProjectId('');
         setTags([]);
@@ -232,7 +234,7 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="p-6">
-          <h2 className="text-2xl font-bold mb-6">Buchung hinzufügen</h2>
+          <h2 className="text-2xl font-bold mb-6">{transaction ? 'Buchung bearbeiten' : 'Buchung hinzufügen'}</h2>
 
           {/* Tabs */}
           <div className="flex gap-2 mb-6">
@@ -306,35 +308,40 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="transaction-category" className="block text-sm font-medium text-gray-700 mb-1">
                   Kategorie
                 </label>
                 <select
-                  value={categoryId}
+                  id="transaction-category"
+                  value={categoryName}
                   onChange={(e) => handleCategoryChange(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-transparent"
                   disabled={isLoadingCategories}
                 >
                   {isLoadingCategories ? (
                     <option value="">Lädt...</option>
-                  ) : categories.length === 0 ? (
+                  ) : categoryOptions.length === 0 ? (
                     <option value="">Keine Kategorien verfügbar</option>
                   ) : (
                     <>
-                      {incomeCategories.length > 0 && (
+                      <option value="">Ohne Kategorie</option>
+                      {incomeOptions.length > 0 && (
                         <optgroup label="Einnahmen">
-                          {incomeCategories.map((cat) => (
-                            <option key={cat.id} value={cat.id}>{cat.name}</option>
+                          {incomeOptions.map((o) => (
+                            <option key={o.value} value={o.value}>{o.label}</option>
                           ))}
                         </optgroup>
                       )}
-                      {expenseCategories.length > 0 && (
+                      {expenseOptions.length > 0 && (
                         <optgroup label="Ausgaben">
-                          {expenseCategories.map((cat) => (
-                            <option key={cat.id} value={cat.id}>{cat.name}</option>
+                          {expenseOptions.map((o) => (
+                            <option key={o.value} value={o.value}>{o.label}</option>
                           ))}
                         </optgroup>
                       )}
+                      {otherOptions.map((o) => (
+                        <option key={o.value} value={o.value}>{o.label}</option>
+                      ))}
                     </>
                   )}
                 </select>

@@ -6,8 +6,9 @@ export default defineConfig({
   base: '/',
   plugins: [react()],
   test: {
-    // Reine Rechenlogik - kein DOM noetig
+    // Standard: reine Rechenlogik ohne DOM. Komponententests setzen
+    // per Kopfkommentar `@vitest-environment jsdom`.
     environment: 'node',
-    include: ['src/**/*.test.ts'],
+    include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
   },
 })
