@@ -60,6 +60,7 @@ export function DataTable<T>({
   loading,
   empty,
   tableFrom = 'xl',
+  selectable,
 }: {
   rows: T[];
   /** optional gruppiert; dann werden `rows` ignoriert */
@@ -79,7 +80,10 @@ export function DataTable<T>({
   empty: ReactNode;
   /** ab welcher Breite die Tabelle statt der Kartenliste erscheint */
   tableFrom?: 'md' | 'lg' | 'xl';
+  /** Zeilen ohne Auswahl (z. B. Rechnungen in der Buchungsliste) */
+  selectable?: (row: T) => boolean;
 }) {
+  const canSelect = (row: T) => !selectable || selectable(row);
   const show = { md: ['hidden md:table', 'md:hidden'], lg: ['hidden lg:table', 'lg:hidden'], xl: ['hidden xl:table', 'xl:hidden'] }[tableFrom];
   const allGroups: RowGroup<T>[] = groups ?? [{ key: 'alle', label: null, rows }];
   const total = allGroups.reduce((n, g) => n + g.rows.length, 0);
@@ -90,7 +94,7 @@ export function DataTable<T>({
     if (e.key === 'Enter' && onRowClick) {
       e.preventDefault();
       onRowClick(row);
-    } else if (e.key === ' ' && selection) {
+    } else if (e.key === ' ' && selection && canSelect(row)) {
       e.preventDefault();
       selection.toggle(rowKey(row));
     } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
@@ -194,13 +198,13 @@ export function DataTable<T>({
                 >
                   {selection && (
                     <td className="py-2 pl-4" onClick={(e) => e.stopPropagation()}>
-                      <input
+                      {canSelect(row) && <input
                         type="checkbox"
                         aria-label={`${rowLabel(row)} auswählen`}
                         checked={!!selected}
                         onChange={() => selection.toggle(id)}
                         className="h-4 w-4 rounded border-line-strong accent-[rgb(var(--bw-fg))]"
-                      />
+                      />}
                     </td>
                   )}
                   {columns.map((c) => (
@@ -241,7 +245,7 @@ export function DataTable<T>({
                 const selected = selection?.isSelected(id);
                 return (
                   <li key={id} className={`flex items-center gap-3 border-b border-line px-4 py-3 ${selected ? 'bg-accent-subtle' : ''}`}>
-                    {selection && (
+                    {selection && canSelect(row) && (
                       <input
                         type="checkbox"
                         aria-label={`${rowLabel(row)} auswählen`}

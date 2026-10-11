@@ -4,7 +4,7 @@ import { Upload, X, FileText, Image, Camera, Paperclip } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useCompany } from '../context/CompanyContext';
 import { useAuth } from '../context/AuthProvider';
-import type { Transaction, Customer, Project, Category } from '../lib/supabase';
+import type { RecurrenceInterval, Transaction, Customer, Project, Category } from '../lib/supabase';
 import {
   buildCategoryOptions,
   defaultCategoryName,
@@ -41,6 +41,9 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
   const [customerId, setCustomerId] = useState(transaction?.customer_id || '');
   const [projectId, setProjectId] = useState(transaction?.project_id || '');
   const [tags, setTags] = useState<string[]>(transaction?.tags || []);
+  // Wiederkehrende Ausgabe (Abo, Miete): Grundlage fuer Fixkosten und Liquiditaet im Cockpit
+  const [isRecurring, setIsRecurring] = useState(transaction?.is_recurring ?? false);
+  const [interval, setRecurrenceInterval] = useState<RecurrenceInterval>(transaction?.recurrence_interval ?? 'monatlich');
   const [tagInput, setTagInput] = useState('');
   // Weitere Angaben offen, wenn die Buchung dort schon etwas enthaelt
   const [moreOpen, setMoreOpen] = useState(
@@ -136,6 +139,8 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
         project_id: projectId || null,
         tags: tags.length > 0 ? tags : null,
         receipt_url: receiptUrl,
+        is_recurring: activeTab === 'ausgabe' && isRecurring,
+        recurrence_interval: activeTab === 'ausgabe' && isRecurring ? interval : null,
       });
 
       if (saveAndNew) {
@@ -361,6 +366,22 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
           </datalist>
         </div>
       </div>
+
+      {activeTab === 'ausgabe' && (
+        <div className="flex flex-wrap items-center gap-3">
+          <label className="flex items-center gap-2 text-sm text-fg">
+            <input type="checkbox" checked={isRecurring} onChange={(e) => setIsRecurring(e.target.checked)} className="h-4 w-4 accent-[rgb(var(--bw-fg))]" />
+            Wiederkehrend (Abo, Miete, Versicherung)
+          </label>
+          {isRecurring && (
+            <select aria-label="Intervall" value={interval} onChange={(e) => setRecurrenceInterval(e.target.value as RecurrenceInterval)} className="input w-auto py-1.5">
+              <option value="monatlich">monatlich</option>
+              <option value="quartalsweise">quartalsweise</option>
+              <option value="jaehrlich">jährlich</option>
+            </select>
+          )}
+        </div>
+      )}
 
       <div>
         <label htmlFor="transaction-description" className="label">
