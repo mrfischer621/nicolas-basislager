@@ -604,3 +604,27 @@ Schreibende Tests laufen nur in «ZZ Testfirma» und werden danach entfernt. Es 
 ## 9. Entscheide
 
 Am 11.10.2026 freigegeben: alle Empfehlungen aus 2.2 und Abschnitt 9 der Vorlage (Navigation mit «Kontakte», Begriffe Firma/Person/Unternehmen, Leads als Art in `opportunities`, Pipeline-Phasen wie 7.3, Website-Anfragen als Lead, Zahlungsdatum ohne Vorbelegung, Datensatzseite in zwei Spalten, Rechnung als Seite). Blauwasser IT und Freiluftchuchi sind Einzelfirmen, werden aber **nicht** zusammengezählt (2.2 J).
+
+---
+
+## 10. Umsetzungsstand (11.10.2026)
+
+Umgesetzt auf `feature/ux-struktur` in 16 Commits (ein Commit pro Baustein bzw. Seite), nicht gemergt. Screenshots mit Testdaten: `vorher/` und `nachher/` (`node scripts/ux-audit-screens.mjs docs/ux-struktur/nachher 1440`).
+
+**Eingespielte Migrationen** (vorher Sicherung `~/CRM-Backups/2026-10-11-vor-ux-struktur/`, Datenbank, Belege und Logos, mit age verschlüsselt):
+
+| Migration | Inhalt |
+|---|---|
+| `20261011170000_ux_struktur_grundlagen.sql` | `company_settings`, `company_revenue_targets`, `bank_balances`, `deadlines`, `notes` (RLS pro Unternehmen); neue Spalten `transactions.is_recurring/recurrence_interval`, `invoices.is_recurring_revenue/sent_at/paid_at_source`, `quotes.sent_at`, `opportunities.kind/lead_status/source`, `pipeline_stages.probability/is_won` |
+| `20261011180000_pipeline_leads.sql` | Freigegebene Datenänderung 7.3: 24 Recherche-Einträge als Leads, Phasen umbenannt, Wahrscheinlichkeiten, `pipeline_stages.is_lead_stage`, Website-Anfragen landen als Lead (Quelle «Website») |
+
+**Abweichungen vom Konzept, bewusst:**
+
+- Buchungen und Projekte filtern im Browser statt in der Datenbank. Buchungen kommen aus der zentralen Aggregation (bezahlte Rechnungen zählen als Einnahmen), Projekte sind wenige. Filter und Ansicht stehen trotzdem in der URL.
+- Nummernkreise sind nicht einstellbar (dafür fehlt eine Spalte). Offerten heissen neu OF-, die Folge läuft nach den AN-Nummern weiter.
+- MWST-Einstellungen bleiben im Bereich «Unternehmen und Logo». Ein Verschieben hätte das Formular geteilt, ohne Nutzen.
+- Der Tab «Dateien» der Firmenseite listet Rechnungen, Offerten und Belege. Eine eigene Ablage pro Firma ist eine spätere Stufe.
+- Akquise-Quoten sind Näherungen: Die Phasengeschichte eines Deals wird nicht gespeichert.
+- `sent_at` ist für bestehende Rechnungen und Offerten leer. Der Verlauf zeigt dann «Datum nicht erfasst».
+
+**Für später** (unverändert aus 7.5): Bankimport (camt.053), Belegerkennung, Gutschrift, wiederkehrende Rechnungen als Automatik, Dateiablage pro Firma, Aufgaben und Erinnerungen, MWST-Abrechnung.

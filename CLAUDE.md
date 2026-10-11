@@ -118,10 +118,10 @@ Konzept, Kontrast und Screenshots: `docs/design-review/`.
 
 ### Custom Hooks
 
-**`useAnalytics(startDate, endDate)`** (`/src/hooks/useAnalytics.ts`):
-- Aggregates financial data from invoices and transactions
-- Returns KPIs (income, expenses, profit), timelines, customer/category breakdowns
-- Used by Dashboard and Auswertungen pages
+**`useAnalytics(range, granularity)`** (`/src/hooks/useAnalytics.ts`):
+- Dünne Schicht über der zentralen Aggregation (Cockpit, Berichte)
+
+**Datenhooks pro Bereich:** `useInvoices.ts`, `useQuotes.ts`, `useTimeEntries.ts`, `usePipeline.ts`, `useContacts.ts`, `useCompanySettings.ts`, `useCockpitData.ts` (React Query; schreibende Funktionen daneben exportiert).
 
 **`useYearEnd(year)`** (`/src/hooks/useYearEnd.ts`):
 - Year-end closing logic with asset depreciation calculations
@@ -133,16 +133,13 @@ Most entities follow this structure:
 - `[Entity]Table.tsx` - List/Table display component
 - Used in corresponding `/src/pages/[Entity].tsx`
 
-**Kanban Components (Sales Pipeline):**
-- `KanbanColumn.tsx` - Droppable column with fixed width (`w-72`)
-- `OpportunityCard.tsx` - Draggable deal card
-- Uses `@dnd-kit` for drag-and-drop functionality
+**Pipeline:** Board in `pages/Pipeline.tsx` (`@dnd-kit`, useDraggable/useDroppable), Lead/Deal-Panel `components/pipeline/OpportunityDrawer.tsx`.
 
 ### Key Files
 
 - `/src/lib/supabase.ts` - Database client + TypeScript type definitions
 - `/src/components/BentoLayout.tsx` - Main app shell (replaced Layout.tsx)
-- `/src/pages/Dashboard.tsx` - KPI overview with analytics
+- `/src/pages/Cockpit.tsx` - Zu erledigen, Steuerung, Kennzahlen (ersetzt Dashboard)
 - `/src/pages/Sales.tsx` - Kanban-style sales pipeline
 - `/src/pages/Settings.tsx` - Company configuration (logo, IBAN, VAT settings)
 
@@ -317,18 +314,32 @@ import { PageHeader, Card, Button, KPICard } from '../components/ui';
 
 ## Navigation Structure
 
-Main sidebar routes (11 total):
-1. Dashboard - `/` (Home)
-2. Sales Pipeline - `/sales` (Kanban board)
-3. Kunden - `/kunden` (Customers)
-4. Projekte - `/projekte` (Projects)
-5. Produkte - `/produkte` (Products)
-6. Zeiterfassung - `/zeiterfassung` (Time tracking)
-7. Rechnungen - `/rechnungen` (Invoices)
-8. Buchungen - `/buchungen` (Transactions)
-9. Auswertungen - `/auswertungen` (Analytics)
-10. Jahresabschluss - `/jahresabschluss` (Year-end)
-11. Einstellungen - `/settings` (Settings)
+Seit der UX-Struktur (Okt. 2026, docs/ux-struktur/konzept.md) entlang des Geschäftsablaufs:
+
+| Bereich | Seiten |
+|---|---|
+| – | Cockpit `/`, Kontakte `/kontakte` (Firmen/Personen), Firmenseite `/kontakte/firmen/:id` |
+| Verkauf | Leads `/leads`, Pipeline `/pipeline`, Offerten `/offerten`, `/offerten/:id` |
+| Arbeit | Projekte `/projekte`, `/projekte/:id`, Zeiterfassung `/zeiterfassung` |
+| Finanzen | Rechnungen `/rechnungen`, `/rechnungen/:id`, Buchungen `/buchungen`, Berichte `/berichte?tab=` |
+| unten | Einstellungen `/einstellungen/<bereich>` |
+
+Alte Adressen (`/sales`, `/angebote`, `/kunden`, `/auswertungen`, `/jahresabschluss`, `/produkte`, `/settings?tab=`) leiten über `src/routes/legacy.ts` weiter. Begriffe: `docs/glossar.md` (Firma/Person, Unternehmen = eigenes Geschäft, Offerte statt Angebot).
+
+### Listen-Template (`src/components/list/`)
+
+Alle Übersichten nutzen `ListPage`, `ViewTabs`, `KpiStrip`, `DataTable` (Tabelle ab 1280 px, darunter Kartenliste), `RowMenu` (ein Menü pro Zeile, nicht mögliche Aktionen ausgeblendet), `BulkBar`, `Drawer`. Filter, Ansicht, Sortierung und Seite stehen in der URL (`useListState`, Schlüssel `ansicht`, `q`, `firma`, `projekt`, `von`, `bis`, `seite`, `sort`). Listen fragen gefiltert und seitenweise (50) die Datenbank ab; Tab-Zahlen kommen aus schlanken Abfragen. Ausnahme: Buchungen und Projekte filtern im Browser (kleine Mengen, zentrale Aggregation).
+
+### Abgeleitete Status
+
+- Rechnung **überfällig** = versendet und Fälligkeit vor heute (`utils/invoiceViews.ts`); der alte gespeicherte Wert `überfällig` zählt wie versendet.
+- Offerte **abgelaufen** = versendet und Gültigkeit vorbei; `offen` heisst «Entwurf», `bestaetigt` heisst «Umgewandelt» (`utils/quoteViews.ts`).
+- Zeit **nicht verrechnet** = verrechenbar, ohne Rechnung, ohne manuellen Status verrechnet/bezahlt (`utils/timeEntries.ts`).
+- Leads sind `opportunities.kind = 'lead'`; die Lead-Stufe (`pipeline_stages.is_lead_stage`) erscheint nicht im Board.
+
+### Cockpit
+
+Alle Werte über reine Funktionen in `utils/cockpit.ts` und `utils/cockpitTodos.ts` (getestet), immer nur für das gewählte Unternehmen (Blauwasser und Freiluftchuchi nie zusammenzählen). Einstellungen in `company_settings` und `company_revenue_targets`, Kontostände `bank_balances`, Fristen `deadlines`, Notizen `notes`.
 
 ## Multi-Company Architecture
 
