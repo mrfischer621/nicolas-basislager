@@ -554,13 +554,15 @@ export default function TransactionForm({ transaction, onSubmit, onCancel, custo
         </div>
       </details>
 
-      <div className="flex flex-col-reverse gap-2 border-t border-line pt-4 sm:flex-row sm:justify-end">
-        <button type="button" onClick={onCancel} className="btn-ghost" disabled={loading}>
+      {/* Handy: eine Zeile in der festen Fussleiste; Abbrechen ueber das X oben */}
+      <div className="sheet-actions flex gap-2 border-t border-line pt-4 sm:justify-end">
+        <button type="button" onClick={onCancel} className="btn-ghost max-sm:hidden" disabled={loading}>
           Abbrechen
         </button>
         {!transaction && (
-          <button type="button" onClick={(e) => handleSubmit(e, true)} className="btn-secondary" disabled={loading}>
-            Speichern und neue Buchung
+          <button type="button" onClick={(e) => handleSubmit(e, true)} className="btn-secondary max-sm:flex-1" disabled={loading}>
+            <span className="sm:hidden">Speichern und nächste</span>
+            <span className="max-sm:hidden">Speichern und neue Buchung</span>
           </button>
         )}
         <button type="submit" className="btn-primary" disabled={loading}>

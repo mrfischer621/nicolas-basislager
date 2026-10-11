@@ -117,7 +117,7 @@ function EntryForm({ entry, projects, onClose, onSaved }: { entry: TimeRow; proj
         <input type="checkbox" checked={billable} onChange={(e) => setBillable(e.target.checked)} className="h-4 w-4 accent-[rgb(var(--bw-fg))]" />
         Verrechenbar
       </label>
-      <div className="flex justify-end gap-2 pt-2">
+      <div className="sheet-actions flex justify-end gap-2 pt-2">
         <button type="button" className="btn-ghost" onClick={onClose}>
           Abbrechen
         </button>

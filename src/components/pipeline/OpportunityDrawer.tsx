@@ -273,7 +273,8 @@ function Form({ target, stages, onClose }: { target: DrawerTarget; stages: Pipel
 
       {existing && <p className="text-xs text-fg-muted">Erstellt {formatDate(existing.created_at)}</p>}
 
-      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line pt-4">
+      {/* Handy: aussen "contents", damit Speichern als feste Fussleiste am Formular haftet */}
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line pt-4 max-md:contents">
         <div className="flex flex-wrap gap-2">
           {existing && kind === 'lead' && (
             <button
@@ -332,7 +333,7 @@ function Form({ target, stages, onClose }: { target: DrawerTarget; stages: Pipel
             </button>
           )}
         </div>
-        <div className="flex gap-2">
+        <div className="sheet-actions flex gap-2">
           <button type="button" className="btn-ghost" onClick={onClose}>
             Abbrechen
           </button>

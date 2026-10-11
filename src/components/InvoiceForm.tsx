@@ -831,7 +831,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
           </div>
         </div>
 
-        <div className="flex gap-3">
+        <div className="sheet-actions flex gap-3">
           <button
             type="submit"
             disabled={isSubmitting || items.length === 0}

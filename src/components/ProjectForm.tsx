@@ -184,7 +184,7 @@ export default function ProjectForm({ onSubmit, editingProject, onCancelEdit, cu
           </div>
         </div>
 
-        <div className="flex gap-3">
+        <div className="sheet-actions flex gap-3">
           <button
             type="submit"
             disabled={isSubmitting}

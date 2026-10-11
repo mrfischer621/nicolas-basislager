@@ -394,7 +394,7 @@ export default function CustomerForm({ onSubmit, editingCustomer, onCancelEdit, 
         )}
 
         {/* Form Actions */}
-        <div className="flex gap-3 pt-4 border-t border-line">
+        <div className="sheet-actions flex gap-3 pt-4 border-t border-line">
           <button
             type="submit"
             disabled={isSubmitting}

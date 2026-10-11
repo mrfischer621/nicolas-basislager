@@ -139,7 +139,7 @@ function PersonForm({ person, customerId, onClose }: { person: CustomerContact |
         <input type="checkbox" checked={f.is_primary} onChange={(e) => setF((p) => ({ ...p, is_primary: e.target.checked }))} className="h-4 w-4 accent-[rgb(var(--bw-fg))]" />
         Hauptperson der Firma
       </label>
-      <div className="flex justify-end gap-2">
+      <div className="sheet-actions flex justify-end gap-2">
         <button type="button" className="btn-ghost" onClick={onClose}>
           Abbrechen
         </button>
