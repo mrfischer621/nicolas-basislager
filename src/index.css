@@ -17,10 +17,11 @@
     text-rendering: optimizeLegibility;
   }
 
-  /* Die App nutzt ein festes Viewport-Layout mit eigenem Scrollbereich */
+  /* Die App nutzt ein festes Viewport-Layout mit eigenem Scrollbereich.
+     dvh statt vh: in iOS Safari ist 100vh hoeher als der sichtbare Bereich. */
   html,
   body {
-    @apply h-screen overflow-hidden;
+    @apply h-dvh overflow-hidden;
   }
 
   body {

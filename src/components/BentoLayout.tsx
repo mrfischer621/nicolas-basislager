@@ -1,4 +1,4 @@
-import { Suspense, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { BentoSidebar } from './BentoSidebar';
 import { BentoHeader } from './BentoHeader';
@@ -11,7 +11,7 @@ import { MobileBar } from './MobileBar';
  * BentoLayout - Swiss Modern App Shell 2026
  *
  * Architecture:
- * - 100vh fixed viewport (no body scroll)
+ * - 100dvh fixed viewport (no body scroll), Safe Area fuer iPhone
  * - CSS Grid: [Dark Sidebar | Light Content Area]
  * - High contrast: slate-900 sidebar vs slate-50 main
  * - Responsive: Sidebar collapses on mobile with hamburger menu
@@ -30,8 +30,16 @@ export default function BentoLayout() {
     setIsMobileMenuOpen(false);
   }
 
+  // Escape schliesst das mobile Menue
+  useEffect(() => {
+    if (!isMobileMenuOpen) return;
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setIsMobileMenuOpen(false);
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [isMobileMenuOpen]);
+
   return (
-    <div className="h-screen w-screen overflow-hidden flex">
+    <div className="flex h-dvh w-screen overflow-hidden">
       {/* Sidebar - Dark, Fixed Width (Desktop) / Fixed Overlay (Mobile) */}
       <aside className="w-60 flex-shrink-0 hidden md:flex flex-col">
         <BentoSidebar />
@@ -50,13 +58,13 @@ export default function BentoLayout() {
       {/* Main Content Area - Light Background */}
       <div className="flex-1 flex flex-col min-w-0 bg-app-bg">
         {/* Header - Sticky Top */}
-        <header className="h-16 flex-shrink-0 bg-surface border-b border-line px-4 md:px-6 flex items-center justify-between">
+        <header className="flex h-[calc(4rem+env(safe-area-inset-top))] flex-shrink-0 items-center justify-between border-b border-line bg-surface pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pt-[env(safe-area-inset-top)] md:px-6">
           <BentoHeader onMenuClick={() => setIsMobileMenuOpen(true)} />
         </header>
 
         {/* Main Content - Fills remaining height */}
         <main className="flex-1 min-h-0 overflow-hidden">
-          <div className="h-full overflow-auto px-4 pb-24 pt-5 md:px-8 md:py-7">
+          <div className="h-full overflow-auto pb-[calc(6rem+env(safe-area-inset-bottom))] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pt-5 md:px-8 md:py-7">
             {/* Faengt Render-Fehler einer Seite ab, statt die ganze App
                 durch eine weisse Seite zu ersetzen. Der resetKey loest den
                 Fehler beim Navigieren auf eine andere Seite wieder auf. */}

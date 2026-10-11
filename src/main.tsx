@@ -1,6 +1,5 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { Toaster } from 'react-hot-toast'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import './index.css'
 import { applyTheme } from './utils/theme'
@@ -12,6 +11,7 @@ import { AuthProvider } from './context/AuthProvider'
 import { CompanyProvider } from './context/CompanyContext'
 import { TimerProvider } from './context/TimerContext'
 import { ConfirmProvider } from './context/ConfirmProvider'
+import { AppToaster } from './components/AppToaster'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,21 +38,7 @@ createRoot(document.getElementById('root')!).render(
           </ConfirmProvider>
           {/* Ohne diese Komponente rendert react-hot-toast nichts. Sie fehlte,
               wodurch saemtliche toast()-Aufrufe in 6 Seiten wirkungslos waren. */}
-          <Toaster
-            position="bottom-right"
-            toastOptions={{
-              duration: 4000,
-              // Farben aus den Tokens (src/styles/tokens.css)
-              style: {
-                background: 'rgb(var(--bw-ink))',
-                color: 'rgb(var(--bw-fg-inverted))',
-                fontSize: '14px',
-                borderRadius: 'var(--bw-radius-lg)',
-              },
-              success: { iconTheme: { primary: 'rgb(var(--bw-cta))', secondary: 'rgb(var(--bw-ink))' } },
-              error: { duration: 6000, iconTheme: { primary: 'rgb(var(--bw-danger-subtle))', secondary: 'rgb(var(--bw-danger))' } },
-            }}
-          />
+          <AppToaster />
         </TimerProvider>
       </CompanyProvider>
     </AuthProvider>
