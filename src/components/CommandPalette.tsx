@@ -108,9 +108,10 @@ export function CommandPalette() {
 
   let lastGroup = '';
   return (
-    <div className="fixed inset-0 z-[70] flex items-start justify-center p-4 pt-[12vh]">
+    // Handy: Vollbild mit Abbrechen; ab sm ein Fenster oben in der Mitte
+    <div className="fixed inset-0 z-[70] flex items-start justify-center p-4 pt-[12vh] max-sm:p-0">
       <div className="fixed inset-0 bg-ink/40" onClick={close} aria-hidden="true" />
-      <div role="dialog" aria-modal="true" aria-label="Befehlspalette" className="relative w-full max-w-xl overflow-hidden rounded-card bg-surface shadow-lg">
+      <div role="dialog" aria-modal="true" aria-label="Befehlspalette" className="relative flex w-full max-w-xl flex-col overflow-hidden rounded-card bg-surface shadow-lg max-sm:h-dvh max-sm:max-w-none max-sm:rounded-none max-sm:pb-[env(safe-area-inset-bottom)] max-sm:pt-[env(safe-area-inset-top)]">
         <div className="flex items-center gap-3 border-b border-line px-4">
           <Search size={18} className="text-fg-muted" aria-hidden="true" />
           <input
@@ -140,12 +141,16 @@ export function CommandPalette() {
                 run(current);
               }
             }}
+            enterKeyHint="go"
             placeholder="Suchen oder Aktion wählen …"
             className="h-14 flex-1 bg-transparent text-base text-fg focus-visible:[outline-offset:-2px] placeholder:text-fg-subtle"
           />
           {isLoading && <Loader2 size={16} className="animate-spin text-fg-muted" aria-label="Sucht" />}
+          <button type="button" onClick={close} className="tap -mr-2 px-2 text-sm font-semibold text-fg-muted sm:hidden">
+            Abbrechen
+          </button>
         </div>
-        <ul id={listId} role="listbox" aria-label="Treffer" className="max-h-[60vh] overflow-y-auto py-2">
+        <ul id={listId} role="listbox" aria-label="Treffer" className="max-h-[60vh] overflow-y-auto py-2 max-sm:max-h-none max-sm:flex-1">
           {items.length === 0 && <li className="px-4 py-6 text-center text-sm text-fg-muted">{q.length >= 2 ? 'Keine Treffer.' : 'Tipp: Firma, Rechnungsnummer oder Projekt eingeben.'}</li>}
           {items.map((item, i) => {
             const group = item.kind === 'action' ? 'Aktionen' : item.result.group;
@@ -160,7 +165,7 @@ export function CommandPalette() {
                   aria-selected={i === current}
                   onMouseEnter={() => setActive(i)}
                   onClick={() => run(i)}
-                  className={`mx-2 flex cursor-pointer items-baseline justify-between gap-3 rounded-lg px-3 py-2 text-sm ${i === current ? 'bg-raised text-fg' : 'text-fg'}`}
+                  className={`mx-2 flex cursor-pointer items-baseline justify-between gap-3 rounded-lg px-3 py-2 text-sm max-sm:min-h-[48px] max-sm:items-center max-sm:text-base ${i === current ? 'bg-raised text-fg' : 'text-fg'}`}
                 >
                   <span className="truncate font-semibold">{item.kind === 'action' ? item.action.label : item.result.title}</span>
                   {item.kind === 'result' && item.result.subtitle && <span className="shrink-0 truncate text-xs text-fg-muted">{item.result.subtitle}</span>}
@@ -169,7 +174,7 @@ export function CommandPalette() {
             );
           })}
         </ul>
-        <p className="border-t border-line px-4 py-2 text-xs text-fg-muted">↑ ↓ wählen · Enter öffnen · Esc schliessen</p>
+        <p className="border-t border-line px-4 py-2 text-xs text-fg-muted max-sm:hidden">↑ ↓ wählen · Enter öffnen · Esc schliessen</p>
       </div>
     </div>
   );

@@ -449,10 +449,22 @@ export default function Jahresabschluss() {
           )}
           {formData.assets.map((a, i) => (
             <div key={i} className="grid grid-cols-2 gap-2 md:grid-cols-[1fr_9rem_6rem_9rem_auto]">
-              <input aria-label={`Anlage ${i + 1}`} className={inputClass} placeholder="z.B. Laptop" value={a.name} disabled={isLocked} onChange={(e) => updateAsset(i, 'name', e.target.value)} />
-              <input aria-label={`Buchwert Anlage ${i + 1}`} type="number" step="0.01" className={numberClass} value={a.value || ''} disabled={isLocked} onChange={(e) => updateAsset(i, 'value', Number(e.target.value))} />
-              <input aria-label={`Abschreibungssatz Anlage ${i + 1}`} type="number" step="0.5" className={numberClass} value={a.depreciation_rate || ''} disabled={isLocked} onChange={(e) => updateAsset(i, 'depreciation_rate', Number(e.target.value))} />
-              <input aria-label={`Abschreibung Anlage ${i + 1}`} type="number" step="0.01" className={numberClass} value={a.amount || ''} disabled={isLocked} onChange={(e) => updateAsset(i, 'amount', Number(e.target.value))} />
+              <label className="block min-w-0">
+                <span className="caps-sm mb-1 block md:sr-only">Anlage</span>
+                <input aria-label={`Anlage ${i + 1}`} className={inputClass} placeholder="z.B. Laptop" value={a.name} disabled={isLocked} onChange={(e) => updateAsset(i, 'name', e.target.value)} />
+              </label>
+              <label className="block min-w-0">
+                <span className="caps-sm mb-1 block md:sr-only">Buchwert CHF</span>
+                <input aria-label={`Buchwert Anlage ${i + 1}`} type="number" step="0.01" className={numberClass} value={a.value || ''} disabled={isLocked} onChange={(e) => updateAsset(i, 'value', Number(e.target.value))} />
+              </label>
+              <label className="block min-w-0">
+                <span className="caps-sm mb-1 block md:sr-only">Satz %</span>
+                <input aria-label={`Abschreibungssatz Anlage ${i + 1}`} type="number" step="0.5" className={numberClass} value={a.depreciation_rate || ''} disabled={isLocked} onChange={(e) => updateAsset(i, 'depreciation_rate', Number(e.target.value))} />
+              </label>
+              <label className="block min-w-0">
+                <span className="caps-sm mb-1 block md:sr-only">Abschreibung CHF</span>
+                <input aria-label={`Abschreibung Anlage ${i + 1}`} type="number" step="0.01" className={numberClass} value={a.amount || ''} disabled={isLocked} onChange={(e) => updateAsset(i, 'amount', Number(e.target.value))} />
+              </label>
               {!isLocked && (
                 <button type="button" aria-label={`Anlage ${i + 1} entfernen`} className="tap rounded-lg px-2 text-fg-muted hover:bg-raised hover:text-danger" onClick={() => setFormData({ ...formData, assets: formData.assets.filter((_, j) => j !== i) })}>
                   <Trash2 size={16} strokeWidth={1.5} />
@@ -471,9 +483,18 @@ export default function Jahresabschluss() {
         <div className="space-y-2">
           {formData.private_shares.map((s, i) => (
             <div key={i} className="grid grid-cols-2 gap-2 md:grid-cols-[1fr_6rem_9rem_auto]">
-              <input aria-label={`Privatanteil ${i + 1}`} className={inputClass} placeholder="z.B. Telefon" value={s.category} disabled={isLocked} onChange={(e) => updateShare(i, 'category', e.target.value)} />
-              <input aria-label={`Privatanteil ${i + 1} in Prozent`} type="number" className={numberClass} placeholder="%" value={s.percentage || ''} disabled={isLocked} onChange={(e) => updateShare(i, 'percentage', Number(e.target.value))} />
-              <input aria-label={`Privatanteil ${i + 1} Betrag`} type="number" step="0.01" className={numberClass} placeholder="CHF" value={s.amount || ''} disabled={isLocked} onChange={(e) => updateShare(i, 'amount', Number(e.target.value))} />
+              <label className="block min-w-0">
+                <span className="caps-sm mb-1 block md:sr-only">Bereich</span>
+                <input aria-label={`Privatanteil ${i + 1}`} className={inputClass} placeholder="z.B. Telefon" value={s.category} disabled={isLocked} onChange={(e) => updateShare(i, 'category', e.target.value)} />
+              </label>
+              <label className="block min-w-0">
+                <span className="caps-sm mb-1 block md:sr-only">Anteil %</span>
+                <input aria-label={`Privatanteil ${i + 1} in Prozent`} type="number" className={numberClass} placeholder="%" value={s.percentage || ''} disabled={isLocked} onChange={(e) => updateShare(i, 'percentage', Number(e.target.value))} />
+              </label>
+              <label className="block min-w-0">
+                <span className="caps-sm mb-1 block md:sr-only">Betrag CHF</span>
+                <input aria-label={`Privatanteil ${i + 1} Betrag`} type="number" step="0.01" className={numberClass} placeholder="CHF" value={s.amount || ''} disabled={isLocked} onChange={(e) => updateShare(i, 'amount', Number(e.target.value))} />
+              </label>
               {!isLocked && (
                 <button type="button" aria-label={`Privatanteil ${i + 1} entfernen`} className="tap rounded-lg px-2 text-fg-muted hover:bg-raised hover:text-danger" onClick={() => setFormData({ ...formData, private_shares: formData.private_shares.filter((_, j) => j !== i) })}>
                   <Trash2 size={16} strokeWidth={1.5} />

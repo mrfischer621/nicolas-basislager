@@ -94,7 +94,7 @@ export function BentoHeader({ onMenuClick }: { onMenuClick?: () => void }) {
   return (
     <>
       {/* Left Side - Mobile Menu + Breadcrumb */}
-      <div className="flex items-center gap-4">
+      <div className="flex min-w-0 flex-1 items-center gap-2 md:flex-none md:gap-4">
         {/* Mobile Menu Button */}
         <button
           onClick={onMenuClick}
@@ -104,7 +104,10 @@ export function BentoHeader({ onMenuClick }: { onMenuClick?: () => void }) {
           <Menu size={20} strokeWidth={1.5} aria-hidden="true" />
         </button>
 
-        {/* Breadcrumb area reserved for future use */}
+        {/* Handy: aktives Unternehmen, damit klar ist, welche Zahlen du siehst */}
+        <span className="truncate font-display text-sm font-extrabold uppercase tracking-[0.02em] text-fg md:hidden">
+          {isLoading ? '' : companyDisplayName(selectedCompany)}
+        </span>
       </div>
 
       {/* Mitte: oeffnet die Befehlspalette (Suche und Schnellaktionen) */}
