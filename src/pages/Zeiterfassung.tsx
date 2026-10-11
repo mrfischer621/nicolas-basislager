@@ -507,14 +507,14 @@ export default function Zeiterfassung() {
 
       {/* Error Message */}
       {error && (
-        <div role="alert" className="rounded-lg border border-danger bg-danger-subtle px-4 py-3 text-danger">
+        <div role="alert" className="rounded-lg border border-danger bg-danger-subtle px-4 py-3 text-danger-on-subtle">
           <strong>Fehler:</strong> {error}
         </div>
       )}
 
       {/* Warning if no projects */}
       {projects.length === 0 && !isLoading && activeTab === 'erfassung' && (
-        <div className="bg-warning-subtle border border-warning-subtle text-warning px-4 py-3 rounded-lg">
+        <div className="bg-warning-subtle border border-warning-subtle text-warning-on-subtle px-4 py-3 rounded-lg">
           Bitte erstellen Sie zuerst Projekte, bevor Sie Zeiteinträge erfassen.
         </div>
       )}
@@ -572,7 +572,7 @@ export default function Zeiterfassung() {
                   <span className="ml-1 text-xs bg-accent-subtle text-accent px-1.5 py-0.5 rounded">P</span>
                 )}
                 {quickAddData.rateSource === 'customer' && (
-                  <span className="ml-1 text-xs bg-success-subtle text-success px-1.5 py-0.5 rounded">K</span>
+                  <span className="ml-1 text-xs bg-success-subtle text-success-on-subtle px-1.5 py-0.5 rounded">K</span>
                 )}
                 {quickAddData.rateSource === 'default' && (
                   <span className="ml-1 text-xs bg-raised text-fg px-1.5 py-0.5 rounded">S</span>

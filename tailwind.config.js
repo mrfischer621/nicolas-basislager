@@ -31,6 +31,7 @@ const colors = {
     subtle: token('fg-subtle'),
     inverted: token('fg-inverted'),
     'inverted-muted': token('fg-inverted-muted'),
+    'on-light': token('fg-on-light'), // Tinte auf hellen Statusflaechen (beide Themen)
   },
   line: { DEFAULT: token('line'), strong: token('line-strong'), inverted: token('line-inverted') },
   accent: {
@@ -41,9 +42,18 @@ const colors = {
     border: token('accent-border'),
   },
   cta: { DEFAULT: token('cta'), hover: token('cta-hover'), fg: token('cta-fg') }, // das eine Hellblau
-  success: { DEFAULT: token('success'), subtle: token('success-subtle'), light: token('success-subtle'), dark: token('success') },
-  warning: { DEFAULT: token('warning'), subtle: token('warning-subtle'), light: token('warning-subtle'), dark: token('warning') },
-  danger: { DEFAULT: token('danger'), subtle: token('danger-subtle'), light: token('danger-subtle'), dark: token('danger') },
+  // Erweiterung CRM, nicht Teil des Blauwasser Design Systems:
+  // satte Statusfarben. text-<x> = lesbarer Text auf dem Thema,
+  // bg-<x>-solid = Flaeche/Balken/Icon, bg-<x>-subtle + text-<x>-on-subtle = Badge/Banner.
+  ...Object.fromEntries(
+    ['positive', 'negative', 'warning', 'attention', 'info'].map((k) => [
+      k,
+      { DEFAULT: token(`${k}-text`), solid: token(k), text: token(`${k}-text`), subtle: token(`${k}-subtle`), 'on-subtle': token(`${k}-on-subtle`), light: token(`${k}-subtle`), dark: token(`${k}-text`) },
+    ])
+  ),
+  // Aliasse: success = positive, danger = negative
+  success: { DEFAULT: token('positive-text'), solid: token('positive'), subtle: token('positive-subtle'), 'on-subtle': token('positive-on-subtle'), light: token('positive-subtle'), dark: token('positive-text') },
+  danger: { DEFAULT: token('negative-text'), solid: token('negative'), subtle: token('negative-subtle'), 'on-subtle': token('negative-on-subtle'), light: token('negative-subtle'), dark: token('negative-text') },
   focus: { DEFAULT: token('focus'), inverted: token('focus-inverted') },
   white: token('cta-fg'), // Weiss nur als Schrift auf cta/success/danger
 

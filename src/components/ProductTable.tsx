@@ -77,7 +77,7 @@ export default function ProductTable({ products, onEdit, onArchive, onRestore }:
                   <span
                     className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                       product.is_active
-                        ? 'bg-success-subtle text-success'
+                        ? 'bg-success-subtle text-success-on-subtle'
                         : 'bg-raised text-fg-muted'
                     }`}
                   >
@@ -97,7 +97,7 @@ export default function ProductTable({ products, onEdit, onArchive, onRestore }:
                     {product.is_active ? (
                       <button
                         onClick={() => onArchive(product.id)}
-                        className="p-2 text-warning hover:bg-warning-subtle rounded-lg transition"
+                        className="p-2 text-warning-on-subtle hover:bg-warning-subtle rounded-lg transition"
                         title="Archivieren"
                         aria-label="Archivieren"
                       >
@@ -106,7 +106,7 @@ export default function ProductTable({ products, onEdit, onArchive, onRestore }:
                     ) : (
                       <button
                         onClick={() => onRestore(product.id)}
-                        className="p-2 text-success hover:bg-success-subtle rounded-lg transition"
+                        className="p-2 text-success-on-subtle hover:bg-success-subtle rounded-lg transition"
                         title="Wiederherstellen"
                         aria-label="Wiederherstellen"
                       >

@@ -623,14 +623,14 @@ export default function Angebote() {
 
       {/* Error Message */}
       {error && (
-        <div role="alert" className="rounded-lg border border-danger bg-danger-subtle px-4 py-3 text-danger">
+        <div role="alert" className="rounded-lg border border-danger bg-danger-subtle px-4 py-3 text-danger-on-subtle">
           <strong>Fehler:</strong> {error}
         </div>
       )}
 
       {/* Warning if no customers */}
       {customers.length === 0 && !isLoading && (
-        <div className="bg-warning-subtle border border-warning-subtle text-warning px-4 py-3 rounded-lg">
+        <div className="bg-warning-subtle border border-warning-subtle text-warning-on-subtle px-4 py-3 rounded-lg">
           Bitte erstellen Sie zuerst Kunden, bevor Sie Angebote erstellen.
         </div>
       )}

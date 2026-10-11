@@ -5,7 +5,11 @@ import { useEffect, useState } from 'react';
  * Liest die aktuellen Werte aus src/styles/tokens.css und aktualisiert sie,
  * wenn Thema (data-theme) oder Systemeinstellung wechseln.
  */
-const NAMES = ['cta', 'fg', 'fg-muted', 'fg-subtle', 'line', 'surface', 'canvas', 'accent-subtle'] as const;
+const NAMES = [
+  'cta', 'fg', 'fg-muted', 'fg-subtle', 'line', 'surface', 'canvas', 'accent-subtle',
+  // Erweiterung CRM: Statusfarben
+  'positive', 'positive-text', 'positive-on-subtle', 'negative', 'negative-text', 'negative-on-subtle',
+] as const;
 export type ThemeColors = Record<(typeof NAMES)[number], string>;
 
 function read(): ThemeColors {

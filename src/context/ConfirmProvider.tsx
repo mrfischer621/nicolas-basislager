@@ -76,7 +76,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
           <div className="relative w-full max-w-md rounded-card bg-surface p-6 shadow-lg">
             <div className="mb-3 flex items-start gap-3">
               {options.destructive && (
-                <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-danger-subtle text-danger">
+                <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-danger-subtle text-danger-on-subtle">
                   <AlertTriangle size={18} aria-hidden="true" />
                 </span>
               )}
@@ -101,7 +101,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
                 type="button"
                 autoFocus={!options.destructive}
                 onClick={() => close(true)}
-                className={options.destructive ? 'btn bg-danger text-white hover:opacity-90' : 'btn-primary'}
+                className={options.destructive ? 'btn bg-negative-on-subtle text-white hover:opacity-90' : 'btn-primary'}
               >
                 {options.confirmLabel ?? 'Bestätigen'}
               </button>

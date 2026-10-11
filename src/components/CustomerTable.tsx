@@ -96,7 +96,7 @@ export default function CustomerTable({ customers, onEdit, onRowClick, onArchive
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right">
                     {customer.open_invoice_amount > 0 ? (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-warning-subtle text-warning">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-warning-subtle text-warning-on-subtle">
                         {formatCurrency(customer.open_invoice_amount)}
                       </span>
                     ) : (
@@ -115,7 +115,7 @@ export default function CustomerTable({ customers, onEdit, onRowClick, onArchive
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                       customer.is_active
-                        ? 'bg-success-subtle text-success'
+                        ? 'bg-success-subtle text-success-on-subtle'
                         : 'bg-raised text-fg-muted'
                     }`}>
                       {customer.is_active ? 'Aktiv' : 'Archiviert'}
@@ -134,7 +134,7 @@ export default function CustomerTable({ customers, onEdit, onRowClick, onArchive
                       {customer.is_active ? (
                         <button
                           onClick={() => onArchive(customer.id)}
-                          className="p-2 text-warning hover:bg-warning-subtle rounded-lg transition"
+                          className="p-2 text-warning-on-subtle hover:bg-warning-subtle rounded-lg transition"
                           title="Archivieren"
                           aria-label="Archivieren"
                         >
@@ -143,7 +143,7 @@ export default function CustomerTable({ customers, onEdit, onRowClick, onArchive
                       ) : (
                         <button
                           onClick={() => onRestore(customer.id)}
-                          className="p-2 text-success hover:bg-success-subtle rounded-lg transition"
+                          className="p-2 text-success-on-subtle hover:bg-success-subtle rounded-lg transition"
                           title="Wiederherstellen"
                           aria-label="Wiederherstellen"
                         >
@@ -152,7 +152,7 @@ export default function CustomerTable({ customers, onEdit, onRowClick, onArchive
                       )}
                       <button
                         onClick={() => onDelete(customer.id)}
-                        className="p-2 text-danger hover:bg-danger-subtle rounded-lg transition"
+                        className="p-2 text-danger-on-subtle hover:bg-danger-subtle rounded-lg transition"
                         title="Löschen"
                         aria-label="Löschen"
                       >

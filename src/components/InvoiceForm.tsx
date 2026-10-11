@@ -669,7 +669,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
                       type="button"
                       onClick={() => handleRemoveItem(index)}
                       disabled={items.length === 1}
-                      className="p-2 text-danger hover:bg-danger-subtle rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed"
+                      className="p-2 text-danger-on-subtle hover:bg-danger-subtle rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed"
                     >
                       <Trash2 size={16} />
                     </button>

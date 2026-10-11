@@ -262,12 +262,12 @@ export default function KundenDetail() {
   const getStatusBadge = (status: string) => {
     const styles: Record<string, string> = {
       'offen': 'bg-brand-light text-brand-darker',
-      'laufend': 'bg-success-light text-success-dark',
+      'laufend': 'bg-success-light text-success-on-subtle',
       'abgeschlossen': 'bg-raised text-fg',
       'entwurf': 'bg-raised text-fg',
       'versendet': 'bg-brand-light text-brand-darker',
-      'bezahlt': 'bg-success-light text-success-dark',
-      'überfällig': 'bg-danger-light text-danger-dark'
+      'bezahlt': 'bg-success-light text-success-on-subtle',
+      'überfällig': 'bg-danger-light text-danger-on-subtle'
     };
     return styles[status] || 'bg-raised text-fg';
   };
@@ -295,7 +295,7 @@ export default function KundenDetail() {
           <ArrowLeft size={20} />
           Zurück zu Kunden
         </Link>
-        <div className="bg-danger-subtle border border-danger-subtle text-danger px-4 py-3 rounded-lg">
+        <div className="bg-danger-subtle border border-danger-subtle text-danger-on-subtle px-4 py-3 rounded-lg">
           Kunde nicht gefunden.
         </div>
       </div>
@@ -501,7 +501,7 @@ export default function KundenDetail() {
                           <button onClick={() => openContactModal(contact)} className="p-1 text-brand hover:bg-canvas rounded">
                             <Pencil size={16} />
                           </button>
-                          <button onClick={() => handleDeleteContact(contact.id)} className="p-1 text-danger hover:bg-danger-subtle rounded">
+                          <button onClick={() => handleDeleteContact(contact.id)} className="p-1 text-danger-on-subtle hover:bg-danger-subtle rounded">
                             <Trash2 size={16} />
                           </button>
                         </div>

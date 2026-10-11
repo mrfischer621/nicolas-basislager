@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import toast from 'react-hot-toast';
-import { Download } from 'lucide-react';
+import { Download, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import FinancialChart from '../components/FinancialChart';
 import HBarChart from '../components/HBarChart';
 import { Card, EmptyState, KPICard, PageHeader, SegmentedControl } from '../components/ui';
@@ -254,7 +254,7 @@ export default function Auswertungen() {
 
       {/* Error Message */}
       {error && (
-        <div role="alert" className="rounded-lg border border-danger bg-danger-subtle p-4 text-danger">
+        <div role="alert" className="rounded-lg border border-danger bg-danger-subtle p-4 text-danger-on-subtle">
           <strong>Fehler:</strong> {error}
         </div>
       )}
@@ -267,18 +267,24 @@ export default function Auswertungen() {
               label="Einnahmen"
               value={formatCHF(bookkeepingData.totalEinnahmen)}
               hint={`${bookkeepingData.einnahmen.reduce((s, e) => s + e.count, 0)} Buchungen`}
+              tone="positive"
+              icon={<TrendingUp size={18} />}
               loading={bookkeepingLoading}
             />
             <KPICard
               label="Ausgaben"
               value={formatCHF(bookkeepingData.totalAusgaben)}
               hint={`${bookkeepingData.ausgaben.reduce((s, a) => s + a.count, 0)} Buchungen`}
+              tone="negative"
+              icon={<TrendingDown size={18} />}
               loading={bookkeepingLoading}
             />
             <KPICard
               label="Ergebnis"
               value={formatCHF(bookkeepingData.gewinnVerlust)}
               hint={bookkeepingData.gewinnVerlust >= 0 ? 'Gewinn' : 'Verlust'}
+              tone={bookkeepingData.gewinnVerlust >= 0 ? 'positive' : 'negative'}
+              icon={bookkeepingData.gewinnVerlust >= 0 ? <ArrowUpRight size={18} /> : <ArrowDownRight size={18} />}
               loading={bookkeepingLoading}
             />
           </div>
@@ -332,12 +338,14 @@ export default function Auswertungen() {
       {viewMode === 'charts' && (
         <>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <KPICard label="Einnahmen" value={formatCHF(kpi.income)} hint="Im gewählten Zeitraum" />
-            <KPICard label="Ausgaben" value={formatCHF(kpi.expense)} hint="Im gewählten Zeitraum" />
+            <KPICard label="Einnahmen" value={formatCHF(kpi.income)} hint="Im gewählten Zeitraum" tone="positive" icon={<TrendingUp size={18} />} />
+            <KPICard label="Ausgaben" value={formatCHF(kpi.expense)} hint="Im gewählten Zeitraum" tone="negative" icon={<TrendingDown size={18} />} />
             <KPICard
               label="Ergebnis"
               value={formatCHF(kpi.profit)}
               hint={kpi.profit >= 0 ? 'Gewinn' : 'Verlust'}
+              tone={kpi.profit >= 0 ? 'positive' : 'negative'}
+              icon={kpi.profit >= 0 ? <ArrowUpRight size={18} /> : <ArrowDownRight size={18} />}
             />
           </div>
 
@@ -357,7 +365,7 @@ export default function Auswertungen() {
             <Card padding="md">
               <Card.Header title="Ausgaben nach Kategorie" />
               {categoryExpenses.length > 0 ? (
-                <HBarChart data={categoryExpenses} labelKey="category" color="fg" label="Ausgaben nach Kategorie in CHF" />
+                <HBarChart data={categoryExpenses} labelKey="category" color="negative" label="Ausgaben nach Kategorie in CHF" />
               ) : (
                 <EmptyState title="Keine Ausgaben im Zeitraum" />
               )}
@@ -365,7 +373,7 @@ export default function Auswertungen() {
             <Card padding="md">
               <Card.Header title="Einnahmen nach Kunde" />
               {customerIncome.length > 0 ? (
-                <HBarChart data={customerIncome} labelKey="name" label="Einnahmen nach Kunde in CHF" />
+                <HBarChart data={customerIncome} labelKey="name" color="positive" label="Einnahmen nach Kunde in CHF" />
               ) : (
                 <EmptyState title="Keine Einnahmen mit Kunde im Zeitraum" />
               )}

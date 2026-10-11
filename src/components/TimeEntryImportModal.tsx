@@ -243,7 +243,7 @@ export default function TimeEntryImportModal({
 
         {/* Error Message */}
         {error && (
-          <div className="bg-danger-subtle border border-danger-subtle text-danger px-4 py-3 rounded-lg text-sm">
+          <div className="bg-danger-subtle border border-danger-subtle text-danger-on-subtle px-4 py-3 rounded-lg text-sm">
             {error}
           </div>
         )}

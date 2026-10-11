@@ -217,7 +217,7 @@ export default function KundenKontakte() {
           <ArrowLeft size={20} />
           Zurück zu Kunden
         </Link>
-        <div className="bg-danger-subtle border border-danger-subtle text-danger px-4 py-3 rounded-lg">
+        <div className="bg-danger-subtle border border-danger-subtle text-danger-on-subtle px-4 py-3 rounded-lg">
           Kunde nicht gefunden.
         </div>
       </div>
@@ -318,7 +318,7 @@ export default function KundenKontakte() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
                       {contact.is_primary ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-warning-subtle text-warning">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-warning-subtle text-warning-on-subtle">
                           <Star size={12} className="fill-current" />
                           Hauptkontakt
                         </span>
@@ -345,7 +345,7 @@ export default function KundenKontakte() {
                         </button>
                         <button
                           onClick={() => handleDelete(contact.id)}
-                          className="p-2 text-danger hover:bg-danger-subtle rounded-lg transition"
+                          className="p-2 text-danger-on-subtle hover:bg-danger-subtle rounded-lg transition"
                           title="Löschen"
                           aria-label="Löschen"
                         >

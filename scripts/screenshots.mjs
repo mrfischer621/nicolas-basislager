@@ -42,6 +42,10 @@ const context = await browser.newContext({
   timezoneId: 'Europe/Zurich',
   locale: 'de-CH',
 });
+// APP_THEME=dark: dunkles Thema wie in den Einstellungen gewaehlt
+if (process.env.APP_THEME === 'dark') {
+  await context.addInitScript(() => localStorage.setItem('bw-theme', 'dark'));
+}
 if (mock) {
   await installMock(context);
   await context.clock?.setFixedTime?.(new Date('2026-10-11T10:00:00+02:00'));

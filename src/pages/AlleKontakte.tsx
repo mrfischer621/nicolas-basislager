@@ -240,7 +240,7 @@ export default function AlleKontakte() {
                   )}
                 </div>
                 {contact.is_primary && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-warning-subtle text-warning">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-warning-subtle text-warning-on-subtle">
                     <Star size={10} className="fill-current" />
                     Haupt
                   </span>

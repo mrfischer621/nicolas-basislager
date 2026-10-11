@@ -183,7 +183,7 @@ export default function TimeEntryForm({ onSubmit, editingEntry, onCancelEdit, pr
                 </span>
               )}
               {rateSource === 'customer' && (
-                <span className="ml-2 text-xs bg-success-subtle text-success px-2 py-0.5 rounded">
+                <span className="ml-2 text-xs bg-success-subtle text-success-on-subtle px-2 py-0.5 rounded">
                   Kunde
                 </span>
               )}

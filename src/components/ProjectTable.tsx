@@ -17,7 +17,7 @@ type ProjectTableProps = {
 const statusColors = {
   offen: 'bg-raised text-fg',
   laufend: 'bg-accent-subtle text-accent',
-  abgeschlossen: 'bg-success-subtle text-success',
+  abgeschlossen: 'bg-success-subtle text-success-on-subtle',
 };
 
 const statusLabels = {
@@ -96,7 +96,7 @@ export default function ProjectTable({ projects, customers, onEdit, onArchive, o
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   {project.open_hours > 0 ? (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-warning-subtle text-warning">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-warning-subtle text-warning-on-subtle">
                       <Clock size={12} />
                       {project.open_hours.toFixed(1)}h offen
                     </span>
@@ -117,7 +117,7 @@ export default function ProjectTable({ projects, customers, onEdit, onArchive, o
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                     project.is_active
-                      ? 'bg-success-subtle text-success'
+                      ? 'bg-success-subtle text-success-on-subtle'
                       : 'bg-raised text-fg-muted'
                   }`}>
                     {project.is_active ? 'Aktiv' : 'Archiviert'}
@@ -136,7 +136,7 @@ export default function ProjectTable({ projects, customers, onEdit, onArchive, o
                     {project.is_active ? (
                       <button
                         onClick={() => onArchive(project.id)}
-                        className="p-2 text-warning hover:bg-warning-subtle rounded-lg transition"
+                        className="p-2 text-warning-on-subtle hover:bg-warning-subtle rounded-lg transition"
                         title="Archivieren"
                         aria-label="Archivieren"
                       >
@@ -145,7 +145,7 @@ export default function ProjectTable({ projects, customers, onEdit, onArchive, o
                     ) : (
                       <button
                         onClick={() => onRestore(project.id)}
-                        className="p-2 text-success hover:bg-success-subtle rounded-lg transition"
+                        className="p-2 text-success-on-subtle hover:bg-success-subtle rounded-lg transition"
                         title="Wiederherstellen"
                         aria-label="Wiederherstellen"
                       >

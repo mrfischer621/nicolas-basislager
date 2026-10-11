@@ -51,7 +51,7 @@ export default function Login() {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
-              <div role="alert" className="rounded-lg border border-danger bg-danger-subtle px-4 py-3 text-sm text-danger">
+              <div role="alert" className="rounded-lg border border-danger bg-danger-subtle px-4 py-3 text-sm text-danger-on-subtle">
                 <strong>Fehler:</strong> {error}
               </div>
             )}

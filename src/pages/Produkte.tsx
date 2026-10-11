@@ -237,7 +237,7 @@ export default function Produkte() {
 
       {/* Error Message */}
       {error && (
-        <div role="alert" className="rounded-lg border border-danger bg-danger-subtle px-4 py-3 text-danger">
+        <div role="alert" className="rounded-lg border border-danger bg-danger-subtle px-4 py-3 text-danger-on-subtle">
           <strong>Fehler:</strong> {error}
         </div>
       )}

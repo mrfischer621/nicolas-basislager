@@ -2,11 +2,11 @@ import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import type { Invoice, Customer } from '../lib/supabase';
-import { TrendingUp, TrendingDown, Wallet } from 'lucide-react';
+import { TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import FinancialChart from '../components/FinancialChart';
 import { useCompany } from '../context/CompanyContext';
 import { useAnalytics } from '../hooks/useAnalytics';
-import { presetRange, yearRange, type DayRange, type Granularity } from '../utils/financeAggregation';
+import { presetRange, yearRange, zurichDay, type DayRange, type Granularity } from '../utils/financeAggregation';
 import { formatChfDisplay } from '../utils/money';
 import PaidWithoutDateNotice from '../components/PaidWithoutDateNotice';
 import { PageHeader, Card, KPICard, Badge, EmptyState, Skeleton, SkeletonRows, SegmentedControl } from '../components/ui';
@@ -83,6 +83,13 @@ export default function Dashboard() {
 
   const formatCurrency = (amount: number): string => formatChfDisplay(amount);
 
+  // In den naechsten 7 Tagen faellig
+  const dueSoon = (dueDate: string | null): boolean => {
+    if (!dueDate) return false;
+    const days = (Date.parse(dueDate.slice(0, 10)) - Date.parse(zurichDay(new Date()))) / 86_400_000;
+    return days >= 0 && days <= 7;
+  };
+
   const isOverdue = (dueDate: string | null): boolean => {
     if (!dueDate) return false;
     return new Date(dueDate) < new Date();
@@ -152,6 +159,7 @@ export default function Dashboard() {
           label="Einnahmen"
           value={formatCurrency(revenue)}
           hint="Bezahlte Rechnungen und Einnahmen"
+          tone="positive"
           icon={<TrendingUp size={18} />}
           loading={loading}
         />
@@ -160,6 +168,7 @@ export default function Dashboard() {
           label="Ausgaben"
           value={formatCurrency(expenses)}
           hint="Gebuchte Ausgaben"
+          tone="negative"
           icon={<TrendingDown size={18} />}
           loading={loading}
         />
@@ -168,7 +177,8 @@ export default function Dashboard() {
           label="Ergebnis"
           value={formatCurrency(profit)}
           hint={profit >= 0 ? 'Gewinn im Zeitraum' : 'Verlust im Zeitraum'}
-          icon={<Wallet size={18} />}
+          tone={profit >= 0 ? 'positive' : 'negative'}
+          icon={profit >= 0 ? <ArrowUpRight size={18} /> : <ArrowDownRight size={18} />}
           loading={loading}
         />
       </div>
@@ -226,7 +236,11 @@ export default function Dashboard() {
                         <td className="pr-5 md:pr-7">
                           <span className="inline-flex flex-wrap items-center gap-2">
                             {invoice.due_date ? formatDay(invoice.due_date.slice(0, 10)) : '-'}
-                            {overdue && <Badge tone="danger">Überfällig</Badge>}
+                            {overdue ? (
+                              <Badge tone="negative">Überfällig</Badge>
+                            ) : dueSoon(invoice.due_date) ? (
+                              <Badge tone="attention">Fällig bald</Badge>
+                            ) : null}
                           </span>
                         </td>
                       </tr>

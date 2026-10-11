@@ -14,12 +14,12 @@ type QuoteTableProps = {
 };
 
 const statusColors: Record<Quote['status'], string> = {
-  offen: 'bg-raised text-fg',
-  versendet: 'bg-accent-subtle text-accent',
-  akzeptiert: 'bg-success-subtle text-success',
-  abgelehnt: 'bg-danger-subtle text-danger',
-  bestaetigt: 'bg-success-subtle text-success',
-  ueberfallig: 'bg-warning-subtle text-warning',
+  offen: 'badge-neutral',
+  versendet: 'badge-info',
+  akzeptiert: 'badge-positive',
+  abgelehnt: 'badge-negative',
+  bestaetigt: 'badge-positive',
+  ueberfallig: 'badge-negative',
 };
 
 const statusLabels: Record<Quote['status'], string> = {
@@ -124,7 +124,7 @@ export default function QuoteTable({
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-center">
-                  <span className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${statusColors[quote.status]}`}>
+                  <span className={statusColors[quote.status]}>
                     {statusLabels[quote.status]}
                   </span>
                 </td>
@@ -167,7 +167,7 @@ export default function QuoteTable({
                     {isConvertible(quote.status) && (
                       <button
                         onClick={() => onConvertToInvoice(quote)}
-                        className="p-2 text-success hover:bg-success-subtle rounded-lg transition"
+                        className="p-2 text-success-on-subtle hover:bg-success-subtle rounded-lg transition"
                         title="Als Rechnung erstellen"
                         aria-label="Als Rechnung erstellen"
                       >
@@ -179,7 +179,7 @@ export default function QuoteTable({
                     {isDeletable(quote.status) && (
                       <button
                         onClick={() => handleDelete(quote.id, quote.quote_number)}
-                        className="p-2 text-danger hover:bg-danger-subtle rounded-lg transition"
+                        className="p-2 text-danger-on-subtle hover:bg-danger-subtle rounded-lg transition"
                         title="Löschen"
                         aria-label="Löschen"
                       >

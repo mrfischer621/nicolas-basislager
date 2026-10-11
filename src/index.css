@@ -208,7 +208,7 @@
   }
   .kpi-value {
     font-family: var(--bw-font-display);
-    @apply text-3xl font-black tabular-nums text-fg;
+    @apply text-3xl font-black tabular-nums;
     letter-spacing: -0.02em;
   }
   .kpi-positive,
@@ -238,14 +238,24 @@
   .badge {
     @apply inline-flex items-center rounded-badge px-2 py-0.5 text-xs font-semibold;
   }
-  .badge-success {
-    @apply badge bg-success-subtle text-success;
+  /* Status-Badges (Erweiterung CRM): heller Hintergrund, Text in der
+     Variante fuer helle Flaechen. Immer mit Wort. */
+  .badge-success,
+  .badge-positive {
+    @apply badge bg-positive-subtle text-positive-on-subtle;
   }
   .badge-warning {
-    @apply badge bg-warning-subtle text-warning;
+    @apply badge bg-warning-subtle text-warning-on-subtle;
   }
-  .badge-danger {
-    @apply badge bg-danger-subtle text-danger;
+  .badge-attention {
+    @apply badge bg-attention-subtle text-attention-on-subtle;
+  }
+  .badge-danger,
+  .badge-negative {
+    @apply badge bg-negative-subtle text-negative-on-subtle;
+  }
+  .badge-info {
+    @apply badge bg-info-subtle text-info-on-subtle;
   }
   .badge-neutral {
     @apply badge bg-raised text-fg;

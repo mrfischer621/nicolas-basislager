@@ -12,11 +12,11 @@ interface TimeEntryWithCustomer extends TimeEntryWithStatus {
 
 // Status display configuration
 const statusConfig: Record<string, { label: string; className: string }> = {
-  offen: { label: 'Offen', className: 'bg-warning-subtle text-warning' },
+  offen: { label: 'Offen', className: 'bg-warning-subtle text-warning-on-subtle' },
   entwurf: { label: 'Entwurf', className: 'bg-raised text-fg-muted' },
   versendet: { label: 'Versendet', className: 'bg-accent-subtle text-accent' },
-  bezahlt: { label: 'Bezahlt', className: 'bg-success-subtle text-success' },
-  überfällig: { label: 'Überfällig', className: 'bg-danger-subtle text-danger' },
+  bezahlt: { label: 'Bezahlt', className: 'bg-success-subtle text-success-on-subtle' },
+  überfällig: { label: 'Überfällig', className: 'bg-danger-subtle text-danger-on-subtle' },
   // Fallback for legacy 'verrechnet' status
   verrechnet: { label: 'Verrechnet', className: 'bg-accent-subtle text-accent' },
 };
@@ -180,7 +180,7 @@ export default function TimeEntryTable({
           <span
             className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
               entry.billable
-                ? 'bg-success-subtle text-success'
+                ? 'bg-success-subtle text-success-on-subtle'
                 : 'bg-raised text-fg-muted'
             }`}
           >
@@ -239,7 +239,7 @@ export default function TimeEntryTable({
             </button>
             <button
               onClick={() => handleDelete(entry.id, projectName)}
-              className="p-1.5 text-danger hover:bg-danger-subtle rounded transition"
+              className="p-1.5 text-danger-on-subtle hover:bg-danger-subtle rounded transition"
               title="Löschen"
               aria-label="Löschen"
             >

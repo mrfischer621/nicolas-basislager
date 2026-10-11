@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { FileDown, FileSpreadsheet, Lock, LockOpen, Plus, Trash2 } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, FileDown, FileSpreadsheet, Lock, LockOpen, Plus, Trash2, XCircle } from 'lucide-react';
 import { useConfirm } from '../context/ConfirmProvider';
 import { useCompany } from '../context/CompanyContext';
 import { useYearEnd } from '../hooks/useYearEnd';
@@ -105,9 +105,28 @@ function BalanceItemsEditor({
   );
 }
 
+/** Kontrollpunkt: Fehler rot, Hinweis orange, in Ordnung gruen (Erweiterung CRM), immer mit Wort und Icon. */
+function CheckItem({ level, title, children }: { level: 'error' | 'hint' | 'ok'; title: string; children?: React.ReactNode }) {
+  const style = {
+    error: { box: 'border-negative-solid bg-negative-subtle', badge: 'badge-negative', word: 'Fehler', Icon: XCircle, icon: 'text-negative-solid' },
+    hint: { box: 'border-warning-solid bg-warning-subtle', badge: 'badge-warning', word: 'Hinweis', Icon: AlertTriangle, icon: 'text-warning-solid' },
+    ok: { box: 'border-positive-solid bg-positive-subtle', badge: 'badge-positive', word: 'In Ordnung', Icon: CheckCircle2, icon: 'text-positive-solid' },
+  }[level];
+  return (
+    <div className={`rounded-lg border-l-4 px-4 py-3 text-fg-on-light ${style.box}`}>
+      <h3 className="flex flex-wrap items-center gap-2 font-semibold">
+        <style.Icon className={`h-4 w-4 ${style.icon}`} aria-hidden="true" />
+        <span className={style.badge}>{style.word}</span>
+        {title}
+      </h3>
+      {children && <div className="mt-1">{children}</div>}
+    </div>
+  );
+}
+
 function EntryList({ entries }: { entries: FinanceEntry[] }) {
   return (
-    <ul className="mt-1 space-y-0.5 text-sm text-fg">
+    <ul className="mt-1 space-y-0.5 text-sm">
       {entries.map((e) => (
         <li key={e.id}>
           <Link className="underline" to={`/buchungen?id=${e.id}`}>
@@ -272,17 +291,17 @@ export default function Jahresabschluss() {
                 </option>
               ))}
             </select>
-            <Badge tone={isLocked ? 'success' : 'warning'} className="px-2.5 py-1 text-sm">
+            <Badge tone={isLocked ? 'positive' : 'neutral'} className="px-2.5 py-1 text-sm">
               {isLocked ? 'Abgeschlossen' : 'Entwurf'}
             </Badge>
           </div>
         }
       />
 
-      {error && <div role="alert" className="rounded-lg border border-danger bg-danger-subtle p-4 text-danger"><strong>Fehler:</strong> {error}</div>}
+      {error && <div role="alert" className="rounded-lg border border-danger bg-danger-subtle p-4 text-danger-on-subtle"><strong>Fehler:</strong> {error}</div>}
 
       {isLocked && (
-        <div role="status" className="rounded-lg border border-success bg-success-subtle p-4 text-sm text-success">
+        <div role="status" className="rounded-lg border border-success bg-success-subtle p-4 text-sm text-success-on-subtle">
           <strong>Abgeschlossen</strong>
           {closing?.locked_at && <> am {new Date(closing.locked_at).toLocaleString('de-CH')}</>}. Buchungen mit Datum{' '}
           {selectedYear} sind schreibgeschützt.
@@ -556,48 +575,43 @@ export default function Jahresabschluss() {
       <Card padding="md">
         <SectionTitle nr="5" title="Kontrollen" hint="Vor dem Abschluss bereinigen. Belegprinzip nach Art. 957a OR: Jede Buchung braucht einen Beleg." />
         {openChecks === 0 ? (
-          <Badge tone="success" className="px-2.5 py-1 text-sm">Keine offenen Punkte</Badge>
+          <CheckItem level="ok" title="Alles in Ordnung: keine offenen Punkte" />
         ) : (
-          <div className="space-y-4 text-sm">
+          <div className="space-y-3 text-sm">
             {c.paidWithoutDate.length > 0 && (
-              <div>
-                <h3 className="font-semibold text-fg">
-                  <Badge tone="danger" className="mr-2">Fehler</Badge>
-                  {c.paidWithoutDate.length} bezahlte Rechnung{c.paidWithoutDate.length === 1 ? '' : 'en'} ohne Zahlungsdatum (nicht gezählt)
-                </h3>
-                <p className="text-fg">
+              <CheckItem
+                level="error"
+                title={`${c.paidWithoutDate.length} bezahlte Rechnung${c.paidWithoutDate.length === 1 ? '' : 'en'} ohne Zahlungsdatum (nicht gezählt)`}
+              >
+                <p>
                   {c.paidWithoutDate.map((i) => i.invoice_number).join(', ')} ·{' '}
                   <Link className="underline" to="/rechnungen?filter=ohne-zahlungsdatum">
                     Zahlungsdatum nachtragen
                   </Link>
                 </p>
-              </div>
-            )}
-            {c.withoutReceipt.length > 0 && (
-              <div>
-                <h3 className="font-semibold">Ohne Beleg: {c.withoutReceipt.length}</h3>
-                <EntryList entries={c.withoutReceipt} />
-              </div>
-            )}
-            {c.withoutCategory.length > 0 && (
-              <div>
-                <h3 className="font-semibold">Ohne Kategorie: {c.withoutCategory.length}</h3>
-                <EntryList entries={c.withoutCategory} />
-              </div>
+              </CheckItem>
             )}
             {c.duplicateNumbers.length > 0 && (
-              <div>
-                <h3 className="font-semibold">Doppelte Beleg-Nummern: {c.duplicateNumbers.map((d) => d.number).join(', ')}</h3>
+              <CheckItem level="error" title={`Doppelte Beleg-Nummern: ${c.duplicateNumbers.map((d) => d.number).join(', ')}`}>
                 <EntryList entries={c.duplicateNumbers.flatMap((d) => d.entries)} />
-              </div>
+              </CheckItem>
+            )}
+            {c.withoutReceipt.length > 0 && (
+              <CheckItem level="hint" title={`Ohne Beleg: ${c.withoutReceipt.length}`}>
+                <EntryList entries={c.withoutReceipt} />
+              </CheckItem>
+            )}
+            {c.withoutCategory.length > 0 && (
+              <CheckItem level="hint" title={`Ohne Kategorie: ${c.withoutCategory.length}`}>
+                <EntryList entries={c.withoutCategory} />
+              </CheckItem>
             )}
             {c.categoriesWithoutAccount.length > 0 && (
-              <div>
-                <h3 className="font-semibold">Kategorien ohne Kontonummer: {c.categoriesWithoutAccount.join(', ')}</h3>
+              <CheckItem level="hint" title={`Kategorien ohne Kontonummer: ${c.categoriesWithoutAccount.join(', ')}`}>
                 <Link className="underline" to="/settings?tab=categories">
                   In den Einstellungen nachtragen
                 </Link>
-              </div>
+              </CheckItem>
             )}
           </div>
         )}

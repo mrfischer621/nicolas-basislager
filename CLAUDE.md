@@ -100,8 +100,15 @@ Konzept, Kontrast und Screenshots: `docs/design-review/`.
   (cta = die eine Pill pro Ansicht, primary, secondary, ghost, danger),
   `PageHeader` (Titel in Versalien), `Card`, `KPICard`, `Badge`,
   `SegmentedControl`, `EmptyState`, `Skeleton`; `Modal` mit Fokusfalle.
-- Statusfarben nur als Badge/Meldung mit Wort, Betraege in Tinte, Icons Lucide
-  mit Strich 1.5, Fokus nie unterdruecken (`outline-none` ist tabu).
+- **Standard ist immer hell**; Tiefsee nur, wenn in den Einstellungen gewaehlt
+  (`src/utils/theme.ts`), nie ueber `prefers-color-scheme`.
+- **Statusfarben (Erweiterung CRM, nicht im Design System):** `positive`,
+  `negative`, `warning`, `attention`, `info`, definiert in
+  `scripts/build-tokens.mjs`. `bg-<x>-solid` fuer Flaechen/Balken/Icons,
+  `text-<x>` fuer Text, `bg-<x>-subtle` + `text-<x>-on-subtle` fuer Badges,
+  `text-fg-on-light` fuer Tinte auf Statusflaechen. Farbe nie allein:
+  Vorzeichen, Pfeil, Wort. Details: `docs/design-review/hell-und-status/`.
+- Icons Lucide mit Strich 1.5, Fokus nie unterdruecken (`outline-none` ist tabu).
 - Screenshots ohne echte Daten: `MOCK=1 node scripts/screenshots.mjs <ordner>`
   (Repo ist oeffentlich). Rauchtest: `node scripts/smoke-pages.mjs`.
 

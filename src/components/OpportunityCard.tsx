@@ -153,7 +153,7 @@ export function OpportunityCard({
                     onDelete(opportunity);
                     setShowMenu(false);
                   }}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-danger hover:bg-danger-subtle transition-colors"
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-danger-on-subtle hover:bg-danger-subtle transition-colors"
                 >
                   <Trash2 size={14} />
                   <span>Löschen</span>
@@ -174,7 +174,7 @@ export function OpportunityCard({
 
       {/* Stale Indicator - Electric Red Accent */}
       {isStale && !opportunity.is_lost && (
-        <div className="flex items-center gap-1.5 text-xs font-medium text-danger mb-3 px-2 py-1 bg-danger-subtle rounded-lg border border-danger-subtle">
+        <div className="flex items-center gap-1.5 text-xs font-medium text-danger-on-subtle mb-3 px-2 py-1 bg-danger-subtle rounded-lg border border-danger-subtle">
           <AlertCircle size={14} />
           <span>Letzter Kontakt vor {daysSinceContact} Tagen</span>
         </div>

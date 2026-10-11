@@ -460,7 +460,7 @@ export function TimerButton() {
         <span
           className={`
             text-sm font-mono font-semibold tabular-nums px-2 py-1 rounded-md
-            ${timer.isRunning ? 'text-success bg-success-subtle' : 'text-warning bg-warning-subtle'}
+            ${timer.isRunning ? 'text-success-on-subtle bg-success-subtle' : 'text-warning-on-subtle bg-warning-subtle'}
           `}
         >
           {formatSeconds(displaySeconds)}
@@ -476,9 +476,9 @@ export function TimerButton() {
           p-2 rounded-lg transition-colors duration-150
           ${
             timer.isRunning
-              ? 'bg-success-subtle text-success hover:bg-success-subtle'
+              ? 'bg-success-subtle text-success-on-subtle hover:bg-success-subtle'
               : timer.isPaused
-              ? 'bg-warning-subtle text-warning hover:bg-warning-subtle'
+              ? 'bg-warning-subtle text-warning-on-subtle hover:bg-warning-subtle'
               : 'bg-raised text-text-secondary hover:bg-sunken hover:text-text-primary'
           }
         `}
@@ -498,7 +498,7 @@ export function TimerButton() {
           onClick={handleStopClick}
           title="Timer stoppen & speichern"
           aria-label="Timer stoppen & speichern"
-          className="p-2 rounded-lg bg-danger-subtle text-danger hover:bg-danger-subtle transition-colors duration-150"
+          className="p-2 rounded-lg bg-danger-subtle text-danger-on-subtle hover:bg-danger-subtle transition-colors duration-150"
         >
           <Square size={16} strokeWidth={2} />
         </button>

@@ -32,6 +32,28 @@
   --bw-danger-subtle: 255 235 233; /* danger-subtle */
   --bw-focus: 11 18 32; /* focus */
   --bw-focus-inverted: 159 220 255; /* focus-on-inverted */
+  /* Erweiterung CRM, nicht Teil des Blauwasser Design Systems: Statusfarben */
+  --bw-positive: 12 182 85;
+  --bw-positive-text: 4 122 55;
+  --bw-positive-subtle: 226 249 230;
+  --bw-positive-on-subtle: 4 122 55;
+  --bw-negative: 237 64 66;
+  --bw-negative-text: 204 39 46;
+  --bw-negative-subtle: 255 233 230;
+  --bw-negative-on-subtle: 204 39 46;
+  --bw-warning: 245 116 0;
+  --bw-warning-text: 169 80 9;
+  --bw-warning-subtle: 255 236 221;
+  --bw-warning-on-subtle: 169 80 9;
+  --bw-attention: 245 196 13;
+  --bw-attention-text: 129 101 0;
+  --bw-attention-subtle: 251 241 216;
+  --bw-attention-on-subtle: 129 101 0;
+  --bw-info: 10 149 255;
+  --bw-info-text: 11 18 32;
+  --bw-info-subtle: 225 244 255;
+  --bw-info-on-subtle: 11 18 32;
+  --bw-fg-on-light: 11 18 32;
   --bw-radius-none: 0px;
   --bw-radius-sm: 2px;
   --bw-radius-badge: 4px;
@@ -94,5 +116,27 @@
   --bw-danger-subtle: 255 235 233; /* danger-subtle */
   --bw-focus: 159 220 255; /* focus */
   --bw-focus-inverted: 159 220 255; /* focus-on-inverted */
+  /* Erweiterung CRM, nicht Teil des Blauwasser Design Systems: Statusfarben */
+  --bw-positive: 12 182 85;
+  --bw-positive-text: 12 182 85;
+  --bw-positive-subtle: 226 249 230;
+  --bw-positive-on-subtle: 4 122 55;
+  --bw-negative: 237 64 66;
+  --bw-negative-text: 238 75 77;
+  --bw-negative-subtle: 255 233 230;
+  --bw-negative-on-subtle: 204 39 46;
+  --bw-warning: 245 116 0;
+  --bw-warning-text: 245 116 0;
+  --bw-warning-subtle: 255 236 221;
+  --bw-warning-on-subtle: 169 80 9;
+  --bw-attention: 245 196 13;
+  --bw-attention-text: 245 196 13;
+  --bw-attention-subtle: 251 241 216;
+  --bw-attention-on-subtle: 129 101 0;
+  --bw-info: 10 149 255;
+  --bw-info-text: 244 247 251;
+  --bw-info-subtle: 225 244 255;
+  --bw-info-on-subtle: 11 18 32;
+  --bw-fg-on-light: 11 18 32;
   color-scheme: dark;
 }

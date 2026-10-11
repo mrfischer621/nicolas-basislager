@@ -54,10 +54,24 @@ function PaidDateInput({ invoice, onSave }: { invoice: Invoice; onSave: (invoice
 
 const statusColors = {
   entwurf: 'badge-neutral',
-  versendet: 'badge-accent',
-  bezahlt: 'badge-success',
-  überfällig: 'badge-danger',
+  versendet: 'badge-info',
+  bezahlt: 'badge-positive',
+  überfällig: 'badge-negative',
 };
+
+/**
+ * Faelligkeit einer versendeten Rechnung: ueberfaellig (rot) oder in den
+ * naechsten 7 Tagen faellig (gelb). Sonst null.
+ */
+function dueHint(invoice: Invoice): { tone: 'badge-negative' | 'badge-attention'; label: string } | null {
+  if (invoice.status !== 'versendet' || !invoice.due_date) return null;
+  const today = zurichDay(new Date());
+  const due = invoice.due_date.slice(0, 10);
+  const days = Math.round((Date.parse(due) - Date.parse(today)) / 86_400_000);
+  if (days < 0) return { tone: 'badge-negative', label: 'Überfällig' };
+  if (days <= 7) return { tone: 'badge-attention', label: days === 0 ? 'Fällig heute' : `Fällig in ${days} ${days === 1 ? 'Tag' : 'Tagen'}` };
+  return null;
+}
 
 const statusLabels = {
   entwurf: 'Entwurf',
@@ -93,25 +107,25 @@ export default function InvoiceTable({ invoices, customers, onDelete, onDownload
         <table className="w-full text-sm">
           <thead className="border-b border-line">
             <tr>
-              <th scope="col" className="caps-sm whitespace-nowrap px-4 py-3 text-left">
+              <th scope="col" className="caps-sm whitespace-nowrap px-3 py-3 text-left">
                 Rechnungsnummer
               </th>
-              <th scope="col" className="caps-sm whitespace-nowrap px-4 py-3 text-left">
+              <th scope="col" className="caps-sm whitespace-nowrap px-3 py-3 text-left">
                 Kunde
               </th>
-              <th scope="col" className="caps-sm whitespace-nowrap px-4 py-3 text-left">
+              <th scope="col" className="caps-sm whitespace-nowrap px-3 py-3 text-left">
                 Rechnungsdatum
               </th>
-              <th scope="col" className="caps-sm whitespace-nowrap px-4 py-3 text-left">
+              <th scope="col" className="caps-sm whitespace-nowrap px-3 py-3 text-left">
                 Fällig am
               </th>
-              <th scope="col" className="caps-sm whitespace-nowrap px-4 py-3 text-right">
+              <th scope="col" className="caps-sm whitespace-nowrap px-3 py-3 text-right">
                 Gesamttotal
               </th>
-              <th scope="col" className="caps-sm whitespace-nowrap px-4 py-3 text-center">
+              <th scope="col" className="caps-sm whitespace-nowrap px-3 py-3 text-center">
                 Status
               </th>
-              <th scope="col" className="caps-sm whitespace-nowrap px-4 py-3 text-right">
+              <th scope="col" className="caps-sm whitespace-nowrap px-3 py-3 text-right">
                 Aktionen
               </th>
             </tr>
@@ -119,30 +133,34 @@ export default function InvoiceTable({ invoices, customers, onDelete, onDownload
           <tbody>
             {invoices.map((invoice) => (
               <tr key={invoice.id} className="border-b border-line last:border-b-0 hover:bg-canvas">
-                <td className="px-4 py-3 whitespace-nowrap">
+                <td className="px-3 py-3 whitespace-nowrap">
                   <div className="text-sm font-medium text-fg">{invoice.invoice_number}</div>
                 </td>
-                <td className="px-4 py-3 whitespace-nowrap">
+                <td className="px-3 py-3 whitespace-nowrap">
                   <div className="text-sm text-fg-muted">{getCustomerName(invoice.customer_id)}</div>
                 </td>
-                <td className="px-4 py-3 whitespace-nowrap">
+                <td className="px-3 py-3 whitespace-nowrap">
                   <div className="text-sm text-fg-muted">
                     {dmy(invoice.issue_date)}
                   </div>
                 </td>
-                <td className="px-4 py-3 whitespace-nowrap">
+                <td className="px-3 py-3 whitespace-nowrap">
                   <div className="text-sm text-fg-muted">
                     {invoice.due_date ? dmy(invoice.due_date) : '–'}
                   </div>
                 </td>
-                <td className="px-4 py-3 whitespace-nowrap text-right">
+                <td className="px-3 py-3 whitespace-nowrap text-right">
                   <div className="text-sm font-medium text-fg">
                     {formatChfDisplay(invoice.total)}
                   </div>
                 </td>
-                <td className="px-4 py-3 whitespace-nowrap text-center">
-                  <span className={statusColors[invoice.status]}>
-                    {statusLabels[invoice.status]}
+                <td className="px-3 py-3 whitespace-nowrap text-center">
+                  <span className="inline-flex flex-wrap justify-center gap-1">
+                    <span className={statusColors[invoice.status]}>{statusLabels[invoice.status]}</span>
+                    {(() => {
+                      const hint = dueHint(invoice);
+                      return hint ? <span className={hint.tone}>{hint.label}</span> : null;
+                    })()}
                   </span>
                   {invoice.status === 'bezahlt' && !invoice.paid_at && (
                     <>
@@ -151,7 +169,7 @@ export default function InvoiceTable({ invoices, customers, onDelete, onDownload
                     </>
                   )}
                 </td>
-                <td className="px-4 py-3 whitespace-nowrap text-right">
+                <td className="px-3 py-3 whitespace-nowrap text-right">
                   <div className="flex justify-end gap-1">
                     <button
                       onClick={() => onEdit(invoice)}

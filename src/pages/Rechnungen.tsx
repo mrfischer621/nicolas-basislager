@@ -606,13 +606,13 @@ export default function Rechnungen() {
 
       {/* Error Message */}
       {error && (
-        <div role="alert" className="rounded-lg border border-danger bg-danger-subtle px-4 py-3 text-danger">
+        <div role="alert" className="rounded-lg border border-danger bg-danger-subtle px-4 py-3 text-danger-on-subtle">
           <strong>Fehler:</strong> {error}
         </div>
       )}
 
       {onlyMissingPaidDate && (
-        <div className="flex items-center justify-between rounded-lg border border-warning bg-warning-subtle px-4 py-3 text-sm text-warning">
+        <div className="flex items-center justify-between rounded-lg border border-warning bg-warning-subtle px-4 py-3 text-sm text-warning-on-subtle">
           <span>
             Gefiltert: {visibleInvoices.length} bezahlte {visibleInvoices.length === 1 ? 'Rechnung' : 'Rechnungen'} ohne Zahlungsdatum.
             Ohne Datum zählen sie in keiner Auswertung.
@@ -625,7 +625,7 @@ export default function Rechnungen() {
 
       {/* Warning if no customers */}
       {customers.length === 0 && !isLoading && (
-        <div className="bg-warning-subtle border border-warning-subtle text-warning px-4 py-3 rounded-lg">
+        <div className="bg-warning-subtle border border-warning-subtle text-warning-on-subtle px-4 py-3 rounded-lg">
           Bitte erstellen Sie zuerst Kunden, bevor Sie Rechnungen erstellen.
         </div>
       )}

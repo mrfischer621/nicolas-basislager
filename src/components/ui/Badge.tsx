@@ -6,7 +6,7 @@ export function Badge({
   children,
   className = '',
 }: {
-  tone?: 'success' | 'warning' | 'danger' | 'neutral' | 'accent';
+  tone?: 'success' | 'warning' | 'danger' | 'neutral' | 'accent' | 'positive' | 'negative' | 'attention' | 'info';
   children: ReactNode;
   className?: string;
 }) {

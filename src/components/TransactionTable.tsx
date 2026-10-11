@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useConfirm } from '../context/ConfirmProvider';
 import toast from 'react-hot-toast';
 import { createPortal } from 'react-dom';
-import { ChevronLeft, ChevronRight, MoreVertical, Paperclip } from 'lucide-react';
+import { ArrowDownRight, ArrowUpRight, ChevronLeft, ChevronRight, MoreVertical, Paperclip } from 'lucide-react';
 import { EmptyState } from './ui';
 import { supabase } from '../lib/supabase';
 import type { Transaction, Customer, Project } from '../lib/supabase';
@@ -121,7 +121,7 @@ function ActionMenu({
             }}
             type="button"
             role="menuitem"
-            className="block w-full px-4 py-2 text-left text-sm text-danger hover:bg-danger-subtle focus:bg-danger-subtle"
+            className="block w-full px-4 py-2 text-left text-sm text-danger-on-subtle hover:bg-danger-subtle focus:bg-danger-subtle"
           >
             Löschen
           </button>
@@ -158,13 +158,26 @@ export default function TransactionTable({ transactions, customers, projects, on
 
   const dmy = (day: string) => `${day.slice(8, 10)}.${day.slice(5, 7)}.${day.slice(0, 4)}`;
 
-  // Betrag in Tinte; Einnahmen mit "+" (Richtung als Zeichen und Spalte, nicht nur als Farbe)
+  // Betrag gruen (Einnahme) bzw. rot (Ausgabe) in der Textvariante, dazu
+  // Vorzeichen und Pfeil: Farbe ist nie das einzige Signal.
   const formatAmount = (amount: number, type: 'einnahme' | 'ausgabe') => (
-    <span className="font-semibold tabular-nums text-fg">
+    <span
+      className={`inline-flex items-center justify-end gap-1 font-semibold tabular-nums ${
+        type === 'einnahme' ? 'text-positive' : 'text-negative'
+      }`}
+    >
+      {type === 'einnahme' ? (
+        <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
+      ) : (
+        <ArrowDownRight className="h-3.5 w-3.5" aria-hidden="true" />
+      )}
       {type === 'einnahme' ? '+ ' : '− '}
       {formatChfDisplay(amount)}
     </span>
   );
+
+  const typeBadge = (type: 'einnahme' | 'ausgabe') =>
+    type === 'einnahme' ? <span className="badge-positive">Einnahme</span> : <span className="badge-negative">Ausgabe</span>;
 
   const openReceipt = async (path: string) => {
     const { data, error } = await supabase.storage.from('receipts').createSignedUrl(path, 60);
@@ -230,6 +243,7 @@ export default function TransactionTable({ transactions, customers, projects, on
             <tr>
               <th scope="col">Datum</th>
               <th scope="col">Nr</th>
+              <th scope="col">Typ</th>
               <th scope="col">Lieferant / Zahler</th>
               <th scope="col">Text</th>
               <th scope="col">Kategorie</th>
@@ -243,6 +257,7 @@ export default function TransactionTable({ transactions, customers, projects, on
               <tr key={transaction.id}>
                 <td className="whitespace-nowrap tabular-nums">{dmy(transaction.date)}</td>
                 <td className="whitespace-nowrap font-medium">{transaction.transaction_number}</td>
+                <td className="whitespace-nowrap">{typeBadge(transaction.type)}</td>
                 <td className="max-w-[12rem] truncate">{transaction.counterparty || '–'}</td>
                 <td className="max-w-xs">
                   <div className="truncate">{transaction.description || '–'}</div>
@@ -278,7 +293,7 @@ export default function TransactionTable({ transactions, customers, projects, on
                   ) : transaction.id.startsWith('invoice-') ? (
                     <span className="text-xs text-fg-muted">Rechnung</span>
                   ) : (
-                    <span className="badge-warning">fehlt</span>
+                    <span className="badge-warning">Beleg fehlt</span>
                   )}
                 </td>
                 <td className="text-right">

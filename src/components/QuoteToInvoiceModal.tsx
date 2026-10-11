@@ -131,7 +131,7 @@ export default function QuoteToInvoiceModal({
 
       {/* Error Message */}
       {error && (
-        <div className="bg-danger-subtle border border-danger-subtle text-danger px-4 py-3 rounded-lg">
+        <div className="bg-danger-subtle border border-danger-subtle text-danger-on-subtle px-4 py-3 rounded-lg">
           {error}
         </div>
       )}
@@ -263,7 +263,7 @@ export default function QuoteToInvoiceModal({
                     type="button"
                     onClick={() => handleRemoveItem(index)}
                     disabled={items.length === 1}
-                    className="p-2 text-danger hover:bg-danger-subtle rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed"
+                    className="p-2 text-danger-on-subtle hover:bg-danger-subtle rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed"
                   >
                     <Trash2 size={16} />
                   </button>

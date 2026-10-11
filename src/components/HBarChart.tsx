@@ -16,7 +16,7 @@ export default function HBarChart<T extends object>({
   data: T[];
   labelKey: keyof T & string;
   valueKey?: keyof T & string;
-  color?: 'cta' | 'fg';
+  color?: 'cta' | 'fg' | 'positive' | 'negative';
   label: string;
 }) {
   const c = useThemeColors();
@@ -52,7 +52,14 @@ export default function HBarChart<T extends object>({
               ) : null
             }
           />
-          <Bar dataKey={valueKey} fill={c[color]} radius={[0, 4, 4, 0]} maxBarSize={22} />
+          <Bar
+            dataKey={valueKey}
+            fill={c[color]}
+            // Kontur in der Textvariante: Balken halten 3:1 auch bei hellem Gruen
+            stroke={color === 'positive' ? c['positive-text'] : color === 'negative' ? c['negative-text'] : undefined}
+            radius={[0, 4, 4, 0]}
+            maxBarSize={22}
+          />
         </BarChart>
       </ResponsiveContainer>
     </figure>
