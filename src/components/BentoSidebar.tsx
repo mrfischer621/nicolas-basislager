@@ -94,7 +94,8 @@ export function BentoSidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: 
 
   return (
     <>
-      {/* Mobile Backdrop */}
+      {/* Mobile Backdrop (unter dem Menue: das Menue hat z-50, sonst schluckt
+          der Hintergrund alle Tipps auf die Links) */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-ink/50 z-40 md:hidden"
@@ -105,7 +106,7 @@ export function BentoSidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: 
       {/* Sidebar */}
       <div
         className={`
-          h-full flex flex-col bg-surface border-r border-line
+          relative z-50 h-full flex flex-col bg-surface border-r border-line
           pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)]
           transition-transform duration-300 ease-in-out
           md:translate-x-0
