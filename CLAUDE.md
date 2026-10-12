@@ -114,7 +114,8 @@ Konzept, Kontrast und Screenshots: `docs/design-review/`.
   Muster: `node scripts/pdf-muster/render.mjs` (siehe `docs/design-review/pdf/`).
 - Icons Lucide mit Strich 1.5, Fokus nie unterdruecken (`outline-none` ist tabu).
 - Screenshots ohne echte Daten: `MOCK=1 node scripts/screenshots.mjs <ordner>`
-  (Repo ist oeffentlich). Rauchtest: `node scripts/smoke-pages.mjs`.
+  (Repo ist oeffentlich). Rauchtest: `node scripts/smoke-pages.mjs`. Handy-Audit:
+  `node scripts/mobile-audit.mjs <ordner>`.
 
 ### Custom Hooks
 
@@ -329,6 +330,30 @@ Alte Adressen (`/sales`, `/angebote`, `/kunden`, `/auswertungen`, `/jahresabschl
 ### Listen-Template (`src/components/list/`)
 
 Alle Übersichten nutzen `ListPage`, `ViewTabs`, `KpiStrip`, `DataTable` (Tabelle ab 1280 px, darunter Kartenliste), `RowMenu` (ein Menü pro Zeile, nicht mögliche Aktionen ausgeblendet), `BulkBar`, `Drawer`. Filter, Ansicht, Sortierung und Seite stehen in der URL (`useListState`, Schlüssel `ansicht`, `q`, `firma`, `projekt`, `von`, `bis`, `seite`, `sort`). Listen fragen gefiltert und seitenweise (50) die Datenbank ab; Tab-Zahlen kommen aus schlanken Abfragen. Ausnahme: Buchungen und Projekte filtern im Browser (kleine Mengen, zentrale Aggregation).
+
+### Handy-Ansicht (seit Okt. 2026, docs/mobile/)
+
+Konzept und Bericht: `docs/mobile/konzept.md`, `docs/mobile/bericht.md`. Handy heisst unter `md` (768 px); die Kartenliste der `DataTable` gilt unter `xl`. Der Desktop ab 1280 px darf sich nicht verändern. Prüfen mit `scripts/ux-audit-screens.mjs` (1440) im Pixelvergleich vorher und nachher.
+
+- **Audit:** `node scripts/mobile-audit.mjs <ordner>` (Mock). Liefert Bilder 375/390/430 in hell und Tiefsee und `messungen-*.json`: Überlauf, Ziele unter 24/44 px, Felder unter 16 px, Lage der Pill. Eingrenzen mit `WIDTHS=390 THEMES=hell PAGES=…`, ganze Seiten mit `FULL=1`.
+- **Grundgerüst:** `h-dvh`, nie `h-screen`/`100vh`. Feste Elemente mit `env(safe-area-inset-*)`.
+- **Felder:** Unter `md` haben Felder 16 px (`index.css`, `!important`). Sonst zoomt iOS.
+- **Touch-Ziele:**
+  - `.tap` an Icon-Knöpfen: 44 × 44 px unter `md`, darüber neutral.
+  - Negative Ränder zum Ausgleich nur mit `max-md:` setzen, sonst verrutscht der Desktop.
+- **Masken:**
+  - Die Zeile mit Speichern bekommt `.sheet-actions`. In Dialogen haftet sie unten. Der Rand gleicht den Innenabstand des Blatts aus (`px-5 py-5`).
+  - Die Zeile muss direktes Kind des Formulars sein. Wenn nicht, die Hülle am Handy mit `max-md:contents` auflösen (siehe `OpportunityDrawer`).
+- **Werkzeugleiste:** Auswahlfilter bekommen `.toolbar-collapsible` (macht `FilterSelect` von selbst). Sie liegen am Handy hinter «Filter (n)». Suche und aktive Filter-Chips bleiben sichtbar.
+- **Bausteine:**
+  - `useIsMobile()`/`useMediaQuery()` (`hooks/useMediaQuery.ts`, ohne `matchMedia` in jsdom = Desktop);
+  - `RowMenu`: am Handy ein Blatt;
+  - `ContactActions` (tel:/mailto:, `utils/contactLinks.ts`);
+  - `PdfFrame`: am Handy «PDF öffnen» und «Teilen»;
+  - Container Query: `.cq` + `.cq-cols-3` (eigenes CSS, kein Plugin).
+- **Leiste unten** (`MobileBar`): Cockpit, Zeit erfassen, Beleg, Suche. Die Timer-Leiste erscheint, wenn ein Timer läuft. Stopp geht über das Ereignis `requestTimerStop()` an den Dialog im `TimerButton`.
+- **Mobiles Menü:** Das Menü braucht eine eigene Ebene (`relative z-50`). Sonst liegt der Hintergrund (z-40) darüber und schluckt alle Tipps.
+- **Einmalige URL-Parameter** wie `?neu=1`: Seiten rendern erst, wenn das Unternehmen geladen ist (`BentoLayout`). Sonst baut der `key` die Seite nach dem Entfernen des Parameters neu auf.
 
 ### Abgeleitete Status
 

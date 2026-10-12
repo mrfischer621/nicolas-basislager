@@ -1,10 +1,14 @@
 # Konzept: Handy-Ansicht des Blauwasser CRM (Stand 2026)
 
-Stand 11.10.2026, Grundlage `main` (da172054). **Phase A: nur Befund und Vorschlag, noch kein Code geändert** (ausser dem neuen Audit-Skript).
+Stand 11.10.2026, Grundlage `main` (da172054).
+
+> **Umgesetzt und produktiv seit 12.10.2026.** Nicolas hat mit «setze direkt um» freigegeben; die Entscheide in Abschnitt 7 gelten wie vorgeschlagen.
+> Abweichung bei E1: Die Timer-Knöpfe bleiben am Handy zusätzlich in der Kopfzeile, nichts wurde ausgeblendet.
+> Ergebnis, Vorher-/Nachher-Vergleich und offene Punkte stehen in [`bericht.md`](bericht.md).
 
 Alle Bilder zeigen **nur erfundene Testdaten** (Mock «ZZ Testfirma»), weil das Repository öffentlich ist.
 
-**Was du entscheiden musst, steht gesammelt in Abschnitt 7.**
+Die Entscheide stehen gesammelt in Abschnitt 7.
 
 ---
 
