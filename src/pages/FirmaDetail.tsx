@@ -456,7 +456,7 @@ export default function FirmaDetail() {
                     {!p.is_primary && (
                       <button
                         type="button"
-                        className="tap -my-2 shrink-0 text-xs text-fg-muted underline hover:text-fg"
+                        className="tap max-md:-my-2 shrink-0 text-xs text-fg-muted underline hover:text-fg"
                         onClick={async () => {
                           await supabase.from('customer_contacts').update({ is_primary: false }).eq('customer_id', c.id);
                           await supabase.from('customer_contacts').update({ is_primary: true }).eq('id', p.id);

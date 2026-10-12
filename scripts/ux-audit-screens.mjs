@@ -57,7 +57,7 @@ for (const [name, path, opener] of shots) {
   const file = `${dir}/${name}-${width}.png`;
   // Ganze Seite: der innere Scrollbereich wird fuer das Bild aufgeklappt
   if (process.env.FULL !== '0' && !opener) {
-    await page.addStyleTag({ content: 'html,body,.h-screen{height:auto!important;overflow:visible!important} main,main>div{overflow:visible!important;height:auto!important}' });
+    await page.addStyleTag({ content: 'html,body,.h-screen,.h-dvh{height:auto!important;overflow:visible!important} main,main>div{overflow:visible!important;height:auto!important}' });
     await page.waitForTimeout(200);
   }
   await page.screenshot({ path: file, fullPage: process.env.FULL !== '0' && !opener });
