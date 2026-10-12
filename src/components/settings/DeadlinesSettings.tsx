@@ -144,7 +144,7 @@ export function DeadlinesSettings() {
 
       <div className="mt-6">
         {isLoading ? (
-          <div className="skeleton h-24" />
+          <div role="status" className="skeleton h-24"  aria-label="Wird geladen" />
         ) : open.length === 0 ? (
           <p className="text-sm text-fg-muted">Keine offenen Fristen.</p>
         ) : (

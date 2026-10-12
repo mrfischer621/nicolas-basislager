@@ -5,6 +5,7 @@ import { useCompany } from '../context/CompanyContext';
 import { Clock, FileText, TrendingUp, DollarSign, Filter } from 'lucide-react';
 import { useThemeColors } from '../hooks/useThemeColors';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { useIsMobile } from '../hooks/useMediaQuery';
 import { format, subDays, startOfMonth, endOfMonth } from 'date-fns';
 
 interface TimeReportingProps {
@@ -14,6 +15,7 @@ interface TimeReportingProps {
 
 export default function TimeReporting({ entries, projects }: TimeReportingProps) {
   const themeColors = useThemeColors();
+  const mobile = useIsMobile();
   const { selectedCompany } = useCompany();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -332,12 +334,12 @@ export default function TimeReporting({ entries, projects }: TimeReportingProps)
         {/* Bar Chart: Billable vs Non-Billable */}
         <div className="card p-4">
           <h3 className="font-medium text-fg mb-4">Stunden nach Verrechenbarkeit</h3>
-          <div className="h-64">
+          <div className="h-40 sm:h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} layout="vertical">
                 <CartesianGrid horizontal={false} stroke={themeColors.line} />
                 <XAxis type="number" tickFormatter={(v) => `${v}h`} tick={{ fill: themeColors['fg-muted'], fontSize: 12 }} />
-                <YAxis type="category" dataKey="category" width={120} tick={{ fill: themeColors.fg, fontSize: 12 }} />
+                <YAxis type="category" dataKey="category" width={mobile ? 92 : 120} tick={{ fill: themeColors.fg, fontSize: 12 }} />
                 <Tooltip
                   formatter={(value) => [`${Number(value).toFixed(1)} Stunden`, '']}
                   contentStyle={{ borderRadius: 'var(--bw-radius-lg)', border: `1px solid ${themeColors.line}`, background: themeColors.surface, color: themeColors.fg }}

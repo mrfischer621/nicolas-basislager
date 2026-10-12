@@ -9,7 +9,7 @@ import { asError } from '../../utils/errors';
 /** Standardsatz und Zahlungsfrist; Nummern zur Information. */
 export function BillingDefaults() {
   const { data } = useCompanySettings();
-  if (!data) return <div className="skeleton h-40" aria-label="Wird geladen" />;
+  if (!data) return <div role="status" className="skeleton h-40" aria-label="Wird geladen" />;
   return <Form settings={data} />;
 }
 

@@ -53,7 +53,7 @@ export default function RechnungDetail() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stamp, selectedCompany?.id]);
 
-  if (isLoading) return <div className="skeleton h-96 w-full" aria-label="Wird geladen" />;
+  if (isLoading) return <div role="status" className="skeleton h-96 w-full" aria-label="Wird geladen" />;
   if (error || !data || !invoice || !selectedCompany) {
     return (
       <EmptyState
@@ -165,7 +165,7 @@ export default function RechnungDetail() {
           ) : preview.error ? (
             <EmptyState title="Vorschau nicht möglich" text={preview.error} />
           ) : (
-            <div className="skeleton m-6 h-[60vh]" aria-label="Vorschau wird erstellt" />
+            <div role="status" className="skeleton m-6 h-[60vh]" aria-label="Vorschau wird erstellt" />
           )}
         </section>
 

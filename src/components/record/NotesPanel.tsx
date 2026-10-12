@@ -58,7 +58,7 @@ export function NotesPanel({ target }: { target: Target }) {
         </div>
       </form>
       {isLoading ? (
-        <div className="skeleton h-16" />
+        <div role="status" className="skeleton h-16"  aria-label="Wird geladen" />
       ) : notes.length === 0 ? (
         <p className="text-sm text-fg-muted">Noch keine Notizen.</p>
       ) : (

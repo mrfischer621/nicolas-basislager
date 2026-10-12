@@ -108,7 +108,7 @@ export function DataTable<T>({
 
   if (loading) {
     return (
-      <div className="space-y-2 p-4" aria-busy="true" aria-label="Wird geladen">
+      <div className="space-y-2 p-4" role="status" aria-busy="true" aria-label="Wird geladen">
         {Array.from({ length: 6 }, (_, i) => (
           <div key={i} className="skeleton h-10 w-full" />
         ))}

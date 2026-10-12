@@ -71,7 +71,7 @@ export default function BentoLayout() {
             <ErrorBoundary resetKey={location.pathname}>
               {/* CRITICAL FIX: Key prop forces complete remount when company changes */}
               {/* Seiten werden erst bei Bedarf geladen (kleineres Haupt-Bundle) */}
-              <Suspense fallback={<div className="skeleton h-64 w-full" aria-label="Seite wird geladen" />}>
+              <Suspense fallback={<div role="status" className="skeleton h-64 w-full" aria-label="Seite wird geladen" />}>
                 {/* Erst nach dem Laden des Unternehmens rendern. Sonst baut der
                     Wechsel des key die Seite gleich wieder neu auf, und einmalige
                     URL-Parameter wie ?neu=1 sind dann schon verbraucht. */}

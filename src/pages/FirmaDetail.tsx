@@ -107,7 +107,7 @@ export default function FirmaDetail() {
   const myDeals = allDeals.filter((d) => d.existing_customer_id === id);
   const data = related.data;
 
-  if (customerQ.isLoading) return <div className="skeleton h-96" aria-label="Wird geladen" />;
+  if (customerQ.isLoading) return <div role="status" className="skeleton h-96" aria-label="Wird geladen" />;
   const c = customerQ.data;
   if (!c)
     return (

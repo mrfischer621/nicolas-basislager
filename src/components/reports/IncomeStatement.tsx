@@ -32,7 +32,7 @@ export function IncomeStatement({ range, view, onView }: { range: DayRange; view
   );
   const missingAccounts = report.checks.categoriesWithoutAccount;
 
-  if (analytics.loading) return <div className="skeleton h-96" aria-label="Wird geladen" />;
+  if (analytics.loading) return <div role="status" className="skeleton h-96" aria-label="Wird geladen" />;
 
   return (
     <section className="card space-y-5 p-5 md:p-7" aria-label="Erfolgsrechnung">

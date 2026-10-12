@@ -19,7 +19,7 @@ type Draft = { id: string; name: string; probability: string; is_won: boolean; i
  */
 export function PipelineStagesSettings() {
   const { data: stages, isLoading } = usePipelineStages();
-  if (isLoading || !stages) return <div className="skeleton h-64" aria-label="Wird geladen" />;
+  if (isLoading || !stages) return <div role="status" className="skeleton h-64" aria-label="Wird geladen" />;
   return <Editor key={stages.map((s) => `${s.id}${s.position}${s.name}`).join('|')} stages={stages} />;
 }
 

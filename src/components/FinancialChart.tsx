@@ -1,4 +1,5 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { useIsMobile } from '../hooks/useMediaQuery';
 import { formatChfDisplay } from '../utils/money';
 import { useThemeColors } from '../hooks/useThemeColors';
 
@@ -59,6 +60,8 @@ function ChartTooltip({ active, payload }: TooltipProps) {
 export default function FinancialChart({ data, height = 300, showLegend = true }: FinancialChartProps) {
   const c = useThemeColors();
   const tick = { fill: c['fg-muted'], fontSize: 12 };
+  // Handy: schmalere Achse, damit die Balken mehr Breite bekommen
+  const mobile = useIsMobile();
   return (
     <figure aria-label="Einnahmen und Ausgaben pro Periode in CHF">
       <ResponsiveContainer width="100%" height={height}>
@@ -77,7 +80,7 @@ export default function FinancialChart({ data, height = 300, showLegend = true }
             tick={tick}
             tickLine={false}
             axisLine={false}
-            width={56}
+            width={mobile ? 44 : 56}
             label={{ value: 'CHF', position: 'top', offset: 12, fill: c['fg-muted'], fontSize: 12 }}
           />
           <Tooltip content={<ChartTooltip />} cursor={{ fill: c['accent-subtle'] }} />

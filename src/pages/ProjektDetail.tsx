@@ -52,7 +52,7 @@ export default function ProjektDetail() {
   });
   const entries = useMemo(() => time.rows.filter((r) => r.project_id === id).sort((a, b) => b.date.localeCompare(a.date)), [time.rows, id]);
 
-  if (isLoading) return <div className="skeleton h-96" aria-label="Wird geladen" />;
+  if (isLoading) return <div role="status" className="skeleton h-96" aria-label="Wird geladen" />;
   if (!project) return <EmptyState title="Projekt nicht gefunden" action={<Link to="/projekte" className="btn-secondary">Zu den Projekten</Link>} />;
 
   const stats = projectStats(project, time.rows);

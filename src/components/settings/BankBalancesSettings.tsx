@@ -93,7 +93,7 @@ export function BankBalancesSettings() {
       <BankBalanceForm />
       <div className="mt-6">
         {isLoading ? (
-          <div className="skeleton h-24" />
+          <div role="status" className="skeleton h-24"  aria-label="Wird geladen" />
         ) : balances.length === 0 ? (
           <p className="text-sm text-fg-muted">Noch kein Kontostand erfasst.</p>
         ) : (

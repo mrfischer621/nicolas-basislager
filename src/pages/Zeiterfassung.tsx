@@ -262,7 +262,7 @@ export default function Zeiterfassung() {
       >
         {view === 'auswertung' ? (
           <div className="p-4 md:p-6">
-            <Suspense fallback={<div className="skeleton h-64" />}>
+            <Suspense fallback={<div role="status" className="skeleton h-64"  aria-label="Wird geladen" />}>
               <TimeReporting entries={summary.rows as unknown as TimeEntry[]} projects={projects} />
             </Suspense>
           </div>

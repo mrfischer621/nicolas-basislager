@@ -41,7 +41,7 @@ export function KPICard({ label, value, hint, tone = 'neutral', trendValue, icon
         )}
       </div>
       <p className={`kpi-value mt-2 ${t.value}`}>
-        {loading ? <span className="skeleton inline-block h-8 w-32 align-middle" aria-label="Wird geladen" /> : value}
+        {loading ? <span role="status" className="skeleton inline-block h-8 w-32 align-middle" aria-label="Wird geladen" /> : value}
       </p>
       {(hint || trendValue) && !loading && <p className="mt-1 text-sm text-fg-muted">{hint ?? trendValue}</p>}
     </div>

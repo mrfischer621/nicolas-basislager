@@ -37,7 +37,7 @@ export default function Berichte() {
       {tab === 'erfolgsrechnung' && <IncomeStatement range={range} view={state.darstellung === 'or' ? 'or' : 'milchbuechli'} onView={(v) => set({ darstellung: v === 'or' ? 'or' : null })} />}
       {tab === 'export' && <ExportPanel range={range} />}
       {tab === 'jahresabschluss' && (
-        <Suspense fallback={<div className="skeleton h-64 w-full" />}>
+        <Suspense fallback={<div role="status" className="skeleton h-64 w-full"  aria-label="Wird geladen" />}>
           <Jahresabschluss />
         </Suspense>
       )}

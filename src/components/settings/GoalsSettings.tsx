@@ -10,7 +10,7 @@ import { asError } from '../../utils/errors';
 export function GoalsSettings() {
   const settings = useCompanySettings();
   const targets = useRevenueTargets();
-  if (!settings.data || !targets.data) return <div className="skeleton h-96" aria-label="Wird geladen" />;
+  if (!settings.data || !targets.data) return <div role="status" className="skeleton h-96" aria-label="Wird geladen" />;
   return <GoalsForm settings={settings.data} targets={targets.data} />;
 }
 

@@ -41,7 +41,7 @@ export function Overview({ range }: { range: DayRange }) {
   const expenseWithoutSupplier = entries.filter((e) => e.type === 'ausgabe' && !e.counterparty);
   const tags = byTag(entries);
 
-  if (analytics.loading) return <div className="skeleton h-96" aria-label="Wird geladen" />;
+  if (analytics.loading) return <div role="status" className="skeleton h-96" aria-label="Wird geladen" />;
 
   return (
     <div className="space-y-6">

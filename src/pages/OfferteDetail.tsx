@@ -50,7 +50,7 @@ export default function OfferteDetail() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stamp, selectedCompany?.id]);
 
-  if (isLoading) return <div className="skeleton h-96" aria-label="Wird geladen" />;
+  if (isLoading) return <div role="status" className="skeleton h-96" aria-label="Wird geladen" />;
   if (error || !data || !quote || !selectedCompany) {
     return <EmptyState title="Offerte nicht gefunden" action={<Link to="/offerten" className="btn-secondary">Zu den Offerten</Link>} />;
   }
@@ -134,7 +134,7 @@ export default function OfferteDetail() {
       />
       <div className="grid gap-6 xl:grid-cols-3">
         <section className="min-w-0 overflow-hidden rounded-card bg-surface shadow-card xl:col-span-2" aria-label="Vorschau">
-          {preview.url ? <PdfFrame title={`Vorschau ${quote.quote_number}`} url={preview.url} filename={`${quote.quote_number}.pdf`} /> : preview.error ? <EmptyState title="Vorschau nicht möglich" text={preview.error} /> : <div className="skeleton m-6 h-[60vh]" />}
+          {preview.url ? <PdfFrame title={`Vorschau ${quote.quote_number}`} url={preview.url} filename={`${quote.quote_number}.pdf`} /> : preview.error ? <EmptyState title="Vorschau nicht möglich" text={preview.error} /> : <div role="status" className="skeleton m-6 h-[60vh]"  aria-label="Wird geladen" />}
         </section>
         <div className="space-y-6">
           <SideCard title="Verlauf">

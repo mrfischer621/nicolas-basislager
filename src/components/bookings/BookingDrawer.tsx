@@ -96,7 +96,7 @@ export function BookingDrawer({ entry, onClose, onEdit, onDelete, locked }: { en
             ) : receipt.isError ? (
               <p className="text-sm text-danger">Beleg konnte nicht geladen werden.</p>
             ) : (
-              <div className="skeleton h-64" aria-label="Beleg wird geladen" />
+              <div role="status" className="skeleton h-64" aria-label="Beleg wird geladen" />
             )
           ) : (
             entry.source === 'transaction' && <p className="text-sm text-fg-muted">Kein Beleg hinterlegt.</p>
