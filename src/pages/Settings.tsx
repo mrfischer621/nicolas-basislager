@@ -8,6 +8,7 @@ import { useCompany } from '../context/CompanyContext';
 import { useAuth } from '../context/AuthProvider';
 import { Save, AlertCircle, CheckCircle, Edit2, Check, X, Trash2, Plus, Tags, Package } from 'lucide-react';
 import { SegmentedControl } from '../components/ui';
+import { MfaSettings } from '../components/settings/MfaSettings';
 
 interface CompanyFormData {
   name: string;
@@ -1130,6 +1131,7 @@ export default function Settings({ section }: { section: TabType }) {
             </div>
           </form>
         </div>
+        <MfaSettings />
         </>
       )}
 

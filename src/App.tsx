@@ -2,7 +2,6 @@ import { lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import BentoLayout from './components/BentoLayout';
 import Login from './pages/Login';
-import Register from './pages/Register';
 import ProtectedRoute from './components/ProtectedRoute';
 import { legacyTarget } from './routes/legacy';
 
@@ -42,7 +41,9 @@ function App() {
       <Routes>
         {/* Public routes */}
         <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        {/* /register gibt es seit dem 15. Oktober 2026 nicht mehr: Konten legt
+            der Administrator in Supabase an, Sign-ups sind dort abgeschaltet. */}
+        <Route path="/register" element={<Navigate to="/login" replace />} />
 
         {/* Protected routes */}
         <Route

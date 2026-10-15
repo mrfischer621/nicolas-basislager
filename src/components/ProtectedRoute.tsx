@@ -7,7 +7,7 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { session, loading } = useAuth();
+  const { session, loading, mfaRequired } = useAuth();
 
   if (loading) {
     return (
@@ -21,6 +21,11 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   }
 
   if (!session) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Passwort stimmt, der zweite Faktor fehlt noch: zurück zur Code-Eingabe.
+  if (mfaRequired) {
     return <Navigate to="/login" replace />;
   }
 

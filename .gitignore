@@ -36,3 +36,6 @@ supabase/.temp
 *.sw?
 # --- Playwright (Sitzungszustand fuer Screenshots, enthaelt Login-Token) ---
 .auth/
+
+# --- Claude Code (lokale Einstellungen, nicht Teil der App) ---
+.claude/
