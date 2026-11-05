@@ -216,7 +216,12 @@ The trigger `enforce_immutable_profile_fields` prevents privilege escalation att
 | `name`        | `TEXT`        | NOT NULL |         | Project name                                         |
 | `description` | `TEXT`        | NULL     |         | Project description                                  |
 | `status`      | `TEXT`        | NOT NULL | `'offen'` | Status: `'offen'`, `'laufend'`, `'abgeschlossen'` |
-| `budget`      | `NUMERIC`     | NULL     |         | Project budget (CHF)                                 |
+| `budget`      | `NUMERIC`     | NULL     |         | Budget CHF: Gesamtbudget, bei wiederkehrendem Budget der Betrag pro Periode |
+| `budget_period` | `TEXT`      | NULL     |         | Wiederkehrendes Budget: `'monat'`, `'quartal'`, `'jahr'`. NULL = Gesamtbudget oder kein Budget |
+| `budget_hours`  | `NUMERIC(8,2)` | NULL  |         | Stunden pro Periode (nur wiederkehrend). Gesetzt: Vergleich in Stunden, sonst in CHF |
+| `budget_start`  | `DATE`      | NULL     |         | Beginn des wiederkehrenden Budgets; Zeiten davor zählen nicht |
+| `hourly_rate` | `NUMERIC`     | NULL     |         | Projektsatz (übersteuert Firma und Standardsatz)     |
+| `is_active`   | `BOOLEAN`     | NOT NULL | `true`  | false = archiviert                                   |
 | `created_at`  | `TIMESTAMPTZ` | NOT NULL | `now()` | Record creation timestamp                            |
 
 **Primary Key:** `id`
@@ -226,6 +231,15 @@ The trigger `enforce_immutable_profile_fields` prevents privilege escalation att
 
 **Check Constraints:**
 - `status` IN ('offen', 'laufend', 'abgeschlossen')
+- `projects_budget_period_check`: `budget_period` IN ('monat', 'quartal', 'jahr')
+- `projects_budget_hours_check`: `budget_hours >= 0`
+- `projects_recurring_budget_complete`: ist `budget_period` gesetzt, dann `budget_start` gesetzt und `budget` oder `budget_hours` gesetzt
+
+**Wiederkehrendes Budget** (Migration `20261105090000_projects_recurring_budget.sql`):
+Perioden sind Kalendermonate, -quartale oder -jahre ab `budget_start` (erste
+Periode ab Beginn, aber mit vollem Budget). Verbrauch einer Periode = verrechenbare
+Zeiten mit Datum in der Periode, verrechnet oder nicht. Kein Übertrag zwischen
+Perioden. Berechnung in `src/utils/projects.ts` (`periodHistory`, `projectStats`).
 
 **RLS Policies:**
 - `Tenant Isolation` (ALL): `company_id = get_user_company_id()`

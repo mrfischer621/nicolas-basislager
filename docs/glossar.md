@@ -20,7 +20,10 @@ Begriffe im CRM, verbindlich für Oberfläche, Hilfetexte und Dokumentation. Sch
 | **Buchung** | Einnahme oder Ausgabe im Milchbüechli, mit Beleg | Transaktion |
 | **Lieferant / Zahler** | Gegenpartei einer Buchung | |
 | **Wiederkehrend** | Buchung, die regelmässig anfällt (Abo, Miete); Grundlage der Fixkosten | |
-| **Wiederkehrender Umsatz** | Rechnung für Wartung oder Retainer; Grundlage des MRR | |
+| **Wiederkehrender Umsatz** | Rechnung für Wartung oder Retainer; Grundlage des MRR. Bei Projekten mit wiederkehrendem Budget im Rechnungsentwurf vorbelegt | |
+| **Wiederkehrendes Budget** | Budget eines Projekts pro Monat, Quartal oder Jahr (Stunden, Betrag oder beides), ab einem Beginn; Gegenstück zum **Gesamtbudget** über die ganze Laufzeit | Retainer (in der Oberfläche), Kontingent |
+| **Periode** | Kalendermonat, -quartal oder -jahr eines wiederkehrenden Budgets, z. B. «November 2026», «Q4 2026». Die laufende Periode enthält heute | Zeitraum, Abrechnungsperiode |
+| **Mehraufwand** | erfasste verrechenbare Zeit über dem Budget einer Periode, immer mit Vorzeichen und Wort («+1.00 h Mehraufwand»); darunter heisst der Unterschied **Rest** | Überzug, Überschreitung |
 | **Leistung** | Produkt oder Dienstleistung als Vorlage für Positionen | Produkt (in der Navigation) |
 | **Zeit** | erfasste Arbeitszeit auf einem Projekt | Zeiteintrag (in Überschriften) |
 | **verrechenbar** | eine Zeit darf in Rechnung gestellt werden | |

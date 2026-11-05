@@ -46,7 +46,7 @@ All tables scoped by `company_id` foreign key for tenant isolation:
 - **companies** - Company profiles with Swiss banking details (IBAN, QR-IBAN)
 - **profiles** - User-to-company mapping (auth.users → companies)
 - **customers** - Clients with structured Swiss addresses (QR-Bill compliant)
-- **projects** - Project tracking with budgets
+- **projects** - Project tracking with budgets: kein Budget, Gesamtbudget (`budget`) oder wiederkehrend pro Kalenderperiode (`budget_period` monat/quartal/jahr, `budget_hours`, `budget` pro Periode, `budget_start`; Logik `utils/projects.ts`)
 - **time_entries** - Billable time logs
 - **invoices** - Invoice headers (status: entwurf/versendet/bezahlt/überfällig)
 - **invoice_items** - Line items (no company_id, uses JOIN-based RLS)
