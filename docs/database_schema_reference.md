@@ -235,7 +235,7 @@ The trigger `enforce_immutable_profile_fields` prevents privilege escalation att
 - `projects_budget_hours_check`: `budget_hours >= 0`
 - `projects_recurring_budget_complete`: ist `budget_period` gesetzt, dann `budget_start` gesetzt und `budget` oder `budget_hours` gesetzt
 
-**Wiederkehrendes Budget** (Migration `20261105090000_projects_recurring_budget.sql`):
+**Wiederkehrendes Budget** (Migration `20261105153141_projects_recurring_budget.sql`):
 Perioden sind Kalendermonate, -quartale oder -jahre ab `budget_start` (erste
 Periode ab Beginn, aber mit vollem Budget). Verbrauch einer Periode = verrechenbare
 Zeiten mit Datum in der Periode, verrechnet oder nicht. Kein Übertrag zwischen

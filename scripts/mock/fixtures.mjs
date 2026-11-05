@@ -77,7 +77,7 @@ const projects = [
   { id: id('p', 1), company_id: C1, customer_id: customers[0].id, name: 'Website Relaunch', status: 'laufend', budget: 8000, hourly_rate: 130, is_active: true, description: null, created_at: '2026-02-01T00:00:00Z', customers: { name: customers[0].name } },
   { id: id('p', 2), company_id: C1, customer_id: customers[1].id, name: 'Shop Betreuung', status: 'laufend', budget: null, hourly_rate: 120, is_active: true, description: null, created_at: '2026-03-01T00:00:00Z', customers: { name: customers[1].name } },
   { id: id('p', 3), company_id: C1, customer_id: customers[1].id, name: 'Tracking Einrichtung', status: 'abgeschlossen', budget: 1500, hourly_rate: 130, is_active: true, description: null, created_at: '2026-01-10T00:00:00Z', customers: { name: customers[1].name } },
-  // Wiederkehrendes Budget (Migration 20261105090000): 2 h pro Monat ab August.
+  // Wiederkehrendes Budget (Migration 20261105153141): 2 h pro Monat ab August.
   // Mock-Heute ist der 11.10.2026: September abgeschlossen mit Mehraufwand und offenen Zeiten.
   { id: id('p', 4), company_id: C1, customer_id: customers[0].id, name: 'Website Wartung', status: 'laufend', budget: 260, budget_period: 'monat', budget_hours: 2, budget_start: '2026-08-01', hourly_rate: 130, is_active: true, description: 'Updates, Backups, kleine Anpassungen', created_at: '2026-07-20T00:00:00Z', customers: { name: customers[0].name } },
 ];
