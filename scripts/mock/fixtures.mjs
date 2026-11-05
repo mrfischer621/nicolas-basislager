@@ -77,7 +77,15 @@ const projects = [
   { id: id('p', 1), company_id: C1, customer_id: customers[0].id, name: 'Website Relaunch', status: 'laufend', budget: 8000, hourly_rate: 130, is_active: true, description: null, created_at: '2026-02-01T00:00:00Z', customers: { name: customers[0].name } },
   { id: id('p', 2), company_id: C1, customer_id: customers[1].id, name: 'Shop Betreuung', status: 'laufend', budget: null, hourly_rate: 120, is_active: true, description: null, created_at: '2026-03-01T00:00:00Z', customers: { name: customers[1].name } },
   { id: id('p', 3), company_id: C1, customer_id: customers[1].id, name: 'Tracking Einrichtung', status: 'abgeschlossen', budget: 1500, hourly_rate: 130, is_active: true, description: null, created_at: '2026-01-10T00:00:00Z', customers: { name: customers[1].name } },
+  // Wiederkehrendes Budget (Migration 20261105090000): 2 h pro Monat ab August.
+  // Mock-Heute ist der 11.10.2026: September abgeschlossen mit Mehraufwand und offenen Zeiten.
+  { id: id('p', 4), company_id: C1, customer_id: customers[0].id, name: 'Website Wartung', status: 'laufend', budget: 260, budget_period: 'monat', budget_hours: 2, budget_start: '2026-08-01', hourly_rate: 130, is_active: true, description: 'Updates, Backups, kleine Anpassungen', created_at: '2026-07-20T00:00:00Z', customers: { name: customers[0].name } },
 ];
+for (const p of projects) {
+  p.budget_period ??= null;
+  p.budget_hours ??= null;
+  p.budget_start ??= null;
+}
 const te = (i, date, hours, p, desc, inv = null, invStatus = null) => {
   const pr = projects[p];
   return {
@@ -94,6 +102,9 @@ const timeEntries = [
   te(7, '2026-08-20', 3, 2, 'Tag Manager eingerichtet', invoices[2].id, 'bezahlt'),
   te(8, '2026-08-18', 2.5, 2, 'Consent Banner', invoices[2].id, 'bezahlt'),
   te(9, '2026-08-05', 1.5, 1, 'Fehleranalyse Kasse'),
+  { ...te(10, '2026-08-12', 1.75, 3, 'Updates und Backup'), manual_status: 'verrechnet', derived_status: 'verrechnet', is_manual_status: true },
+  te(11, '2026-09-04', 1.5, 3, 'Plugin-Updates'), te(12, '2026-09-23', 1, 3, 'Formular angepasst'),
+  te(13, '2026-10-06', 0.75, 3, 'Sicherheitsupdate'),
 ];
 const stageNames = ['Recherche', 'Erstgespräch', 'Analyse', 'Offerte', 'Verhandlung', 'Gewonnen'];
 const probabilities = [null, 10, 30, 50, 70, 100];

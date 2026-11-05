@@ -23,6 +23,8 @@ const routes = {
   'rechnung-maske': '/rechnungen',
   kunden: '/kunden',
   projekte: '/projekte',
+  'projekt-wiederkehrend': '/projekte/00000000-0000-4000-8000-p00000000004',
+  'projekt-perioden': '/projekte/00000000-0000-4000-8000-p00000000004?tab=perioden',
   produkte: '/produkte',
   zeiterfassung: '/zeiterfassung',
   offerten: '/angebote',

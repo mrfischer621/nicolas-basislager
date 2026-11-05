@@ -5,8 +5,16 @@ const REF = 'sswwgrjowchcgrqkazoo';
 
 export async function installMock(context) {
   const now = Math.floor(Date.now() / 1000);
+  // Seit der Zwei-Faktor-Anmeldung liest supabase-js die Stufe (aal) aus dem
+  // Token. Darum ein formal gueltiges, unsigniertes Test-JWT statt 'mock'.
+  const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64url');
+  const accessToken = [
+    b64({ alg: 'HS256', typ: 'JWT' }),
+    b64({ sub: USER.id, email: USER.email, role: 'authenticated', aud: 'authenticated', aal: 'aal1', amr: [{ method: 'password', timestamp: now }], iat: now, exp: now + 3600 * 24 * 365 }),
+    'bW9jaw',
+  ].join('.');
   const session = {
-    access_token: 'mock', refresh_token: 'mock', token_type: 'bearer', expires_in: 3600 * 24 * 365,
+    access_token: accessToken, refresh_token: 'mock', token_type: 'bearer', expires_in: 3600 * 24 * 365,
     expires_at: now + 3600 * 24 * 365, user: { ...USER, aud: 'authenticated', role: 'authenticated', app_metadata: {}, user_metadata: {} },
   };
   await context.addInitScript(([key, value]) => localStorage.setItem(key, value), [`sb-${REF}-auth-token`, JSON.stringify(session)]);
