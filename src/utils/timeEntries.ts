@@ -165,6 +165,10 @@ export interface InvoicePreset {
   items: { description: string; quantity: number; unit_price: number; timeEntryIds: string[] }[];
   hours: number;
   amount: number;
+  /** Vorschlag fuer den Rechnungstitel (nur vorbelegt) */
+  title?: string;
+  /** Vorschlag «Wiederkehrender Umsatz» (nur vorbelegt) */
+  isRecurringRevenue?: boolean;
 }
 
 const MONTHS = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];

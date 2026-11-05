@@ -1,10 +1,13 @@
-import type { Deadline } from '../lib/supabase';
+import type { Deadline, Project } from '../lib/supabase';
 import type { FinanceEntry } from './financeAggregation';
 import { addDays } from './financeAggregation';
 import { invoiceState, type InvoiceSummaryRow } from './invoiceViews';
 import { isUnbilled, type TimeRow } from './timeEntries';
 import { isDueAction, type OpportunityRow } from './pipeline';
 import { upcomingDeadlines } from './deadlines';
+import { budgetModeOf, periodHistory } from './projects';
+
+type TodoProject = Pick<Project, 'id' | 'name' | 'budget' | 'is_active'> & Partial<Pick<Project, 'budget_period' | 'budget_hours' | 'budget_start'>>;
 
 export interface Todo {
   key: string;
@@ -32,6 +35,8 @@ export function buildTodos(input: {
   entries: FinanceEntry[];
   deadlines: Deadline[];
   lastBalanceDate: string | null;
+  /** fuer «Periode verrechnen» bei wiederkehrendem Budget */
+  projects?: TodoProject[];
 }): Todo[] {
   const { today } = input;
   const todos: Todo[] = [];
@@ -58,8 +63,20 @@ export function buildTodos(input: {
 
   if (input.newLeads) todos.push({ key: 'leads', count: input.newLeads, text: n(input.newLeads, 'neuer Lead', 'neue Leads'), to: '/leads?ansicht=neu', tone: 'info' });
 
+  // Wiederkehrendes Budget: letzte abgeschlossene Periode mit offenen Zeiten verrechnen.
+  // Diese Zeiten zaehlen dann nicht mehr im 30-Tage-Eintrag.
+  const covered = new Set<string>();
+  for (const p of input.projects ?? []) {
+    if (!p.is_active || budgetModeOf(p) !== 'recurring') continue;
+    const last = periodHistory(p, input.time, today).find((x) => x.isClosed);
+    if (!last || last.unbilledHours <= 0) continue;
+    const rows = input.time.filter((t) => t.project_id === p.id && isUnbilled(t) && t.date >= last.from && t.date <= last.to);
+    rows.forEach((t) => covered.add(t.id));
+    todos.push({ key: `periode-${p.id}`, count: rows.length, text: `${p.name}: ${last.label} verrechnen (${last.unbilledHours.toFixed(2)} h)`, to: `/projekte/${p.id}?tab=perioden`, tone: 'attention' });
+  }
+
   const cutoff = addDays(today, -30);
-  const stale = input.time.filter((t) => isUnbilled(t) && t.date < cutoff);
+  const stale = input.time.filter((t) => isUnbilled(t) && t.date < cutoff && !covered.has(t.id));
   if (stale.length) {
     const hours = Math.round(stale.reduce((s, t) => s + Number(t.hours), 0) * 100) / 100;
     todos.push({ key: 'zeiten', count: stale.length, text: `${hours.toFixed(2)} h nicht verrechnet, älter als 30 Tage`, to: `/zeiterfassung?ansicht=offen&bis=${cutoff}`, tone: 'attention' });

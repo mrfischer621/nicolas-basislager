@@ -103,7 +103,14 @@ export interface Project {
   name: string;
   description: string | null;
   status: 'offen' | 'laufend' | 'abgeschlossen';
+  /** Gesamtbudget CHF, bei wiederkehrendem Budget der Betrag pro Periode */
   budget: number | null;
+  /** null = Gesamtbudget oder kein Budget; sonst wiederkehrend pro Kalenderperiode */
+  budget_period: 'monat' | 'quartal' | 'jahr' | null;
+  /** Stunden pro Periode (nur wiederkehrend) */
+  budget_hours: number | null;
+  /** Beginn des wiederkehrenden Budgets (YYYY-MM-DD) */
+  budget_start: string | null;
   hourly_rate: number | null; // Project-specific rate override (Phase 4.3)
   is_active: boolean;
   created_at: string;
