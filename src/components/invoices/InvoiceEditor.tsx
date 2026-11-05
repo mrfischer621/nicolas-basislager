@@ -9,7 +9,7 @@ import { nextInvoiceNumber, saveInvoice, useInvalidateInvoices, useInvoiceSummar
 import { asError } from '../../utils/errors';
 
 export type InvoiceEditorMode =
-  | { kind: 'new'; preset?: { customerId: string; projectId?: string | null; items: Array<{ description: string; quantity: number; unit_price: number; timeEntryIds: string[] }> } }
+  | { kind: 'new'; preset?: { customerId: string; projectId?: string | null; items: Array<{ description: string; quantity: number; unit_price: number; timeEntryIds: string[] }>; title?: string; isRecurringRevenue?: boolean } }
   | { kind: 'edit'; invoice: Invoice; items: InvoiceItem[] }
   | { kind: 'copy'; invoice: Invoice; items: InvoiceItem[] };
 

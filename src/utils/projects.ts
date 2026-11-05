@@ -1,7 +1,7 @@
 import type { Project } from '../lib/supabase';
 import type { Level } from './cockpit';
 import { amount, isUnbilled, type InvoicePreset, type TimeRow } from './timeEntries';
-import { sumRappen } from './money';
+import { formatChfDisplay, sumRappen } from './money';
 import { zurichDay } from './financeAggregation';
 
 export type ProjectView = 'laufend' | 'offen' | 'abgeschlossen' | 'archiviert' | 'alle';
@@ -203,6 +203,32 @@ export function withRecurringDefaults(preset: InvoicePreset, project: (BudgetFie
   if (!oldest) return { ...preset, isRecurringRevenue: true };
   const label = budgetPeriodOf(oldest, project.budget_period!, project.budget_start!)?.label ?? `${MONTH_NAMES[Number(oldest.slice(5, 7)) - 1]} ${oldest.slice(0, 4)}`;
   return { ...preset, title: `${project.name} ${label}`, isRecurringRevenue: true };
+}
+
+const chf0 = (n: number) => formatChfDisplay(n, { decimals: 0 });
+
+/** Verbrauch der Periode in der Vergleichseinheit: «0.50 von 1.00 h» oder «CHF 65 von CHF 130». */
+export function periodUsageText(p: BudgetPeriodSummary): string {
+  if (p.budgetHours !== null && p.budgetHours > 0) return `${p.hours.toFixed(2)} von ${p.budgetHours.toFixed(2)} h`;
+  if (p.budgetAmount !== null) return `${chf0(p.amount)} von ${chf0(p.budgetAmount)}`;
+  return `${p.hours.toFixed(2)} h`;
+}
+
+/** Budget pro Periode: «1.00 h · CHF 130», «1.00 h» oder «CHF 130». */
+export function periodBudgetText(p: Pick<BudgetPeriodSummary, 'budgetHours' | 'budgetAmount'>): string {
+  return [p.budgetHours !== null ? `${p.budgetHours.toFixed(2)} h` : null, p.budgetAmount !== null ? chf0(p.budgetAmount) : null].filter(Boolean).join(' · ') || '–';
+}
+
+/** Differenz in der Vergleichseinheit (Stunden vor Betrag), null ohne Budget. */
+export function periodDiffText(p: BudgetPeriodSummary): string | null {
+  if (p.budgetHours !== null && p.budgetHours > 0 && p.overHours !== null) return formatBudgetDiff(p.overHours, 'h', chf0);
+  if (p.overAmount !== null) return formatBudgetDiff(p.overAmount, 'chf', chf0);
+  return null;
+}
+
+/** true, wenn die Periode ueber dem Budget liegt (Mehraufwand) */
+export function isOverBudget(p: BudgetPeriodSummary): boolean {
+  return p.usedPercent !== null && p.usedPercent > 100;
 }
 
 /** Differenz zum Budget als Text mit Vorzeichen und Wort, z. B. «+1.00 h Mehraufwand», «−0.50 h Rest». */

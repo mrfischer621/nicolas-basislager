@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import { useTimer } from '../context/TimerContext';
 import { requestTimerStop } from '../utils/timerEvents';
 import { useCompany } from '../context/CompanyContext';
-import { useCustomers } from '../hooks/queries';
+import { useCustomers, useProjects } from '../hooks/queries';
 import { useFinanceEntries } from '../hooks/useFinance';
 import { useAnalytics } from '../hooks/useAnalytics';
 import { useInvoiceSummary } from '../hooks/useInvoices';
@@ -60,6 +60,7 @@ export default function Cockpit() {
   const { data: balances = [] } = useBankBalances();
   const { data: deadlines = [] } = useDeadlines();
   const { data: customers = [] } = useCustomers();
+  const { data: projects = [] } = useProjects();
   const [chartRange, setChartRange] = useState<'12m' | '90d'>('12m');
   const [paidDatesOpen, setPaidDatesOpen] = useState(false);
   const [balanceOpen, setBalanceOpen] = useState(false);
@@ -124,6 +125,7 @@ export default function Cockpit() {
     entries,
     deadlines,
     lastBalanceDate: balances[0]?.date ?? null,
+    projects,
   });
 
   const nextDue = invoices

@@ -22,6 +22,7 @@ import { EmptyState, SegmentedControl } from '../components/ui';
 import { useConfirm } from '../context/ConfirmProvider';
 import { useCompany } from '../context/CompanyContext';
 import { useCustomers, useProjects } from '../hooks/queries';
+import { withRecurringDefaults } from '../utils/projects';
 import { projectIdsOf, useInvalidateTime, useTimeList, useTimeSummary } from '../hooks/useTimeEntries';
 import { QuickTimeEntry } from '../components/time/QuickTimeEntry';
 import { TimeEntryDrawer } from '../components/time/TimeEntryDrawer';
@@ -135,7 +136,7 @@ export default function Zeiterfassung() {
       toast.error(r.reason);
       return;
     }
-    setEditor({ kind: 'new', preset: r.preset });
+    setEditor({ kind: 'new', preset: withRecurringDefaults(r.preset, projects.find((p) => p.id === r.preset.projectId), rows) });
   };
 
   const menu = (row: TimeRow): RowMenuItem[] => [

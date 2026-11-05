@@ -13,8 +13,8 @@ import { supabase } from '../lib/supabase';
 import type { Project } from '../lib/supabase';
 import { useQueryClient } from '@tanstack/react-query';
 import { formatChfDisplay } from '../utils/money';
-import { formatHours, formatPercent } from '../utils/format';
-import { PROJECT_STATUS_BADGE, PROJECT_STATUS_LABEL, PROJECT_VIEWS, matchesProjectView, projectStats, type ProjectView } from '../utils/projects';
+import { formatDate, formatHours, formatPercent } from '../utils/format';
+import { BUDGET_PERIOD_LABEL, PROJECT_STATUS_BADGE, PROJECT_STATUS_LABEL, PROJECT_VIEWS, isOverBudget, matchesProjectView, periodDiffText, periodUsageText, projectStats, type ProjectView } from '../utils/projects';
 
 const DEFAULTS = { ansicht: 'laufend' };
 type Row = Project & { customers?: { name?: string } | null; stats: ReturnType<typeof projectStats> };
@@ -79,7 +79,20 @@ export default function Projekte() {
       key: 'budget',
       header: 'Budget',
       cell: (p) =>
-        p.budget ? (
+        p.stats.budgetMode === 'recurring' ? (
+          p.stats.period ? (
+            <span className="block w-40">
+              <span className="mb-1 block text-xs tabular-nums">{periodUsageText(p.stats.period)}</span>
+              <ProgressBar percent={p.stats.budgetUsed ?? 0} level={p.stats.level} label={`Budget ${p.name}, ${p.stats.period.label}: ${formatPercent(p.stats.budgetUsed ?? 0)}`} />
+              <span className="mt-1 block text-xs text-fg-muted">
+                {p.stats.period.label}, pro {BUDGET_PERIOD_LABEL[p.budget_period!]}
+                {isOverBudget(p.stats.period) && <span className="text-negative"> · {periodDiffText(p.stats.period)}</span>}
+              </span>
+            </span>
+          ) : (
+            <span className="text-fg-muted">pro {BUDGET_PERIOD_LABEL[p.budget_period!]}, ab {formatDate(p.budget_start)}</span>
+          )
+        ) : p.budget ? (
           <span className="block w-40">
             <span className="mb-1 flex justify-between text-xs tabular-nums">
               <span>{formatChfDisplay(p.stats.amount, { decimals: 0 })}</span>
@@ -125,7 +138,7 @@ export default function Projekte() {
           mobile={(p) => ({
             title: p.name,
             subtitle: p.customers?.name ?? '',
-            amount: p.stats.unbilledHours ? `${p.stats.unbilledHours.toFixed(1)} h offen` : undefined,
+            amount: p.stats.period ? periodUsageText(p.stats.period) : p.stats.unbilledHours ? `${p.stats.unbilledHours.toFixed(1)} h offen` : undefined,
             badge: <span className={PROJECT_STATUS_BADGE[p.status]}>{PROJECT_STATUS_LABEL[p.status]}</span>,
           })}
           empty={<EmptyState icon={<Briefcase size={20} />} title="Keine Projekte in dieser Ansicht" />}

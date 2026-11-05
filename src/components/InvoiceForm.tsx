@@ -33,7 +33,8 @@ type InvoiceFormProps = {
   /** Zahlungsfrist in Tagen (Einstellungen), Standard 30 */
   paymentTermsDays?: number;
   /** Vorbelegung aus der Zeiterfassung (Sammelaktion "Rechnung erstellen") */
-  preset?: { customerId: string; projectId?: string | null; items: Array<{ description: string; quantity: number; unit_price: number; timeEntryIds: string[] }> };
+  /** Vorbelegung (z. B. aus Zeiten); title und isRecurringRevenue nur als Vorschlag */
+  preset?: { customerId: string; projectId?: string | null; items: Array<{ description: string; quantity: number; unit_price: number; timeEntryIds: string[] }>; title?: string; isRecurringRevenue?: boolean };
 };
 
 type ItemState = {
@@ -58,7 +59,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
   const [customerId, setCustomerId] = useState(existingInvoice?.customer_id || preset?.customerId || '');
   const [projectId, setProjectId] = useState(existingInvoice?.project_id || preset?.projectId || '');
   const [invoiceNumber, setInvoiceNumber] = useState(editInvoice?.invoice_number || nextInvoiceNumber);
-  const [isRecurringRevenue, setIsRecurringRevenue] = useState(existingInvoice?.is_recurring_revenue ?? false);
+  const [isRecurringRevenue, setIsRecurringRevenue] = useState(existingInvoice?.is_recurring_revenue ?? preset?.isRecurringRevenue ?? false);
   const [issueDate, setIssueDate] = useState(
     existingInvoice?.issue_date || zurichDay(new Date())
   );
@@ -70,7 +71,7 @@ export default function InvoiceForm({ onSubmit, customers, projects, nextInvoice
   );
 
   // New fields for Phase 3.3
-  const [title, setTitle] = useState(existingInvoice?.title || '');
+  const [title, setTitle] = useState(existingInvoice?.title || preset?.title || '');
   const [introText, setIntroText] = useState(existingInvoice?.introduction_text || '');
   const [footerText, setFooterText] = useState(existingInvoice?.footer_text || '');
 
