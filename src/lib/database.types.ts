@@ -10,10 +10,48 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.1"
   }
   public: {
     Tables: {
+      bank_balances: {
+        Row: {
+          account_label: string
+          amount: number
+          company_id: string
+          created_at: string
+          date: string
+          id: string
+          note: string | null
+        }
+        Insert: {
+          account_label?: string
+          amount: number
+          company_id: string
+          created_at?: string
+          date: string
+          id?: string
+          note?: string | null
+        }
+        Update: {
+          account_label?: string
+          amount?: number
+          company_id?: string
+          created_at?: string
+          date?: string
+          id?: string
+          note?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_balances_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categories: {
         Row: {
           account_number: string | null
@@ -169,6 +207,85 @@ export type Database = {
         }
         Relationships: []
       }
+      company_revenue_targets: {
+        Row: {
+          company_id: string
+          revenue_target: number
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          company_id: string
+          revenue_target: number
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          company_id?: string
+          revenue_target?: number
+          updated_at?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_revenue_targets_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_settings: {
+        Row: {
+          ahv_rate: number
+          company_id: string
+          concentration_alert: number
+          concentration_warn: number
+          default_hourly_rate: number | null
+          min_reserve: number | null
+          payment_terms_days: number
+          tax_rate: number | null
+          updated_at: string
+          vat_threshold: number
+          weekly_hours_target: number | null
+        }
+        Insert: {
+          ahv_rate?: number
+          company_id: string
+          concentration_alert?: number
+          concentration_warn?: number
+          default_hourly_rate?: number | null
+          min_reserve?: number | null
+          payment_terms_days?: number
+          tax_rate?: number | null
+          updated_at?: string
+          vat_threshold?: number
+          weekly_hours_target?: number | null
+        }
+        Update: {
+          ahv_rate?: number
+          company_id?: string
+          concentration_alert?: number
+          concentration_warn?: number
+          default_hourly_rate?: number | null
+          min_reserve?: number | null
+          payment_terms_days?: number
+          tax_rate?: number | null
+          updated_at?: string
+          vat_threshold?: number
+          weekly_hours_target?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_settings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_contacts: {
         Row: {
           created_at: string | null
@@ -228,6 +345,7 @@ export type Database = {
           house_number: string | null
           id: string
           is_active: boolean
+          is_supplier: boolean
           name: string
           notes: string | null
           phone: string | null
@@ -249,6 +367,7 @@ export type Database = {
           house_number?: string | null
           id?: string
           is_active?: boolean
+          is_supplier?: boolean
           name: string
           notes?: string | null
           phone?: string | null
@@ -270,6 +389,7 @@ export type Database = {
           house_number?: string | null
           id?: string
           is_active?: boolean
+          is_supplier?: boolean
           name?: string
           notes?: string | null
           phone?: string | null
@@ -280,6 +400,47 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "customers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deadlines: {
+        Row: {
+          company_id: string
+          created_at: string
+          done_at: string | null
+          due_date: string
+          id: string
+          note: string | null
+          recurrence: string
+          title: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          done_at?: string | null
+          due_date: string
+          id?: string
+          note?: string | null
+          recurrence?: string
+          title: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          done_at?: string | null
+          due_date?: string
+          id?: string
+          note?: string | null
+          recurrence?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deadlines_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
@@ -381,9 +542,12 @@ export type Database = {
           id: string
           introduction_text: string | null
           invoice_number: string
+          is_recurring_revenue: boolean
           issue_date: string
           paid_at: string | null
+          paid_at_source: string | null
           project_id: string | null
+          sent_at: string | null
           status: string | null
           subtotal: number
           title: string | null
@@ -403,9 +567,12 @@ export type Database = {
           id?: string
           introduction_text?: string | null
           invoice_number: string
+          is_recurring_revenue?: boolean
           issue_date: string
           paid_at?: string | null
+          paid_at_source?: string | null
           project_id?: string | null
+          sent_at?: string | null
           status?: string | null
           subtotal: number
           title?: string | null
@@ -425,9 +592,12 @@ export type Database = {
           id?: string
           introduction_text?: string | null
           invoice_number?: string
+          is_recurring_revenue?: boolean
           issue_date?: string
           paid_at?: string | null
+          paid_at_source?: string | null
           project_id?: string | null
+          sent_at?: string | null
           status?: string | null
           subtotal?: number
           title?: string | null
@@ -460,6 +630,68 @@ export type Database = {
           },
         ]
       }
+      notes: {
+        Row: {
+          body: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          customer_id: string | null
+          id: string
+          opportunity_id: string | null
+          project_id: string | null
+        }
+        Insert: {
+          body: string
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string | null
+          id?: string
+          opportunity_id?: string | null
+          project_id?: string | null
+        }
+        Update: {
+          body?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          customer_id?: string | null
+          id?: string
+          opportunity_id?: string | null
+          project_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       opportunities: {
         Row: {
           company_id: string
@@ -468,10 +700,13 @@ export type Database = {
           expected_value: number | null
           id: string
           is_lost: boolean
+          kind: string
           last_contact_at: string
+          lead_status: string | null
           next_action_date: string | null
           notes: string | null
           prospect_info: Json | null
+          source: string | null
           stage_id: string
           title: string
           updated_at: string
@@ -483,10 +718,13 @@ export type Database = {
           expected_value?: number | null
           id?: string
           is_lost?: boolean
+          kind?: string
           last_contact_at?: string
+          lead_status?: string | null
           next_action_date?: string | null
           notes?: string | null
           prospect_info?: Json | null
+          source?: string | null
           stage_id: string
           title: string
           updated_at?: string
@@ -498,10 +736,13 @@ export type Database = {
           expected_value?: number | null
           id?: string
           is_lost?: boolean
+          kind?: string
           last_contact_at?: string
+          lead_status?: string | null
           next_action_date?: string | null
           notes?: string | null
           prospect_info?: Json | null
+          source?: string | null
           stage_id?: string
           title?: string
           updated_at?: string
@@ -514,8 +755,11 @@ export type Database = {
           company_id: string
           created_at: string
           id: string
+          is_lead_stage: boolean
+          is_won: boolean
           name: string
           position: number
+          probability: number | null
           updated_at: string
         }
         Insert: {
@@ -523,8 +767,11 @@ export type Database = {
           company_id: string
           created_at?: string
           id?: string
+          is_lead_stage?: boolean
+          is_won?: boolean
           name: string
           position: number
+          probability?: number | null
           updated_at?: string
         }
         Update: {
@@ -532,8 +779,11 @@ export type Database = {
           company_id?: string
           created_at?: string
           id?: string
+          is_lead_stage?: boolean
+          is_won?: boolean
           name?: string
           position?: number
+          probability?: number | null
           updated_at?: string
         }
         Relationships: []
@@ -639,6 +889,9 @@ export type Database = {
       projects: {
         Row: {
           budget: number | null
+          budget_hours: number | null
+          budget_period: string | null
+          budget_start: string | null
           company_id: string
           created_at: string | null
           customer_id: string
@@ -651,6 +904,9 @@ export type Database = {
         }
         Insert: {
           budget?: number | null
+          budget_hours?: number | null
+          budget_period?: string | null
+          budget_start?: string | null
           company_id: string
           created_at?: string | null
           customer_id: string
@@ -663,6 +919,9 @@ export type Database = {
         }
         Update: {
           budget?: number | null
+          budget_hours?: number | null
+          budget_period?: string | null
+          budget_start?: string | null
           company_id?: string
           created_at?: string | null
           customer_id?: string
@@ -744,6 +1003,7 @@ export type Database = {
           outro_text: string | null
           project_id: string | null
           quote_number: string
+          sent_at: string | null
           status: string | null
           subtotal: number | null
           total: number | null
@@ -767,6 +1027,7 @@ export type Database = {
           outro_text?: string | null
           project_id?: string | null
           quote_number: string
+          sent_at?: string | null
           status?: string | null
           subtotal?: number | null
           total?: number | null
@@ -790,6 +1051,7 @@ export type Database = {
           outro_text?: string | null
           project_id?: string | null
           quote_number?: string
+          sent_at?: string | null
           status?: string | null
           subtotal?: number | null
           total?: number | null
@@ -920,8 +1182,11 @@ export type Database = {
           document_url: string | null
           id: string
           invoice_id: string | null
+          is_recurring: boolean
           project_id: string | null
           receipt_url: string | null
+          recurrence_interval: string | null
+          supplier_id: string | null
           tags: string[] | null
           transaction_number: string | null
           type: string
@@ -939,8 +1204,11 @@ export type Database = {
           document_url?: string | null
           id?: string
           invoice_id?: string | null
+          is_recurring?: boolean
           project_id?: string | null
           receipt_url?: string | null
+          recurrence_interval?: string | null
+          supplier_id?: string | null
           tags?: string[] | null
           transaction_number?: string | null
           type: string
@@ -958,8 +1226,11 @@ export type Database = {
           document_url?: string | null
           id?: string
           invoice_id?: string | null
+          is_recurring?: boolean
           project_id?: string | null
           receipt_url?: string | null
+          recurrence_interval?: string | null
+          supplier_id?: string | null
           tags?: string[] | null
           transaction_number?: string | null
           type?: string
@@ -991,6 +1262,13 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
             referencedColumns: ["id"]
           },
         ]
