@@ -24,22 +24,18 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
     },
   });
 
-  // Sync value when changed externally (e.g. product selected) but not while user is typing
+  // Sync value when changed externally (e.g. product selected) but not while user is typing.
+  // Kein eigenes destroy(): useEditor raeumt selbst auf. Seit TipTap 3.32 setzt
+  // destroy() das Schema auf null; getHTML() auf einem zerstoerten Editor wirft
+  // dann «Cannot read properties of null (reading 'cached')».
   useEffect(() => {
-    if (editor && !editor.isFocused) {
+    if (editor && !editor.isDestroyed && !editor.isFocused) {
       const current = editor.getHTML();
       if (current !== value) {
         editor.commands.setContent(value || '');
       }
     }
   }, [value, editor]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      editor?.destroy();
-    };
-  }, [editor]);
 
   return (
     <div className="relative w-full border border-line rounded-lg focus-within:border-brand focus-within:ring-2 focus-within:ring-brand/20 transition bg-surface">
