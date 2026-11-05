@@ -25,12 +25,43 @@ export function CockpitCard({ title, info, children, footer, action }: { title: 
 
 const FILL: Record<Level, string> = { ok: 'bg-fg', warning: 'bg-warning-solid', negative: 'bg-negative-solid' };
 
-/** Fortschrittsbalken mit optionaler Markierung (z. B. zeitanteiliges Soll). */
-export function ProgressBar({ percent, level = 'ok', marker, label, fillClass }: { percent: number; level?: Level; marker?: number; label: string; fillClass?: string }) {
+/** Matt-Blau fuer «erwartet» (zweites Segment hinter dem Ist-Wert) */
+export const EXPECTED_FILL = 'bg-info-solid/40';
+
+/**
+ * Fortschrittsbalken mit optionaler Markierung (z. B. zeitanteiliges Soll) und
+ * optionalem zweitem Segment direkt hinter dem Ist-Wert (z. B. erwartet, noch
+ * nicht bezahlt). Das Segment braucht immer eine Legende mit Wort und Betrag.
+ */
+export function ProgressBar({
+  percent,
+  level = 'ok',
+  marker,
+  label,
+  fillClass,
+  extra,
+}: {
+  percent: number;
+  level?: Level;
+  marker?: number;
+  label: string;
+  fillClass?: string;
+  extra?: { percent: number; className?: string; valueText: string };
+}) {
   const p = Math.max(0, Math.min(100, percent));
+  const withExtra = extra ? Math.max(p, Math.min(100, percent + Math.max(0, extra.percent))) : p;
   return (
-    <div className="relative h-2.5 w-full rounded-full bg-raised" role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(percent)}>
-      <div className={`h-full rounded-full ${fillClass ?? FILL[level]}`} style={{ width: `${p}%` }} />
+    <div
+      className="relative h-2.5 w-full rounded-full bg-raised"
+      role="progressbar"
+      aria-label={label}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={Math.round(percent)}
+      aria-valuetext={extra ? `${Math.round(percent)} %, ${extra.valueText}` : undefined}
+    >
+      {extra && withExtra > p && <div aria-hidden="true" className={`absolute inset-y-0 left-0 rounded-full ${extra.className ?? EXPECTED_FILL}`} style={{ width: `${withExtra}%` }} />}
+      <div className={`relative h-full rounded-full ${fillClass ?? FILL[level]}`} style={{ width: `${p}%` }} />
       {marker !== undefined && (
         <span aria-hidden="true" className="absolute -top-1 w-0.5 bg-cta" style={{ left: `calc(${Math.max(0, Math.min(100, marker))}% - 1px)`, height: '18px' }} />
       )}

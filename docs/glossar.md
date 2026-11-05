@@ -23,6 +23,7 @@ Begriffe im CRM, verbindlich für Oberfläche, Hilfetexte und Dokumentation. Sch
 | **Wiederkehrender Umsatz** | Rechnung für Wartung oder Retainer; Grundlage des MRR. Bei Projekten mit wiederkehrendem Budget im Rechnungsentwurf vorbelegt | |
 | **Wiederkehrendes Budget** | Budget eines Projekts pro Monat, Quartal oder Jahr (Stunden, Betrag oder beides), ab einem Beginn; Gegenstück zum **Gesamtbudget** über die ganze Laufzeit | Retainer (in der Oberfläche), Kontingent |
 | **Periode** | Kalendermonat, -quartal oder -jahr eines wiederkehrenden Budgets, z. B. «November 2026», «Q4 2026». Die laufende Periode enthält heute | Zeitraum, Abrechnungsperiode |
+| **Erwartet** | Einnahmen, die gesichert, aber noch nicht bezahlt sind: offene Rechnungen, nicht verrechnete Zeiten, Restbudgets laufender Projekte (Budget minus Verbrauch), wiederkehrende Budgets bis Jahresende. Im Cockpit beim Jahresziel als mattblaues Segment hinter «Bezahlt». Ohne Pipeline | Forecast, Auftragsbestand (in der Oberfläche) |
 | **Mehraufwand** | erfasste verrechenbare Zeit über dem Budget einer Periode, immer mit Vorzeichen und Wort («+1.00 h Mehraufwand»); darunter heisst der Unterschied **Rest** | Überzug, Überschreitung |
 | **Leistung** | Produkt oder Dienstleistung als Vorlage für Positionen | Produkt (in der Navigation) |
 | **Zeit** | erfasste Arbeitszeit auf einem Projekt | Zeiteintrag (in Überschriften) |

@@ -14,20 +14,20 @@ import { useDeals, useLeadStatuses, usePipelineStages } from '../hooks/usePipeli
 import { defaultRate, useCompanySettings, useRevenueTargets } from '../hooks/useCompanySettings';
 import { SecondaryMetrics } from '../components/cockpit/SecondaryMetrics';
 import { useBankBalances, useDeadlines } from '../hooks/useCockpitData';
-import { CockpitCard, Figure, ProgressBar } from '../components/cockpit/CockpitCard';
+import { CockpitCard, EXPECTED_FILL, Figure, ProgressBar } from '../components/cockpit/CockpitCard';
 import { BankBalanceForm } from '../components/settings/BankBalancesSettings';
 import { PaidDatesDialog } from '../components/invoices/PaidDatesDialog';
 import { Drawer } from '../components/list';
 import { SegmentedControl } from '../components/ui';
 import FinancialChart from '../components/FinancialChart';
 import { filterRange, presetRange, summarize, zurichDay, type DayRange } from '../utils/financeAggregation';
-import { formatChfDisplay } from '../utils/money';
+import { formatChfDisplay, roundRappen } from '../utils/money';
 import { formatDate, formatPercent } from '../utils/format';
 import { buildTodos, type Todo } from '../utils/cockpitTodos';
 import { invoiceState, summarizeInvoices } from '../utils/invoiceViews';
 import { isUnbilled, totals } from '../utils/timeEntries';
 import { opportunityCompany, weightedPipeline } from '../utils/pipeline';
-import { concentration, fixedCosts, freeCash, incomeYearOverYear, liquidityForecast, recurringSeries, targetProgress, vatThreshold, type Level } from '../utils/cockpit';
+import { concentration, expectedIncome, fixedCosts, freeCash, incomeYearOverYear, liquidityForecast, recurringSeries, targetProgress, vatThreshold, type Level } from '../utils/cockpit';
 
 const TODO_DOT: Record<Todo['tone'], string> = {
   negative: 'bg-negative-solid',
@@ -104,6 +104,10 @@ export default function Cockpit() {
   const conc = concentration(entries, names, today, settings?.concentration_warn ?? 50, settings?.concentration_alert ?? 70);
   const target = targets.find((t) => String(t.year) === year)?.revenue_target ?? null;
   const progress = target ? targetProgress(target, ytd.income, today) : null;
+  // Erwartet: gesichert, aber noch nicht bezahlt (offene Rechnungen, Zeiten, Restbudgets, wiederkehrend)
+  const expected = expectedIncome({ today, invoices, time: time.rows, projects, defaultRate: defaultRate(settings) });
+  const withExpected = progress ? roundRappen(progress.actual + expected.total) : 0;
+  const withExpectedPercent = progress && progress.target > 0 ? (withExpected / progress.target) * 100 : 0;
   const pipeline3m = weightedPipeline(stages, deals, today, 90);
   const vat = vatThreshold(
     invoices.map((i) => ({
@@ -316,37 +320,85 @@ export default function Cockpit() {
 
         <CockpitCard
           title={`Ziel ${year}`}
-          info="Jahresziel aus den Einstellungen. Die blaue Marke zeigt, wo du zeitanteilig stehen müsstest. Gewichtete Pipeline: Betrag mal Wahrscheinlichkeit der Phase, nächste Aktion innert drei Monaten."
+          info="Jahresziel aus den Einstellungen. Schwarz: bezahlt. Mattblau: erwartet, also gesichert, aber noch nicht bezahlt (offene Rechnungen, nicht verrechnete Zeiten, Restbudgets laufender Projekte, wiederkehrende Budgets bis Jahresende). Die blaue Marke zeigt, wo du zeitanteilig stehen müsstest. Gewichtete Pipeline: Betrag mal Wahrscheinlichkeit der Phase, nächste Aktion innert drei Monaten."
         >
           {progress ? (
-            <>
-              <div className="mb-2 flex items-baseline justify-between gap-2">
-                <p className="font-display text-2xl font-black tabular-nums text-fg">{formatChfDisplay(progress.actual, { decimals: 0 })}</p>
-                <p className="text-sm text-fg-muted">
-                  von {formatChfDisplay(progress.target, { decimals: 0 })} · {formatPercent(progress.percent)}
-                </p>
-              </div>
-              <ProgressBar percent={progress.percent} marker={progress.expectedPercent} label="Ziel erreicht" fillClass="bg-fg" />
-              <dl className="mt-3 grid grid-cols-2 gap-3 text-sm">
-                <div>
-                  <dt className="text-xs text-fg-muted">Nötig pro Monat</dt>
-                  <dd className="font-semibold tabular-nums">
-                    {progress.gap > 0
-                      ? formatChfDisplay(progress.neededPerMonth, {
-                          decimals: 0,
-                        })
-                      : 'Ziel erreicht'}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-fg-muted">Pipeline gewichtet (3 Mte.)</dt>
-                  <dd className="font-semibold tabular-nums">
-                    {formatChfDisplay(pipeline3m.weighted, { decimals: 0 })}
-                    {progress.gap > 0 && <span className="ml-1 text-xs font-normal text-fg-muted">= {formatPercent((pipeline3m.weighted / progress.gap) * 100)} der Lücke</span>}
-                  </dd>
-                </div>
-              </dl>
-            </>
+            (() => {
+              const gapAfterExpected = Math.max(0, roundRappen(progress.target - withExpected));
+              const parts = [
+                { label: 'Offene Rechnungen', value: expected.openInvoices, to: '/rechnungen' },
+                { label: 'Nicht verrechnete Zeiten', value: expected.unbilledTime, to: '/zeiterfassung?ansicht=offen' },
+                { label: 'Restbudgets laufender Projekte', value: expected.remainingBudgets, to: '/projekte' },
+                { label: 'Wiederkehrende Budgets bis 31.12.', value: expected.recurring, to: '/projekte' },
+              ].filter((x) => x.value > 0);
+              return (
+                <>
+                  <div className="mb-2 flex items-baseline justify-between gap-2">
+                    <p className="font-display text-2xl font-black tabular-nums text-fg">{formatChfDisplay(progress.actual, { decimals: 0 })}</p>
+                    <p className="text-sm text-fg-muted">
+                      von {formatChfDisplay(progress.target, { decimals: 0 })} · {formatPercent(progress.percent)}
+                    </p>
+                  </div>
+                  <ProgressBar
+                    percent={progress.percent}
+                    marker={progress.expectedPercent}
+                    label="Ziel erreicht"
+                    fillClass="bg-fg"
+                    extra={expected.total > 0 ? { percent: withExpectedPercent - progress.percent, className: EXPECTED_FILL, valueText: `mit Erwartetem ${Math.round(withExpectedPercent)} %` } : undefined}
+                  />
+                  {/* Legende: Farbe nie allein, immer Wort und Betrag */}
+                  <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-fg-muted">
+                    <li className="flex items-center gap-1.5">
+                      <span aria-hidden="true" className="inline-block h-2.5 w-2.5 rounded-sm bg-fg" />
+                      Bezahlt <span className="tabular-nums text-fg">{formatChfDisplay(progress.actual, { decimals: 0 })}</span>
+                    </li>
+                    <li className="flex items-center gap-1.5">
+                      <span aria-hidden="true" className={`inline-block h-2.5 w-2.5 rounded-sm ${EXPECTED_FILL}`} />
+                      Erwartet <span className="tabular-nums text-fg">+{formatChfDisplay(expected.total, { decimals: 0 })}</span>
+                    </li>
+                    <li>
+                      zusammen <span className="tabular-nums font-semibold text-fg">{formatChfDisplay(withExpected, { decimals: 0 })} · {formatPercent(withExpectedPercent)}</span>
+                    </li>
+                  </ul>
+                  {parts.length > 0 && (
+                    <details className="mt-2 text-xs">
+                      <summary className="cursor-pointer text-fg-muted hover:text-fg max-md:py-2">Woraus sich «Erwartet» zusammensetzt</summary>
+                      <ul className="mt-1 space-y-1">
+                        {parts.map((x) => (
+                          <li key={x.label} className="flex justify-between gap-3">
+                            <Link to={x.to} className="hover:underline max-md:py-1.5">{x.label}</Link>
+                            <span className="tabular-nums">{formatChfDisplay(x.value, { decimals: 0 })}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </details>
+                  )}
+                  <dl className="mt-3 grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <dt className="text-xs text-fg-muted">Nötig pro Monat</dt>
+                      <dd className="font-semibold tabular-nums">
+                        {progress.gap > 0
+                          ? formatChfDisplay(progress.neededPerMonth, {
+                              decimals: 0,
+                            })
+                          : 'Ziel erreicht'}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-xs text-fg-muted">Lücke nach Erwartetem</dt>
+                      <dd className="font-semibold tabular-nums">{gapAfterExpected > 0 ? formatChfDisplay(gapAfterExpected, { decimals: 0 }) : 'Ziel gedeckt'}</dd>
+                    </div>
+                    <div className="col-span-2">
+                      <dt className="text-xs text-fg-muted">Pipeline gewichtet (3 Mte.)</dt>
+                      <dd className="font-semibold tabular-nums">
+                        {formatChfDisplay(pipeline3m.weighted, { decimals: 0 })}
+                        {gapAfterExpected > 0 && <span className="ml-1 text-xs font-normal text-fg-muted">= {formatPercent((pipeline3m.weighted / gapAfterExpected) * 100)} der Lücke nach Erwartetem</span>}
+                      </dd>
+                    </div>
+                  </dl>
+                </>
+              );
+            })()
           ) : (
             <div className="flex flex-col items-start gap-2">
               <p className="text-sm text-fg-muted">Noch kein Umsatzziel für {year}.</p>

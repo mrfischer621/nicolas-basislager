@@ -8,6 +8,9 @@
 import type { FinanceEntry } from './financeAggregation';
 import { addDays, toDay } from './financeAggregation';
 import { roundRappen, sumRappen } from './money';
+import type { Project } from '../lib/supabase';
+import { amount, isUnbilled, type TimeRow } from './timeEntries';
+import { budgetModeOf, budgetPeriodOf, periodHistory } from './projects';
 
 export type Level = 'ok' | 'warning' | 'negative';
 type Interval = 'monatlich' | 'quartalsweise' | 'jaehrlich';
@@ -235,6 +238,92 @@ export interface TargetProgress {
   /** noetiger Umsatz pro Monat fuer den Rest des Jahres (inkl. laufendem Monat) */
   neededPerMonth: number;
   monthsLeft: number;
+}
+
+// ---------------------------------------------------------------------------
+// d2) Erwartete Einnahmen: gesichert, aber noch nicht bezahlt
+// ---------------------------------------------------------------------------
+
+export interface ExpectedIncome {
+  /** Rechnungen im Entwurf, versendet oder ueberfaellig (fakturiert, nicht bezahlt) */
+  openInvoices: number;
+  /** verrechenbare Zeiten ohne Rechnung (geleistet, nicht fakturiert) */
+  unbilledTime: number;
+  /** Restbudget von Projekten mit Gesamtbudget (freigegeben, noch nicht geleistet) */
+  remainingBudgets: number;
+  /** wiederkehrende Budgets bis Jahresende (Rest der laufenden Periode plus folgende Perioden) */
+  recurring: number;
+  total: number;
+}
+
+type ExpectedProject = Pick<Project, 'id' | 'budget' | 'status' | 'is_active' | 'hourly_rate'> &
+  Partial<Pick<Project, 'budget_period' | 'budget_hours' | 'budget_start'>>;
+
+/**
+ * Was bis Jahresende voraussichtlich noch hereinkommt, ohne Doppelzaehlung:
+ * - offene Rechnungen (Entwurf, versendet, ueberfaellig): fakturiert;
+ * - nicht verrechnete Zeiten: geleistet, nicht fakturiert;
+ * - Restbudget je laufendem Projekt mit Gesamtbudget = Budget minus Verbrauch;
+ *   Verbrauch ist das Groessere von verrechenbaren Zeiten und Rechnungen auf
+ *   dem Projekt (deckt auch Pauschalrechnungen ohne Zeiten ab);
+ * - wiederkehrende Budgets: Rest der laufenden Periode plus volle Perioden bis
+ *   31.12. Ohne Betrag pro Periode: Stunden mal Projektsatz, sonst Standardsatz.
+ * Abgeschlossene und archivierte Projekte zaehlen nicht. Bezahlte Rechnungen
+ * sind bereits Einnahmen und zaehlen hier nie.
+ */
+export function expectedIncome(input: {
+  today: string;
+  invoices: { total: number | string; status: string; project_id?: string | null }[];
+  time: TimeRow[];
+  projects: ExpectedProject[];
+  defaultRate: number;
+}): ExpectedIncome {
+  const { today } = input;
+  const yearEnd = `${today.slice(0, 4)}-12-31`;
+  const isOpen = (s: string) => s === 'entwurf' || s === 'versendet' || s === 'überfällig';
+  const openInvoices = sumRappen(input.invoices.filter((i) => isOpen(i.status)).map((i) => Number(i.total)));
+  const unbilledTime = sumRappen(input.time.filter(isUnbilled).map(amount));
+
+  const invoicedByProject = new Map<string, number>();
+  for (const i of input.invoices) {
+    if (!i.project_id) continue;
+    invoicedByProject.set(i.project_id, (invoicedByProject.get(i.project_id) ?? 0) + Number(i.total));
+  }
+
+  const remaining: number[] = [];
+  const recurring: number[] = [];
+  for (const p of input.projects) {
+    if (!p.is_active || p.status === 'abgeschlossen') continue;
+    const mode = budgetModeOf(p);
+    if (mode === 'total') {
+      const used = Math.max(sumRappen(input.time.filter((r) => r.project_id === p.id && r.billable).map(amount)), invoicedByProject.get(p.id) ?? 0);
+      remaining.push(Math.max(0, roundRappen(Number(p.budget) - used)));
+    } else if (mode === 'recurring') {
+      const rate = p.hourly_rate ? Number(p.hourly_rate) : input.defaultRate;
+      const perPeriod = p.budget !== null && p.budget !== undefined ? Number(p.budget) : roundRappen(Number(p.budget_hours ?? 0) * rate);
+      if (!perPeriod) continue;
+      // laufende Periode: Rest nach dem bereits Erfassten (das steckt in Zeiten oder Rechnungen)
+      const current = periodHistory(p, input.time, today, 1)[0];
+      if (current?.isCurrent) recurring.push(Math.max(0, roundRappen(perPeriod - current.amount)));
+      // folgende Perioden bis Jahresende (oder ab Beginn, wenn er noch kommt)
+      let day = current?.isCurrent ? addDays(current.to, 1) : today < p.budget_start! ? p.budget_start! : today;
+      while (day <= yearEnd) {
+        const next = budgetPeriodOf(day, p.budget_period!, p.budget_start!);
+        if (!next) break;
+        recurring.push(perPeriod);
+        day = addDays(next.to, 1);
+      }
+    }
+  }
+  const remainingBudgets = sumRappen(remaining);
+  const recurringTotal = sumRappen(recurring);
+  return {
+    openInvoices,
+    unbilledTime,
+    remainingBudgets,
+    recurring: recurringTotal,
+    total: sumRappen([openInvoices, unbilledTime, remainingBudgets, recurringTotal]),
+  };
 }
 
 export function targetProgress(target: number, actual: number, today: string): TargetProgress {

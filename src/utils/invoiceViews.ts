@@ -57,6 +57,8 @@ export function daysUntilDue(dueDate: string | null, today: string): number | nu
 export type InvoiceSummaryRow = Pick<Invoice, 'id' | 'status' | 'total' | 'due_date' | 'issue_date' | 'paid_at' | 'customer_id' | 'invoice_number'> & {
   paid_at_source?: PaidAtSource | null;
   is_recurring_revenue?: boolean | null;
+  /** fuer Restbudgets im Cockpit (erwartete Einnahmen) */
+  project_id?: string | null;
 };
 
 export interface InvoiceSummary {

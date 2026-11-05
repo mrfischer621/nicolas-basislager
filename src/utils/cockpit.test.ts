@@ -3,6 +3,7 @@ import type { FinanceEntry } from './financeAggregation';
 import {
   acquisition,
   concentration,
+  expectedIncome,
   fixedCosts,
   freeCash,
   incomeYearOverYear,
@@ -244,5 +245,50 @@ describe('Einnahmen gegen Vorjahr', () => {
     const inc = (date: string, amount: number) => entry(date, amount, { type: 'einnahme' });
     const r = incomeYearOverYear([inc('2026-02-01', 3000), inc('2025-03-01', 2000), inc('2025-11-01', 9999)], TODAY);
     expect(r).toEqual({ current: 3000, previous: 2000, change: 50 });
+  });
+});
+
+describe('Erwartete Einnahmen', () => {
+  // Erfundene Projekte; heute 11.10.2026
+  const row = (id: string, project_id: string, date: string, hours: number, over: Record<string, unknown> = {}) => ({ id, project_id, date, hours, rate: 100, billable: true, invoice_id: null, manual_status: null, description: null, ...over });
+  const base = { id: 'p', budget: null, status: 'laufend' as const, is_active: true, hourly_rate: 100 };
+
+  it('zaehlt offene Rechnungen und nicht verrechnete Zeiten, bezahlte nie', () => {
+    const r = expectedIncome({
+      today: TODAY,
+      invoices: [{ total: 500, status: 'versendet' }, { total: 200, status: 'entwurf' }, { total: 300, status: 'überfällig' }, { total: 900, status: 'bezahlt' }],
+      time: [row('a', 'x', '2026-10-01', 2), row('b', 'x', '2026-10-02', 1, { billable: false }), row('c', 'x', '2026-10-03', 3, { invoice_id: 'r' })],
+      projects: [],
+      defaultRate: 130,
+    });
+    expect(r).toEqual({ openInvoices: 1000, unbilledTime: 200, remainingBudgets: 0, recurring: 0, total: 1200 });
+  });
+
+  it('rechnet Restbudget ohne Doppelzaehlung, auch bei Pauschalrechnungen', () => {
+    const time = [row('a', 'p', '2026-09-01', 10, { invoice_id: 'r' }), row('b', 'p', '2026-10-01', 5)];
+    const projects = [
+      { ...base, budget: 5000 }, // Verbrauch 1500 aus Zeiten -> Rest 3500
+      { ...base, id: 'pausch', budget: 4000 }, // Rechnung 2500 ohne Zeiten -> Rest 1500
+      { ...base, id: 'fertig', budget: 9000, status: 'abgeschlossen' as const },
+      { ...base, id: 'archiv', budget: 9000, is_active: false },
+      { ...base, id: 'drueber', budget: 100 }, // Verbrauch ueber Budget -> 0, nie negativ
+    ];
+    const invoices = [{ total: 2500, status: 'bezahlt', project_id: 'pausch' }, { total: 1000, status: 'bezahlt', project_id: 'p' }];
+    const r = expectedIncome({ today: TODAY, invoices, time: [...time, row('c', 'drueber', '2026-10-01', 3)], projects, defaultRate: 130 });
+    expect(r.remainingBudgets).toBe(5000);
+    expect(r.unbilledTime).toBe(800); // 5 h auf p plus 3 h auf drueber
+  });
+
+  it('rechnet wiederkehrende Budgets bis Jahresende', () => {
+    const monthly = { ...base, id: 'w', budget: 260, budget_period: 'monat' as const, budget_hours: 2, budget_start: '2026-08-01' };
+    const r = expectedIncome({ today: TODAY, invoices: [], time: [row('a', 'w', '2026-10-05', 1, { rate: 130 })], projects: [monthly], defaultRate: 130 });
+    // Oktober: 260 - 130 erfasst = 130; November und Dezember je 260
+    expect(r.recurring).toBe(650);
+    // nur Stunden: 2 h x Projektsatz 100, ab Beginn im November
+    const hoursOnly = { ...monthly, id: 'h', budget: null, budget_start: '2026-11-01' };
+    expect(expectedIncome({ today: TODAY, invoices: [], time: [], projects: [hoursOnly], defaultRate: 130 }).recurring).toBe(400);
+    // Quartal: Rest Q4
+    const quarterly = { ...monthly, id: 'q', budget: 1000, budget_period: 'quartal' as const };
+    expect(expectedIncome({ today: TODAY, invoices: [], time: [], projects: [quarterly], defaultRate: 130 }).recurring).toBe(1000);
   });
 });
