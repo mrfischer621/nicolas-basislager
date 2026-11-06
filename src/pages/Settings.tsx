@@ -22,6 +22,12 @@ interface CompanyFormData {
   house_number: string;
   zip_code: string;
   city: string;
+  // Briefkopf und Fusszeile (leer = Adresse aus dem Zahlteil)
+  address_line1: string;
+  letterhead_street: string;
+  letterhead_house_number: string;
+  letterhead_zip_code: string;
+  letterhead_city: string;
   iban: string;
   qr_iban: string;
   qr_creditor_name: string; // Personal name for QR-Bill creditor (e.g., "Nicolas Fischer")
@@ -64,6 +70,11 @@ export default function Settings({ section }: { section: TabType }) {
     house_number: '',
     zip_code: '',
     city: '',
+    address_line1: '',
+    letterhead_street: '',
+    letterhead_house_number: '',
+    letterhead_zip_code: '',
+    letterhead_city: '',
     iban: '',
     qr_iban: '',
     qr_creditor_name: '',
@@ -155,6 +166,11 @@ export default function Settings({ section }: { section: TabType }) {
         house_number: selectedCompany.house_number || '',
         zip_code: selectedCompany.zip_code || '',
         city: selectedCompany.city || '',
+        address_line1: selectedCompany.address_line1 || '',
+        letterhead_street: selectedCompany.letterhead_street || '',
+        letterhead_house_number: selectedCompany.letterhead_house_number || '',
+        letterhead_zip_code: selectedCompany.letterhead_zip_code || '',
+        letterhead_city: selectedCompany.letterhead_city || '',
         iban: selectedCompany.iban || '',
         qr_iban: selectedCompany.qr_iban || '',
         qr_creditor_name: selectedCompany.qr_creditor_name || '',
@@ -754,11 +770,85 @@ export default function Settings({ section }: { section: TabType }) {
                 placeholder="z.B. c/o Hans Muster oder Inhaber: Maria Müller"
               />
               <p className="text-xs text-fg-muted mt-1">
-                Wenn ausgefüllt, erscheint dieser Name oberhalb des Firmennamens auf PDF-Rechnungen und Offerten.
+                Wenn ausgefüllt, erscheint dieser Name unter dem Rechnungsnamen im Briefkopf und in der Fusszeile von Rechnungen und Offerten.
               </p>
             </div>
 
-            {/* Address */}
+            {/* Briefkopf-Adresse: nur Briefkopf, Fensterzeile und Fusszeile, nie QR */}
+            <fieldset className="space-y-4 rounded-lg border border-line p-4">
+              <legend className="px-1 text-sm font-semibold text-fg">Adresse Briefkopf und Fusszeile</legend>
+              <p className="text-xs text-fg-muted">
+                Erscheint oben links und in der Fusszeile von Rechnungen und Offerten. Leer gelassen gilt die Adresse aus dem Zahlteil.
+              </p>
+              <div>
+                <label htmlFor="address_line1" className="block text-sm font-medium text-fg mb-1">
+                  Adresszusatz <span className="text-xs font-normal text-fg-muted">(optional, steht vor der Strasse)</span>
+                </label>
+                <input
+                  type="text"
+                  id="address_line1"
+                  value={companyFormData.address_line1}
+                  onChange={(e) => handleCompanyFieldChange('address_line1', e.target.value)}
+                  className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
+                  placeholder="z.B. c/o Muster AG"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2 sm:col-span-1">
+                  <label htmlFor="letterhead_street" className="block text-sm font-medium text-fg mb-1">Strasse</label>
+                  <input
+                    type="text"
+                    id="letterhead_street"
+                    value={companyFormData.letterhead_street}
+                    onChange={(e) => handleCompanyFieldChange('letterhead_street', e.target.value)}
+                    className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
+                    placeholder="Musterstrasse"
+                  />
+                </div>
+                <div className="col-span-2 sm:col-span-1">
+                  <label htmlFor="letterhead_house_number" className="block text-sm font-medium text-fg mb-1">Hausnummer</label>
+                  <input
+                    type="text"
+                    id="letterhead_house_number"
+                    value={companyFormData.letterhead_house_number}
+                    onChange={(e) => handleCompanyFieldChange('letterhead_house_number', e.target.value)}
+                    className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
+                    placeholder="123"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label htmlFor="letterhead_zip_code" className="block text-sm font-medium text-fg mb-1">PLZ</label>
+                  <input
+                    type="text"
+                    id="letterhead_zip_code"
+                    value={companyFormData.letterhead_zip_code}
+                    onChange={(e) => handleCompanyFieldChange('letterhead_zip_code', e.target.value)}
+                    className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
+                    placeholder="8000"
+                  />
+                </div>
+                <div className="col-span-2">
+                  <label htmlFor="letterhead_city" className="block text-sm font-medium text-fg mb-1">Ort</label>
+                  <input
+                    type="text"
+                    id="letterhead_city"
+                    value={companyFormData.letterhead_city}
+                    onChange={(e) => handleCompanyFieldChange('letterhead_city', e.target.value)}
+                    className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
+                    placeholder="Zürich"
+                  />
+                </div>
+              </div>
+            </fieldset>
+
+            {/* Zahlteil QR-Rechnung: Adresse im QR-Code und im Zahlteil */}
+            <fieldset className="space-y-4 rounded-lg border border-warning p-4">
+              <legend className="px-1 text-sm font-semibold text-fg">Zahlteil QR-Rechnung</legend>
+              <p className="rounded-md bg-warning-subtle px-3 py-2 text-sm text-fg">
+                <strong>Nur ändern, wenn die Bank informiert ist.</strong> Diese Adresse steht im Swiss QR Code und im Zahlteil. Weicht sie vom Konto ab, kommen Zahlungen nicht mehr an.
+              </p>
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2 sm:col-span-1">
                 <label htmlFor="street" className="block text-sm font-medium text-fg mb-1">
@@ -832,6 +922,25 @@ export default function Settings({ section }: { section: TabType }) {
                 {errors.city && <p className="text-sm text-danger mt-1">{errors.city}</p>}
               </div>
             </div>
+
+            {/* QR-Bill Creditor Name */}
+            <div>
+              <label htmlFor="qr_creditor_name" className="block text-sm font-medium text-fg mb-1">
+                QR-Rechnung Empfänger
+              </label>
+              <input
+                type="text"
+                id="qr_creditor_name"
+                value={companyFormData.qr_creditor_name}
+                onChange={(e) => handleCompanyFieldChange('qr_creditor_name', e.target.value)}
+                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
+                placeholder="z.B. Nicolas Fischer"
+              />
+              <p className="text-xs text-fg-muted mt-1">
+                Persönlicher Name für den QR-Code (Zahlungsempfänger). Leer lassen um Firmennamen zu verwenden.
+              </p>
+            </div>
+            </fieldset>
 
             {/* Contact Info (PDF footer) */}
             <div className="grid grid-cols-2 gap-4">
@@ -924,24 +1033,6 @@ export default function Settings({ section }: { section: TabType }) {
                 className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
                 placeholder="z.B. UBS AG"
               />
-            </div>
-
-            {/* QR-Bill Creditor Name */}
-            <div>
-              <label htmlFor="qr_creditor_name" className="block text-sm font-medium text-fg mb-1">
-                QR-Rechnung Empfänger
-              </label>
-              <input
-                type="text"
-                id="qr_creditor_name"
-                value={companyFormData.qr_creditor_name}
-                onChange={(e) => handleCompanyFieldChange('qr_creditor_name', e.target.value)}
-                className="w-full px-4 py-2 border border-line rounded-lg focus:border-brand focus:ring-2 focus:ring-brand/20 transition"
-                placeholder="z.B. Nicolas Fischer"
-              />
-              <p className="text-xs text-fg-muted mt-1">
-                Persönlicher Name für den QR-Code (Zahlungsempfänger). Leer lassen um Firmennamen zu verwenden.
-              </p>
             </div>
 
             {/* Tax */}

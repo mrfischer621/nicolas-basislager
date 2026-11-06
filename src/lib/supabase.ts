@@ -28,10 +28,19 @@ export interface Company {
   alternativ_name: string | null; // Alternative company name / "Doing Business As"
   rechnungsname: string | null; // Display name for invoices and quotes
   logo_url: string | null;
+  // Adresse im Zahlteil der QR-Rechnung und im Swiss QR Code.
+  // Nur aendern, wenn die Bank informiert ist.
   street: string | null;
   house_number: string | null;
   zip_code: string | null;
   city: string | null;
+  // Adresse in Briefkopf und Fusszeile von Rechnung und Offerte
+  // (migration: 20261106142128_briefkopf_adresse.sql). Leer = Zahlteil-Adresse.
+  address_line1?: string | null; // Adresszusatz (c/o) vor der Strasse
+  letterhead_street?: string | null;
+  letterhead_house_number?: string | null;
+  letterhead_zip_code?: string | null;
+  letterhead_city?: string | null;
   iban: string | null;
   qr_iban: string | null;
   qr_creditor_name: string | null; // Personal name for QR-Bill creditor (e.g., "Nicolas Fischer")

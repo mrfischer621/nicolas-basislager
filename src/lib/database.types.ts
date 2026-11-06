@@ -120,6 +120,10 @@ export type Database = {
           id: string
           invoice_footer_text: string | null
           invoice_intro_text: string | null
+          letterhead_city: string | null
+          letterhead_house_number: string | null
+          letterhead_street: string | null
+          letterhead_zip_code: string | null
           logo_url: string | null
           name: string
           phone: string | null
@@ -153,6 +157,10 @@ export type Database = {
           id?: string
           invoice_footer_text?: string | null
           invoice_intro_text?: string | null
+          letterhead_city?: string | null
+          letterhead_house_number?: string | null
+          letterhead_street?: string | null
+          letterhead_zip_code?: string | null
           logo_url?: string | null
           name: string
           phone?: string | null
@@ -186,6 +194,10 @@ export type Database = {
           id?: string
           invoice_footer_text?: string | null
           invoice_intro_text?: string | null
+          letterhead_city?: string | null
+          letterhead_house_number?: string | null
+          letterhead_street?: string | null
+          letterhead_zip_code?: string | null
           logo_url?: string | null
           name?: string
           phone?: string | null

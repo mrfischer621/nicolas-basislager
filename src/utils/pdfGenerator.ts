@@ -293,6 +293,43 @@ function formatAddress(street: string | null, houseNumber: string | null): strin
 }
 
 /**
+ * Absendername fuer Briefkopf, Fensterzeile und Fusszeile (nicht QR-Rechnung):
+ * [erste Zeile, zweite Zeile]. Ist alternativ_name gesetzt (z.B. «Blauwasser IT»),
+ * steht er oben und darunter die Person (sender_contact_name, sonst
+ * rechnungsname bzw. name). Sonst wie bisher rechnungsname bzw. name und
+ * darunter sender_contact_name, falls gesetzt. Die zweite Zeile kann leer sein.
+ */
+function senderNameLines(company: Company): [string, string] {
+  const legal = (company.rechnungsname || company.name || '').trim();
+  const contact = company.sender_contact_name?.trim() ?? '';
+  const brand = company.alternativ_name?.trim() ?? '';
+  const first = brand || legal;
+  const second = brand ? contact || legal : contact;
+  return [sanitizeForPDF(first), second && second !== first ? sanitizeForPDF(second) : ''];
+}
+
+/**
+ * Absenderadresse fuer Briefkopf, Fensterzeile und Fusszeile (nicht QR-Rechnung).
+ * Liest die eigenen Briefkopf-Felder (letterhead_*), sonst die Zahlteil-Adresse.
+ * Der Adresszusatz address_line1 (c/o) steht vor der Strasse, nur wenn gesetzt.
+ * Der QR-Zahlteil liest weiterhin ausschliesslich street/house_number/zip_code/city.
+ */
+function letterheadAddressLines(company: Company): string[] {
+  const own = !!company.letterhead_street?.trim();
+  const street = own ? company.letterhead_street ?? null : company.street;
+  const houseNumber = own ? company.letterhead_house_number ?? null : company.house_number;
+  const zip = own ? company.letterhead_zip_code : company.zip_code;
+  const city = own ? company.letterhead_city : company.city;
+  return [
+    company.address_line1?.trim() ?? '',
+    formatAddress(street, houseNumber),
+    `${zip ?? ''} ${city ?? ''}`.trim(),
+  ]
+    .map((l) => sanitizeForPDF(l))
+    .filter(Boolean);
+}
+
+/**
  * Draw the Swiss cross using exact proportions from the official
  * CH-Kreuz_7mm.svg (SIX Group, viewBox 0 0 19.8 19.8 = 7mm).
  *
@@ -672,27 +709,22 @@ function drawDocumentHeader(
   }
 
   // ── Absender oben links ──────────────────────────────────────────────────────
-  const senderName = sanitizeForPDF(company.rechnungsname || company.name);
+  const [senderName, senderSecondName] = senderNameLines(company);
   doc.setFont(FONTS.display, 'bold');
   doc.setFontSize(10);
   doc.text(senderName, 20, 20);
   doc.setFont(FONTS.body, 'normal');
   doc.setFontSize(8);
   doc.setTextColor(...MUTED);
-  const senderLines = [
-    company.sender_contact_name ? sanitizeForPDF(company.sender_contact_name) : null,
-    sanitizeForPDF(formatAddress(company.street, company.house_number)),
-    sanitizeForPDF(`${company.zip_code ?? ''} ${company.city ?? ''}`.trim()),
-  ].filter((l): l is string => !!l);
+  const senderLines = [senderSecondName, ...letterheadAddressLines(company)].filter(
+    (l): l is string => !!l
+  );
   senderLines.forEach((line, i) => doc.text(line, 20, 25 + i * 4));
 
   // ── Absenderzeile im Fenster (klein, ohne Unterstreichung) ───────────────────
   doc.setFontSize(6.5);
   doc.text(
-    [senderName, formatAddress(company.street, company.house_number), `${company.zip_code ?? ''} ${company.city ?? ''}`.trim()]
-      .map((t) => sanitizeForPDF(t))
-      .filter(Boolean)
-      .join(' · '),
+    [senderName, ...letterheadAddressLines(company)].filter(Boolean).join(' · '),
     PDF_STYLE_CONFIG.ADDR.x,
     PDF_STYLE_CONFIG.ADDR.startY - 6
   );
@@ -1424,15 +1456,9 @@ function drawCompanyFooterBar(doc: jsPDF, company: Company): void {
   doc.setTextColor(...MUTED);
 
   // Spalte 1: Absender
-  let nameBlock = sanitizeForPDF(company.rechnungsname || company.name);
-  if (company.sender_contact_name && company.sender_contact_name.trim()) {
-    nameBlock = `${sanitizeForPDF(company.sender_contact_name)} c/o ${nameBlock}`;
-  }
-  const col1 = [
-    nameBlock,
-    sanitizeForPDF(formatAddress(company.street, company.house_number)),
-    sanitizeForPDF(`${company.zip_code ?? ''} ${company.city ?? ''}`.trim()),
-  ].filter(Boolean);
+  // Namen untereinander wie im Briefkopf (kein «c/o», das ist dem
+  // Adresszusatz address_line1 vorbehalten)
+  const col1 = [...senderNameLines(company), ...letterheadAddressLines(company)].filter(Boolean);
   // Spalte 2: Bank und Register
   const col2 = [
     formattedIban ? `IBAN ${formattedIban}` : '',

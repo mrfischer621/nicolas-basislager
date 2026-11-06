@@ -73,6 +73,12 @@ export function CompanyProvider({ children }: { children: ReactNode }) {
         zip_code: row.zip_code,
         city: row.city,
         country: row.country || null,
+        // Briefkopf-Adresse (QR-Zahlteil nutzt street/house_number/zip_code/city)
+        address_line1: row.address_line1 || null,
+        letterhead_street: row.letterhead_street || null,
+        letterhead_house_number: row.letterhead_house_number || null,
+        letterhead_zip_code: row.letterhead_zip_code || null,
+        letterhead_city: row.letterhead_city || null,
         // Banking
         iban: row.iban,
         qr_iban: row.qr_iban,
